@@ -3814,6 +3814,7 @@ function castSkillCore(c, key, ang, frac = null) {
   cancelRecall(c);
   if (c.blink || c.leap || c.alpha || c.rcut) return;
   if (c.chRide) return;                                              // 메피에 탄 동안엔 스킬 불가
+  if (EXTRA_CHAMP_KEYS.has(c.key)) { castExtraSkill(c, key, ang, frac); return; }
   if (c.key === 'dongrang') {
     if (castDongrang(c, key, ang, frac) === false) return;
     if (hasItem(c, 'grinder') && time >= c.grinderCd) c.grinderReady = true;
