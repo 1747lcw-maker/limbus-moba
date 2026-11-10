@@ -1932,15 +1932,15 @@ const SK_BTN = {r:30, maxDrag:80, deadzone:14};
 // 공격 버튼을 중심으로 한 호 위에 Q → W → E → R 순서로 배치
 const SKILL_OFFSETS = {Q:[-124, 4], W:[-104, -70], E:[-46, -118], R:[30, -126]};
 const CHAMP_UI = {
-  roland:{names:{Q:'검격', W:'수평베기', E:'회피 기동', R:'뒤틀림의 잔향'},cast:{}},
-  blueReverb:{names:{Q:'푸른 파동', W:'잔향 폭발', E:'공명 가속', R:'푸른 장막'},cast:{}},
-  purpleTear:{names:{Q:'변형 검격', W:'연속 참격', E:'전술 전환', R:'보라빛 종결'},cast:{}},
-  vespa:{names:{Q:'정밀 사격', W:'관통 탄환', E:'후퇴 사격', R:'집중 포화'},cast:{}},
-  naihwang:{names:{Q:'뇌전 강타', W:'천둥 가르기', E:'기세 올리기', R:'낙뢰 진격'},cast:{}},
-  gachiu:{names:{Q:'철벽 타격', W:'수호의 파동', E:'방어 태세', R:'최후의 방벽'},cast:{}},
-  indigoElder:{names:{Q:'쪽빛 탄환', W:'관통 사격', E:'거리 벌리기', R:'노장의 일격'},cast:{}},
-  liuEn:{names:{Q:'화염권', W:'연환격', E:'불꽃 질주', R:'홍염 난무'},cast:{}},
-  callisto:{names:{Q:'월광 베기', W:'연속 돌진', E:'그림자 보법', R:'월식 참격'},cast:{}},
+  roland:{names:{Q:'검격', W:'수평베기', E:'회피 기동', R:'뒤틀림의 잔향'},cast:{},desc:{Q:'전방을 가르는 검격. 일직선상의 적에게 피해를 줍니다.',W:'넓은 수평 참격으로 피해를 주고 적의 이동을 둔화합니다.',E:'짧은 시간 공격력이 상승합니다.',R:'지정한 지점에 뒤틀림의 잔향을 폭발시켜 광역 피해와 둔화를 줍니다.'}},
+  blueReverb:{names:{Q:'푸른 파동', W:'잔향 폭발', E:'공명 가속', R:'푸른 장막'},cast:{},desc:{Q:'푸른 에너지를 직선으로 방출해 적을 공격합니다.',W:'넓게 퍼지는 잔향으로 피해를 주고 적을 둔화합니다.',E:'공명을 가속해 체력을 회복하고 잠시 스킬 가속 효과를 얻습니다.',R:'지정한 지점에 푸른 파동을 폭발시켜 주변 적에게 피해와 둔화를 줍니다.'}},
+  purpleTear:{names:{Q:'변형 검격', W:'연속 참격', E:'전술 전환', R:'보라빛 종결'},cast:{},desc:{Q:'보라빛 검격으로 전방의 적을 베어 피해를 줍니다.',W:'넓은 범위를 연속으로 베고 적의 이동을 둔화합니다.',E:'전술을 전환해 잠시 공격력이 상승합니다.',R:'보라빛 힘을 한 점에 모아 광역 피해와 둔화를 일으킵니다.'}},
+  vespa:{names:{Q:'정밀 사격', W:'관통 탄환', E:'후퇴 사격', R:'집중 포화'},cast:{},desc:{Q:'정밀한 일직선 사격으로 적을 공격합니다.',W:'더 넓고 긴 관통 사격을 가해 적을 둔화합니다.',E:'사격 자세를 정비해 잠시 공격력이 상승합니다.',R:'지정한 위치에 집중 포화를 퍼부어 범위 피해와 둔화를 줍니다.'}},
+  naihwang:{names:{Q:'뇌전 강타', W:'천둥 가르기', E:'기세 올리기', R:'낙뢰 진격'},cast:{},desc:{Q:'전방으로 뇌전을 실은 강타를 날려 피해를 줍니다.',W:'천둥처럼 넓게 가르며 피해를 주고 적을 둔화합니다.',E:'기세를 끌어올려 잠시 공격력이 상승합니다.',R:'지정한 지점에 낙뢰를 떨어뜨려 주변 적에게 큰 피해와 둔화를 줍니다.'}},
+  gachiu:{names:{Q:'철벽 타격', W:'수호의 파동', E:'방어 태세', R:'최후의 방벽'},cast:{},desc:{Q:'철벽 같은 일격으로 전방의 적을 공격합니다.',W:'수호의 파동을 넓게 퍼뜨려 적에게 피해와 둔화를 줍니다.',E:'보호막을 얻어 잠시 받는 피해를 막습니다.',R:'넓은 범위에 강력한 충격을 일으키고 추가 보호막을 얻습니다.'}},
+  indigoElder:{names:{Q:'쪽빛 탄환', W:'관통 사격', E:'거리 벌리기', R:'노장의 일격'},cast:{},desc:{Q:'쪽빛 탄환을 직선으로 발사해 적을 공격합니다.',W:'긴 사거리의 관통 사격으로 피해를 주고 적을 둔화합니다.',E:'노련하게 거리를 벌리며 잠시 공격력이 상승합니다.',R:'지정한 지점에 노장의 일격을 집중해 광역 피해와 둔화를 줍니다.'}},
+  liuEn:{names:{Q:'화염권', W:'연환격', E:'불꽃 질주', R:'홍염 난무'},cast:{},desc:{Q:'불꽃을 두른 주먹으로 전방의 적을 강타합니다.',W:'연속으로 넓게 공격해 피해를 주고 적을 둔화합니다.',E:'불꽃 질주를 준비해 잠시 공격력이 상승합니다.',R:'홍염을 폭발시켜 지정한 범위의 적에게 큰 피해와 둔화를 줍니다.'}},
+  callisto:{names:{Q:'월광 베기', W:'연속 돌진', E:'그림자 보법', R:'월식 참격'},cast:{},desc:{Q:'달빛을 머금은 검격으로 전방의 적을 벱니다.',W:'연속 참격을 넓게 펼쳐 적을 둔화시킵니다.',E:'그림자 보법으로 전투 리듬을 끌어올려 잠시 공격력이 상승합니다.',R:'월식의 힘을 폭발시켜 지정한 지점에 광역 피해와 둔화를 줍니다.'}},
 
   gregor: {names:{Q:'꿰뚫기', W:'심장', E:'내장파기', R:'어느 날'},
            cast:{Q:'꿰뚫기', W:"'심장을 노려야지, 아들.'", R:'어느 날 갑자기'}},
@@ -3765,7 +3765,7 @@ const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','na
 function castExtraSkill(c, key, ang, frac) {
   const n = rk(c, key), cds = {Q:[7,6.5,6,5.5],W:[13,12,11,10],E:[15,14,13,12],R:[95,80,65]};
   const cd = cds[key][n] * hasteMul(c);
-  const ranged = !!c.st.ranged, color = c.key === 'blueReverb' ? '#79aaff' : c.key === 'gachiu' ? '#9ab8a5' : c.key === 'liuEn' ? '#ff8b4d' : '#d8c6ff';
+  const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#9ab8a5',indigoElder:'#70d7d0',liuEn:'#ff8b4d',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
   if (key === 'Q' || key === 'W') {
     const len = E(key === 'Q' ? (ranged ? 520 : 350) : (ranged ? 600 : 420));
     const wid = E(key === 'Q' ? 66 : 90);
@@ -3779,6 +3779,8 @@ function castExtraSkill(c, key, ang, frac) {
       if (key === 'W' && u.alive && !u.structure) { u.slowT = Math.max(u.slowT || 0, 1.1); u.slowAmt = Math.max(u.slowAmt || 0, .22); }
     }
     spikeFx(c, ang, len, wid, .28, key === 'W');
+    const sound = c.key === 'naihwang' || c.key === 'blueReverb' ? 'zap' : ranged ? 'gun' : 'swing';
+    sfxPlay(sound, c.x, c.y, key === 'W' ? 1.15 : .9, key === 'Q' ? 1.08 : .92);
     return;
   }
   if (key === 'E') {
@@ -3787,7 +3789,8 @@ function castExtraSkill(c, key, ang, frac) {
     else if (c.key === 'blueReverb') { c.hasteT = Math.max(c.hasteT || 0, 2.5); c.hp = Math.min(c.maxHp, c.hp + 45 + n * 18); }
     else { c.exExtraT = time + 3; c.exExtraAd = 12 + n * 7; }
     fx.push({type:'burst',x:c.x,y:c.y,r:c.r*1.8,t:0,life:.35,col:color});
-    text(c.x,c.y-c.r-E(35),c.key === 'gachiu' ? '방어 태세' : c.key === 'blueReverb' ? '공명 가속' : '기세 상승',color,true,.8);
+    sfxPlay(c.key === 'gachiu' ? 'clang' : c.key === 'blueReverb' ? 'chime' : c.st.ranged ? 'whoosh' : 'charge', c.x, c.y, .85);
+    text(c.x,c.y-c.r-E(35),skillNames(c).E,color,true,.8);
     return;
   }
   if (key === 'R') {
@@ -3803,7 +3806,8 @@ function castExtraSkill(c, key, ang, frac) {
     }
     if (c.key === 'gachiu') { c.shield = Math.max(c.shield || 0, c.maxHp*.18); c.shieldT = 5; }
     fx.push({type:'burst',x,y,r:radius,t:0,life:.55,col:color});
-    text(x,y,'필살기!',color,true,1);
+    sfxPlay('ult', x, y, 1.1); sfxPlay('boom', x, y, .8);
+    text(x,y,skillNames(c).R,color,true,1);
   }
 }
 function castSkillCore(c, key, ang, frac = null) {
@@ -17814,6 +17818,24 @@ function drawButtons(g) {
     g.fillStyle = 'rgba(12,14,16,.9)'; g.beginPath(); g.arc(wp.x + wr * .72, wp.y + wr * .72, 8, 0, 7); g.fill(); g.strokeStyle = '#ffe36b'; g.lineWidth = 1; g.stroke();
     g.fillStyle = '#fff'; g.font = '800 10px system-ui,sans-serif'; g.fillText(n, wp.x + wr * .72, wp.y + wr * .72 + .5);
     if (skAim.id !== null && skAim.id !== 'kb' && skAim.key === 'T' && skAim.aiming) { g.fillStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.arc(wp.x + skAim.dx, wp.y + skAim.dy, 12, 0, 7); g.fill(); }
+  }
+  // PC: 스킬 버튼에 마우스를 올리면 해당 캐릭터의 스킬 설명 표시
+  if (mouse.on && player.alive) {
+    const hovered = ['Q','W','E','R'].find(k => { const p = skillPos(k); return Math.hypot(mouse.x-p.x, mouse.y-p.y) <= (k === 'R' ? SK_BTN.r + 8 : SK_BTN.r + 4); });
+    const info = hovered && CHAMP_UI[player.key] && CHAMP_UI[player.key].desc && CHAMP_UI[player.key].desc[hovered];
+    if (info) {
+      const p = skillPos(hovered), w = Math.min(250, vw - 24), h = 76;
+      const x = Math.max(12, Math.min(vw - w - 12, p.x - w - 16)), y = Math.max(12, Math.min(vh - h - 12, p.y - h - 40));
+      g.save(); g.globalAlpha = 1; g.fillStyle = 'rgba(7,12,18,.96)'; g.beginPath(); g.roundRect(x,y,w,h,9); g.fill();
+      g.strokeStyle = '#d9a066'; g.lineWidth = 1.5; g.stroke();
+      g.textAlign = 'left'; g.textBaseline = 'top'; g.fillStyle = '#e6c35c'; g.font = '800 12px system-ui,sans-serif';
+      g.fillText(hovered + ' · ' + skillNames(player)[hovered], x+10, y+9);
+      g.fillStyle = '#e8efe6'; g.font = '500 11px system-ui,sans-serif';
+      const words = info.split(' '); let line = '', yy = y+30;
+      for (const word of words) { const test = line ? line + ' ' + word : word; if (g.measureText(test).width > w-20 && line) { g.fillText(line,x+10,yy); yy += 15; line = word; } else line = test; }
+      if (line && yy < y+h-8) g.fillText(line,x+10,yy);
+      g.restore();
+    }
   }
   drawItemButtons(g);                                  // 사용 아이템 · 물약 버튼
   // 패시브 아이콘
