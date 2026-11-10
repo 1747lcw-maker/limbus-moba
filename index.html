@@ -1074,6 +1074,26 @@ const STATS = {
            hp:[660, 120], regen:[1.8, 0.16], ad:[60, 3.4], armor:[38, 5.4], mr:[34, 3], as:[0.64, 0.02]},
   heathcliff:{name:'히스클리프', r:31, range:75, speed:292, acquire:235,
            hp:[640, 118], regen:[1.7, 0.15], ad:[64, 3.9], armor:[33, 5.2], mr:[32, 2.8], as:[0.64, 0.024]},
+
+  // 프로젝트 문 세계관 추가 챔피언
+  roland: {name:'롤랑', r:31, range:105, speed:300, acquire:270,
+           hp:[680, 132], regen:[1.9, 0.17], ad:[66, 4.0], armor:[38, 5.4], mr:[34, 3.0], as:[0.66, 0.025]},
+  blueReverb: {name:'푸른잔향', r:28, range:470, speed:280, acquire:510, ap:[30, 8], ranged:true,
+           hp:[535, 106], regen:[1.4, 0.13], ad:[49, 2.8], armor:[24, 4.6], mr:[34, 3.0], as:[0.63, 0.02]},
+  purpleTear: {name:'보라눈물', r:29, range:115, speed:315, acquire:275,
+           hp:[590, 112], regen:[1.5, 0.14], ad:[64, 4.0], armor:[30, 4.8], mr:[32, 2.8], as:[0.69, 0.03]},
+  vespa: {name:'베스파', r:28, range:520, speed:290, acquire:560, ranged:true,
+           hp:[525, 100], regen:[1.35, 0.12], ad:[61, 3.3], armor:[23, 4.4], mr:[30, 2.6], as:[0.68, 0.03]},
+  naihwang: {name:'뇌횡', r:31, range:100, speed:295, acquire:260,
+           hp:[665, 126], regen:[1.8, 0.16], ad:[65, 3.8], armor:[37, 5.2], mr:[33, 2.8], as:[0.65, 0.024]},
+  gachiu: {name:'가치우', r:34, range:75, speed:270, acquire:235,
+           hp:[790, 145], regen:[2.2, 0.2], ad:[54, 3.0], armor:[46, 6.0], mr:[40, 3.4], as:[0.60, 0.018]},
+  indigoElder: {name:'쪽빛노인', r:28, range:535, speed:285, acquire:575, ranged:true,
+           hp:[530, 102], regen:[1.4, 0.12], ad:[60, 3.2], armor:[24, 4.5], mr:[31, 2.7], as:[0.67, 0.028]},
+  liuEn: {name:'뤼엔', r:31, range:110, speed:305, acquire:270,
+           hp:[650, 122], regen:[1.8, 0.16], ad:[67, 4.0], armor:[35, 5.0], mr:[33, 2.8], as:[0.67, 0.026]},
+  callisto: {name:'칼리스토', r:30, range:100, speed:300, acquire:265,
+           hp:[640, 120], regen:[1.7, 0.15], ad:[65, 3.8], armor:[34, 5.0], mr:[33, 2.8], as:[0.66, 0.025]},
   bot:    {name:'훈련용 봇', r:30, range:70, speed:270, acquire:400,
            hp:[600, 95], regen:[1.6, 0.14], ad:[58, 3.6], armor:[32, 4.2], mr:[32, 1.9], as:[0.68, 0.025]},
   // 미니언은 웨이브마다 조금씩 강해짐 (hpWave, dmgWave)
@@ -1912,6 +1932,16 @@ const SK_BTN = {r:30, maxDrag:80, deadzone:14};
 // 공격 버튼을 중심으로 한 호 위에 Q → W → E → R 순서로 배치
 const SKILL_OFFSETS = {Q:[-124, 4], W:[-104, -70], E:[-46, -118], R:[30, -126]};
 const CHAMP_UI = {
+  roland:{names:{Q:'검격', W:'수평베기', E:'회피 기동', R:'뒤틀림의 잔향'},cast:{}},
+  blueReverb:{names:{Q:'푸른 파동', W:'잔향 폭발', E:'공명 가속', R:'푸른 장막'},cast:{}},
+  purpleTear:{names:{Q:'변형 검격', W:'연속 참격', E:'전술 전환', R:'보라빛 종결'},cast:{}},
+  vespa:{names:{Q:'정밀 사격', W:'관통 탄환', E:'후퇴 사격', R:'집중 포화'},cast:{}},
+  naihwang:{names:{Q:'뇌전 강타', W:'천둥 가르기', E:'기세 올리기', R:'낙뢰 진격'},cast:{}},
+  gachiu:{names:{Q:'철벽 타격', W:'수호의 파동', E:'방어 태세', R:'최후의 방벽'},cast:{}},
+  indigoElder:{names:{Q:'쪽빛 탄환', W:'관통 사격', E:'거리 벌리기', R:'노장의 일격'},cast:{}},
+  liuEn:{names:{Q:'화염권', W:'연환격', E:'불꽃 질주', R:'홍염 난무'},cast:{}},
+  callisto:{names:{Q:'월광 베기', W:'연속 돌진', E:'그림자 보법', R:'월식 참격'},cast:{}},
+
   gregor: {names:{Q:'꿰뚫기', W:'심장', E:'내장파기', R:'어느 날'},
            cast:{Q:'꿰뚫기', W:"'심장을 노려야지, 아들.'", R:'어느 날 갑자기'}},
   outis:  {names:{Q:'발포', W:'수류탄 기폭', E:'전략적 후퇴', R:'토 파토스 마토스'},
@@ -3729,6 +3759,52 @@ function castSkill(c, key, ang, frac = null) {                // 공통 후처�
     }
   }
   return r;
+}
+
+const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','naihuang','gachiu','indigoElder','liuEn','callisto']);
+function castExtraSkill(c, key, ang, frac) {
+  const n = rk(c, key), cds = {Q:[7,6.5,6,5.5],W:[13,12,11,10],E:[15,14,13,12],R:[95,80,65]};
+  const cd = cds[key][n] * hasteMul(c);
+  const ranged = !!c.st.ranged, color = c.key === 'blueReverb' ? '#79aaff' : c.key === 'gachiu' ? '#9ab8a5' : c.key === 'liuEn' ? '#ff8b4d' : '#d8c6ff';
+  if (key === 'Q' || key === 'W') {
+    const len = E(key === 'Q' ? (ranged ? 520 : 350) : (ranged ? 600 : 420));
+    const wid = E(key === 'Q' ? 66 : 90);
+    if (ang === null) ang = autoAim(c, len);
+    c.face = ang; c.cd[key] = c.cdMax[key] = cd;
+    const hits = segHits(c, ang, len, wid);
+    for (const u of hits) {
+      if (isChamp(u)) callForHelp(c, u);
+      const raw = (key === 'Q' ? 48 + n * 27 : 62 + n * 31) + c.ad * (key === 'Q' ? .72 : .9) + c.ap * .45;
+      damage(c, u, raw, {skill:true,color});
+      if (key === 'W' && u.alive && !u.structure) { u.slowT = Math.max(u.slowT || 0, 1.1); u.slowAmt = Math.max(u.slowAmt || 0, .22); }
+    }
+    spikeFx(c, ang, len, wid, .28, key === 'W');
+    return;
+  }
+  if (key === 'E') {
+    c.cd.E = c.cdMax.E = cd;
+    if (c.key === 'gachiu') { c.shield = Math.max(c.shield || 0, 100 + c.maxHp * (.08 + n * .025)); c.shieldT = 4; }
+    else if (c.key === 'blueReverb') { c.hasteT = Math.max(c.hasteT || 0, 2.5); c.hp = Math.min(c.maxHp, c.hp + 45 + n * 18); }
+    else { c.exExtraT = time + 3; c.exExtraAd = 12 + n * 7; }
+    fx.push({type:'burst',x:c.x,y:c.y,r:c.r*1.8,t:0,life:.35,col:color});
+    text(c.x,c.y-c.r-E(35),c.key === 'gachiu' ? '방어 태세' : c.key === 'blueReverb' ? '공명 가속' : '기세 상승',color,true,.8);
+    return;
+  }
+  if (key === 'R') {
+    c.cd.R = c.cdMax.R = cd;
+    if (ang === null) ang = autoAim(c, E(460));
+    const range = E(ranged ? 600 : 430), x = c.x + Math.cos(ang) * range * (frac == null ? .65 : Math.max(.25,frac));
+    const y = c.y + Math.sin(ang) * range * (frac == null ? .65 : Math.max(.25,frac));
+    const radius = E(c.key === 'gachiu' ? 260 : 205);
+    for (const u of units) if (u.alive && u.team !== c.team && targetable(u) && dist(u,{x,y}) < radius + u.r) {
+      if (isChamp(u)) callForHelp(c,u);
+      damage(c,u,180+n*95+c.ad*1.05+c.ap*.65,{skill:true,color});
+      if (u.alive && isChamp(u)) { u.slowT = Math.max(u.slowT || 0,1.5); u.slowAmt = Math.max(u.slowAmt || 0,.3); }
+    }
+    if (c.key === 'gachiu') { c.shield = Math.max(c.shield || 0, c.maxHp*.18); c.shieldT = 5; }
+    fx.push({type:'burst',x,y,r:radius,t:0,life:.55,col:color});
+    text(x,y,'필살기!',color,true,1);
+  }
 }
 function castSkillCore(c, key, ang, frac = null) {
   const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard);   // 이스마엘 재사용
@@ -11863,7 +11939,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['mid','support'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','mid'], liuEn:['top','jungle'], callisto:['top','mid']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = []) {                            // 자리마다: 1·2·3순위 챔피언 중 가중치로 추첨 → 없으면 아무나 (한 팀 안 중복 없음)
   const used = new Set(taken), out = [];
@@ -11880,7 +11956,7 @@ function pickForRoles(roles, taken = []) {                            // 자리�
   }
   return out;
 }
-const CHAMP_POOL = ['gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang'];
+const CHAMP_POOL = ['gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto'];
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
 const enemiesOf = b => champs().filter(c => c.team !== b.team && (!c.alive || seenBy(b.team, c)));   // 시야에 보이는 적만 (죽은 적은 알 수 있음)
 const UNSEEN = {alive:false, unseen:true, respawnT:99, x:-1e5, y:-1e5, r:0, hp:1, maxHp:1, team:'none', st:{range:0, speed:0}, rank:{}, cd:{}, key:'none', vx:0, vy:0, speed:0};
