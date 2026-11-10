@@ -3761,7 +3761,7 @@ function castSkill(c, key, ang, frac = null) {                // 공통 후처�
   return r;
 }
 
-const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','naihuang','gachiu','indigoElder','liuEn','callisto']);
+const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','naihwang','gachiu','indigoElder','liuEn','callisto']);
 function castExtraSkill(c, key, ang, frac) {
   const n = rk(c, key), cds = {Q:[7,6.5,6,5.5],W:[13,12,11,10],E:[15,14,13,12],R:[95,80,65]};
   const cd = cds[key][n] * hasteMul(c);
