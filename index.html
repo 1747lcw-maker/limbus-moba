@@ -3857,7 +3857,7 @@ function basicAttack(c, t) {
   if (c.key === 'outis') { if (c.ammo === undefined) c.ammo = KO.P.ammo; if (c.ammo <= 0 || c.reloadT > time || c.snipe) return; }   // 탄창·장전 중
   cancelRecall(c);
   const enhanced = c.eStacks > 0 && time < c.eUntil;
-  if(c.key==='naihwang'&&!nhSpend(c,1,c.nhMag==='tiger'))return;
+  if(c.key==='naihwang'){c.nhShotTiger=c.nhMag==='tiger';if(!nhSpend(c,1,c.nhShotTiger))return;}
   const e = EV(c);
   if (hasItem(c, 'lament')) {                           // 엄숙한 애도: 공격할수록 빨라짐
     c.lamentN = time < c.lamentT ? Math.min(5, c.lamentN + 1) : 1; c.lamentT = time + 5;
@@ -3875,7 +3875,7 @@ function basicAttack(c, t) {
     fx.push({type:'rlDash',x:(c.x+t.x)/2,y:(c.y+t.y)/2,ang:c.face,len:Math.min(E(125),dist(c,t)),t:0,life:.22});
   }
   if(c.key==='liuEn')liuWeaponRoll(c);
-  let dmg = c.ad * (c.key==='liuEn' ? (c.liuWeaponMul||1) : 1) * (c.key==='naihwang' ? 1.42 * (c.nhMag==='tiger'?1.7:1) : 1);
+  let dmg = c.ad * (c.key==='liuEn' ? (c.liuWeaponMul||1) : 1) * (c.key==='naihwang' ? 1.42 * (c.nhShotTiger?1.7:1) : 1);
   const crit = rollCrit(c);
   c.swingCrit = crit;
   if (crit) { dmg *= critMult(c); critFx(t, c.face, c.iceT > 0); }
