@@ -21747,18 +21747,35 @@ function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoCh
 
 $('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
-$('mSpec').onclick = () => {
+// 관전 모드는 캡처 단계에서 시작해 다른 클릭 핸들러보다 먼저 밴픽을 연다.
+document.addEventListener('click', e => {
+  const target = e.target instanceof Element ? e.target : e.target?.parentElement;
+  const button = target && target.closest('#mSpec');
+  if (!button) return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  const draft = $('aiDraft');
   try {
-    specStart();
-    // 일부 모바일 브라우저에서 hidden 상태가 남는 경우를 막고 밴픽 레이어를 명시적으로 표시
-    const draft = $('aiDraft');
+    if (aiDraftTimer) clearTimeout(aiDraftTimer);
+    aiDraftState = null; aiDraftBans = []; aiDraftLineup = null;
+    spectating = false; specSpeed = 1; mpLineup = null;
+    chosenRole = ROLES[Math.floor(Math.random() * ROLES.length)];
+    chosenChamp = pickForRoles([chosenRole], [])[0] || 'gregor';
+    $('menu').hidden = true;
+    $('select').hidden = true;
+    $('spec').hidden = true;
+    document.body.classList.remove('spec');
     draft.hidden = false;
     draft.style.display = 'flex';
     draft.style.visibility = 'visible';
     draft.style.zIndex = '120';
+    aiDraftStart(true);
+    draft.hidden = false;
+    draft.style.display = 'flex';
+    draft.style.visibility = 'visible';
   } catch (err) {
     console.error('[spectator draft start]', err);
-    const draft = $('aiDraft');
     draft.hidden = false;
     draft.style.display = 'flex';
     draft.style.visibility = 'visible';
@@ -21766,7 +21783,7 @@ $('mSpec').onclick = () => {
     $('adStatus').textContent = '관전 밴픽을 시작하지 못했습니다';
     $('adSub').textContent = String(err && err.message || err);
   }
-};
+}, true);
 
 // ═════════════ 관전 모드: AI 10명만으로 진행, 버튼으로 시점 전환 (시야 = 보고 있는 챔피언의 팀) ═════════════
 let specT = 0, specCards = [];
