@@ -1127,8 +1127,8 @@ const STATS = {
   // 프로젝트 문 세계관 추가 챔피언
   roland: {name:'롤랑', r:31, range:105, speed:300, acquire:270,
            hp:[680, 132], regen:[1.9, 0.17], ad:[66, 4.0], armor:[38, 5.4], mr:[34, 3.0], as:[0.66, 0.025]},
-  blueReverb: {name:'푸른잔향', r:28, range:470, speed:280, acquire:510, ap:[30, 8], ranged:true,
-           hp:[535, 106], regen:[1.4, 0.13], ad:[49, 2.8], armor:[24, 4.6], mr:[34, 3.0], as:[0.63, 0.02]},
+  blueReverb: {name:'푸른잔향', r:30, range:105, speed:290, acquire:270, ap:[30, 8],
+           hp:[610, 120], regen:[1.7, 0.15], ad:[61, 3.6], armor:[34, 5.0], mr:[34, 3.0], as:[0.66, 0.024]},
   purpleTear: {name:'보라눈물', r:29, range:115, speed:315, acquire:275,
            hp:[590, 112], regen:[1.5, 0.14], ad:[64, 4.0], armor:[30, 4.8], mr:[32, 2.8], as:[0.69, 0.03]},
   vespa: {name:'베스파', r:28, range:520, speed:290, acquire:560, ranged:true,
@@ -3870,6 +3870,7 @@ function basicAttack(c, t) {
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
   if (c.key === 'naihwang') sfxPlay('shotgun', c.x, c.y, 1.25, .96); // 짧고 묵직한 산탄총 발사음
   if(c.key==='liuEn')fx.push({type:'lySlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(38),t.r*1.5),t:0,life:.48,weapon:c.liuWeapon||0});
+  if(c.key==='blueReverb')fx.push({type:'brSlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(48),t.r*1.9),t:0,life:.42});
   if (c.key === 'roland') {
     fx.push({type:'rlSlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(34),t.r*1.25),t:0,life:.34,crit:!!c.swingCrit});
     fx.push({type:'rlDash',x:(c.x+t.x)/2,y:(c.y+t.y)/2,ang:c.face,len:Math.min(E(125),dist(c,t)),t:0,life:.22});
@@ -12431,7 +12432,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['mid','support'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','mid'], liuEn:['top','jungle'], callisto:['top','mid']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','mid'], liuEn:['top','jungle'], callisto:['top','mid']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = []) {                            // 자리마다: 1·2·3순위 챔피언 중 가중치로 추첨 → 없으면 아무나 (한 팀 안 중복 없음)
   const used = new Set(taken), out = [];
@@ -13910,8 +13911,9 @@ function drawBlueReverbBody(g,c){
  const a=c.face||0,r=c.r,navy='#102b50',blue='#24558b',bright='#6fbaff',silver='#cbd8e8',white='#f1f6ff',dark='#172437';
  g.save();g.translate(c.x,c.y);g.rotate(a);
  const sway=Math.sin(time*2.1)*.035;
+ const swing=c.swingT>0?Math.sin((1-Math.min(1,c.swingT/.18))*Math.PI)*.72:0;
  // 낫 자루와 거대한 초승달 칼날은 몸 뒤쪽에 배치
- g.save();g.rotate(sway);
+ g.save();g.rotate(sway+swing);
  g.lineCap='round';g.lineJoin='round';
  g.shadowColor='#4a9fff';g.shadowBlur=E(13);
  const shaft=g.createLinearGradient(-r*1.55,-r*2.7,-r*.05,r*.75);
@@ -18419,6 +18421,18 @@ function drawLiuEnFx(g,f,k){
 }
 
 function drawNaihwangSkillFx(g,f,k){const p=1-k;g.save();g.globalAlpha=p;g.translate(f.x,f.y);if(f.type==='nhSlash'){g.rotate(f.ang||0);const R=f.r||E(130);g.shadowColor='#ff3b20';g.shadowBlur=E(30);for(const [w,col] of [[E(25),'#74101b'],[E(15),'#ef3827'],[E(7),'#ffbd35'],[E(2.5),'#fff2b0']]){g.strokeStyle=col;g.lineWidth=w*(.55+p*.6);g.lineCap='round';g.beginPath();g.arc(0,0,R*(.7+k*.5),-.9,-.9+2.05);g.stroke();}g.globalCompositeOperation='lighter';for(let i=0;i<12;i++){const a=i/12*Math.PI*2+k*5,rr=R*(.3+(i%4)*.17);g.fillStyle=i%2?'#ff4b28':'#ffe078';g.beginPath();g.arc(Math.cos(a)*rr,Math.sin(a)*rr,E(3)*(1-k),0,7);g.fill();}}else if(f.type==='nhDash'){g.rotate(f.ang||0);g.shadowColor='#ff3b20';g.shadowBlur=E(25);g.strokeStyle='#ff4928';g.lineWidth=E(16)*(1-k);g.beginPath();g.moveTo(-f.r*.48,0);g.lineTo(f.r*.48,0);g.stroke();g.strokeStyle='#ffd34b';g.lineWidth=E(5)*(1-k);g.beginPath();g.moveTo(-f.r*.4,-E(5));g.lineTo(f.r*.4,-E(5));g.stroke();}else{const R=f.r||E(160),pulse=1+.15*Math.sin(time*18);g.shadowColor='#ff351d';g.shadowBlur=E(42);g.fillStyle='rgba(255,55,25,.15)';g.beginPath();g.arc(0,0,R*pulse,0,7);g.fill();for(let i=0;i<20;i++){const a=i/20*Math.PI*2+time*1.8,rr=R*(.78+.12*Math.sin(time*12+i));g.strokeStyle=i%2?'#ff4b25':'#ffd34b';g.lineWidth=E(i%3===0?5:2.5);g.beginPath();g.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);g.lineTo(Math.cos(a)*(rr+E(30)),Math.sin(a)*(rr+E(30)));g.stroke();}g.strokeStyle='#fff0a0';g.lineWidth=E(3);g.beginPath();g.arc(0,0,R*.88,0,7);g.stroke();}g.restore();}
+function drawBlueReverbFx(g,f,k){
+ const p=1-k,e=easeOut(k),R=f.r||E(55);g.save();g.translate(f.x,f.y);g.rotate(f.ang||0);g.globalAlpha=p;
+ g.lineCap='round';g.lineJoin='round';
+ // 낫의 넓은 휘두르기 궤적: 은빛 본체와 푸른 잔광
+ g.strokeStyle='#4d9ce8';g.shadowColor='#65baff';g.shadowBlur=E(15);g.lineWidth=E(13)*(1-k*.65);
+ g.beginPath();g.arc(0,0,R*(.72+e*.42),-.95+e*.18,.95+e*.18);g.stroke();
+ g.shadowBlur=0;g.strokeStyle='#e5f0ff';g.lineWidth=E(5)*(1-k*.6);
+ g.beginPath();g.arc(0,0,R*(.72+e*.42),-.95+e*.18,.95+e*.18);g.stroke();
+ g.strokeStyle='#8fcaff';g.lineWidth=E(2);
+ g.beginPath();g.arc(0,0,R*(.92+e*.48),-1.02+e*.18,.9+e*.18);g.stroke();
+ g.restore();
+}
 function drawFx(g) {
   g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const f of fx) {
@@ -18431,6 +18445,7 @@ function drawFx(g) {
     if(f.type.startsWith('vs')){drawVespaFx(g,f,k);continue;}
     if(f.type.startsWith('gc')){drawGachiuFx(g,f,k);continue;}
     if(f.type.startsWith('ly')){drawLiuEnFx(g,f,k);continue;}
+    if(f.type.startsWith('br')){drawBlueReverbFx(g,f,k);continue;}
     if (f.type === 'bloodBurst') { drawBloodFx(g, f, k); continue; }
     if (f.type === 'spike') drawSpike(g, f);
     else if (f.type === 'puff') {
@@ -22042,7 +22057,7 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리'], liuEn:['전사'], callisto:['전사'],
+  roland:['전사'], blueReverb:['전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리'], liuEn:['전사'], callisto:['전사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = k => (CX_CLASS[k] || []).map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join('');
