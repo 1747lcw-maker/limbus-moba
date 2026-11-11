@@ -12167,7 +12167,7 @@ function aiCombo(b, p) {
   }
   if (b.key === 'liuEn') {
     const a = aimAt(b, p, .18);
-    if (ready('R') && b.liuFormUntil > time && b.liuFuriosoReady && d < E(560)) { castSkill(b, 'R', a); return true; }
+    if (b.rank.R > 0 && b.liuFormUntil > time && b.liuFuriosoReady && !b.liuFurioso && d < E(560)) { castSkill(b, 'R', a); return true; }
     if (ready('R') && b.liuFormUntil <= time && d < E(520) && (hpP < .58 || hpB < .48)) { castSkill(b, 'R', null); return true; }
     if (ready('E') && d < E(500) && d > E(65)) { castSkill(b, 'E', a); return true; }
     if (ready('W') && d < E(590) && d > E(90)) { castSkill(b, 'W', a); return true; }
