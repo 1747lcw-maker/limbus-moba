@@ -3857,6 +3857,7 @@ function basicAttack(c, t) {
   if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(1.08, c.as * 1.38)); // 묵직한 한 방: 공격 속도 상한
   c.swingT = c.key === 'naihwang' ? .52 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
+  if (c.key === 'naihwang') sfxPlay('gun', c.x, c.y, 1.35, .78); // 방아쇠와 부스터가 함께 터지는 묵직한 총격음
   if(c.key==='liuEn')fx.push({type:'lySlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(38),t.r*1.5),t:0,life:.48,weapon:c.liuWeapon||0});
   if (c.key === 'roland') {
     fx.push({type:'rlSlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(34),t.r*1.25),t:0,life:.34,crit:!!c.swingCrit});
@@ -14001,7 +14002,8 @@ function drawGachiuAura(g,c){
 function drawNaihwangBody(g,c){
  const r=c.r,a=c.face||0,red='#54131b',redHi='#8e2631',black='#171316',steel='#9da4ad',bright='#d6d9dc',brass='#b58a45';
  const swingK=c.key==='naihwang'&&c.swingT>0?Math.max(0,Math.min(1,1-c.swingT/.52)):0;
- const swingPose=swingK<.58?-.62*(swingK/.58):-.62+1.72*easeOut((swingK-.58)/.42);
+ // 손잡이는 몸 뒤에 고정하고, 검끝은 뒤쪽에서 위로 크게 젖혔다가 전방으로 쓸어낸다.
+ const swingPose=swingK<.58?.33*(swingK/.58):.33-3.83*easeOut((swingK-.58)/.42);
  g.save();g.translate(c.x,c.y);g.rotate(a);
  // 어두운 적색 코트 실루엣
  g.fillStyle='#321016';g.strokeStyle='#6f2029';g.lineWidth=E(2);
@@ -14044,15 +14046,18 @@ function drawNaihwangBody(g,c){
   g.fillStyle='#d04a35';g.beginPath();g.ellipse(-r*.43,yy,r*.08,r*.07,0,0,Math.PI*2);g.fill();g.fillStyle='#252a31';
  }
  // 평상시에는 작은 불씨, 방아쇠를 당겨 베는 순간에는 붉은 부스터 화염이 폭발
- const firing=swingK>0, heat=firing?(swingK<.58?.35+.65*(swingK/.58):1):.18;
- g.save();g.globalAlpha=.9;g.shadowColor='#ff2b19';g.shadowBlur=E(firing?22:7);
- g.fillStyle=firing?'#ff321c':'#d94b32';g.beginPath();g.moveTo(-r*.48,-r*.075);
- g.lineTo(-r*(.58+heat*.62+.12*Math.sin(time*34)), -r*.045);
- g.lineTo(-r*(.92+heat*.8+.16*Math.sin(time*29)),0);
- g.lineTo(-r*(.58+heat*.62+.12*Math.sin(time*34)),r*.045);
- g.lineTo(-r*.48,r*.075);g.closePath();g.fill();
- if(firing){g.fillStyle='#ff9a54';g.beginPath();g.moveTo(-r*.5,-r*.035);g.lineTo(-r*(.72+heat*.5),0);g.lineTo(-r*.5,r*.035);g.closePath();g.fill();
- g.fillStyle='#fff0b0';g.beginPath();g.moveTo(-r*.49,-r*.014);g.lineTo(-r*(.63+heat*.26),0);g.lineTo(-r*.49,r*.014);g.closePath();g.fill();}
+ const firing=swingK>0, heat=firing?(swingK<.58?.45+.55*(swingK/.58):1):.12;
+ g.save();g.globalAlpha=firing?1:.72;g.shadowColor='#ff1608';g.shadowBlur=E(firing?38:13);
+ // 외곽의 거대한 주홍 화염, 중앙의 밝은 주황·백열 코어를 겹쳐 멀리서도 보이게
+ g.fillStyle=firing?'#e51b16':'#b83a2b';g.beginPath();g.moveTo(-r*.46,-r*.14);
+ g.lineTo(-r*(.78+heat*.72+.18*Math.sin(time*31)),-r*.105);
+ g.lineTo(-r*(1.12+heat*1.12+.2*Math.sin(time*27)),0);
+ g.lineTo(-r*(.78+heat*.72+.18*Math.sin(time*31)),r*.105);
+ g.lineTo(-r*.46,r*.14);g.closePath();g.fill();
+ g.fillStyle='#ff4a20';g.beginPath();g.moveTo(-r*.48,-r*.09);g.lineTo(-r*(.72+heat*.95),-r*.045);g.lineTo(-r*(.98+heat*1.12),0);g.lineTo(-r*(.72+heat*.95),r*.045);g.lineTo(-r*.48,r*.09);g.closePath();g.fill();
+ g.fillStyle='#ffad50';g.beginPath();g.moveTo(-r*.49,-r*.05);g.lineTo(-r*(.7+heat*.7),-r*.02);g.lineTo(-r*(.83+heat*.9),0);g.lineTo(-r*(.7+heat*.7),r*.02);g.lineTo(-r*.49,r*.05);g.closePath();g.fill();
+ g.fillStyle='#fff0b8';g.beginPath();g.moveTo(-r*.49,-r*.022);g.lineTo(-r*(.65+heat*.48),0);g.lineTo(-r*.49,r*.022);g.closePath();g.fill();
+ if(firing){for(let n=0;n<4;n++){const yy=(n-1.5)*r*.09,spread=(.7+heat*.75+n*.13);g.globalAlpha=.85;g.strokeStyle=n%2?'#ffb15b':'#ff4025';g.lineWidth=E(2+n%2);g.beginPath();g.moveTo(-r*.5,yy*.35);g.quadraticCurveTo(-r*spread,yy*1.8,-r*(spread+.35),yy*(2.2+Math.sin(time*35+n)));g.stroke();}}
  g.restore();g.globalAlpha=1;
  g.restore();
  // 반대편 손과 장갑
@@ -14062,7 +14067,7 @@ function drawNaihwangBody(g,c){
 // 뇌횡 평타: 잠깐 힘을 모은 뒤 부스터를 폭발시키며 단 한 번 크게 베는 연출
 function drawNaihwangSwingFx(g,c,k){
  const r=c.r,wind=Math.max(0,1-k/.58),strike=Math.max(0,(k-.58)/.42);
- const a=c.face,reach=r*2.05;
+ const a=c.face,reach=r*2.35;
  g.save();g.translate(c.x,c.y);g.rotate(a);
  // 베기 직전 칼날에 모이는 붉은 기류
  if(wind>0){
@@ -14075,14 +14080,16 @@ function drawNaihwangSwingFx(g,c,k){
  }
  // 타격 프레임: 굵고 선명한 붉은 검격과 충격파
  if(strike>0){
-  const sweep=easeOut(Math.min(1,strike*1.25));
-  g.globalAlpha=.92*(1-strike*.28);g.shadowColor='#ff2a18';g.shadowBlur=E(24);
-  g.strokeStyle='#a91520';g.lineWidth=E(18+strike*5);g.lineCap='round';
-  g.beginPath();g.arc(0,0,reach,-.92,-.92+1.82*sweep);g.stroke();
-  g.strokeStyle='#ff4a2d';g.lineWidth=E(9+strike*3);
-  g.beginPath();g.arc(0,0,reach,-.88,-.88+1.72*sweep);g.stroke();
-  g.strokeStyle='#ffd0a0';g.lineWidth=E(2.5);
-  g.beginPath();g.arc(0,0,reach,-.82,-.82+1.62*sweep);g.stroke();
+  const sweep=easeOut(Math.min(1,strike*1.35));
+  g.globalAlpha=.96*(1-strike*.2);g.shadowColor='#ff1b10';g.shadowBlur=E(32);
+  g.strokeStyle='#74101a';g.lineWidth=E(25+strike*7);g.lineCap='round';
+  g.beginPath();g.arc(0,0,reach,-1.32,-1.32+2.55*sweep);g.stroke();
+  g.strokeStyle='#ed281f';g.lineWidth=E(15+strike*4);
+  g.beginPath();g.arc(0,0,reach,-1.27,-1.27+2.45*sweep);g.stroke();
+  g.strokeStyle='#ff8a4c';g.lineWidth=E(7+strike*2);
+  g.beginPath();g.arc(0,0,reach,-1.22,-1.22+2.35*sweep);g.stroke();
+  g.strokeStyle='#fff0c2';g.lineWidth=E(2.8);
+  g.beginPath();g.arc(0,0,reach,-1.17,-1.17+2.25*sweep);g.stroke();
   g.globalAlpha=.9*(1-strike);
   g.fillStyle='#ff5a35';g.beginPath();g.moveTo(r*.9,-r*.6);g.lineTo(r*(2.7+strike*.5),0);g.lineTo(r*.9,r*.6);g.closePath();g.fill();
  }
