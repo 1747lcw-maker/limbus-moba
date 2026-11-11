@@ -21737,7 +21737,7 @@ function cxList() {
   $('cxTitle').textContent = '도감'; $('cxBack').textContent = '← 메인';
   $('cxBody').innerHTML = `<div class="cx-grid">${CODEX_ORDER.map(k => `
     <button type="button" class="cx-card" data-cx="${k}">
-      <span class="cx-token" style="background:${cxCol(k)}"></span>
+      <span class="cx-token" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
       <b>${esc(STATS[k].name)}</b>
       <span class="cx-icons">${['P', 'Q', 'W', 'E', 'R'].map(s => { const u = cxIcon(k, s); return u ? `<img src="${u}" alt="">` : `<i>${s}</i>`; }).join('')}</span>
     </button>`).join('')}</div>` + cxSpellsHtml() + cxRunesHtml();
@@ -21769,7 +21769,7 @@ function cxDetail(k, key = 'P') {
   $('cxBody').innerHTML = `
     <div class="cx-detail">
       <div class="cx-left">
-        <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)}"></span>
+        <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
           <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}</small></div></div></div>
         <details class="cx-stats" open><summary>기초 스탯 개요</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
