@@ -1637,6 +1637,7 @@ function duelExitArena() { for (const w of DUEL_WALLS) { const i = walls.indexOf
                                                     // 멀티: 픽창에서 정한 구성 (resetGame이 읽음)
 const colTeam = () => spectating ? 'blue' : player.team;              // 관전: 블루=파랑 / 레드=빨강 고정
 let sprite = null, chosenChamp = 'gregor', started = false, shots = [], mirrors = [], feathers = [], harpoons = [];
+let aiDraftBans = [], aiDraftLineup = null;
 
 function baseUnit(o) {
   return Object.assign({alive:true, atkT:0, target:null, stunT:0, slowT:0, slowAmt:0, hasteT:0,
@@ -1759,12 +1760,18 @@ function resetGame() {
     heroes = [player];
     for (const b of ML.blue) if (b !== mine) { const c = spawn('blue', b.key, b.role); if (b.name) c.name = b.name; c.mpSpells = b.spells; c.mpRune = b.rune || defaultRune(b.role, b.key); c.mpPerks = b.perks; heroes.push(c); }
     for (const r of ML.red) { const c = spawn('red', r.key, r.role); c.name += ' (적)'; c.mpSpells = r.spells; c.mpRune = r.rune || defaultRune(r.role, r.key); c.mpPerks = r.perks; heroes.push(c); }
+  } else if (aiDraftLineup && aiDraftLineup.fresh) {
+    aiDraftLineup.fresh = false;
+    const mine = aiDraftLineup.blue.find(x => x.role === chosenRole);
+    player = spawn('blue', mine.key, mine.role); heroes = [player];
+    for (const x of aiDraftLineup.blue) if (x !== mine) heroes.push(spawn('blue', x.key, x.role));
+    for (const x of aiDraftLineup.red) { const c = spawn('red', x.key, x.role); if (!spectating) c.name += ' (적)'; heroes.push(c); }
   } else {
   player = spawn('blue', chosenChamp, chosenRole);
   heroes = [player];
   const allyRoles = ROLES.filter(r => r !== chosenRole), allyKeys = pickForRoles(allyRoles, [chosenChamp]);   // 선호 라인대로
   allyRoles.forEach((r, i) => heroes.push(spawn('blue', allyKeys[i], r)));
-  const enemyKeys = pickForRoles(ROLES, []);
+  const enemyKeys = pickForRoles(ROLES, [chosenChamp, ...allyKeys]); // 양 팀 전체 챔피언 중복 방지
   ROLES.forEach((r, i) => { const c = spawn('red', enemyKeys[i], r); if (!spectating) c.name += ' (적)'; heroes.push(c); });
   }
   bots = heroes.filter(c => c !== player);
@@ -2242,7 +2249,8 @@ $('fs').addEventListener('click', async () => {
 });
 function renderSpellPick() {
   const icon = id => { try { return spellIconCanvas(id).toDataURL(); } catch { return ''; } };
-  $('selSpells').innerHTML = `<b>소환사 주문</b><small>2개 선택 (D · F)</small><div class="sp-chips">${SPELL_ORDER.map(id => {
+  const banHtml = `<div class="ai-draft-bans"><b>AI 밴픽 · 금지 챔피언</b><div>${aiDraftBans.map(k => `<span>${esc(STATS[k].name)}</span>`).join('')}</div><small>양 팀 AI가 각각 2명씩 밴했습니다. 밴된 챔피언은 선택할 수 없습니다.</small></div>`;
+  $('selSpells').innerHTML = banHtml + `<b>소환사 주문</b><small>2개 선택 (D · F)</small><div class="sp-chips">${SPELL_ORDER.map(id => {
     const s = SPELLS[id], on = chosenSpells.indexOf(id);
     return `<button type="button" class="sp-chip" data-spell="${id}" aria-pressed="${on >= 0}" title="${esc(s.desc)}"><img src="${icon(id)}" alt=""><span>${esc(s.name)}<small>${s.lol} · ${s.cd}초</small></span>${on >= 0 ? `<em>${on ? 'F' : 'D'}</em>` : ''}</button>`; }).join('')}</div>` + rpSummaryHtml(chosenPage);
 }
@@ -2253,8 +2261,16 @@ function selRecommend(role) {                                          // 챔피
   for (const el of cards) { el.querySelector('.rec')?.remove(); const r = rank(el); if (r <= 1) { const em = document.createElement('em'); em.className = 'rec' + (r ? ' sub' : ''); em.textContent = r ? '추천' : '최적'; el.prepend(em); } box.appendChild(el); }
 }
 function selStep(step) {
-  $('selRoles').hidden = step !== 'role'; $('selCards').hidden = step !== 'champ'; $('selSpells').hidden = step !== 'champ'; if (step === 'champ') renderSpellPick(); $('selBack').hidden = step !== 'champ';
-  $('selTitle').textContent = step === 'role' ? '라인 선택' : `챔피언 선택 · ${ROLE_NAME[chosenRole]}`;
+  $('selRoles').hidden = step !== 'role'; $('selCards').hidden = step !== 'champ'; $('selSpells').hidden = step !== 'champ'; if (step === 'champ') {
+    renderSpellPick();
+    for (const el of $('selCards').querySelectorAll('.sel-card')) {
+      const banned = aiDraftBans.includes(el.dataset.champ);
+      el.disabled = banned; el.style.display = banned ? 'none' : '';
+      el.title = banned ? '밴된 챔피언' : '';
+    }
+  } else for (const el of $('selCards').querySelectorAll('.sel-card')) { el.disabled = false; el.style.display = ''; }
+  $('selBack').hidden = step !== 'champ';
+  $('selTitle').textContent = step === 'role' ? '라인 선택' : `AI 밴픽 · 챔피언 선택 · ${ROLE_NAME[chosenRole]}`;
 }
 $('again').addEventListener('click', () => { specEnd(); if (mpLineup && mpLineup.duel) duelCleanup(); if (mpLineup) { mpLineup = null; mpEndSync(); if (MP.code) mpLeave(''); $('mp').hidden = true; } $('over').hidden = true; started = false; $('select').hidden = true; $('menu').hidden = false; selStep('role'); });
 $('select').addEventListener('click', e => {
@@ -2267,9 +2283,27 @@ $('select').addEventListener('click', e => {
     if (i >= 0) { if (chosenSpells.length > 1) chosenSpells.splice(i, 1); } else { if (chosenSpells.length >= 2) chosenSpells.shift(); chosenSpells.push(id); }
     if (chosenSpells.length < 2) chosenSpells.push(SPELL_ORDER.find(s => !chosenSpells.includes(s)));
     renderSpellPick(); return; }
-  const r = e.target.closest('[data-role]'); if (r) { chosenRole = r.dataset.role; chosenSpells = chosenRole === 'jungle' ? ['warp', 'hook'] : chosenRole === 'support' ? ['warp', 'ampule'] : ['warp', 'brand']; selStep('champ'); selRecommend(chosenRole); return; }
+  const r = e.target.closest('[data-role]'); if (r) {
+    chosenRole = r.dataset.role; chosenSpells = chosenRole === 'jungle' ? ['warp', 'hook'] : chosenRole === 'support' ? ['warp', 'ampule'] : ['warp', 'brand'];
+    aiDraftLineup = null;
+    const pool = CHAMP_POOL.slice(), bans = [];
+    for (const team of ['blue', 'red']) for (let i = 0; i < 2; i++) {
+      const candidates = pool.filter(k => !bans.includes(k));
+      const k = candidates[Math.floor(Math.random() * candidates.length)];
+      if (k) bans.push(k);
+    }
+    aiDraftBans = bans; selStep('champ'); selRecommend(chosenRole); return;
+  }
   const b = e.target.closest('[data-champ]'); if (!b) return;
-  chosenChamp = b.dataset.champ; mpLineup = null; resetGame(); started = true; $('select').hidden = true;
+  chosenChamp = b.dataset.champ;
+  if (aiDraftBans.includes(chosenChamp)) return;
+  mpLineup = null;
+  const blueRoles = ROLES.filter(role => role !== chosenRole), blueKeys = pickForRoles(blueRoles, [...aiDraftBans, chosenChamp]);
+  const blue = [{role:chosenRole, key:chosenChamp}, ...blueRoles.map((role, i) => ({role, key:blueKeys[i]}))];
+  const redKeys = pickForRoles(ROLES, [...aiDraftBans, ...blue.map(x => x.key)]);
+  const red = ROLES.map((role, i) => ({role, key:redKeys[i]}));
+  aiDraftLineup = {fresh:true, blue, red};
+  resetGame(); started = true; $('select').hidden = true;
   text(player.x + E(80), player.y - E(80), `${ROLE_NAME[chosenRole]} 상대: ${STATS[bot.key].name}`, '#ff8a8a', true, 3);
   if (chosenRole === 'jungle') { shopSel = 'hunter'; text(player.x + E(80), player.y - E(130), '정글: 상점에서 사냥꾼의 칼을 사세요', '#d8b36a', true, 4); }
 });
@@ -21595,7 +21629,7 @@ function cxDemo(k, key, fresh) {
 }
 function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; }
 
-$('mVsAi').addEventListener('click', () => { openMenu(false); $('select').hidden = false; selStep('role'); });
+$('mVsAi').addEventListener('click', () => { aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
 $('mSpec').addEventListener('click', () => specStart());
 
