@@ -11617,6 +11617,24 @@ function inLine(c, ang, len, wid, t) {
 // 교전 중 스킬 사용 (챔피언별 콤보). 쓴 게 있으면 true
 function aiCombo(b, p) {
   const d = edge(b, p), ready = k => b.rank[k] > 0 && b.cd[k] <= 0, hpP = p.hp / p.maxHp, hpB = b.hp / b.maxHp;
+  if (b.key === 'roland') {
+    const form = b.rolandFormUntil > time;
+    const ang = Math.atan2(p.y - b.y, p.x - b.x);
+    // 뒤틀림 중에는 일반 궁 쿨다운과 무관하게 FURIOSO 재사용을 최우선으로 실행
+    if (form && b.rank.R > 0 && b.rolandFuriosoReady && !b.rolandFurioso && d < E(520)) {
+      castSkill(b, 'R', ang); return true;
+    }
+    // 교전 사거리 안에 적 챔피언이 들어오면 궁극기로 뒤틀림 진입
+    if (!form && ready('R') && d < E(520)) {
+      castSkill(b, 'R', null); return true;
+    }
+    // 근접 교전에서는 E로 방어하며 주변을 베고, W로 접근한 뒤 Q를 계속 찌른다
+    if (ready('E') && d < E(165)) { castSkill(b, 'E', ang); return true; }
+    if (ready('W') && d < E(430) && d > E(55)) { castSkill(b, 'W', ang); return true; }
+    if (ready('Q') && d < E(350)) { castSkill(b, 'Q', ang); return true; }
+    // 뒤틀림 상태에서 R을 바로 못 썼더라도 대상이 사거리 안으로 오면 다음 판단에서 사용
+    return false;
+  }
   if (b.key === 'gregor') {
     if (ready('R') && d < E(350) && (hpP < .65 || hpB < .5)) { castSkill(b, 'R', null); return true; }
     const w = WV(b); if (ready('W') && d < E(w.len) - E(30)) { castSkill(b, 'W', aimAt(b, p, CAST.W)); return true; }
