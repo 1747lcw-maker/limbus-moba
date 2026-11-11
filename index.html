@@ -21470,40 +21470,26 @@ const CX_CLASS = {                                              // 역할군: [�
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = k => (CX_CLASS[k] || []).map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join('');
 const cxCol = k => {
+  if (k === 'roland') return '#090a0d';
+  if (k === 'liuEn') return '#41464f';
   if (k === 'xichun') return 'linear-gradient(90deg, #c8202c 50%, #26262c 50%)';
-  return CHAMP_COL[k] || (document.querySelector(`.sel-card[data-champ="${k}"] .sel-token`)?.style.background) || '#777';
+  const el = document.querySelector(`.sel-card[data-champ="${k}"] .sel-token`);
+  return el ? el.style.background : '#777';
 };
-function cxLiuFallbackIcon(key) {
-  const cv=document.createElement('canvas');cv.width=cv.height=96;
-  const g=cv.getContext('2d');
-  const bg=g.createRadialGradient(35,28,3,48,48,58);bg.addColorStop(0,'#596d80');bg.addColorStop(1,'#080b12');
-  g.fillStyle=bg;g.beginPath();g.arc(48,48,47,0,Math.PI*2);g.fill();
-  g.save();g.translate(48,48);g.lineCap='round';g.lineJoin='round';
-  const line=(x1,y1,x2,y2,col,w)=>{g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();};
-  const slash=(x1,y1,x2,y2)=>{line(x1,y1,x2,y2,'#080b12',11);line(x1,y1,x2,y2,'#d9e6f2',2.5);};
-  if(key==='P'){
-    g.strokeStyle='#bceaff';g.lineWidth=2.5;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();
-    for(let i=0;i<8;i++){g.save();g.rotate(i*Math.PI/4);g.fillStyle='#a9dff4';g.beginPath();g.ellipse(0,-13,4,9,0,0,Math.PI*2);g.fill();g.strokeStyle='#f0fbff';g.lineWidth=1;g.stroke();g.restore();}
-    g.fillStyle='#e8faff';g.beginPath();g.arc(0,0,6,0,7);g.fill();
-  } else if(key==='Q'){
-    g.save();g.rotate(-.55);slash(-25,9,25,-10);slash(-20,16,19,-3);g.restore();
-    for(let i=0;i<5;i++){const a=-1.2+i*.48;line(Math.cos(a)*17,Math.sin(a)*17,Math.cos(a)*28,Math.sin(a)*28,'#b9d8f0',2);}
-  } else if(key==='W'){
-    g.save();g.rotate(-.6);line(-18,20,11,-12,'#111722',7);line(-18,20,11,-12,'#e1eaf4',2.5);
-    g.strokeStyle='#e1eaf4';g.lineWidth=5;g.beginPath();g.moveTo(8,-12);g.quadraticCurveTo(31,-29,27,-5);g.quadraticCurveTo(24,8,9,2);g.stroke();g.restore();
-  } else if(key==='E'){
-    g.rotate(-.45);g.fillStyle='#111722';g.strokeStyle='#e1eaf4';g.lineWidth=2.5;g.beginPath();g.moveTo(-22,-14);g.lineTo(4,-18);g.lineTo(22,-8);g.lineTo(17,16);g.lineTo(-8,19);g.lineTo(-23,7);g.closePath();g.fill();g.stroke();
-    line(-14,-5,12,8,'#9fc4df',2);line(-14,3,9,14,'#9fc4df',2);
-  } else {
-    for(let i=0;i<9;i++){g.save();g.rotate(i*Math.PI*2/9);g.fillStyle=i%2?'#111722':'#dce7f2';g.strokeStyle='#f5fbff';g.lineWidth=1.2;g.beginPath();g.moveTo(-3,-5);g.lineTo(0,-31);g.lineTo(3,-5);g.closePath();g.fill();g.stroke();g.restore();}
-    g.fillStyle='#080b12';g.strokeStyle='#e4eff8';g.lineWidth=2.5;g.beginPath();g.arc(0,0,10,0,7);g.fill();g.stroke();g.fillStyle='#a9dff4';g.beginPath();g.arc(0,0,4,0,7);g.fill();
-  }
-  g.restore();return cv.toDataURL();
-}
+const CX_LIU_ICON_SVG = {
+ P:'<circle cx="48" cy="48" r="27" fill="none" stroke="#bdeaff" stroke-width="3"/><g fill="#a9dff4" stroke="#f0fbff" stroke-width="1.5"><ellipse cx="48" cy="25" rx="6" ry="13"/><ellipse cx="64" cy="32" rx="6" ry="13" transform="rotate(45 64 32)"/><ellipse cx="71" cy="48" rx="6" ry="13" transform="rotate(90 71 48)"/><ellipse cx="64" cy="64" rx="6" ry="13" transform="rotate(135 64 64)"/><ellipse cx="48" cy="71" rx="6" ry="13"/><ellipse cx="32" cy="64" rx="6" ry="13" transform="rotate(45 32 64)"/><ellipse cx="25" cy="48" rx="6" ry="13" transform="rotate(90 25 48)"/><ellipse cx="32" cy="32" rx="6" ry="13" transform="rotate(135 32 32)"/></g><circle cx="48" cy="48" r="7" fill="#eafaff"/>',
+ Q:'<path d="M18 68 L72 25 L79 31 L27 76Z" fill="#080b12" stroke="#dce8f3" stroke-width="3"/><path d="M16 55 L68 18 M26 78 L80 42" stroke="#b9d8f0" stroke-width="3" stroke-linecap="round"/>',
+ W:'<path d="M22 76 L61 30" stroke="#dce6f2" stroke-width="7" stroke-linecap="round"/><path d="M58 32 Q85 5 79 40 Q74 60 55 47" fill="none" stroke="#e7f0fa" stroke-width="6" stroke-linecap="round"/><path d="M58 32 Q85 5 79 40" fill="none" stroke="#111722" stroke-width="2"/>',
+ E:'<path d="M22 23 L62 17 L79 31 L73 72 L34 80 L17 62Z" fill="#111722" stroke="#e1eaf4" stroke-width="4"/><path d="M30 39 L65 57 M27 52 L59 68" stroke="#9fc4df" stroke-width="4" stroke-linecap="round"/>',
+ R:'<g stroke="#f5fbff" stroke-width="2"><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(40 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(80 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(120 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(160 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(200 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(240 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(280 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(320 48 48)"/></g><circle cx="48" cy="48" r="13" fill="#080b12" stroke="#dce8f3" stroke-width="3"/><circle cx="48" cy="48" r="5" fill="#a9dff4"/>'
+};
 const cxIcon = (k, key) => {
-  try { const cv=skillIconCanvas(k,key); if(cv) return cv.toDataURL(); } catch(e) {}
-  if(k==='liuEn' && ['P','Q','W','E','R'].includes(key)) { try{return cxLiuFallbackIcon(key);}catch(e){} }
-  return '';
+  if (k === 'liuEn' && CX_LIU_ICON_SVG[key]) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><defs><radialGradient id="g"><stop stop-color="#667b91"/><stop offset="1" stop-color="#080b12"/></radialGradient></defs><circle cx="48" cy="48" r="47" fill="url(#g)"/>${CX_LIU_ICON_SVG[key]}</svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+  const cv = skillIconCanvas(k, key);
+  try { return cv ? cv.toDataURL() : ''; } catch { return ''; }
 };
 let cxChamp = null, cxKey = 'P';
 
