@@ -21732,7 +21732,7 @@ function cxDemo(k, key, fresh) {
 }
 function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; }
 
-$('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
+$('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); chosenSpells = chosenRole === 'jungle' ? ['warp','hook'] : chosenRole === 'support' ? ['warp','ampule'] : ['warp','brand']; aiDraftStart(); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
 $('mSpec').addEventListener('click', () => specStart());
 
