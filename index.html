@@ -1932,7 +1932,7 @@ const SK_BTN = {r:30, maxDrag:80, deadzone:14};
 // 공격 버튼을 중심으로 한 호 위에 Q → W → E → R 순서로 배치
 const SKILL_OFFSETS = {Q:[-124, 4], W:[-104, -70], E:[-46, -118], R:[30, -126]};
 const CHAMP_UI = {
-  roland:{names:{Q:'검격', W:'수평베기', E:'회피 기동', R:'뒤틀림의 잔향'},cast:{},desc:{Q:'전방을 가르는 검격. 일직선상의 적에게 피해를 줍니다.',W:'넓은 수평 참격으로 피해를 주고 적의 이동을 둔화합니다.',E:'짧은 시간 공격력이 상승합니다.',R:'지정한 지점에 뒤틀림의 잔향을 폭발시켜 광역 피해와 둔화를 줍니다.'}},
+  roland:{names:{Q:'그건 그거고 이건 이거야',W:'함부로 끊어 낼 수는 없어',E:'안젤리카를 위한 춤',R:'내게는 고통밖에 없습니다. 그외에는...'},cast:{R2:'FURIOSO'},desc:{Q:'야스오의 강철 폭풍처럼 전방을 찌릅니다. 회오리 3타 없이 단일 찌르기만 사용합니다.',W:'이렐리아의 칼날 쇄도처럼 적에게 돌진합니다. 적 처치 시 재사용 대기시간이 초기화됩니다.',E:'사미라의 원형 검무처럼 주변을 베며 날아오는 투사체를 막아냅니다.',R:'뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 흡혈이 부여되고 궁극기를 재사용해 FURIOSO를 발동할 수 있습니다.'}},
   blueReverb:{names:{Q:'푸른 파동', W:'잔향 폭발', E:'공명 가속', R:'푸른 장막'},cast:{},desc:{Q:'푸른 에너지를 직선으로 방출해 적을 공격합니다.',W:'넓게 퍼지는 잔향으로 피해를 주고 적을 둔화합니다.',E:'공명을 가속해 체력을 회복하고 잠시 스킬 가속 효과를 얻습니다.',R:'지정한 지점에 푸른 파동을 폭발시켜 주변 적에게 피해와 둔화를 줍니다.'}},
   purpleTear:{names:{Q:'변형 검격', W:'연속 참격', E:'전술 전환', R:'보라빛 종결'},cast:{},desc:{Q:'보라빛 검격으로 전방의 적을 베어 피해를 줍니다.',W:'넓은 범위를 연속으로 베고 적의 이동을 둔화합니다.',E:'전술을 전환해 잠시 공격력이 상승합니다.',R:'보라빛 힘을 한 점에 모아 광역 피해와 둔화를 일으킵니다.'}},
   vespa:{names:{Q:'정밀 사격', W:'관통 탄환', E:'후퇴 사격', R:'집중 포화'},cast:{},desc:{Q:'정밀한 일직선 사격으로 적을 공격합니다.',W:'더 넓고 긴 관통 사격을 가해 적을 둔화합니다.',E:'사격 자세를 정비해 잠시 공격력이 상승합니다.',R:'지정한 위치에 집중 포화를 퍼부어 범위 피해와 둔화를 줍니다.'}},
@@ -3763,6 +3763,50 @@ function castSkill(c, key, ang, frac = null) {                // 공통 후처�
 
 const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','naihwang','gachiu','indigoElder','liuEn','callisto']);
 function castExtraSkill(c, key, ang, frac) {
+  if (c.key === 'roland') {
+    const n = rk(c, key), form = c.rolandFormUntil > time, color = form ? '#a8b8d8' : '#d8c6ff';
+    const healOnHit = u => { if (form) c.hp = Math.min(c.maxHp, c.hp + Math.max(1, u._rolandLastDamage || 0) * .28); };
+    if (key === 'Q') {
+      const len=E(350), wid=E(62); if(ang===null) ang=autoAim(c,len); c.face=ang;
+      c.cd.Q=c.cdMax.Q=([7,6.5,6,5.5][n])*hasteMul(c);
+      const hits=segHits(c,ang,len,wid);
+      for(const u of hits){if(isChamp(u))callForHelp(c,u);const before=u.hp;damage(c,u,48+n*27+c.ad*.78,{skill:true,color});u._rolandLastDamage=Math.max(0,before-u.hp);healOnHit(u);}
+      spikeFx(c,ang,len,wid,.28,false);sfxPlay('swing',c.x,c.y,.95,1.12);text(c.x,c.y-c.r-E(35),skillNames(c).Q,color,true,.8);return;
+    }
+    if (key === 'W') {
+      const len=E(430), wid=E(78);if(ang===null)ang=autoAim(c,len);c.face=ang;
+      const hits=segHits(c,ang,len,wid).filter(u=>u.alive&&!u.structure).sort((a,b)=>dist(c,a)-dist(c,b));
+      c.cd.W=c.cdMax.W=([13,12,11,10][n])*hasteMul(c);
+      if(hits.length){const u=hits[0],dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy)||1,step=Math.max(0,d-c.r-u.r-5);c.x+=dx/d*step;c.y+=dy/d*step;
+        if(isChamp(u))callForHelp(c,u);const before=u.hp;damage(c,u,64+n*31+c.ad*.95,{skill:true,color});u._rolandLastDamage=Math.max(0,before-u.hp);healOnHit(u);
+        if(!u.alive){c.cd.W=0;c.cdMax.W=0;}
+      }
+      fx.push({type:'burst',x:c.x,y:c.y,r:c.r*1.9,t:0,life:.28,col:color});sfxPlay('dash',c.x,c.y,.95);text(c.x,c.y-c.r-E(35),skillNames(c).W,color,true,.8);return;
+    }
+    if (key === 'E') {
+      c.cd.E=c.cdMax.E=([18,16,14,12][n])*hasteMul(c);c.rolandSpinUntil=time+.75;
+      for(const u of units)if(u.alive&&u.team!==c.team&&targetable(u)&&dist(c,u)<E(155)+u.r){
+        if(isChamp(u))callForHelp(c,u);const before=u.hp;damage(c,u,55+n*30+c.ad*.62,{skill:true,color});u._rolandLastDamage=Math.max(0,before-u.hp);healOnHit(u);
+      }
+      fx.push({type:'burst',x:c.x,y:c.y,r:E(155),t:0,life:.42,col:color});sfxPlay('swing',c.x,c.y,1.1,.8);text(c.x,c.y-c.r-E(35),skillNames(c).E,color,true,.8);return;
+    }
+    if (key === 'R' && form) {
+      if(ang===null)ang=autoAim(c,E(520));c.face=ang;
+      let target=null,bd=E(520);
+      for(const u of units)if(u.alive&&u.team!==c.team&&targetable(u)){const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy),da=Math.atan2(dy,dx),diff=Math.abs(Math.atan2(Math.sin(da-ang),Math.cos(da-ang)));if(d<bd&&diff<.55){target=u;bd=d;}}
+      if(!target)target=units.filter(u=>u.alive&&u.team!==c.team&&targetable(u)).sort((a,b)=>dist(c,a)-dist(c,b))[0]||null;
+      if(!target)return;
+      target.stunT=Math.max(target.stunT||0,1.65);target.cast=null;target.dash=null;
+      for(let i=0;i<9;i++){if(!target.alive)break;damage(c,target,42+n*12+c.ad*.38,{skill:true,color:'#dbe5ff'});fx.push({type:'slash',x:target.x+(Math.random()-.5)*target.r,y:target.y+(Math.random()-.5)*target.r,t:0,life:.22,col:'#dbe5ff'});}
+      c.rolandFormUntil=0;c.rolandMaskUntil=0;c.cd.R=c.cdMax.R=([95,80,65][n])*hasteMul(c);
+      sfxPlay('ult',target.x,target.y,1.3);sfxPlay('boom',target.x,target.y,1.1);text(target.x,target.y,'FURIOSO','#dbe5ff',true,1.2);return;
+    }
+    if (key === 'R') {
+      c.cd.R=c.cdMax.R=([95,80,65][n])*hasteMul(c);c.rolandFormUntil=time+12;c.rolandMaskUntil=time+12;c.rolandFuriosoReady=true;
+      c.shield=Math.max(c.shield||0,c.maxHp*.16);c.shieldT=2.5;
+      fx.push({type:'burst',x:c.x,y:c.y,r:c.r*3,t:0,life:.8,col:'#a8b8d8'});sfxPlay('ult',c.x,c.y,1.25);text(c.x,c.y-c.r-E(45),'뒤틀림','#dbe5ff',true,1.1);return;
+    }
+  }
   const n = rk(c, key), cds = {Q:[7,6.5,6,5.5],W:[13,12,11,10],E:[15,14,13,12],R:[95,80,65]};
   const cd = cds[key][n] * hasteMul(c);
   const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#9ab8a5',indigoElder:'#70d7d0',liuEn:'#ff8b4d',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
@@ -3812,7 +3856,7 @@ function castExtraSkill(c, key, ang, frac) {
   }
 }
 function castSkillCore(c, key, ang, frac = null) {
-  const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard);   // 이스마엘 재사용
+  const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time);   // 이스마엘 재사용
   const tmFree = c.key === 'thoma' && key === 'R' && !tmBusy(c);   // 토마 전화위복: 군중 제어 중에도 사용
   if (!c.alive || !c.rank[key] || (c.stunT > 0 && !tmFree) || (c.cast && !tmFree) || (c.cd[key] > 0 && !recast) || gameOver) return;
   if (!tmFree && (c.tauntT > time || c.fearT > time)) return;          // 도발·공포 중엔 스킬 불가
@@ -11323,7 +11367,7 @@ function champTimers(c, dt) {
     if (c.stunT > 0 && !c.cast.unstoppable) c.cast = null;          // 기절하면 시전 끊김
     else c.cast.t += dt;
   }
-  if (c.key === 'rodion') rodionTick(c, dt);
+  if (c.key === 'roland') { c.rolandMove=(c.rolandMove||0)+Math.hypot(c.x-(c.rolandPX??c.x),c.y-(c.rolandPY??c.y));c.rolandPX=c.x;c.rolandPY=c.y;if(c.rolandMove>=E(390)){c.rolandMove=0;const sh=95+c.level*9;c.shield=Math.max(c.shield||0,sh);c.shieldT=2.5;if(c===player)text(c.x,c.y-c.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.7);}if(c.rolandFormUntil>0&&time>=c.rolandFormUntil){c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;} }\n  if (c.key === 'rodion') rodionTick(c, dt);
   if (c.key === 'yisang') yisangTick(c, dt);
   if (c.key === 'ishmael') ishmaelTick(c, dt);
   if (c.key === 'ryoshu') ryoshuTick(c, dt);
@@ -20757,7 +20801,7 @@ CODEX_SK.gregor = {
 };
 
 const EXTRA_CODEX = {
-  roland:{P:{name:'검사의 감각',text:()=> '근접 전투에 특화된 전사입니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'검격',cd:[7,6.5,6,5.5],range:350,text:H=>'전방 직선으로 검격을 날려 경로상의 적에게 물리 피해를 줍니다.'},W:{name:'수평베기',cd:[13,12,11,10],range:420,text:H=>'넓고 긴 수평 참격으로 피해를 주고 1.1초 동안 이동 속도를 22% 낮춥니다.'},E:{name:'회피 기동',cd:[15,14,13,12],text:H=>'전투 자세를 가다듬어 3초 동안 추가 공격력을 얻습니다.'},R:{name:'뒤틀림의 잔향',cd:[95,80,65],range:430,text:H=>'지정 방향의 지점에 강력한 잔향을 폭발시켜 주변 적에게 큰 피해를 줍니다.'}},
+  roland:{P:{name:'어느 도서관의 사서',text:()=> '일정 거리를 이동하면 야스오처럼 보호막을 얻습니다. 치명타 확률 보너스가 적용되는 전투 패시브입니다.'},Q:{name:'그건 그거고 이건 이거야',cd:[7,6.5,6,5.5],range:350,text:H=>'전방을 찌르는 단일 직선 공격입니다. 야스오 Q와 같은 기본 찌르기이며 3타 회오리바람은 없습니다.'},W:{name:'함부로 끊어 낼 수는 없어',cd:[13,12,11,10],range:430,text:H=>'이렐리아 Q처럼 적에게 돌진해 피해를 줍니다. 이 공격으로 적을 처치하면 재사용 대기시간이 초기화됩니다.'},E:{name:'안젤리카를 위한 춤',cd:[18,16,14,12],text:H=>'사미라 W처럼 주변을 회전 베기하며 투사체를 막아내는 기술입니다.'},R:{name:'내게는 고통밖에 없습니다. 그외에는...',cd:[95,80,65],text:H=>'12초 동안 뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 28% 흡혈이 붙고 R을 재사용해 적 하나를 속박한 뒤 9개의 무기로 FURIOSO를 시전합니다.'}},
   blueReverb:{P:{name:'푸른 공명',text:()=> '원거리 마법 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'푸른 파동',cd:[7,6.5,6,5.5],range:520,text:H=>'푸른 에너지를 직선으로 방출해 경로상의 적에게 마법 피해를 줍니다.'},W:{name:'잔향 폭발',cd:[13,12,11,10],range:600,text:H=>'넓은 직선으로 잔향을 폭발시켜 적에게 피해를 주고 1.1초 동안 둔화시킵니다.'},E:{name:'공명 가속',cd:[15,14,13,12],text:H=>'체력을 회복하고 2.5초 동안 공명 가속 효과를 얻습니다.'},R:{name:'푸른 장막',cd:[95,80,65],range:600,text:H=>'지정 지점에 푸른 파동을 폭발시켜 넓은 범위의 적에게 큰 피해를 줍니다.'}},
   purpleTear:{P:{name:'전술 숙련',text:()=> '근접 암살 전술에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'변형 검격',cd:[7,6.5,6,5.5],range:350,text:H=>'전방 직선의 적을 보라빛 검격으로 베어 물리 피해를 줍니다.'},W:{name:'연속 참격',cd:[13,12,11,10],range:420,text:H=>'넓은 수평 범위를 연속으로 베어 피해를 주고 적을 둔화시킵니다.'},E:{name:'전술 전환',cd:[15,14,13,12],text:H=>'전술을 전환해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'보라빛 종결',cd:[95,80,65],range:430,text:H=>'보라빛 힘을 지정 지점에서 폭발시켜 주변 적에게 큰 피해를 줍니다.'}},
   vespa:{P:{name:'저격수의 감각',text:()=> '긴 사거리의 원거리 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'정밀 사격',cd:[7,6.5,6,5.5],range:520,text:H=>'정밀한 직선 사격으로 경로상의 적에게 물리 피해를 줍니다.'},W:{name:'관통 탄환',cd:[13,12,11,10],range:600,text:H=>'더 넓고 긴 관통 사격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'후퇴 사격',cd:[15,14,13,12],text:H=>'사격 자세를 정비해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'집중 포화',cd:[95,80,65],range:600,text:H=>'지정한 위치에 집중 포화를 퍼부어 넓은 범위에 큰 피해를 줍니다.'}},
