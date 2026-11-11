@@ -19929,12 +19929,13 @@ function dBanInit(r) {                                                          
 function fadeTo(on, ms) { const f = document.getElementById('fade'); if (!f) return; f.style.transition = `opacity ${ms}ms ease`; f.style.opacity = on ? '1' : '0'; f.style.pointerEvents = on ? 'auto' : 'none'; }
 function fadeSwap(fn, out = 280, inn = 420) { fadeTo(true, out); setTimeout(() => { try { fn(); } catch (e) { console.warn(e); } requestAnimationFrame(() => requestAnimationFrame(() => fadeTo(false, inn))); }, out); }
 const FADE_SEL = '#mVsAi,#mSpec,#mMulti,#mDuel,#mCodex,#mVicDev,#again,#selHome,#cxBack,.sel-card[data-champ],#mpBack,[data-mp="dsolo"]';
-document.addEventListener('click', e => {                                          // 메뉴 버튼: 바로 넘기지 않고 살짝 암전
-  const b = e.target.closest(FADE_SEL); if (!b || b.__fadePass || b.disabled) return;
-  if (b.id === 'mpBack' && MP.code) return;                                         // (방 나가기는 그대로)
-  e.stopImmediatePropagation(); e.preventDefault();
-  fadeSwap(() => { b.__fadePass = true; try { b.click(); } finally { b.__fadePass = false; } }, 240, 420);
-}, true);
+// 메뉴 전환은 각 버튼의 기존 클릭 핸들러에 맡깁니다.
+// 캡처 단계에서 클릭을 가로채면 투명 페이드 레이어가 입력을 막는 문제가 생길 수 있어 비활성화합니다.
+document.addEventListener('click', e => {
+  const b = e.target.closest(FADE_SEL);
+  if (!b || b.disabled) return;
+  fadeTo(false, 120);
+}, false);
 function duelPlayerRec(slot) { return {name:mpName(), slot, spells:chosenSpells.slice(), rune:chosenRune, perks:pagePerks(chosenPage), joined:MP.net.now()}; }
 async function duelCreate(pub) {
   const N = await mpEnsureNet();
