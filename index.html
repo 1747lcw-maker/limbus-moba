@@ -1195,7 +1195,7 @@ const ITEMS = {
   s_blade:  {name:'낡은 칼날', cat:'start', total:450, stats:{ad:8, hp:80, omni:0.03}, desc:'모든 피해의 3%만큼 체력 회복'},
   s_ring:   {name:'낡은 반지', cat:'start', total:400, stats:{ap:15, hp:70, regen:1}},
   s_shield: {name:'낡은 방패', cat:'start', total:450, stats:{hp:110, armor:5, regen:1.2}},
-  hunter:   {name:'사냥꾼의 칼', cat:'start', total:350, stats:{hp:60, regen:1.5}, passive:'사냥', desc:'정글 전용. 몬스터에게 주는 피해 +40%, 정글 몬스터 골드·경험치 100% (없으면 35%), 몬스터를 처치하면 체력 회복 (대형 8%, 소형 3%)'},
+  hunter:   {name:'사냥꾼의 칼', cat:'start', total:350, stats:{hp:60, regen:1.5}, passive:'사냥', desc:'정글 전용. 몬스터에게 주는 피해 +30%, 일반 캠프 골드 8%·경험치 추가 5% 감소 (사냥꾼의 칼 미보유 시 기본 35%), 몬스터 처치 시 체력 회복 (대형 8%, 소형 3%)'},
   // 기본 재료
   whet:  {name:'숫돌',      cat:'basic', total:350, stats:{ad:10}},
   dagger:{name:'단검',      cat:'basic', total:300, stats:{as:0.12}},
@@ -1652,7 +1652,7 @@ const critMult = c => BASE_CRIT_DMG + (c.key === 'dongbaek' ? KDB.P.critDmg : 0)
 
 const TURRET_RANGE = E(480);   // 캐릭터 기준 480
 const MINION_AGGRO = E(650);
-const WAVE_FIRST = 25, WAVE_EVERY = 20, CHAMP_GOLD = 300, TURRET_GOLD = 150, TURRET_LOCAL_GOLD = 200, PLATE_GOLD = 120, PLATE_UNTIL = 840;   // 포탑: 팀 전체 + 부순 사람들 + 방패(14분까지)
+const WAVE_FIRST = 25, WAVE_EVERY = 20, CHAMP_GOLD = 300, JUNGLE_TAKEDOWN_GOLD_MUL = .9, TURRET_GOLD = 150, TURRET_LOCAL_GOLD = 200, PLATE_GOLD = 120, PLATE_UNTIL = 840;   // 포탑: 팀 전체 + 부순 사람들 + 방패(14분까지)
 
 const LANES = {
   blue: {
@@ -2825,12 +2825,12 @@ const BUFFS = {
   siege: {name:'공성의 뿔', short:'공성', dur:120, col:'#e0a040', desc:'구조물 피해 +80%, 근처 아군 미니언의 구조물 피해 +60%'},
 };
 const CAMP_DEF = [   // 블루 진영 좌표 (레드 진영은 좌우 대칭). mobs: [종류, x 오프셋, y 오프셋] (캐릭터 기준)
-  {id:'blood',   mobs:[['blood', 0, 0]],                                          x:900,  y:FY(520), first:30, respawn:90},
-  {id:'thieves', mobs:[['thief', -34, -12], ['thief', 30, -18], ['thief', 0, 28]], x:1400, y:FY(560), first:30, respawn:60},
-  {id:'rats',    mobs:[['rat', -30, -16], ['rat', 28, -20], ['rat', 0, 26]],      x:1360, y:FY(880), first:30, respawn:60},
-  {id:'scribe',  mobs:[['scribe', 0, 0]],                                         x:900,  y:H - FY(520), first:30, respawn:90},
-  {id:'glutton', mobs:[['glutton', 0, 0]],                                        x:1400, y:H - FY(560), first:30, respawn:75},
-  {id:'sweep',   mobs:[['sweeper', 0, -10], ['sweeperS', -50, 36], ['sweeperS', 50, 36]], x:1360, y:H - FY(880), first:30, respawn:60},
+  {id:'blood',   mobs:[['blood', 0, 0]],                                          x:900,  y:FY(520), first:30, respawn:100},
+  {id:'thieves', mobs:[['thief', -34, -12], ['thief', 30, -18], ['thief', 0, 28]], x:1400, y:FY(560), first:30, respawn:70},
+  {id:'rats',    mobs:[['rat', -30, -16], ['rat', 28, -20], ['rat', 0, 26]],      x:1360, y:FY(880), first:30, respawn:70},
+  {id:'scribe',  mobs:[['scribe', 0, 0]],                                         x:900,  y:H - FY(520), first:30, respawn:100},
+  {id:'glutton', mobs:[['glutton', 0, 0]],                                        x:1400, y:H - FY(560), first:30, respawn:85},
+  {id:'sweep',   mobs:[['sweeper', 0, -10], ['sweeperS', -50, 36], ['sweeperS', 50, 36]], x:1360, y:H - FY(880), first:30, respawn:70},
 ];
 const LANER_GOLD = .35, LANER_XP = .35;   // 사냥꾼의 칼 없이 몬스터를 잡으면 골드·경험치 35% (버프는 그대로)
 const LEASH = E(900), EPIC_FIRST = 480, EPIC_RESPAWN = 360, NEUTRAL_COL = '#d8b36a';
@@ -2981,9 +2981,9 @@ function monsterReward(m, src) {
   const xp = Math.round(st.xp * (st.epic ? 1 : .8) * (1 + .015 * Math.min(time / 60, 20)) * catchUp);
   const team = st.epic ? champs().filter(c => c.team === k.team) : [k];
   for (const c of team) {
-    const full = st.epic || hasItem(c, 'hunter'), gold = Math.round(st.gold * (full ? 1 : LANER_GOLD));   // 에픽은 팀 목표라 누구나 100%
+    const full = st.epic || hasItem(c, 'hunter'), jungleMul = !st.epic && c.role === 'jungle' && hasItem(c, 'hunter') ? .92 : 1, gold = Math.round(st.gold * (full ? 1 : LANER_GOLD) * jungleMul);   // 일반 캠프 정글 골드 -8%, 에픽 보상은 유지
     c.gold += gold;
-    if (c.alive) gainXp(c, Math.round(xp * (full ? 1 : LANER_XP)));
+    if (c.alive) gainXp(c, Math.round(xp * (full ? 1 : LANER_XP) * (c.role === 'jungle' && hasItem(c, 'hunter') && !st.epic ? .95 : 1))); // 정글러 일반 캠프 경험치 추가 -5%
     if (st.buff && c.alive) giveBuff(c, st.buff, BUFFS[st.buff].dur);
     if (c === k && hasItem(c, 'hunter')) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * (st.big ? .08 : .03));
     if (c === player) text(m.x, m.y - m.r - E(25), '+' + gold, full ? '#e6c35c' : '#b8a878', true, 1);
@@ -3492,7 +3492,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (isChamp(tgt) && tgt.linkT > time) amount *= 1 - KF.P.dmgDown;                                            // 잿빛 비룡 중첩
   if (tgt.structure && isChamp(src) && hasBuff(src, 'siege')) amount *= 1.8;                 // 공성의 뿔
   if (tgt.structure && isMinion(src) && champs().some(c => c.team === src.team && c.alive && hasBuff(c, 'siege') && dist(c, src) < E(600))) amount *= 1.6;
-  if (isMonster(tgt) && isChamp(src) && hasItem(src, 'hunter')) amount *= 1.4;               // 사냥꾼의 칼
+  if (isMonster(tgt) && isChamp(src) && hasItem(src, 'hunter')) amount *= 1.3;               // 사냥꾼의 칼
   if (isChamp(src) && hasItem(src, 'scar') && isChamp(tgt) && tgt.hp < tgt.maxHp * .5) amount *= 1.12;   // 붉은 흉터
   if (tgt.heavenT > time) amount *= 1.06;                                                   // 천국: 응시 받는 중
   if (isChamp(tgt) && isChamp(src) && hasItem(tgt, 'regret')) amount *= .92;
@@ -3754,13 +3754,13 @@ function kill(u, src) {
     const bounty = u.alSelf ? 0 : champBounty(u); u.streak = 0;
     if (bounty) { announce(`현상금 획득! ${(killer || helpers[0] || {name:'?'}).name} → ${u.name} (${bounty}G)`, '#ffd25a'); fx.push({type:'pop', x:u.x, y:u.y, r:u.r * 2.5, color:'#ffd25a', t:0, life:.6}); }
     if (killer) {
-      killer.k++; killer.gold += CHAMP_GOLD + bounty;
-      if (killer === player) text(u.x, u.y - u.r - E(30), '+' + (CHAMP_GOLD + bounty) + (bounty ? ' 현상금!' : ''), '#e6c35c', true, 1.2);
+      killer.k++; const kg = Math.round((CHAMP_GOLD + bounty) * (killer.role === 'jungle' && time < 840 ? JUNGLE_TAKEDOWN_GOLD_MUL : 1)); killer.gold += kg;
+      if (killer === player) text(u.x, u.y - u.r - E(30), '+' + kg + (bounty ? ' 현상금!' : ''), '#e6c35c', true, 1.2);
       killer.streak = (killer.streak || 0) + 1;
       if ([3, 5, 7, 9].includes(killer.streak)) announce(`${killer.name}에게 현상금이 걸렸습니다! · ${killer.streak}연속 처치 · ${champBounty(killer)}G`, killer.team === player.team ? '#7ac0ff' : '#ff8a8e');
     }
     for (const c of helpers) {                         // 도움: 처치 골드의 절반을 나눠 가짐
-      const g = Math.round((CHAMP_GOLD + bounty) * .5 / helpers.length);
+      const g = Math.round((CHAMP_GOLD + bounty) * .5 / helpers.length * (c.role === 'jungle' && time < 840 ? JUNGLE_TAKEDOWN_GOLD_MUL : 1));
       c.a++; c.gold += g;
       if (c === player) text(u.x, u.y - u.r - E(30), '+' + g + ' 도움', '#e6c35c', true, 1.2);
     }
