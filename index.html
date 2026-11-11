@@ -2564,6 +2564,13 @@ function sfxSynth(ctx) {
   });
   zap('zap1', .2, 16, 110, .5); zap('zap2', .24, 13, 140, .45); zap('zap3', .18, 18, 95, .55);
   zap('zapBig', .6, 4.5, 70, .62);
+  mk('shotgun', .36, (t, st) => {                                      // 산탄총: 짧고 넓게 터지는 화약 폭발 + 저음 충격 + 탄피/기계음
+    const blast = lp(st, noise(), 5200) * Math.exp(-t * 25) * 2.4;
+    const body = Math.sin(2 * Math.PI * (92 - 48 * Math.min(1, t / .2)) * t) * Math.exp(-t * 18) * 1.15;
+    const crack = hp(st, noise(), 1700) * Math.exp(-Math.max(0, t - .018) * 48) * (t < .018 ? .35 : .72);
+    const tail = lp(st, noise(), 900) * Math.exp(-Math.max(0, t - .075) * 30) * (t > .075 ? .5 : 0);
+    return (blast + body + crack + tail) * Math.min(1, t / .0015);
+  });
   mk('charge', .5, (t, st) => {                                                   // 선딜: 올라가는 기 모으는 소리
     const f = 180 * Math.pow(5, t / .5); st.ph += f / sr; st.ph2 += f * 1.5 / sr;
     const tone = Math.sin(st.ph * 2 * Math.PI) * .5 + Math.sin(st.ph2 * 2 * Math.PI) * .18;
@@ -2609,6 +2616,7 @@ const SFX_GROUP = {                                                    // 묶음
   boom:{c:['boom1', 'boom2'], v:.5, gap:.12, p:.08},
   gun:{c:['gun1', 'gun2'], v:.3, gap:.05, p:.1},
   biggun:{c:['biggun'], v:.55, gap:.15, p:.05},
+  shotgun:{c:['shotgun'], v:.78, gap:.1, p:.025},
   ult:{c:['ult'], v:.42, gap:.4, p:.04},
   death:{c:['heavy1', 'crash2'], v:.48, gap:.15, p:.06},
   tower:{c:['boom2'], v:.65, gap:.3, p:0},
@@ -3857,7 +3865,7 @@ function basicAttack(c, t) {
   if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(1.08, c.as * 1.38)); // 묵직한 한 방: 공격 속도 상한
   c.swingT = c.key === 'naihwang' ? .52 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
-  if (c.key === 'naihwang') { sfxPlay('biggun', c.x, c.y, 1.35, .84); sfxPlay('gun', c.x, c.y, 1.25, .9); } // 대구경 발사음과 일반 총격음을 겹쳐 매 평타마다 강하게 재생
+  if (c.key === 'naihwang') sfxPlay('shotgun', c.x, c.y, 1.25, .96); // 짧고 묵직한 산탄총 발사음
   if(c.key==='liuEn')fx.push({type:'lySlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(38),t.r*1.5),t:0,life:.48,weapon:c.liuWeapon||0});
   if (c.key === 'roland') {
     fx.push({type:'rlSlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(34),t.r*1.25),t:0,life:.34,crit:!!c.swingCrit});
