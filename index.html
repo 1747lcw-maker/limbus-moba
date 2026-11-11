@@ -13176,6 +13176,7 @@ function updateView(dt) {                                               // ì¹´ë©
       wantZoom = Math.max(.2, Math.min(.75, fit));
     }
   }
+  if(spectating){camTx=specCamera.free?specCamera.x:player.x;camTy=specCamera.free?specCamera.y:player.y;wantZoom=specCamera.free?specCamera.zoom:1;}
   zoomMul += (wantZoom - zoomMul) * (1 - Math.exp(-dt * 5)); zoom = baseZoom * zoomMul;
   if(spectating&&specCamera.free){zoomMul=specCamera.zoom;zoom=baseZoom*zoomMul;}
   const ck = 1 - Math.exp(-dt * 8);
