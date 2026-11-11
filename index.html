@@ -21745,7 +21745,16 @@ function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoCh
 
 $('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
-$('mSpec').addEventListener('click', () => specStart());
+$('mSpec').addEventListener('click', () => {
+  if(aiDraftTimer)clearTimeout(aiDraftTimer);
+  aiDraftState=null;aiDraftBans=[];aiDraftLineup=null;
+  spectating=false;specSpeed=1;mpLineup=null;
+  chosenRole=ROLES[Math.floor(Math.random()*ROLES.length)];
+  chosenChamp=pickForRoles([chosenRole],[])[0]||'gregor';
+  $('menu').hidden=true;$('select').hidden=true;$('spec').hidden=true;
+  document.body.classList.remove('spec');
+  aiDraftStart(true);
+});
 
 // ═════════════ 관전 모드: AI 10명만으로 진행, 버튼으로 시점 전환 (시야 = 보고 있는 챔피언의 팀) ═════════════
 let specT = 0, specCards = [];
