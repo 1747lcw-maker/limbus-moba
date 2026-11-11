@@ -3525,7 +3525,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (src && src.key === 'heathcliff' && tgt.team !== src.team && !tgt.structure && !opts.noStack && !opts.noBleed && (opts.basic || opts.skill)) hcBleedAdd(src, tgt);   // 뼈 부수기: 출혈
   if (tgt.key === 'vergil' && tgt.vgParryT > time && src && isChamp(src) && src.team !== tgt.team && !opts.noParry && !(opts.noProc && !opts.skill)) { vgParry(tgt, src); return; }   // 간파
   if(tgt&&src&&isChamp(src)&&tgt.team!==src.team&&tgt.brWeakUntil>time)amount*=.9;
-  if(src&&src.key==='blueReverb'&&src.brTempoUntil>time)amount*=1+(src.brTempoDmg||.08);
+  if(src&&src.brTempoUntil>time)amount*=1+(src.brTempoDmg||.08);
   if(src&&src.key==='vespa'&&src.vespaFuryUntil>time)amount*=1.15;
   if(src&&src.key==='gachiu'&&opts.basic&&!opts.noGachiuR&&src.gachiuRUntil>time)amount*=5;
   if (src && src.vgGaze > time) amount *= 1 + KVG.P.dmgUp;                                  // 붉은시선 개안
@@ -4148,7 +4148,7 @@ function castExtraSkill(c,key,ang,frac){
   if(key==='W'){c.cd.W=c.cdMax.W=cd;for(const a of champs())if(a.team===c.team&&a.alive&&dist(a,c)<E(260)+a.r){a.brWardUntil=time+2;fx.push({type:'brWard',x:a.x,y:a.y,r:E(115),t:0,life:2});}sfxPlay('chime',c.x,c.y,1.2,.72);text(c.x,c.y-c.r-E(40),'잔향의 막',blue,true,.9);return;}
   if(key==='R'){if(ang==null)ang=autoAim(c,E(650));c.face=ang;c.cd.R=c.cdMax.R=cd;const len=E(650),wid=E(210);fx.push({type:'brNotesR',x:c.x,y:c.y,ang,len,wid,t:0,life:1.15});
    for(const u of foes()){const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy);if(d>len+u.r)continue;const a=Math.atan2(dy,dx),da=Math.abs(Math.atan2(Math.sin(a-ang),Math.cos(a-ang)));if(da>.82+u.r/Math.max(1,d))continue;
-    damage(c,u,125+n*85+c.ap*.85,{skill:true,type:'magic',color:blue});u.brBerserkUntil=time+2.5;u.brBerserkBy=c;u.target=null;u.tauntT=Math.max(u.tauntT||0,2.5);u.cast=null;u.dash=null;fx.push({type:'brCharm',x:u.x,y:u.y,r:u.r*2.2,t:0,life:.8});
+    damage(c,u,125+n*85+c.ap*.85,{skill:true,type:'magic',color:blue});u.brBerserkUntil=time+2.5;u.brBerserkBy=c;const allies=units.filter(a=>a.alive&&a.team===u.team&&a!==u&&!a.structure&&!a.ward);const victim=allies.sort((a,b)=>dist(u,a)-dist(u,b))[0];u.target=victim||c;u.forceT=2.5;u.tauntT=Math.max(u.tauntT||0,2.5);u.cast=null;u.dash=null;fx.push({type:'brCharm',x:u.x,y:u.y,r:u.r*2.2,t:0,life:.8});
    }sfxPlay('ult',c.x,c.y,1.35,.9);text(c.x,c.y-c.r-E(48),'잔향 악단',blue,true,1.1);return;
   }return;
  }
@@ -11898,7 +11898,7 @@ function respawnTick(c, dt) {
   }
 }
 function moveChamp(c, dx, dy, dt) {
-  const k = 1 - Math.exp(-dt * 18), sp = E(c.speed) * speedMul(c);
+  const k = 1 - Math.exp(-dt * 18), sp = E(c.speed) * speedMul(c) * (c.brTempoUntil>time ? 1+(c.brTempoMove||.10) : 1);
   if (c !== player || window.AUTOPLAY || spectating) [dx, dy] = steerAround(c, dx, dy);   // AI는 구조물을 돌아감
   c.vx += (dx * sp - c.vx) * k; c.vy += (dy * sp - c.vy) * k;
   c.x += c.vx * dt; c.y += c.vy * dt;
@@ -13246,6 +13246,7 @@ function update(dt) {
     if(!p.tgt||!p.tgt.alive)return false;const v=p.tgt,dx=v.x-p.x,dy=v.y-p.y,d=Math.hypot(dx,dy),step=p.speed*dt;
     if(d<=step+v.r*.5){
      if(v.key==='vespa'&&v.vespaGuardUntil>time&&p.src&&p.src.team!==v.team&&!p.vespaReflected){const da=Math.atan2(p.y-v.y,p.x-v.x),diff=Math.abs(Math.atan2(Math.sin(da-v.vespaGuardAng),Math.cos(da-v.vespaGuardAng)));if(diff<1.15){const old=p.src;p.src=v;p.tgt=old;p.x=v.x+Math.cos(v.vespaGuardAng)*v.r;p.y=v.y+Math.sin(v.vespaGuardAng)*v.r;p.amount*=1.25;p.vespaReflected=true;p.color='#ffe45c';fx.push({type:'vsReflect',x:v.x,y:v.y,ang:v.vespaGuardAng,r:v.r*2,t:0,life:.42});sfxPlay('clang',v.x,v.y,.9,1.2);return true;}}
+     if(v.brWardUntil>time&&p.src&&p.src.team!==v.team){fx.push({type:'brBlock',x:v.x,y:v.y,r:v.r*1.5,t:0,life:.3});return false;}
      if(efProjBlock(p))return false;damage(p.src,v,p.amount,p.opts||{basic:isMinion(p.src)||isMonster(p.src)});
      if(p.vespa){if(p.vespaKind==='basic'||p.vespaKind==='W')vespaStick(p.src,v,p.amount,p.vespaKind);else fx.push({type:'vsRecall',x:v.x,y:v.y,r:v.r*2,t:0,life:.58,count:1});}
      if(p.src&&p.src.key==='dongbaek'&&p.opts&&p.opts.basic)dbOnHit(p.src,v,p.opts);if(p.src&&p.src.key==='saude'&&p.opts&&p.opts.basic)sdOnHit(p.src,v,p.opts);return false;
