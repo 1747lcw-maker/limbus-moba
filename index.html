@@ -12139,6 +12139,58 @@ function aiCombo(b, p) {
     if (ready('W') && !mirrors.some(m => m.owner === b) && d > E(160) && d < E(KY.W.range)
         && (hpP < .4 || (ready('R') && hpB > .4) || (ready('Q') && ready('E')))) { castSkill(b, 'W', Math.atan2(p.y - b.y, p.x - b.x), dist(b, p) / E(KY.W.range)); return true; }
   }
+
+  // ── 프로젝트 문 신규 챔피언 AI 스킬 연계 ──
+  if (b.key === 'blueReverb') {
+    const a = aimAt(b, p, .22), allies = alliesOf(b).filter(x => x.alive && dist(x, p) < E(420)).length;
+    if (ready('R') && d < E(650) && (hpP < .62 || allies >= 2 || hpB < .38)) { castSkill(b, 'R', a, Math.min(1, d / E(650))); return true; }
+    if (ready('W') && (hpB < .72 || (allies >= 1 && d < E(360)))) { castSkill(b, 'W', null); return true; }
+    if (ready('E') && d < E(470)) { castSkill(b, 'E', a); return true; }
+    if (ready('Q') && d < E(590)) { castSkill(b, 'Q', a); return true; }
+  }
+  if (b.key === 'vespa') {
+    const a = aimAt(b, p, .16);
+    if (ready('R') && d < E(750) && (hpP < .48 || hpB < .35)) { castSkill(b, 'R', a); return true; }
+    if (ready('E') && d < E(210) && (p.target === b || hpB < .58)) { castSkill(b, 'E', a); return true; }
+    if (ready('W') && d < E(650)) { castSkill(b, 'W', a); return true; }
+    if (ready('Q') && d > E(95) && d < E(470)) { castSkill(b, 'Q', a); return true; }
+  }
+  if (b.key === 'gachiu') {
+    const a = aimAt(b, p, .12);
+    if (ready('R') && d < E(470) && (hpP < .55 || hpB < .55 || b.gachiuRUntil < time)) { castSkill(b, 'R', null); return true; }
+    if (ready('W') && d < E(470)) { castSkill(b, 'W', a, Math.min(1, d / E(470))); return true; }
+    if (ready('Q') && b.jaro && b.jaro.alive && d < E(650)) { castSkill(b, 'Q', a, Math.min(1, d / E(650))); return true; }
+    if (ready('E')) {
+      const hurt = [b, ...alliesOf(b)].filter(x => x.alive && x.hp / x.maxHp < .58).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];
+      if (hurt && dist(b, hurt) < E(520)) { castSkill(b, 'E', Math.atan2(hurt.y-b.y,hurt.x-b.x), Math.min(1,dist(b,hurt)/E(520))); return true; }
+    }
+  }
+  if (b.key === 'liuEn') {
+    const a = aimAt(b, p, .18);
+    if (ready('R') && b.liuFormUntil > time && b.liuFuriosoReady && d < E(560)) { castSkill(b, 'R', a); return true; }
+    if (ready('R') && b.liuFormUntil <= time && d < E(520) && (hpP < .58 || hpB < .48)) { castSkill(b, 'R', null); return true; }
+    if (ready('E') && d < E(500) && d > E(65)) { castSkill(b, 'E', a); return true; }
+    if (ready('W') && d < E(590) && d > E(90)) { castSkill(b, 'W', a); return true; }
+    if (ready('Q') && d < E(350)) { castSkill(b, 'Q', a); return true; }
+  }
+  if (b.key === 'naihwang') {
+    const a = aimAt(b, p, .12);
+    if (b.nhCombo) {
+      if (time >= b.nhCombo.nextAt && time <= b.nhCombo.expires) { castSkill(b, b.nhCombo.key, b.nhCombo.ang); return true; }
+      return false;
+    }
+    if (ready('R') && b.nhMag === 'tiger' && d < E(650)) { castSkill(b, 'R', a); return true; }
+    if (ready('E') && d < E(650)) { castSkill(b, 'E', a); return true; }
+    if (ready('W') && d < E(650)) { castSkill(b, 'W', a); return true; }
+    if (ready('Q') && d < E(650)) { castSkill(b, 'Q', a); return true; }
+  }
+  if (['purpleTear','indigoElder','callisto'].includes(b.key)) {
+    const a = aimAt(b, p, .18), range = b.key === 'indigoElder' ? 600 : b.key === 'purpleTear' ? 430 : 420;
+    if (ready('R') && d < E(range) && (hpP < .55 || hpB < .38 || alliesOf(b).filter(x=>x.alive&&dist(x,p)<E(360)).length>=2)) { castSkill(b, 'R', a, Math.min(1,d/E(range))); return true; }
+    if (ready('E') && d < E(260) && (hpB < .72 || b.key !== 'indigoElder')) { castSkill(b, 'E', a); return true; }
+    if (ready('W') && d < E(b.key === 'indigoElder' ? 600 : 420)) { castSkill(b, 'W', a); return true; }
+    if (ready('Q') && d < E(b.key === 'indigoElder' ? 520 : 350)) { castSkill(b, 'Q', a); return true; }
+  }
   return false;
 }
 // 파밍 중 스킬: 상대가 멀 때만 (로쟈 Q 중첩 쌓기, 이상 E로 미니언 여러 마리)
