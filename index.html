@@ -3973,7 +3973,7 @@ function castExtraSkill(c, key, ang, frac) {
   }
   const n = rk(c, key), cds = {Q:[7,6.5,6,5.5],W:[13,12,11,10],E:[15,14,13,12],R:[95,80,65]};
   const cd = cds[key][n] * hasteMul(c);
-  const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#9ab8a5',indigoElder:'#70d7d0',liuEn:'#ff8b4d',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
+  const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#9ab8a5',indigoElder:'#70d7d0',liuEn:'#85858f',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
   if (key === 'Q' || key === 'W') {
     const len = E(key === 'Q' ? (ranged ? 520 : 350) : (ranged ? 600 : 420));
     const wid = E(key === 'Q' ? 66 : 90);
@@ -13419,7 +13419,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'liuEn' ? '#292a30' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -13435,6 +13435,7 @@ function drawChamp(g, c) {
   if (c.flashT > 0) { g.fillStyle = `rgba(255,255,255,${Math.min(1, c.flashT / .1) * .85})`; g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.fill(); }
   if (!window.__mvpDraw) { g.strokeStyle = c.flashT > 0 ? '#ffffff' : sideCol(c); g.lineWidth = E(5); g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.stroke(); }
   if (c.key === 'roland') drawRolandBody(g,c);
+  if (c.key === 'liuEn') drawLiuEnBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
   if (c.key === 'ryoshu') drawRyoshuBody(g, c);
   if (c.key === 'faust') drawFaustBody(g, c);
@@ -13585,6 +13586,53 @@ function drawRolandBody(g,c){
  g.strokeStyle='rgba(190,198,214,.8)';g.lineWidth=E(1);g.beginPath();g.moveTo(-r*.15,-E(1));g.lineTo(r*.24,-E(1));g.stroke();g.restore();}
  if(mask){g.save();g.globalAlpha=.28+.16*Math.sin(time*8);g.strokeStyle='#aeb8ce';g.lineWidth=E(2);g.beginPath();g.arc(c.x,c.y,r*1.95,0,7);g.stroke();g.restore();}
 }
+
+// 뤼엔: 검은 정장·흰 장갑·얼굴 대부분을 가리는 대형 백색 가면·먹빛 회색 무기 9종
+function drawLiuEnBody(g,c){
+ const a=c.face||0,r=c.r,ink='#24252b',edge='#666873',metal='#555761',shine='#aeb0b8';
+ g.save();g.translate(c.x,c.y);g.rotate(a);
+ // 길게 떨어지는 검은 정장 코트
+ g.fillStyle='rgba(0,0,0,.42)';g.beginPath();g.ellipse(0,r*.12,r*1.02,r*.78,0,0,7);g.fill();
+ g.fillStyle='#111216';g.strokeStyle='#44464f';g.lineWidth=E(2);
+ g.beginPath();g.moveTo(-r*.72,-r*.55);g.lineTo(-r*.34,-r*.88);g.lineTo(r*.35,-r*.86);g.lineTo(r*.82,-r*.48);g.lineTo(r*.64,r*.82);g.lineTo(r*.22,r*.98);g.lineTo(-r*.16,r*.72);g.lineTo(-r*.62,r*.9);g.closePath();g.fill();g.stroke();
+ // 셔츠와 넥타이, 정장 라펠
+ g.fillStyle='#d7d8dc';g.beginPath();g.moveTo(-r*.2,-r*.65);g.lineTo(r*.18,-r*.65);g.lineTo(r*.1,r*.18);g.lineTo(-r*.08,r*.18);g.closePath();g.fill();
+ g.fillStyle='#303139';g.beginPath();g.moveTo(-r*.24,-r*.62);g.lineTo(-r*.02,-r*.43);g.lineTo(-r*.12,r*.38);g.lineTo(-r*.34,-r*.22);g.closePath();g.fill();
+ g.beginPath();g.moveTo(r*.24,-r*.62);g.lineTo(r*.02,-r*.43);g.lineTo(r*.13,r*.38);g.lineTo(r*.35,-r*.22);g.closePath();g.fill();
+ // 어깨와 소매, 새하얀 장갑
+ g.fillStyle='#090a0e';g.beginPath();g.ellipse(-r*.48,-r*.12,r*.31,r*.48,-.25,0,7);g.ellipse(r*.49,-r*.12,r*.31,r*.48,.25,0,7);g.fill();
+ g.strokeStyle='#dfe0e5';g.fillStyle='#f0f0f2';g.lineWidth=E(1.2);
+ for(const side of [-1,1]){
+   g.beginPath();g.ellipse(side*r*.72,r*.38,r*.19,r*.15,side*.2,0,7);g.fill();g.stroke();
+   for(let k=0;k<4;k++){g.beginPath();g.moveTo(side*r*.72+side*(k-1.5)*r*.055,r*.43);g.lineTo(side*r*.72+side*(k-1.5)*r*.065,r*.62);g.stroke();}
+ }
+ // 거대한 흰 가면: 머리와 눈 부분을 압도적으로 덮는 크기
+ g.fillStyle='#ececf0';g.strokeStyle='#aeb0b8';g.lineWidth=E(2);
+ g.beginPath();g.moveTo(-r*.48,-r*.7);g.lineTo(-r*.26,-r*1.02);g.lineTo(r*.42,-r*1.08);g.lineTo(r*.88,-r*.72);g.lineTo(r*.96,-r*.12);g.lineTo(r*.68,r*.72);g.lineTo(r*.18,r*.9);g.lineTo(-r*.3,r*.58);g.lineTo(-r*.52,r*.02);g.closePath();g.fill();g.stroke();
+ // 가면의 각진 음영과 눈을 가리는 검은 홈
+ g.fillStyle='#c5c7ce';g.beginPath();g.moveTo(-r*.26,-r*1.02);g.lineTo(r*.05,-r*.68);g.lineTo(-r*.12,r*.48);g.lineTo(-r*.3,r*.58);g.lineTo(-r*.52,r*.02);g.closePath();g.fill();
+ g.fillStyle='#777b86';g.beginPath();g.moveTo(r*.42,-r*1.08);g.lineTo(r*.88,-r*.72);g.lineTo(r*.96,-r*.12);g.lineTo(r*.68,r*.72);g.lineTo(r*.42,r*.34);g.lineTo(r*.56,-r*.3);g.closePath();g.fill();
+ g.strokeStyle='#343740';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.36,-r*.28);g.lineTo(r*.74,-r*.28);g.stroke();
+ // 먹물에 잠긴 아홉 무기: 손도끼, 망치, 채찍, 스틸레토, 레이피어, 랜스, 바스타드 소드, 대검, 낫
+ for(let i=0;i<9;i++){
+   const an=a+Math.PI*2*i/9-time*.11,rr=r*1.92,x=c.x+Math.cos(an)*rr,y=c.y+Math.sin(an)*rr;
+   g.save();g.translate(x,y);g.rotate(an);g.globalAlpha=.9;g.strokeStyle=ink;g.fillStyle=metal;g.lineWidth=E(3.4);g.lineCap='round';g.lineJoin='round';
+   if(i===0){g.beginPath();g.moveTo(-r*.34,0);g.lineTo(r*.2,0);g.lineTo(r*.28,-r*.42);g.quadraticCurveTo(r*.7,-r*.36,r*.55,r*.12);g.lineTo(r*.2,r*.25);g.closePath();g.fill();g.stroke();}
+   else if(i===1){g.beginPath();g.moveTo(-r*.38,0);g.lineTo(r*.24,0);g.stroke();g.fillRect(r*.12,-r*.32,r*.45,r*.64);g.strokeRect(r*.12,-r*.32,r*.45,r*.64);}
+   else if(i===2){g.beginPath();for(let k=0;k<7;k++){const xx=-r*.42+k*r*.14,yy=Math.sin(k*1.2)*r*.24; if(!k)g.moveTo(xx,yy);else g.lineTo(xx,yy);}g.stroke();}
+   else if(i===3){g.beginPath();g.moveTo(-r*.42,0);g.lineTo(r*.5,0);g.lineTo(r*.18,-r*.1);g.moveTo(r*.5,0);g.lineTo(r*.18,r*.1);g.stroke();}
+   else if(i===4){g.beginPath();g.moveTo(-r*.42,0);g.lineTo(r*.52,0);g.moveTo(-r*.12,-r*.16);g.lineTo(-r*.12,r*.16);g.stroke();}
+   else if(i===5){g.beginPath();g.moveTo(-r*.48,0);g.lineTo(r*.62,0);g.lineTo(r*.38,-r*.12);g.moveTo(r*.62,0);g.lineTo(r*.38,r*.12);g.stroke();}
+   else if(i===6){g.beginPath();g.moveTo(-r*.4,0);g.lineTo(r*.45,0);g.lineTo(r*.18,-r*.18);g.lineTo(r*.45,0);g.lineTo(r*.18,r*.18);g.closePath();g.fill();g.stroke();}
+   else if(i===7){g.beginPath();g.moveTo(-r*.45,0);g.lineTo(r*.5,0);g.lineTo(r*.72,-r*.18);g.lineTo(r*.5,0);g.lineTo(r*.72,r*.18);g.closePath();g.fill();g.stroke();}
+   else{g.beginPath();g.moveTo(-r*.4,0);g.lineTo(r*.3,0);g.stroke();g.beginPath();g.arc(r*.28,-r*.08,r*.34,-1.4,1.4);g.stroke();}
+   g.strokeStyle='rgba(205,207,216,.75)';g.lineWidth=E(1);g.beginPath();g.moveTo(-r*.16,-E(1));g.lineTo(r*.22,-E(1));g.stroke();g.restore();
+ }
+ // 가면 주위의 먹물 잔상
+ g.save();g.globalAlpha=.24+.12*Math.sin(time*6);g.strokeStyle='#92949e';g.lineWidth=E(2);g.setLineDash([E(5),E(7)]);g.beginPath();g.arc(c.x,c.y,r*2.18,time*.2,time*.2+Math.PI*1.6);g.stroke();g.setLineDash([]);g.restore();
+ g.restore();
+}
+
 function drawCCTag(g, c, cc, by) {
   const label = `${cc.name} ${cc.left < 9.95 ? cc.left.toFixed(1) : Math.ceil(cc.left)}`;
   g.font = `900 ${E(23)}px system-ui,sans-serif`; g.textAlign = 'center'; g.textBaseline = 'bottom';
