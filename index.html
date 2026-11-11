@@ -18455,7 +18455,7 @@ function drawBlueReverbFx(g,f,k){
  if(f.type==='brNotesQ'||f.type==='brNotesE'||f.type==='brNotesR'){g.save();g.translate(f.x,f.y);g.rotate(f.ang||0);g.globalAlpha=p;const count=f.type==='brNotesR'?22:f.type==='brNotesQ'?7:9;for(let i=0;i<count;i++){const x=i/(count-1||1)*(f.len||E(500)),y=Math.sin(i*2.4)*E(f.type==='brNotesR'?65:24);g.save();g.translate(x,y);g.rotate(Math.sin(i*1.7)*.35);g.font=`900 ${Math.round(E(f.type==='brNotesR'?25:22))}px serif`;g.fillStyle=i%2?'#d7efff':'#58baff';g.shadowColor='#39aaff';g.shadowBlur=E(14);g.fillText(i%3===0?'♫':i%3===1?'♪':'♬',0,0);g.restore();}g.restore();return;}
  if(f.type==='brWard'){g.save();g.globalAlpha=p*.85;g.strokeStyle='#78bdff';g.fillStyle='rgba(80,155,255,.13)';g.shadowColor='#4aaaff';g.shadowBlur=E(18);g.lineWidth=E(4);g.beginPath();g.arc(f.x,f.y,R*(.8+e*.2),0,Math.PI*2);g.fill();g.stroke();g.setLineDash([E(8),E(6)]);g.beginPath();g.arc(f.x,f.y,R*(.65+e*.25),time*2,time*2+Math.PI*1.8);g.stroke();g.restore();return;}
  if(f.type==='brRoot'||f.type==='brCharm'||f.type==='brAlly'){g.save();g.globalAlpha=p;g.strokeStyle='#8bd1ff';g.shadowColor='#4aaaff';g.shadowBlur=E(16);g.lineWidth=E(4);g.beginPath();g.arc(f.x,f.y,R*(.8+e*.4),0,Math.PI*2);g.stroke();g.font=`900 ${Math.round(E(22))}px serif`;g.fillStyle='#d9f2ff';g.textAlign='center';g.fillText(f.type==='brRoot'?'♬':f.type==='brCharm'?'♫':'♪',f.x,f.y-R*.55);g.restore();return;}
- const p=1-k,e=easeOut(k),R=f.r||E(55);g.save();g.translate(f.x,f.y);g.rotate(f.ang||0);g.globalAlpha=p;
+ g.save();g.translate(f.x,f.y);g.rotate(f.ang||0);g.globalAlpha=p;
  g.lineCap='round';g.lineJoin='round';
  // 낫의 넓은 휘두르기 궤적: 은빛 본체와 푸른 잔광
  g.strokeStyle='#4d9ce8';g.shadowColor='#65baff';g.shadowBlur=E(15);g.lineWidth=E(13)*(1-k*.65);
