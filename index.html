@@ -21747,16 +21747,26 @@ function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoCh
 
 $('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
-$('mSpec').addEventListener('click', () => {
-  if(aiDraftTimer)clearTimeout(aiDraftTimer);
-  aiDraftState=null;aiDraftBans=[];aiDraftLineup=null;
-  spectating=false;specSpeed=1;mpLineup=null;
-  chosenRole=ROLES[Math.floor(Math.random()*ROLES.length)];
-  chosenChamp=pickForRoles([chosenRole],[])[0]||'gregor';
-  $('menu').hidden=true;$('select').hidden=true;$('spec').hidden=true;
-  document.body.classList.remove('spec');
-  aiDraftStart(true);
-});
+$('mSpec').onclick = () => {
+  try {
+    specStart();
+    // 일부 모바일 브라우저에서 hidden 상태가 남는 경우를 막고 밴픽 레이어를 명시적으로 표시
+    const draft = $('aiDraft');
+    draft.hidden = false;
+    draft.style.display = 'flex';
+    draft.style.visibility = 'visible';
+    draft.style.zIndex = '120';
+  } catch (err) {
+    console.error('[spectator draft start]', err);
+    const draft = $('aiDraft');
+    draft.hidden = false;
+    draft.style.display = 'flex';
+    draft.style.visibility = 'visible';
+    $('adPhase').textContent = 'DRAFT ERROR';
+    $('adStatus').textContent = '관전 밴픽을 시작하지 못했습니다';
+    $('adSub').textContent = String(err && err.message || err);
+  }
+};
 
 // ═════════════ 관전 모드: AI 10명만으로 진행, 버튼으로 시점 전환 (시야 = 보고 있는 챔피언의 팀) ═════════════
 let specT = 0, specCards = [];
@@ -21769,7 +21779,10 @@ function specStart() {
   spectating=true;specSpeed=1;mpLineup=null;
   chosenRole=ROLES[Math.floor(Math.random()*ROLES.length)];
   chosenChamp=pickForRoles([chosenRole],[])[0]||'gregor';
-  openMenu(false);$('spec').hidden=true;document.body.classList.remove('spec');
+  openMenu(false);$('select').hidden=true;$('spec').hidden=true;document.body.classList.remove('spec');
+  $('aiDraft').hidden=false;
+  $('aiDraft').style.display='flex';
+  $('aiDraft').style.visibility='visible';
   aiDraftStart(true);
 }
 function specEnd() {
