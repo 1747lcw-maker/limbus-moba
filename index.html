@@ -21554,7 +21554,7 @@ function cxShowSkill(key, fresh) {
   if (key && key[0] === 'C') return cxShowCombo(+key.slice(1) || 0, fresh);
   cxKey = key;
   const isW = cxChamp === 'xichun' && key[0] === 'w', bk = isW ? key.slice(1) : key;   // 가시춘과 웨이: w로 시작하면 웨이의 스킬
-  const sk = ((isW ? CODEX_SK.wei : CODEX_SK[cxChamp]) || {})[bk] || {name:'', text:() => '설명 준비 중'};
+  const sk = ((isW ? CODEX_SK.wei : CODEX_SK[cxChamp]) || {})[bk] || ((EXTRA_CODEX[cxChamp] || {})[bk]) || {name:'', text:() => '설명 준비 중'};
   for (const b of document.querySelectorAll('.cx-tabs [data-sk]')) b.setAttribute('aria-selected', b.dataset.sk === key);
   const meta = [];
   if (sk.cd !== undefined) meta.push(`<span>재사용 대기시간 <b>${CX_H.r(sk.cd, '초')}</b></span>`);
