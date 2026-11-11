@@ -3991,7 +3991,7 @@ const CAST = {Q:0.25, W:0.35, R:K.R.cast};
 const RECALL_TIME = 8;
 
 const hasteMul = c => 100 / (100 + (c.haste || 0) + (hasBuff(c, 'blue') ? 20 : 0));
-const AI_AIM = {lat:90, fr:.14};                              // AI 조준 오차: 움직이는 대상이면 옆으로 ±90 정도 흔들림 (사람처럼)
+const AI_AIM = {lat:48, fr:.075};                            // 상위 티어 AI: 이동 예측은 정확하지만 완벽한 조준은 아님
 const aiGauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 2;
 function aiAimNoise(c, key, ang, frac) {                     // AI가 쏘는 논타깃 스킬에 손떨림 · 예측 실수
   if (typeof ang !== 'number' || !Number.isFinite(ang) || !['Q', 'W', 'E', 'R'].includes(key)) return [ang, frac];
@@ -11969,7 +11969,7 @@ const AI_BUILD = {
   yisang: ['s_ring', 'galaxy', 'fragment', 'dacapo', 'star'],
 };
 const AI_SKILL_ORDER = {dongrang:['Q', 'E', 'W'], ran:['Q', 'E', 'W'], effie:['Q', 'W', 'E'], saude:['Q', 'W', 'E'], xichun:['Q', 'E', 'W'], wei:['Q', 'E', 'W'], bongdad:['Q', 'W', 'E'], ricardo:['Q', 'E', 'W'], gubo:['Q', 'E', 'W'], dongbaek:['Q', 'W', 'E'], thoma:['Q', 'W', 'E'], guido:['Q', 'W', 'E'], marten:['Q', 'E', 'W'], alyssa:['Q', 'W', 'E'], hohenheim:['Q', 'W', 'E'], gregor:['Q', 'W', 'E'], rodion:['Q', 'E', 'W'], yisang:['W', 'Q', 'E'], ishmael:['Q', 'E', 'W'], ryoshu:['Q', 'E', 'W'], faust:['Q', 'E', 'W'], donq:['Q', 'W', 'E'], outis:['Q', 'W', 'E'], honglu:['Q', 'W', 'E'], sinclair:['Q', 'W', 'E'], heathcliff:['Q', 'E', 'W'], meursault:['Q', 'E', 'W'], yuri:['E', 'W', 'Q'], kromer:['Q', 'E', 'W'], vergil:['Q', 'W', 'E'], charon:['Q', 'E', 'W'], roland:['Q','W','E'], blueReverb:['Q','W','E'], purpleTear:['Q','E','W'], vespa:['Q','W','E'], naihwang:['Q','W','E'], gachiu:['W','Q','E'], indigoElder:['Q','W','E'], liuEn:['Q','W','E'], callisto:['Q','E','W']};
-const AI = {react:[.14, .3], dodgeReact:[.1, .2], dodgeChance:.7, engage:600, lastHit:1.15};   // 반응 0.14~0.3초, 스킬 피하기는 보고 0.1~0.2초 뒤 (선딜이 짧으면 못 피함)
+const AI = {react:[.1, .2], dodgeReact:[.09, .16], dodgeChance:.84, engage:650, lastHit:1.15}; // 숙련 AI: 빠르게 판단하고 회피하되 모든 공격을 피하지는 않음
 
 // ── 포탑 철거: 맞아 줄 챔피언(탱커)을 앞세워 포탑 어그로를 받게 하고 나머지가 같이 침 ──
 const towerDps = c => c.ad * c.as * (1 + critChance(c) * .6) * 100 / 150;                  // 포탑 방어력 50 반영
@@ -12605,7 +12605,9 @@ const keySkillsDown = e => ['Q', 'W', 'E'].filter(k => e.rank[k] > 0 && e.cd[k] 
 
 // 사람처럼 피하기: 선딜을 '보고' 반응(0.1~0.2초)한 뒤, 남은 선딜 안에 빠져나갈 수 있을 때만. 가끔 반대쪽으로 잘못 피함
 function aiDodge(b) {
-  const q = enemiesOf(b).find(e => e.alive && e.cast && e.cast.len && inLine(e, e.cast.ang, e.cast.len, e.cast.wid, b));
+  const threats = enemiesOf(b).filter(e => e.alive && e.cast && e.cast.len && inLine(e, e.cast.ang, e.cast.len, e.cast.wid, b))
+    .sort((a, z) => (a.cast.dur - a.cast.t) - (z.cast.dur - z.cast.t));
+  const q = threats[0];
   if (!q) return null;
   const cs = q.cast; cs.dodge = cs.dodge || {};
   const id = b.team + b.role;
@@ -12613,12 +12615,12 @@ function aiDodge(b) {
   if (d === undefined) {
     const react = AI.dodgeReact[0] + Math.random() * (AI.dodgeReact[1] - AI.dodgeReact[0]);
     const off = -(b.x - q.x) * Math.sin(cs.ang) + (b.y - q.y) * Math.cos(cs.ang);
-    const wrong = Math.random() < .2, side = (off >= 0 ? 1 : -1) * (wrong ? -1 : 1);
-    const needDist = cs.wid / 2 + b.r + (wrong ? Math.abs(off) : -Math.abs(off));
-    const needT = needDist / (E(b.st.speed) * (speedMul(b) || .01));
-    const busy = b.target && b.atkT > 0 && edge(b, b.target) < E(b.st.range) + E(10);          // 막타·평타에 정신 팔림
-    const chance = AI.dodgeChance * (busy ? .55 : 1) * (dist(b, q) > E(300) ? 1.15 : .8);
-    d = cs.dodge[id] = {go:Math.random() < chance && (cs.dur - cs.t) > react + needT * .5, at:cs.t + react, side, skew:(Math.random() - .5) * .5};
+    const side = off >= 0 ? 1 : -1;
+    const needDist = Math.max(E(10), cs.wid / 2 + b.r + E(18) - Math.abs(off));
+    const needT = needDist / Math.max(1, E(b.st.speed) * (speedMul(b) || .01));
+    const busy = b.target && b.atkT > 0 && edge(b, b.target) < E(b.st.range) + E(10);
+    const chance = AI.dodgeChance * (busy ? .88 : 1) * (dist(b, q) > E(300) ? 1 : .96);
+    d = cs.dodge[id] = {go:Math.random() < chance && (cs.dur - cs.t) > react + needT * .55, at:cs.t + react, side, skew:(Math.random() - .5) * .1};
   }
   if (!d.go || cs.t < d.at) return null;
   const a = cs.ang + d.side * Math.PI / 2 + d.skew;
@@ -12627,7 +12629,7 @@ function aiDodge(b) {
 
 // 상대 고르기: 한 번 정하면 쉽게 안 바꿈 (훨씬 좋은 대상이 있을 때만)
 function focusEnemy(b) {
-  const score = c => edge(b, c) + c.hp / c.maxHp * E(380) + (c.hidden ? E(400) : 0);
+  const score = c => edge(b, c) + c.hp / c.maxHp * E(310) + (c.hidden ? E(500) : 0) - (c.hp <= burstEst(b, c) * .9 ? E(220) : 0) - (enemiesOf(b).filter(e => e.alive && dist(e, c) < E(360)).length <= 1 ? E(35) : 0);
   let best = null, bs = Infinity;
   for (const c of enemiesOf(b)) {
     if (!c.alive || edge(b, c) > E(1100)) continue;
@@ -12811,7 +12813,7 @@ function aiCall(b, hpB) {
 }
 // 가만히 서 있지 않고 옆으로 조금씩 움직임 (사람 손맛)
 function aiStrafe(b, p, amt) {
-  if (!b.strafeT || time > b.strafeT) { b.strafeDir = -(b.strafeDir || 1); b.strafeT = time + .35 + Math.random() * .55; }
+  if (!b.strafeT || time > b.strafeT) { b.strafeDir = -(b.strafeDir || 1); b.strafeT = time + .55 + Math.random() * .65; }
   const a = Math.atan2(p.y - b.y, p.x - b.x) + b.strafeDir * Math.PI / 2;
   return {x:Math.cos(a) * amt, y:Math.sin(a) * amt};
 }
@@ -12955,12 +12957,12 @@ function updateBot(b, dt) {
       if (p.alive && pd < E(560) && !ev.inDanger) {
         b.target = p;
         if (b.thinkT <= 0) { b.thinkT = react(); if (aiCombo(b, p)) { moveChamp(b, 0, 0, dt); return; } }
-        if (pd > E(b.st.range)) go(p.x, p.y); else if (b.atkT <= 0) basicAttack(b, p); else { const s = aiStrafe(b, p, .3); dx = s.x; dy = s.y; }
+        if (pd > E(b.st.range)) go(p.x, p.y); else if (b.atkT <= 0) basicAttack(b, p); else { const s = aiStrafe(b, p, .42); dx = s.x; dy = s.y; }
       } else if (ob.unit) {
         const t = ob.unit; b.target = t;
         if (b.thinkT <= 0) { b.thinkT = .5; if (aiJungleSkill(b, t)) { moveChamp(b, 0, 0, dt); return; } }
         if (edge(b, t) > E(b.st.range)) go(t.x, t.y); else if (b.atkT <= 0) basicAttack(b, t);
-      } else if (go(ob.x, ob.y) < E(40) && p.alive && pd < E(900)) { const s = aiStrafe(b, p, .25); dx = s.x; dy = s.y; }
+      } else if (go(ob.x, ob.y) < E(40) && p.alive && pd < E(900)) { const s = aiStrafe(b, p, .38); dx = s.x; dy = s.y; }
       moveChamp(b, dx, dy, dt); return;
     }
   }
@@ -13032,7 +13034,7 @@ function updateBot(b, dt) {
         if (m && !(b.featherN > 0 && pd <= E(b.st.range))) { go(m.x, m.y); moveChamp(b, dx, dy, dt); return; }
       }
       if (pd > E(b.st.range)) go(p.x, p.y);
-      else { if (b.atkT <= 0) basicAttack(b, p); else if (b.st.ranged && pd < E(b.st.range) * .7) backOff(); else { const s = aiStrafe(b, p, .35); dx = s.x; dy = s.y; } }   // 평타 사이 살짝 움직임 (원거리는 거리 유지)
+      else { if (b.atkT <= 0) basicAttack(b, p); else if (b.st.ranged && pd < E(b.st.range) * .7) backOff(); else { const s = aiStrafe(b, p, .48); dx = s.x; dy = s.y; } }   // 평타 사이 살짝 움직임 (원거리는 거리 유지)
       if (!ev.canKill && dangerFor(b, {x:b.x + dx * E(40), y:b.y + dy * E(40)})) dx = dy = 0;
       moveChamp(b, dx, dy, dt); return;
     }
@@ -13074,7 +13076,7 @@ function updateBot(b, dt) {
       if (p.alive && pd <= E(b.st.range) + E(30) && !nearTurret(p.team, b) && !dangerFor(b, p) && hpB > .35) {
         b.target = p; if (b.thinkT <= 0) { b.thinkT = react(); if (aiPoke(b, p)) { moveChamp(b, 0, 0, dt); return; } }
         if (b.atkT <= 0) basicAttack(b, p);
-      } else if (go(fx, fy) < E(45)) { dx = dy = 0; if (p.alive && pd < E(900)) { const s = aiStrafe(b, p, .22); dx = s.x; dy = s.y; } }
+      } else if (go(fx, fy) < E(45)) { dx = dy = 0; if (p.alive && pd < E(900)) { const s = aiStrafe(b, p, .34); dx = s.x; dy = s.y; } }
       if (dangerFor(b, {x:b.x + dx * E(40), y:b.y + dy * E(40)})) dx = dy = 0;
       moveChamp(b, dx, dy, dt); return;
     }
@@ -13125,14 +13127,14 @@ function updateBot(b, dt) {
     const d = edge(b, tgt);
     if (d > E(b.st.range)) go(tgt.x, tgt.y);
     else if (b.atkT <= 0) basicAttack(b, tgt);
-    else if (p.alive && pd < E(900)) { const s = aiStrafe(b, p, .3); dx = s.x; dy = s.y; }
+    else if (p.alive && pd < E(900)) { const s = aiStrafe(b, p, .42); dx = s.x; dy = s.y; }
   } else if (p.alive && pd < tr + E(40)) {
     backOff();                                                   // 위협 범위 밖으로 간격 유지
   } else if (b.wp < b.path.length) {
     const [wx, wy] = b.path[b.wp];
     if (go(wx, wy) < E(40)) b.wp++;
     if (dangerFor(b, {x:b.x + dx * E(40), y:b.y + dy * E(40)})) dx = dy = 0;
-    if (!dx && !dy && p.alive && pd < E(900)) { const s = aiStrafe(b, p, .3); dx = s.x; dy = s.y; }
+    if (!dx && !dy && p.alive && pd < E(900)) { const s = aiStrafe(b, p, .42); dx = s.x; dy = s.y; }
   }
   if (time < (b.backoff || 0) && p.alive && pd < tr + E(30) && !(tgt && killableMinion(b, tgt) && edge(b, tgt) <= E(b.st.range))) backOff();
   if ((dx || dy) && !(tgt && tgt.structure && safeStruct(tgt)) && dangerFor(b, {x:b.x + dx * E(45), y:b.y + dy * E(45)}) && !dangerFor(b, b)) {   // 포탑 경계에서 들락날락 금지
@@ -21367,7 +21369,7 @@ function duelBot(b, dt) {                                                       
   if (b.stance === 'retreat') { const a = Math.atan2(b.y - p.y, b.x - p.x) + Math.sin(time * 1.3) * .7; dx = Math.cos(a); dy = Math.sin(a); if (pd < R && b.atkT <= 0) basicAttack(b, p); }
   else if (pd > R) { const q = navStep(b, p.x, p.y), d = Math.hypot(q.x - b.x, q.y - b.y) || 1; dx = (q.x - b.x) / d; dy = (q.y - b.y) / d; }
   else if (b.atkT <= 0) basicAttack(b, p);
-  else { const s = aiStrafe(b, p, .35); dx = s.x; dy = s.y; }
+  else { const s = aiStrafe(b, p, .48); dx = s.x; dy = s.y; }
   const cx = ARENA.x + ARENA.w / 2, cy = ARENA.y + ARENA.h / 2, m = 90;              // 벽에 붙지 않게 안쪽으로
   if (b.x < ARENA.x + m || b.x > ARENA.x + ARENA.w - m || b.y < ARENA.y + m || b.y > ARENA.y + ARENA.h - m) { const a = Math.atan2(cy - b.y, cx - b.x); dx = dx * .4 + Math.cos(a) * .8; dy = dy * .4 + Math.sin(a) * .8; }
   moveChamp(b, dx, dy, dt);
