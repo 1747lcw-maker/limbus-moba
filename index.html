@@ -4043,7 +4043,7 @@ function castExtraSkill(c,key,ang,frac){
   }
 }
 function castSkillCore(c, key, ang, frac = null) {
-  const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso);   // 이스마엘 재사용
+  const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso) || (c.key === 'liuEn' && key === 'R' && c.liuFormUntil > time && c.liuFuriosoReady && !c.liuFurioso);   // 이스마엘 재사용
   const tmFree = c.key === 'thoma' && key === 'R' && !tmBusy(c);   // 토마 전화위복: 군중 제어 중에도 사용
   if (!c.alive || !c.rank[key] || (c.stunT > 0 && !tmFree) || (c.cast && !tmFree) || (c.cd[key] > 0 && !recast) || gameOver) return;
   if (!tmFree && (c.tauntT > time || c.fearT > time)) return;          // 도발·공포 중엔 스킬 불가
@@ -13416,6 +13416,13 @@ function drawMinion(g, m) {
   if (m.team !== player.team) { const hx = m.x - E(20) + E(40) * csExecHp(m) / m.maxHp; g.fillStyle = m.hp <= csExecHp(m) ? '#ffe29a' : 'rgba(255,255,255,.75)'; g.fillRect(hx - E(.8), hy - E(1.5), E(1.6), E(9)); }   // 막타 보조 기준선
 }
 
+function drawLiuOrderBadge(g,c){
+ const x=c.x,y=c.y-c.r-E(30),r=E(11),pulse=.9+.1*Math.sin(time*7);g.save();g.translate(x,y);g.scale(pulse,pulse);g.shadowColor='#8bdcff';g.shadowBlur=E(14);
+ for(let i=0;i<6;i++){g.save();g.rotate(i*Math.PI/3);g.fillStyle=i%2?'#bdeaff':'#f0fbff';g.beginPath();g.ellipse(0,-r*.48,r*.32,r*.6,0,0,7);g.fill();g.restore();}
+ g.shadowBlur=0;g.fillStyle='#4ba6d4';g.beginPath();g.arc(0,0,r*.2,0,7);g.fill();g.strokeStyle='#e3f7ff';g.lineWidth=E(1.5);g.beginPath();g.arc(0,0,r*1.35,0,7);g.stroke();
+ g.fillStyle='#eaf9ff';g.font=`900 ${E(11)}px system-ui`;g.textAlign='center';g.fillText('지령 대상',0,-r*1.65);g.restore();
+}
+
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
   const isP = c === player;
@@ -13535,6 +13542,8 @@ function drawChamp(g, c) {
   g.restore();
   if (window.__mvpDraw) return;                                       // MVP 연출: 이름·체력바 없이 몸만
   drawStatus(g, c);
+  if(c.liuOrderBy&&c.liuOrderBy.alive&&c.liuOrderBy.team!==c.team)drawLiuOrderBadge(g,c);
+  if(c.silenceUntil>time){g.save();g.strokeStyle='rgba(185,205,230,.95)';g.lineWidth=E(3);g.setLineDash([E(4),E(4)]);g.beginPath();g.arc(c.x,c.y,c.r+E(17),0,7);g.stroke();g.setLineDash([]);g.restore();}
   const y = champHpBar(g, c, E(90), E(10), isP ? '#5bd46a' : c.team === colTeam() ? '#4aa3ff' : '#ff5a5f');
   const bx = c.x - E(45) - E(20), bs = E(18);      // 레벨 뱃지
   g.fillStyle = '#0b0f14'; g.fillRect(bx, y - E(4), bs, bs);
