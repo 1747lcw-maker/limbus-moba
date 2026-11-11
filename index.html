@@ -4108,7 +4108,7 @@ function castExtraSkill(c,key,ang,frac){
   }
   const n = rk(c, key), cds = {Q:[7,6.5,6,5.5],W:[13,12,11,10],E:[15,14,13,12],R:[95,80,65]};
   const cd = cds[key][n] * hasteMul(c);
-  const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#9ab8a5',indigoElder:'#70d7d0',liuEn:'#85858f',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
+  const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#b52c36',indigoElder:'#70d7d0',liuEn:'#85858f',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
   if (key === 'Q' || key === 'W') {
     const len = E(key === 'Q' ? (ranged ? 520 : 350) : (ranged ? 600 : 420));
     const wid = E(key === 'Q' ? 66 : 90);
