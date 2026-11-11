@@ -2344,8 +2344,14 @@ const AI_DRAFT_ORDER = [
 function aiDraftName(key){return STATS[key]?.name || key;}
 function aiDraftPortrait(key){return CHAMP_COL[key] || '#46515f';}
 function aiDraftSfx(kind){
-  const ctx=SFX.ctx;if(!SFX.on||!ctx||!SFX.out||document.hidden)return;
-  if(ctx.state==='suspended'){ctx.resume().catch(()=>{});return;}
+  const ctx=SFX.ctx;
+  if(!SFX.on||!ctx||!SFX.out||document.hidden)return;
+  // 페이지 로드 직후 만들어진 AudioContext는 브라우저 정책상 일시 정지일 수 있다.
+  // resume 완료 후 같은 효과음을 다시 실행해 첫 밴픽 효과음이 유실되지 않게 한다.
+  if(ctx.state!=='running'){
+    if(ctx.state==='suspended')ctx.resume().then(()=>{if(SFX.on&&!document.hidden&&SFX.ctx===ctx&&ctx.state==='running')aiDraftSfx(kind);}).catch(()=>{});
+    return;
+  }
   const now=ctx.currentTime;
   const tone=(freq,dur,vol,wave='sine',endFreq=freq,delay=0)=>{
     const o=ctx.createOscillator(),g=ctx.createGain();o.type=wave;o.frequency.setValueAtTime(freq,now+delay);
@@ -2354,26 +2360,15 @@ function aiDraftSfx(kind){
     g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(SFX.out);o.start(now+delay);o.stop(now+delay+dur+.025);
   };
   if(kind==='ban'){
-    tone(155,.34,.22,'triangle',62);
-    tone(920,.19,.12,'square',280,.012);
-    tone(2450,.09,.055,'sawtooth',620,.018);
+    tone(155,.34,.22,'triangle',62);tone(920,.19,.12,'square',280,.012);tone(2450,.09,.055,'sawtooth',620,.018);
   }else if(kind==='pick'){
-    tone(523,.38,.13,'sine',784);
-    tone(659,.42,.11,'triangle',988,.055);
-    tone(1047,.34,.075,'sine',1318,.11);
+    tone(523,.38,.13,'sine',784);tone(659,.42,.11,'triangle',988,.055);tone(1047,.34,.075,'sine',1318,.11);
   }else if(kind==='turn'){
-    tone(660,.12,.075,'sine',660);
-    tone(880,.16,.085,'sine',880,.105);
+    tone(660,.12,.075,'sine',660);tone(880,.16,.085,'sine',880,.105);
   }else if(kind==='start'){
-    tone(196,.65,.13,'triangle',392);
-    tone(392,.62,.12,'sine',587,.12);
-    tone(587,.7,.1,'sine',784,.24);
+    tone(196,.65,.13,'triangle',392);tone(392,.62,.12,'sine',587,.12);tone(587,.7,.1,'sine',784,.24);
   }else if(kind==='ready'){
-    tone(392,.75,.14,'triangle',392);
-    tone(494,.8,.14,'sine',494,.08);
-    tone(587,.85,.14,'sine',587,.16);
-    tone(784,1,.16,'sine',784,.25);
-    tone(988,1.1,.13,'sine',988,.38);
+    tone(392,.75,.14,'triangle',392);tone(494,.8,.14,'sine',494,.08);tone(587,.85,.14,'sine',587,.16);tone(784,1,.16,'sine',784,.25);tone(988,1.1,.13,'sine',988,.38);
   }
 }
 function aiDraftRender(){
