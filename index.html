@@ -14019,19 +14019,22 @@ function drawNaihwangBody(g,c){
  // 손잡이와 가드
  g.strokeStyle=black;g.lineWidth=E(6);g.beginPath();g.moveTo(-r*.42,0);g.lineTo(r*.12,0);g.stroke();
  g.strokeStyle=brass;g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.22,-r*.12);g.lineTo(-r*.22,r*.12);g.stroke();
- // 넓고 묵직한 칼날
- g.fillStyle='#737b84';g.strokeStyle='#dce0e4';g.lineWidth=E(1.5);
- g.beginPath();g.moveTo(r*.12,-r*.18);g.lineTo(r*2.45,-r*.12);g.lineTo(r*2.78,0);g.lineTo(r*2.42,r*.18);g.lineTo(r*.12,r*.18);g.closePath();g.fill();g.stroke();
- g.strokeStyle='#f1f2f3';g.lineWidth=E(1.2);g.beginPath();g.moveTo(r*.28,r*.08);g.lineTo(r*2.55,r*.03);g.stroke();
+ // 넓고 묵직한 단날 도검: 칼등은 두껍고 곧게, 날은 아래쪽 한 면에만 형성
+ g.fillStyle='#54131b';g.strokeStyle='#9b303b';g.lineWidth=E(2);
+ g.beginPath();g.moveTo(r*.12,-r*.22);g.lineTo(r*2.42,-r*.2);g.lineTo(r*2.78,-r*.06);g.lineTo(r*2.53,r*.1);g.lineTo(r*2.18,r*.2);g.lineTo(r*.12,r*.16);g.closePath();g.fill();g.stroke();
+ // 한쪽으로만 이어지는 노란 절삭날 — 반대편 칼등에는 날 장식 없음
+ g.strokeStyle='#f2c51b';g.lineWidth=E(4);g.lineCap='round';g.beginPath();g.moveTo(r*.28,r*.155);g.lineTo(r*2.18,r*.19);g.lineTo(r*2.53,r*.1);g.lineTo(r*2.78,-r*.06);g.stroke();
+ g.strokeStyle='#ffeb72';g.lineWidth=E(1.2);g.beginPath();g.moveTo(r*.38,r*.12);g.lineTo(r*2.15,r*.15);g.stroke();
+ // 칼등은 둔하고 어두운 적색 금속으로 유지
  // 칼등에 얹힌 리볼버식 6연발 탄창
  g.fillStyle='#25232a';g.strokeStyle=brass;g.lineWidth=E(2);
  g.beginPath();g.roundRect(r*.65,-r*.43,r*.86,r*.3,r*.1);g.fill();g.stroke();
  g.fillStyle='#0c0d10';g.beginPath();g.arc(r*1.05,-r*.28,r*.2,0,Math.PI*2);g.fill();g.stroke();
  for(let i=0;i<6;i++){const aa=i*Math.PI/3;g.fillStyle='#d6b36a';g.beginPath();g.arc(r*1.05+Math.cos(aa)*r*.13,-r*.28+Math.sin(aa)*r*.13,r*.045,0,Math.PI*2);g.fill();}
  g.fillStyle='#b58a45';g.beginPath();g.arc(r*1.05,-r*.28,r*.055,0,Math.PI*2);g.fill();
- // 칼날 뒷부분의 이중 부스터 노즐과 배기구
+ // 칼날 뒷부분의 단일 추진 장치와 배기구
  g.fillStyle='#252a31';g.strokeStyle='#aeb6bf';g.lineWidth=E(1.5);
- for(let j=0;j<2;j++){const yy=(j?1:-1)*r*.13;
+ for(let j=0;j<1;j++){const yy=0;
   g.beginPath();g.moveTo(r*.22,yy-r*.09);g.lineTo(-r*.35,yy-r*.12);g.lineTo(-r*.52,yy);g.lineTo(-r*.35,yy+r*.12);g.lineTo(r*.22,yy+r*.09);g.closePath();g.fill();g.stroke();
   g.fillStyle='#d04a35';g.beginPath();g.ellipse(-r*.43,yy,r*.08,r*.07,0,0,Math.PI*2);g.fill();g.fillStyle='#252a31';
  }
