@@ -3771,7 +3771,7 @@ function castExtraSkill(c, key, ang, frac) {
       c.cd.Q=c.cdMax.Q=([7,6.5,6,5.5][n])*hasteMul(c);
       fx.push({type:'rlThrust',x:c.x,y:c.y,ang,len,wid,t:0,life:.42});const hits=segHits(c,ang,len,wid);
       for(const u of hits){if(isChamp(u))callForHelp(c,u);const before=u.hp;damage(c,u,48+n*27+c.ad*.78,{skill:true,color});u._rolandLastDamage=Math.max(0,before-u.hp);healOnHit(u);}
-      spikeFx(c,ang,len,wid,.28,false);sfxPlay('swing',c.x,c.y,.95,1.12);text(c.x,c.y-c.r-E(35),skillNames(c).Q,color,true,.8);return;
+      sfxPlay('swing',c.x,c.y,.95,1.12);text(c.x,c.y-c.r-E(35),skillNames(c).Q,color,true,.8);return;
     }
     if (key === 'W') {
       const len=E(430), wid=E(78);if(ang===null)ang=autoAim(c,len);c.face=ang;
@@ -11372,7 +11372,7 @@ function champTimers(c, dt) {
     if(c.rolandMove>=E(390)){c.rolandMove=0;const sh=95+c.level*9;c.shield=Math.max(c.shield||0,sh);c.shieldT=2.5;if(c===player)text(c.x,c.y-c.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.7);}
     if(c.rolandFurioso){const F=c.rolandFurioso,T=F.target;
       if(!T||!T.alive||!c.alive){c.rolandFurioso=null;c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;}
-      else if(time>=F.nextAt&&F.index<9){const i=F.index++,ang=Math.atan2(T.y-c.y,T.x-c.x)+((i%3)-1)*.22;T.stunT=Math.max(T.stunT||0,.78);T.cast=null;T.dash=null;damage(c,T,F.damage,{skill:true,color:'#dbe5ff'});fx.push({type:'rlFuri',x:T.x+(Math.random()-.5)*T.r*.35,y:T.y+(Math.random()-.5)*T.r*.35,ang,r:T.r,t:0,life:.62,weapon:i});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.25,t:0,life:.18});text(T.x,T.y-T.r-E(18),String(i+1)+'/9','#dbe5ff',false,.35);sfxPlay('swing',T.x,T.y,.72,1.15+i*.025);F.nextAt+=.7;
+      else if(time>=F.nextAt&&F.index<9){const i=F.index++,sx=c.x,sy=c.y,dx=T.x-c.x,dy=T.y-c.y,d=Math.hypot(dx,dy)||1,baseAng=Math.atan2(dy,dx),ang=baseAng+((i%3)-1)*.22,step=Math.max(0,d-c.r-T.r-5);c.face=baseAng;c.x+=dx/d*step;c.y+=dy/d*step;fx.push({type:'rlDash',x:(sx+c.x)/2,y:(sy+c.y)/2,ang:baseAng,len:Math.hypot(c.x-sx,c.y-sy)+E(85),t:0,life:.38});T.stunT=Math.max(T.stunT||0,.78);T.cast=null;T.dash=null;damage(c,T,F.damage,{skill:true,color:'#dbe5ff'});fx.push({type:'rlFuri',x:T.x+(Math.random()-.5)*T.r*.35,y:T.y+(Math.random()-.5)*T.r*.35,ang,r:T.r,t:0,life:.62,weapon:i});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.25,t:0,life:.18});text(T.x,T.y-T.r-E(18),String(i+1)+'/9','#dbe5ff',false,.35);sfxPlay('swing',T.x,T.y,.72,1.15+i*.025);F.nextAt+=.7;
         if(F.index>=9||!T.alive){c.rolandFurioso=null;c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;c.cd.R=c.cdMax.R=([95,80,65][F.rank])*hasteMul(c);sfxPlay('boom',T.x,T.y,1.1);text(T.x,T.y,'FURIOSO','#dbe5ff',true,1.2);}
       }
     }
