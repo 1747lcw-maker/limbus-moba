@@ -3597,6 +3597,10 @@ function damage(src, tgt, amount, opts = {}) {
     if (heal > 0) src.hp = Math.min(src.maxHp, src.hp + heal * (src.spBrand && time < src.spBrand.until ? .6 : 1));   // 불태우는 낙인: 회복 감소
   }
   tgt.hitBy.set(src, time);
+  if (src && src.key === 'naihwang' && (opts.basic || opts.skill) && !opts.noProc && !tgt.structure && tgt.hp > 0) {
+    const dps = 4 + .55 * (src.level || 1);
+    tgt.nhBurn = {src, until:time + 2.5, dps, tick:tgt.nhBurn ? tgt.nhBurn.tick : .5};
+  }
   if (isMonster(tgt) && tgt.hp > 0) monsterHit(tgt, src);
   if (opts.basic && isChamp(src) && hasBuff(src, 'red') && !tgt.structure && tgt.hp > 0) {    // 피의 갈증: 화상 + 둔화
     tgt.burn = {src, until:time + 3, dps:4 + 1.2 * src.level, tick:tgt.burn ? tgt.burn.tick : .5};
@@ -13273,6 +13277,10 @@ function update(dt) {
     if (u.burn) {                                    // 피의 갈증 화상
       if (time >= u.burn.until) u.burn = null;
       else if ((u.burn.tick -= dt) <= 0) { u.burn.tick = .5; damage(u.burn.src, u, u.burn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff6a4a'}); if (!u.alive) continue; }
+    }
+    if (u.nhBurn) {                                  // 뇌횡: 맹호의 화염
+      if (time >= u.nhBurn.until) u.nhBurn = null;
+      else if ((u.nhBurn.tick -= dt) <= 0) { u.nhBurn.tick = .5; damage(u.nhBurn.src, u, u.nhBurn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff7438'}); if (!u.alive) continue; }
     }
     if (isMinion(u)) updateMinion(u, dt);
     else if (u.kind === 'siege' && u.alive) updateSiege(u, dt);
