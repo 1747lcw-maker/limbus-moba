@@ -2335,10 +2335,10 @@ function aiDraftRender(){
   const used=new Set([...d.bans.map(x=>x.key),...d.blue.map(x=>x?.key),...d.red.map(x=>x?.key)].filter(Boolean));
   $('adGrid').innerHTML=CHAMP_POOL.map(k=>`<button type="button" class="ad-champ" data-draft-champ="${k}" ${used.has(k)?'disabled':''}><span class="ad-avatar" style="background:${aiDraftPortrait(k)}">${esc(aiDraftName(k).slice(0,1))}</span><span>${esc(aiDraftName(k))}</span></button>`).join('');
 }
-function aiDraftStart(){
+function aiDraftStart(spectator=false){
   if(aiDraftTimer)clearTimeout(aiDraftTimer);
-  aiDraftState={bans:[],blue:[],red:[],used:new Set(),step:0,blueRoles:ROLES.filter(r=>r!==chosenRole),redRoles:ROLES.slice(),userPicked:false};
-  $('select').hidden=true;$('aiDraft').hidden=false;aiDraftAdvance();
+  aiDraftState={bans:[],blue:[],red:[],used:new Set(),step:0,blueRoles:spectator?ROLES.slice():ROLES.filter(r=>r!==chosenRole),redRoles:ROLES.slice(),userPicked:false,spectator};
+  $('select').hidden=true;$('aiDraft').hidden=false;aiDraftRender();aiDraftAdvance();
 }
 function aiDraftAdvance(){
   const d=aiDraftState;if(!d)return;
@@ -2356,7 +2356,7 @@ function aiDraftAdvance(){
       d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,420);
     },520);return;
   }
-  if(a.team==='blue'&&!d.userPicked){
+  if(a.team==='blue'&&!d.userPicked&&!d.spectator){
     $('adStatus').textContent='파랑팀 · 내 챔피언 선택';
     $('adSub').textContent=`${ROLE_NAME[chosenRole]} 포지션으로 플레이할 챔피언을 선택하세요`;
     $('adGridNote').textContent='직접 챔피언을 선택하면 AI 밴픽이 이어집니다';
@@ -2382,16 +2382,27 @@ function aiDraftFinish(){
   const d=aiDraftState;if(!d)return;
   const all=[...d.blue,...d.red].map(x=>x.key);
   if(all.length!==10||new Set(all).size!==10||d.bans.some(x=>all.includes(x.key))){
-    $('adStatus').textContent='밴픽 오류 · 다시 진행합니다';aiDraftTimer=setTimeout(aiDraftStart,900);return;
+    $('adStatus').textContent='밴픽 오류 · 다시 진행합니다';aiDraftTimer=setTimeout(()=>aiDraftStart(d.spectator),900);return;
   }
   aiDraftBans=d.bans.map(x=>x.key);
   aiDraftLineup={fresh:true,blue:d.blue.slice(),red:d.red.slice()};
   $('adPhase').textContent='READY';$('adStatus').textContent='밴픽 완료';$('adSub').textContent='10명의 챔피언이 모두 결정되었습니다. 게임을 시작합니다.';
   $('adGridNote').textContent='전투 시작!';$('adGrid').innerHTML='';
   aiDraftTimer=setTimeout(()=>{
-    $('aiDraft').hidden=true;aiDraftState=null;mpLineup=null;resetGame();started=true;
-    text(player.x+E(80),player.y-E(80),`${ROLE_NAME[chosenRole]} 상대: ${STATS[bot.key].name}`,'#ff8a8a',true,3);
-    if(chosenRole==='jungle'){shopSel='hunter';text(player.x+E(80),player.y-E(130),'정글: 상점에서 사냥꾼의 칼을 사세요','#d8b36a',true,4);}
+    const spectator=d.spectator;
+    $('aiDraft').hidden=true;aiDraftState=null;mpLineup=null;
+    if(spectator){
+      spectating=true;specSpeed=1;resetGame();started=true;
+      openMenu(false);$('select').hidden=true;
+      document.body.classList.add('spec');$('spec').hidden=false;
+      if(shopOpen)openShop(false);
+      for(const b of document.querySelectorAll('#spec [data-spd]'))b.setAttribute('aria-pressed',b.dataset.spd==='1');
+      specBuild();specUpdate();
+    }else{
+      resetGame();started=true;
+      text(player.x+E(80),player.y-E(80),`${ROLE_NAME[chosenRole]} 상대: ${STATS[bot.key].name}`,'#ff8a8a',true,3);
+      if(chosenRole==='jungle'){shopSel='hunter';text(player.x+E(80),player.y-E(130),'정글: 상점에서 사냥꾼의 칼을 사세요','#d8b36a',true,4);}
+    }
   },900);
 }
 $('aiDraft').addEventListener('click',e=>{const b=e.target.closest('[data-draft-champ]');if(b&&!b.disabled)aiDraftUserPick(b.dataset.draftChamp);});
@@ -21732,7 +21743,7 @@ function cxDemo(k, key, fresh) {
 }
 function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; }
 
-$('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); chosenSpells = chosenRole === 'jungle' ? ['warp','hook'] : chosenRole === 'support' ? ['warp','ampule'] : ['warp','brand']; aiDraftStart(); });
+$('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
 $('mSpec').addEventListener('click', () => specStart());
 
@@ -21742,16 +21753,13 @@ const SPEC_ICON = {};
 const specIcon = (key, k) => { const id = key + k; if (!(id in SPEC_ICON)) { const cv = skillIconCanvas(key, k); SPEC_ICON[id] = cv ? cv.toDataURL() : ''; } return SPEC_ICON[id]; };
 const specOrder = () => { const byRole = (a, b) => ROLES.indexOf(a.role) - ROLES.indexOf(b.role); return [...heroes.filter(c => c.team === 'blue').sort(byRole), ...heroes.filter(c => c.team === 'red').sort(byRole)]; };   // 팀마다 탑 · 정글 · 미드 · 바텀 · 서폿 순
 function specStart() {
-  const pool = Object.keys(CHAMP_COL).filter(k => STATS[k] && k !== 'bot');
-  spectating = true; specSpeed = 1; mpLineup = null;
-  chosenRole = ROLES[Math.floor(Math.random() * ROLES.length)];
-  chosenChamp = pickForRoles([chosenRole], [])[0] || pool[Math.floor(Math.random() * pool.length)];
-  resetGame(); started = true;
-  openMenu(false); $('select').hidden = true;
-  document.body.classList.add('spec'); $('spec').hidden = false;
-  if (shopOpen) openShop(false);
-  for (const b of document.querySelectorAll('#spec [data-spd]')) b.setAttribute('aria-pressed', b.dataset.spd === '1');
-  specBuild(); specUpdate();
+  if(aiDraftTimer)clearTimeout(aiDraftTimer);
+  aiDraftState=null;aiDraftBans=[];aiDraftLineup=null;
+  spectating=true;specSpeed=1;mpLineup=null;
+  chosenRole=ROLES[Math.floor(Math.random()*ROLES.length)];
+  chosenChamp=pickForRoles([chosenRole],[])[0]||'gregor';
+  openMenu(false);$('spec').hidden=true;document.body.classList.remove('spec');
+  aiDraftStart(true);
 }
 function specEnd() {
   if (!spectating) return;
