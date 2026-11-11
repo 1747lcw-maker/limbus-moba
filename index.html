@@ -11367,7 +11367,8 @@ function champTimers(c, dt) {
     if (c.stunT > 0 && !c.cast.unstoppable) c.cast = null;          // 기절하면 시전 끊김
     else c.cast.t += dt;
   }
-  if (c.key === 'roland') { c.rolandMove=(c.rolandMove||0)+Math.hypot(c.x-(c.rolandPX??c.x),c.y-(c.rolandPY??c.y));c.rolandPX=c.x;c.rolandPY=c.y;if(c.rolandMove>=E(390)){c.rolandMove=0;const sh=95+c.level*9;c.shield=Math.max(c.shield||0,sh);c.shieldT=2.5;if(c===player)text(c.x,c.y-c.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.7);}if(c.rolandFormUntil>0&&time>=c.rolandFormUntil){c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;} }\n  if (c.key === 'rodion') rodionTick(c, dt);
+  if (c.key === 'roland') { c.rolandMove=(c.rolandMove||0)+Math.hypot(c.x-(c.rolandPX??c.x),c.y-(c.rolandPY??c.y));c.rolandPX=c.x;c.rolandPY=c.y;if(c.rolandMove>=E(390)){c.rolandMove=0;const sh=95+c.level*9;c.shield=Math.max(c.shield||0,sh);c.shieldT=2.5;if(c===player)text(c.x,c.y-c.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.7);}if(c.rolandFormUntil>0&&time>=c.rolandFormUntil){c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;} }
+  if (c.key === 'rodion') rodionTick(c, dt);
   if (c.key === 'yisang') yisangTick(c, dt);
   if (c.key === 'ishmael') ishmaelTick(c, dt);
   if (c.key === 'ryoshu') ryoshuTick(c, dt);
