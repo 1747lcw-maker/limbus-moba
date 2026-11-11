@@ -13656,7 +13656,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -13677,6 +13677,7 @@ function drawChamp(g, c) {
   if (c.gachiuAuraUntil > time) drawGachiuAura(g,c);
   if (c.gachiuAuraUntil > time) drawGachiuAura(g,c);
   if (c.key === 'vespa') drawVespaBody(g,c);
+  if (c.key === 'naihwang') drawNaihwangBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
   if (c.key === 'ryoshu') drawRyoshuBody(g, c);
   if (c.key === 'faust') drawFaustBody(g, c);
@@ -13992,6 +13993,54 @@ function drawGachiuAura(g,c){
  for(let i=0;i<3;i++){g.save();g.rotate(time*(i%2?-.9:.65)+i*1.7);g.strokeStyle=i===1?'rgba(255,70,92,.9)':'rgba(255,255,255,.92)';g.shadowColor=i===1?'#ff405d':'#fff';g.lineWidth=E(i===1?4:2.5);g.beginPath();g.ellipse(0,0,r*(1.35+i*.2),r*(1.62+i*.16),0,-1.25+i*.12,1.25-i*.12);g.stroke();g.restore();}
  for(let i=0;i<12;i++){const aa=i/12*Math.PI*2+time*1.8,rr=r*(1.18+.22*Math.sin(time*5+i));g.save();g.rotate(aa);g.fillStyle=i%3===0?'#ff536d':'#fff';g.shadowColor=g.fillStyle;g.beginPath();g.moveTo(rr,-E(3));g.lineTo(rr+E(10)*p,0);g.lineTo(rr,E(3));g.closePath();g.fill();g.restore();}
  g.globalAlpha=.22*p;g.fillStyle='#fff';g.beginPath();g.arc(0,0,r*1.15,0,Math.PI*2);g.fill();g.restore();
+}
+// 뇌횡: 어두운 적색 실루엣, 붉은 중절모와 시가, 총알 약실·부스터가 결합된 천퇴성도
+function drawNaihwangBody(g,c){
+ const r=c.r,a=c.face||0,red='#54131b',redHi='#8e2631',black='#171316',steel='#9da4ad',bright='#d6d9dc',brass='#b58a45';
+ g.save();g.translate(c.x,c.y);g.rotate(a);
+ // 어두운 적색 코트 실루엣
+ g.fillStyle='#321016';g.strokeStyle='#6f2029';g.lineWidth=E(2);
+ g.beginPath();g.moveTo(-r*.72,-r*.45);g.lineTo(-r*.38,-r*.83);g.lineTo(r*.42,-r*.8);g.lineTo(r*.78,-r*.36);g.lineTo(r*.67,r*.76);g.lineTo(r*.18,r*.98);g.lineTo(-r*.55,r*.78);g.closePath();g.fill();g.stroke();
+ g.strokeStyle='#a33a43';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.12,-r*.65);g.lineTo(-r*.04,r*.72);g.stroke();
+ // 얼굴
+ g.fillStyle='#c69b83';g.beginPath();g.ellipse(r*.12,-r*.52,r*.36,r*.38,0,0,Math.PI*2);g.fill();
+ // 붉은 중절모: 크라운, 챙, 리본
+ g.fillStyle=red;g.strokeStyle='#a94750';g.lineWidth=E(1.8);
+ g.beginPath();g.moveTo(-r*.48,-r*.72);g.lineTo(-r*.34,-r*1.34);g.quadraticCurveTo(r*.05,-r*1.52,r*.43,-r*1.27);g.lineTo(r*.48,-r*.72);g.closePath();g.fill();g.stroke();
+ g.fillStyle='#711923';g.beginPath();g.ellipse(0,-r*.72,r*.78,r*.19,-.04,0,Math.PI*2);g.fill();g.stroke();
+ g.strokeStyle='#c65a60';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.32,-r*1.02);g.quadraticCurveTo(0,-r*1.1,r*.36,-r*1.02);g.stroke();
+ // 시가와 끝의 붉은 불씨, 가느다란 연기
+ g.save();g.translate(r*.38,-r*.39);g.rotate(-.08);
+ g.fillStyle='#9a6a43';g.strokeStyle='#e0b27b';g.lineWidth=E(1);g.beginPath();g.roundRect(0,-E(2),r*.53,E(4),E(2));g.fill();g.stroke();
+ g.fillStyle='#e45a3e';g.beginPath();g.arc(r*.53,0,E(2.2),0,Math.PI*2);g.fill();
+ g.strokeStyle='rgba(205,205,205,.55)';g.lineWidth=E(1.2);g.beginPath();g.moveTo(r*.46,-E(4));g.quadraticCurveTo(r*.72,-r*.45,r*.48,-r*.62);g.stroke();g.restore();
+ // 왼손의 칼: 칼날 뒤쪽 부스터와 칼등 위 회전식 리볼버 탄창을 강조
+ g.save();g.translate(-r*.7,r*.32);g.rotate(2.72);
+ // 손잡이와 가드
+ g.strokeStyle=black;g.lineWidth=E(6);g.beginPath();g.moveTo(-r*.42,0);g.lineTo(r*.12,0);g.stroke();
+ g.strokeStyle=brass;g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.22,-r*.12);g.lineTo(-r*.22,r*.12);g.stroke();
+ // 넓고 묵직한 칼날
+ g.fillStyle='#737b84';g.strokeStyle='#dce0e4';g.lineWidth=E(1.5);
+ g.beginPath();g.moveTo(r*.12,-r*.18);g.lineTo(r*2.45,-r*.12);g.lineTo(r*2.78,0);g.lineTo(r*2.42,r*.18);g.lineTo(r*.12,r*.18);g.closePath();g.fill();g.stroke();
+ g.strokeStyle='#f1f2f3';g.lineWidth=E(1.2);g.beginPath();g.moveTo(r*.28,r*.08);g.lineTo(r*2.55,r*.03);g.stroke();
+ // 칼등에 얹힌 리볼버식 6연발 탄창
+ g.fillStyle='#25232a';g.strokeStyle=brass;g.lineWidth=E(2);
+ g.beginPath();g.roundRect(r*.65,-r*.43,r*.86,r*.3,r*.1);g.fill();g.stroke();
+ g.fillStyle='#0c0d10';g.beginPath();g.arc(r*1.05,-r*.28,r*.2,0,Math.PI*2);g.fill();g.stroke();
+ for(let i=0;i<6;i++){const aa=i*Math.PI/3;g.fillStyle='#d6b36a';g.beginPath();g.arc(r*1.05+Math.cos(aa)*r*.13,-r*.28+Math.sin(aa)*r*.13,r*.045,0,Math.PI*2);g.fill();}
+ g.fillStyle='#b58a45';g.beginPath();g.arc(r*1.05,-r*.28,r*.055,0,Math.PI*2);g.fill();
+ // 칼날 뒷부분의 이중 부스터 노즐과 배기구
+ g.fillStyle='#252a31';g.strokeStyle='#aeb6bf';g.lineWidth=E(1.5);
+ for(let j=0;j<2;j++){const yy=(j?1:-1)*r*.13;
+  g.beginPath();g.moveTo(r*.22,yy-r*.09);g.lineTo(-r*.35,yy-r*.12);g.lineTo(-r*.52,yy);g.lineTo(-r*.35,yy+r*.12);g.lineTo(r*.22,yy+r*.09);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#d04a35';g.beginPath();g.ellipse(-r*.43,yy,r*.08,r*.07,0,0,Math.PI*2);g.fill();g.fillStyle='#252a31';
+ }
+ // 추진 화염
+ g.globalAlpha=.65+.25*Math.sin(time*18);g.fillStyle='#ff713c';g.beginPath();g.moveTo(-r*.5,-r*.08);g.lineTo(-r*(.95+.12*Math.sin(time*20)),0);g.lineTo(-r*.5,r*.08);g.closePath();g.fill();g.globalAlpha=1;
+ g.restore();
+ // 반대편 손과 장갑
+ g.fillStyle='#242126';g.beginPath();g.arc(r*.75,r*.38,r*.16,0,Math.PI*2);g.fill();
+ g.restore();
 }
 // 베스파: 검정·노랑 스트릿 재킷, 안경, 양손의 궁니르와 환도
 function drawVespaBody(g,c){
@@ -21857,6 +21906,7 @@ const cxCol = k => {
   if (k === 'liuEn') return '#41464f';
   if (k === 'gachiu') return '#d12b9a';
   if (k === 'vespa') return '#d5aa16';
+  if (k === 'naihwang') return '#5a1720';
   if (k === 'xichun') return 'linear-gradient(90deg, #c8202c 50%, #26262c 50%)';
   const el = document.querySelector(`.sel-card[data-champ="${k}"] .sel-token`);
   return el ? el.style.background : '#777';
