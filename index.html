@@ -520,7 +520,7 @@
   #aiDraft .ad-team h3{margin:0 0 10px;font-size:14px;letter-spacing:.08em}
   #aiDraft .ad-team.blue h3{color:#70baff} #aiDraft .ad-team.red h3{color:#ff8585}
   #aiDraft .ad-slot{display:flex;align-items:center;gap:8px;min-height:45px;padding:6px;margin:5px 0;border-radius:8px;background:#ffffff08;border:1px solid #ffffff12;font-size:12px}
-  #aiDraft .ad-slot img{width:34px;height:34px;object-fit:cover;border-radius:6px;background:#26303b}
+  #aiDraft .ad-avatar{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:6px;color:#fff;font-weight:900;text-shadow:0 1px 3px #000;background:#26303b}
   #aiDraft .ad-slot .ad-empty{width:34px;height:34px;border-radius:6px;background:#ffffff0d;display:grid;place-items:center;color:#788797;font-size:18px}
   #aiDraft .ad-slot small{display:block;color:#93a3b4;margin-top:2px}
   #aiDraft .ad-center{display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -530,13 +530,13 @@
   #aiDraft .ad-banbox span{display:inline-block;font-size:11px;margin:2px;padding:3px 6px;border-radius:5px;background:#702e35;color:#ffd7d7}
   #aiDraft .ad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;overflow:auto;align-content:start;padding:2px;max-height:min(55vh,650px)}
   #aiDraft .ad-champ{border:1px solid #ffffff1c;background:#ffffff0a;color:#eaf0f6;border-radius:9px;padding:7px 4px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;font-size:11px;cursor:pointer}
-  #aiDraft .ad-champ img{width:48px;height:48px;object-fit:cover;border-radius:7px;background:#25303b}
+  #aiDraft .ad-champ .ad-avatar{width:48px;height:48px;display:grid;place-items:center;border-radius:7px;color:#fff;font-size:20px;font-weight:900;text-shadow:0 1px 3px #000}
   #aiDraft .ad-champ:disabled{opacity:.22;filter:grayscale(1);cursor:not-allowed}
   #aiDraft .ad-champ:not(:disabled):hover{border-color:#e6c35c;background:#e6c35c18}
   #aiDraft .ad-grid-note{text-align:center;color:#aebbc8;font-size:12px;padding:6px}
   #aiDraft .ad-grid-note button{margin-left:8px;padding:7px 12px;border:0;border-radius:7px;background:#e6c35c;color:#1b1a15;font-weight:800}
-  @media(max-width:700px){#aiDraft .ad-main{grid-template-columns:1fr 1.3fr 1fr;gap:5px}#aiDraft .ad-team{padding:5px}#aiDraft .ad-slot{font-size:10px;gap:4px;padding:4px}#aiDraft .ad-slot img,#aiDraft .ad-slot .ad-empty{width:25px;height:25px}#aiDraft .ad-grid{grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:4px}#aiDraft .ad-champ img{width:38px;height:38px}#aiDraft .ad-team h3{font-size:11px}}
-  @media(max-width:430px){#aiDraft{padding:6px}#aiDraft .ad-main{grid-template-columns:90px minmax(0,1fr) 90px}#aiDraft .ad-slot{display:block;text-align:center;min-height:54px}#aiDraft .ad-slot img,#aiDraft .ad-slot .ad-empty{display:block;margin:0 auto 3px}#aiDraft .ad-slot small{font-size:9px}}
+  @media(max-width:700px){#aiDraft .ad-main{grid-template-columns:1fr 1.3fr 1fr;gap:5px}#aiDraft .ad-team{padding:5px}#aiDraft .ad-slot{font-size:10px;gap:4px;padding:4px}#aiDraft .ad-slot .ad-avatar,#aiDraft .ad-slot .ad-empty{width:25px;height:25px;flex-basis:25px}#aiDraft .ad-grid{grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:4px}#aiDraft .ad-champ .ad-avatar{width:38px;height:38px}#aiDraft .ad-team h3{font-size:11px}}
+  @media(max-width:430px){#aiDraft{padding:6px}#aiDraft .ad-main{grid-template-columns:90px minmax(0,1fr) 90px}#aiDraft .ad-slot{display:block;text-align:center;min-height:54px}#aiDraft .ad-slot .ad-avatar,#aiDraft .ad-slot .ad-empty{display:grid;margin:0 auto 3px}#aiDraft .ad-slot small{font-size:9px}}
 </style>
 
 <canvas id="c"></canvas>
@@ -2325,15 +2325,15 @@ const AI_DRAFT_ORDER = [
   ...['red','blue','blue','red'].map(team=>({type:'pick',team,phase:2}))
 ];
 function aiDraftName(key){return STATS[key]?.name || key;}
-function aiDraftPortrait(key){try{return champPortrait(key)?.toDataURL?.() || '';}catch{return '';}}
+function aiDraftPortrait(key){return CHAMP_COL[key] || '#46515f';}
 function aiDraftRender(){
   const d=aiDraftState;if(!d)return;
-  const slotHtml=(team)=>d[team].map((x,i)=>`<div class="ad-slot">${x?(`<img src="${aiDraftPortrait(x.key)}" alt=""><span>${esc(aiDraftName(x.key))}<small>${esc(ROLE_NAME[x.role])}</small></span>`):'<span class="ad-empty">?</span><span>대기 중</span>'}</div>`).join('');
+  const slotHtml=(team)=>d[team].map((x,i)=>`<div class="ad-slot">${x?(`<span class="ad-avatar" style="background:${aiDraftPortrait(x.key)}">${esc(aiDraftName(x.key).slice(0,1))}</span><span>${esc(aiDraftName(x.key))}<small>${esc(ROLE_NAME[x.role])}</small></span>`):'<span class="ad-empty">?</span><span>대기 중</span>'}</div>`).join('');
   $('adBlue').innerHTML=slotHtml('blue');$('adRed').innerHTML=slotHtml('red');
   $('adBlueBans').innerHTML=d.bans.filter(x=>x.team==='blue').map(x=>`<span>${esc(aiDraftName(x.key))}</span>`).join('')||'<small>없음</small>';
   $('adRedBans').innerHTML=d.bans.filter(x=>x.team==='red').map(x=>`<span>${esc(aiDraftName(x.key))}</span>`).join('')||'<small>없음</small>';
   const used=new Set([...d.bans.map(x=>x.key),...d.blue.map(x=>x?.key),...d.red.map(x=>x?.key)].filter(Boolean));
-  $('adGrid').innerHTML=CHAMP_POOL.map(k=>`<button type="button" class="ad-champ" data-draft-champ="${k}" ${used.has(k)?'disabled':''}><img src="${aiDraftPortrait(k)}" alt=""><span>${esc(aiDraftName(k))}</span></button>`).join('');
+  $('adGrid').innerHTML=CHAMP_POOL.map(k=>`<button type="button" class="ad-champ" data-draft-champ="${k}" ${used.has(k)?'disabled':''}><span class="ad-avatar" style="background:${aiDraftPortrait(k)}">${esc(aiDraftName(k).slice(0,1))}</span><span>${esc(aiDraftName(k))}</span></button>`).join('');
 }
 function aiDraftStart(){
   if(aiDraftTimer)clearTimeout(aiDraftTimer);
