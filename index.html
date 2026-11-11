@@ -3854,7 +3854,8 @@ function basicAttack(c, t) {
   const lam = hasItem(c, 'lament') && time < c.lamentT ? .06 * c.lamentN : 0;
   const cob = hasItem(c, 'cobalt') && c.hp < c.maxHp * .5 ? .2 : 0;                         // 푸른 흉터
   c.atkT = 1 / Math.min(2.5, c.as * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c)) * (c.frostT > time ? .85 : 1));
-  c.swingT = 0.18; c.swingE = enhanced;
+  if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(1.08, c.as * 1.38)); // 묵직한 한 방: 공격 속도 상한
+  c.swingT = c.key === 'naihwang' ? .52 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
   if(c.key==='liuEn')fx.push({type:'lySlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(38),t.r*1.5),t:0,life:.48,weapon:c.liuWeapon||0});
   if (c.key === 'roland') {
@@ -13716,7 +13717,8 @@ function drawChamp(g, c) {
   }
 
   if (c.swingT > 0) {
-    const k = 1 - c.swingT / 0.18;
+    const swingDur = c.key === 'naihwang' ? .52 : .18;
+    const k = 1 - c.swingT / swingDur;
     if (c.swingE) {         // 내장파기: 갈색 초승달 세 겹 (고른 간격)
       g.save(); g.globalAlpha = 1 - k * .7;
       const sweep = easeOut(Math.min(1, k * 2.5));
@@ -13737,6 +13739,7 @@ function drawChamp(g, c) {
     } else if (c.key === 'donq') {     // 랜스 찌르기는 몸통 그리기에서
     } else if (c.key === 'ishmael') {  // 검은 메이스 휘두르기 (세 번째 평타는 주황)
       drawMaceSwing(g, c, k);
+    } else if (c.key === 'naihwang') { drawNaihwangSwingFx(g,c,k);
     } else if (c.key === 'gachiu') { drawGachiuSwing(g,c,k);
      } else if (c.key === 'rodion') {   // 검은 할버드 휘두르기 (얼음 상태면 푸른빛)
       drawHalberdSwing(g, c, k);
@@ -13997,6 +14000,8 @@ function drawGachiuAura(g,c){
 // 뇌횡: 어두운 적색 실루엣, 붉은 중절모와 시가, 총알 약실·부스터가 결합된 천퇴성도
 function drawNaihwangBody(g,c){
  const r=c.r,a=c.face||0,red='#54131b',redHi='#8e2631',black='#171316',steel='#9da4ad',bright='#d6d9dc',brass='#b58a45';
+ const swingK=c.key==='naihwang'&&c.swingT>0?Math.max(0,Math.min(1,1-c.swingT/.52)):0;
+ const swingPose=swingK<.58?-.62*(swingK/.58):-.62+1.72*easeOut((swingK-.58)/.42);
  g.save();g.translate(c.x,c.y);g.rotate(a);
  // 어두운 적색 코트 실루엣
  g.fillStyle='#321016';g.strokeStyle='#6f2029';g.lineWidth=E(2);
@@ -14015,7 +14020,7 @@ function drawNaihwangBody(g,c){
  g.fillStyle='#e45a3e';g.beginPath();g.arc(r*.53,0,E(2.2),0,Math.PI*2);g.fill();
  g.strokeStyle='rgba(205,205,205,.55)';g.lineWidth=E(1.2);g.beginPath();g.moveTo(r*.46,-E(4));g.quadraticCurveTo(r*.72,-r*.45,r*.48,-r*.62);g.stroke();g.restore();
  // 왼손의 칼: 칼날 뒤쪽 부스터와 칼등 위 회전식 리볼버 탄창을 강조
- g.save();g.translate(-r*.7,r*.32);g.rotate(2.72);
+ g.save();g.translate(-r*.7,r*.32);g.rotate(2.72+swingPose);
  // 손잡이와 가드
  g.strokeStyle=black;g.lineWidth=E(6);g.beginPath();g.moveTo(-r*.42,0);g.lineTo(r*.12,0);g.stroke();
  g.strokeStyle=brass;g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.22,-r*.12);g.lineTo(-r*.22,r*.12);g.stroke();
@@ -14038,12 +14043,51 @@ function drawNaihwangBody(g,c){
   g.beginPath();g.moveTo(r*.22,yy-r*.09);g.lineTo(-r*.35,yy-r*.12);g.lineTo(-r*.52,yy);g.lineTo(-r*.35,yy+r*.12);g.lineTo(r*.22,yy+r*.09);g.closePath();g.fill();g.stroke();
   g.fillStyle='#d04a35';g.beginPath();g.ellipse(-r*.43,yy,r*.08,r*.07,0,0,Math.PI*2);g.fill();g.fillStyle='#252a31';
  }
- // 추진 화염
- g.globalAlpha=.65+.25*Math.sin(time*18);g.fillStyle='#ff713c';g.beginPath();g.moveTo(-r*.5,-r*.08);g.lineTo(-r*(.95+.12*Math.sin(time*20)),0);g.lineTo(-r*.5,r*.08);g.closePath();g.fill();g.globalAlpha=1;
+ // 평상시에는 작은 불씨, 방아쇠를 당겨 베는 순간에는 붉은 부스터 화염이 폭발
+ const firing=swingK>0, heat=firing?(swingK<.58?.35+.65*(swingK/.58):1):.18;
+ g.save();g.globalAlpha=.9;g.shadowColor='#ff2b19';g.shadowBlur=E(firing?22:7);
+ g.fillStyle=firing?'#ff321c':'#d94b32';g.beginPath();g.moveTo(-r*.48,-r*.075);
+ g.lineTo(-r*(.58+heat*.62+.12*Math.sin(time*34)), -r*.045);
+ g.lineTo(-r*(.92+heat*.8+.16*Math.sin(time*29)),0);
+ g.lineTo(-r*(.58+heat*.62+.12*Math.sin(time*34)),r*.045);
+ g.lineTo(-r*.48,r*.075);g.closePath();g.fill();
+ if(firing){g.fillStyle='#ff9a54';g.beginPath();g.moveTo(-r*.5,-r*.035);g.lineTo(-r*(.72+heat*.5),0);g.lineTo(-r*.5,r*.035);g.closePath();g.fill();
+ g.fillStyle='#fff0b0';g.beginPath();g.moveTo(-r*.49,-r*.014);g.lineTo(-r*(.63+heat*.26),0);g.lineTo(-r*.49,r*.014);g.closePath();g.fill();}
+ g.restore();g.globalAlpha=1;
  g.restore();
  // 반대편 손과 장갑
  g.fillStyle='#242126';g.beginPath();g.arc(r*.75,r*.38,r*.16,0,Math.PI*2);g.fill();
  g.restore();
+}
+// 뇌횡 평타: 잠깐 힘을 모은 뒤 부스터를 폭발시키며 단 한 번 크게 베는 연출
+function drawNaihwangSwingFx(g,c,k){
+ const r=c.r,wind=Math.max(0,1-k/.58),strike=Math.max(0,(k-.58)/.42);
+ const a=c.face,reach=r*2.05;
+ g.save();g.translate(c.x,c.y);g.rotate(a);
+ // 베기 직전 칼날에 모이는 붉은 기류
+ if(wind>0){
+  g.globalAlpha=.22+.5*wind;g.strokeStyle='#ff553b';g.lineWidth=E(3+wind*4);
+  g.shadowColor='#ff2818';g.shadowBlur=E(16);
+  g.beginPath();g.arc(0,0,r*1.45,-.95,-.95+wind*.95);g.stroke();
+  for(let i=0;i<5;i++){const x=r*(.55+i*.18),y=Math.sin(time*13+i*1.7)*r*.12;
+   g.fillStyle=i%2?'#ff9b55':'#ff3a24';g.globalAlpha=.25+.55*wind;
+   g.beginPath();g.arc(x,y,E(2+i%3),0,Math.PI*2);g.fill();}
+ }
+ // 타격 프레임: 굵고 선명한 붉은 검격과 충격파
+ if(strike>0){
+  const sweep=easeOut(Math.min(1,strike*1.25));
+  g.globalAlpha=.92*(1-strike*.28);g.shadowColor='#ff2a18';g.shadowBlur=E(24);
+  g.strokeStyle='#a91520';g.lineWidth=E(18+strike*5);g.lineCap='round';
+  g.beginPath();g.arc(0,0,reach,-.92,-.92+1.82*sweep);g.stroke();
+  g.strokeStyle='#ff4a2d';g.lineWidth=E(9+strike*3);
+  g.beginPath();g.arc(0,0,reach,-.88,-.88+1.72*sweep);g.stroke();
+  g.strokeStyle='#ffd0a0';g.lineWidth=E(2.5);
+  g.beginPath();g.arc(0,0,reach,-.82,-.82+1.62*sweep);g.stroke();
+  g.globalAlpha=.9*(1-strike);
+  g.fillStyle='#ff5a35';g.beginPath();g.moveTo(r*.9,-r*.6);g.lineTo(r*(2.7+strike*.5),0);g.lineTo(r*.9,r*.6);g.closePath();g.fill();
+ }
+ g.restore();g.globalAlpha=1;
+ if(strike>.25){const pulse=Math.max(0,1-(strike-.25)/.75);g.save();g.globalAlpha=pulse*.65;g.strokeStyle='#ff5135';g.lineWidth=E(4);g.beginPath();g.arc(c.x+Math.cos(a)*r*1.35,c.y+Math.sin(a)*r*1.35,r*(.5+strike*.8),0,Math.PI*2);g.stroke();g.restore();}
 }
 // 베스파: 검정·노랑 스트릿 재킷, 안경, 양손의 궁니르와 환도
 function drawVespaBody(g,c){
