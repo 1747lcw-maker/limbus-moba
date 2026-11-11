@@ -3809,6 +3809,7 @@ function castExtraSkill(c, key, ang, frac) {
       for(const u of units)if(u.alive&&u.team!==c.team&&targetable(u)){const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy),da=Math.atan2(dy,dx),diff=Math.abs(Math.atan2(Math.sin(da-ang),Math.cos(da-ang)));if(d<bd&&diff<.55){target=u;bd=d;}}
       if(!target)target=units.filter(u=>u.alive&&u.team!==c.team&&targetable(u)).sort((a,b)=>dist(c,a)-dist(c,b))[0]||null;
       if(!target)return;
+      c.rolandFuriosoReady=false; // 뒤틀림 한 번당 FURIOSO는 한 번만 사용
       target.stunT=Math.max(target.stunT||0,6.25);target.cast=null;target.dash=null;
       c.rolandFurioso={target,index:0,nextAt:time,rank:n,damage:42+n*12+c.ad*.38};
       fx.push({type:'rlAwaken',x:target.x,y:target.y,r:target.r*2.1,t:0,life:.7});
@@ -3869,7 +3870,7 @@ function castExtraSkill(c, key, ang, frac) {
   }
 }
 function castSkillCore(c, key, ang, frac = null) {
-  const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && !c.rolandFurioso);   // 이스마엘 재사용
+  const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso);   // 이스마엘 재사용
   const tmFree = c.key === 'thoma' && key === 'R' && !tmBusy(c);   // 토마 전화위복: 군중 제어 중에도 사용
   if (!c.alive || !c.rank[key] || (c.stunT > 0 && !tmFree) || (c.cast && !tmFree) || (c.cd[key] > 0 && !recast) || gameOver) return;
   if (!tmFree && (c.tauntT > time || c.fearT > time)) return;          // 도발·공포 중엔 스킬 불가
