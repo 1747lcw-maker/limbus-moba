@@ -19439,6 +19439,55 @@ Object.assign(SKILL_ICON_DRAW, { liuEn: {
    g.strokeStyle='rgba(185,220,245,.85)';g.lineWidth=2;g.beginPath();g.arc(0,0,19,-.3,2.8);g.stroke();
  }
 }});
+// 푸른 잔향 전용: 푸른 공명과 악보를 모티브로 한 스킬 아이콘
+SKILL_BG.blueReverb = ['#287fc0', '#061629'];
+Object.assign(SKILL_ICON_DRAW, {
+ blueReverb: {
+  P:g=>{
+   iconGlow(g,0,0,31,'rgba(65,175,255,.85)');
+   g.strokeStyle='#bceaff';g.lineWidth=2.4;
+   for(let i=0;i<3;i++){g.beginPath();g.arc(-2,1,9+i*7,-1.12,1.12);g.stroke();}
+   iconLine(g,-18,-17,18,17,'#e4f8ff',2);
+   iconCircle(g,0,0,5,'#ffffff','#63c5ff');
+   for(let i=0;i<6;i++){const a=i*Math.PI/3;iconCircle(g,Math.cos(a)*25,Math.sin(a)*25,2.2,'#d9f5ff');}
+  },
+  Q:g=>{
+   iconGlow(g,0,0,32,'rgba(45,155,255,.9)');
+   g.save();g.rotate(-.42);
+   sSlash(g,-27,12,24,-12,'#0b3159',12);
+   sSlash(g,-25,9,26,-15,'#4bb8ff',6);
+   sSlash(g,-23,7,27,-17,'#e5f8ff',2);
+   g.restore();
+   g.save();g.translate(12,-13);g.fillStyle='#eafaff';g.shadowColor='#42baff';g.shadowBlur=13;
+   g.font='900 29px serif';g.textAlign='center';g.textBaseline='middle';g.fillText('♪',0,0);g.restore();
+   for(let i=0;i<4;i++)sStar(g,-22+i*12,20-i*7,3.5,1.4,4,'#8edaff');
+  },
+  W:g=>{
+   iconGlow(g,0,0,35,'rgba(45,155,255,.9)');
+   g.fillStyle='rgba(60,160,255,.2)';g.strokeStyle='#a9e5ff';g.lineWidth=3;
+   g.beginPath();g.arc(0,0,23,0,Math.PI*2);g.fill();g.stroke();
+   g.strokeStyle='#4ab7ff';g.lineWidth=4;g.setLineDash([7,4]);g.beginPath();g.arc(0,0,17,.15,Math.PI*1.9);g.stroke();g.setLineDash([]);
+   iconCircle(g,0,0,9,'#dff7ff','#ffffff');iconCircle(g,0,0,4,'#4baeff','#ffffff');
+   for(let i=0;i<8;i++){const a=i*Math.PI/4;iconLine(g,Math.cos(a)*25,Math.sin(a)*25,Math.cos(a)*31,Math.sin(a)*31,'#c7efff',2);}
+  },
+  E:g=>{
+   iconGlow(g,0,0,32,'rgba(75,185,255,.85)');
+   g.save();g.rotate(-.35);
+   for(let i=0;i<3;i++){const y=-15+i*15;g.strokeStyle='#dff7ff';g.lineWidth=2.2;g.beginPath();g.moveTo(-24,y);g.lineTo(14,y-5);g.stroke();g.font='900 17px serif';g.fillStyle=i===1?'#ffffff':'#76ceff';g.fillText(i===1?'♫':'♪',17,y+2);}
+   g.restore();
+   sArrow(g,-20,23,23,-22,'#8bd9ff',3);
+   iconCircle(g,0,0,5,'#ffffff','#8bd9ff');
+  },
+  R:g=>{
+   iconGlow(g,0,0,36,'rgba(35,145,255,.95)');
+   g.save();g.strokeStyle='#8bd5ff';g.lineWidth=2.5;
+   for(let i=0;i<3;i++){g.beginPath();g.arc(0,0,11+i*8,-.85+i*.18,Math.PI*1.35+i*.18);g.stroke();}
+   g.restore();
+   for(let i=0;i<9;i++){const a=i*Math.PI*2/9,r=23+(i%2)*5,x=Math.cos(a)*r,y=Math.sin(a)*r;g.save();g.translate(x,y);g.rotate(a+.5);g.font='900 15px serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle=i%2?'#eafaff':'#62c5ff';g.shadowColor='#38aaff';g.shadowBlur=9;g.fillText(i%3===0?'♫':i%3===1?'♪':'♬',0,0);g.restore();}
+   iconCircle(g,0,0,8,'#e9faff','#ffffff');iconCircle(g,0,0,3,'#248bd4','#ffffff');
+  }
+ }
+});
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
