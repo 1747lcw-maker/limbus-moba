@@ -4063,6 +4063,24 @@ function finishCast(c) {
 }
 
 function doQ(c, ang) {
+  // 롤랑은 그레고르의 공통 Q 이펙트(hitSpray/spikeFx)를 사용하지 않는다.
+  if (c.key === 'roland') {
+    const n = rk(c, 'Q'), form = c.rolandFormUntil > time;
+    const color = form ? '#a8b8d8' : '#d8c6ff', len = E(350), wid = E(62);
+    c.face = ang;
+    const hits = segHits(c, ang, len, wid);
+    fx.push({type:'rlThrust',x:c.x,y:c.y,ang,len,wid,t:0,life:.42});
+    for (const u of hits) {
+      if (isChamp(u)) callForHelp(c, u);
+      const before = u.hp;
+      damage(c, u, 48 + n * 27 + c.ad * .78, {skill:true,color});
+      const dealt = Math.max(0, before - u.hp);
+      if (form) c.hp = Math.min(c.maxHp, c.hp + dealt * .28);
+    }
+    sfxPlay('swing', c.x, c.y, .95, 1.12);
+    text(c.x, c.y - c.r - E(35), skillNames(c).Q, color, true, .8);
+    return;
+  }
   const q = QV(c), len = E(q.len);
   const hits = segHits(c, ang, len, E(q.wid));
   let champHits = 0;
@@ -11370,9 +11388,14 @@ function champTimers(c, dt) {
   if (c.key === 'roland') {
     c.rolandMove=(c.rolandMove||0)+Math.hypot(c.x-(c.rolandPX??c.x),c.y-(c.rolandPY??c.y));c.rolandPX=c.x;c.rolandPY=c.y;
     if(c.rolandMove>=E(390)){c.rolandMove=0;const sh=95+c.level*9;c.shield=Math.max(c.shield||0,sh);c.shieldT=2.5;if(c===player)text(c.x,c.y-c.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.7);}
+    if(c.rolandFuriDash){
+      const D=c.rolandFuriDash,k=Math.max(0,Math.min(1,(time-D.start)/D.duration)),e=1-Math.pow(1-k,3);
+      c.x=D.sx+(D.tx-D.sx)*e;c.y=D.sy+(D.ty-D.sy)*e;
+      if(k>=1)c.rolandFuriDash=null;
+    }
     if(c.rolandFurioso){const F=c.rolandFurioso,T=F.target;
       if(!T||!T.alive||!c.alive){c.rolandFurioso=null;c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;}
-      else if(time>=F.nextAt&&F.index<9){const i=F.index++,sx=c.x,sy=c.y,dx=T.x-c.x,dy=T.y-c.y,d=Math.hypot(dx,dy)||1,baseAng=Math.atan2(dy,dx),ang=baseAng+((i%3)-1)*.22,step=Math.max(0,d-c.r-T.r-5);c.face=baseAng;c.x+=dx/d*step;c.y+=dy/d*step;fx.push({type:'rlDash',x:(sx+c.x)/2,y:(sy+c.y)/2,ang:baseAng,len:Math.hypot(c.x-sx,c.y-sy)+E(85),t:0,life:.38});T.stunT=Math.max(T.stunT||0,.78);T.cast=null;T.dash=null;damage(c,T,F.damage,{skill:true,color:'#dbe5ff'});fx.push({type:'rlFuri',x:T.x+(Math.random()-.5)*T.r*.35,y:T.y+(Math.random()-.5)*T.r*.35,ang,r:T.r,t:0,life:.62,weapon:i});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.25,t:0,life:.18});text(T.x,T.y-T.r-E(18),String(i+1)+'/9','#dbe5ff',false,.35);sfxPlay('swing',T.x,T.y,.72,1.15+i*.025);F.nextAt+=.7;
+      else if(time>=F.nextAt&&F.index<9){const i=F.index++,sx=c.x,sy=c.y,dx=T.x-c.x,dy=T.y-c.y,d=Math.hypot(dx,dy)||1,baseAng=Math.atan2(dy,dx),ang=baseAng+((i%3)-1)*.22,step=Math.max(0,d-c.r-T.r-5),tx=c.x+dx/d*step,ty=c.y+dy/d*step;c.face=baseAng;c.rolandFuriDash={sx,sy,tx,ty,start:time,duration:.24};fx.push({type:'rlDash',x:(sx+tx)/2,y:(sy+ty)/2,ang:baseAng,len:Math.hypot(tx-sx,ty-sy)+E(85),t:0,life:.48});T.stunT=Math.max(T.stunT||0,.78);T.cast=null;T.dash=null;damage(c,T,F.damage,{skill:true,color:'#dbe5ff'});fx.push({type:'rlFuri',x:T.x+(Math.random()-.5)*T.r*.35,y:T.y+(Math.random()-.5)*T.r*.35,ang,r:T.r,t:0,life:.62,weapon:i});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.25,t:0,life:.18});text(T.x,T.y-T.r-E(18),String(i+1)+'/9','#dbe5ff',false,.35);sfxPlay('swing',T.x,T.y,.72,1.15+i*.025);F.nextAt+=.7;
         if(F.index>=9||!T.alive){c.rolandFurioso=null;c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;c.cd.R=c.cdMax.R=([95,80,65][F.rank])*hasteMul(c);sfxPlay('boom',T.x,T.y,1.1);text(T.x,T.y,'FURIOSO','#dbe5ff',true,1.2);}
       }
     }
@@ -11469,7 +11492,7 @@ function updatePlayer(dt, ix, iy) {
   if (!player.alive) { respawnTick(player, dt); return; }
   champTimers(player, dt);
   if (player.sdR) { if (ix || iy) sdStopR(player); else { moveChamp(player, 0, 0, dt); return; } }   // 소드 제압명령: 움직이면 취소
-  if (player.dash || player.blink || player.leap || player.alpha || player.rcut || player.scR || player.hcR || player.mrDash || player.mrGrab || player.ylDash || player.krDash || player.krR || player.vgDash || player.vgFin || player.chE || player.chQ || player.chRide || player.stasisT > time || player.itDash || hhBusy(player) || alBusy(player) || mtBusy(player) || gdBusy(player) || tmBusy(player) || dbBusy(player) || riBusy(player) || bpBusy(player) || xcBusy(player) || sdBusy(player) || efBusy(player) || dlBusy(player)) return;
+  if (player.rolandFuriDash || player.dash || player.blink || player.leap || player.alpha || player.rcut || player.scR || player.hcR || player.mrDash || player.mrGrab || player.ylDash || player.krDash || player.krR || player.vgDash || player.vgFin || player.chE || player.chQ || player.chRide || player.stasisT > time || player.itDash || hhBusy(player) || alBusy(player) || mtBusy(player) || gdBusy(player) || tmBusy(player) || dbBusy(player) || riBusy(player) || bpBusy(player) || xcBusy(player) || sdBusy(player) || efBusy(player) || dlBusy(player)) return;
   if (player.ylRevive) { moveChamp(player, 0, 0, dt); return; }                                            // 돌진 중엔 조작 불가
   if (player.stunT > 0 || player.cast) { moveChamp(player, 0, 0, dt); return; }
   if (tauntedMove(player, dt) || fearMove(player, dt)) return;                               // 도발당함
@@ -12362,7 +12385,7 @@ function updateBot(b, dt) {
   if (!b.alive) { respawnTick(b, dt); b.path = null; b.stance = null; b.focus = null; return; }
   champTimers(b, dt);
   aiLearn(b);
-  if (b.dash || b.blink || b.leap || b.alpha || b.rcut || b.scR || b.hcR || b.mrDash || b.mrGrab || b.ylDash || b.krDash || b.krR || b.vgDash || b.vgFin || b.chE || b.chQ || b.chRide || b.stasisT > time || b.itDash || hhBusy(b) || alBusy(b) || mtBusy(b) || gdBusy(b) || tmBusy(b) || dbBusy(b) || riBusy(b) || bpBusy(b) || xcBusy(b) || sdBusy(b) || efBusy(b) || dlBusy(b)) return;
+  if (b.rolandFuriDash || b.dash || b.blink || b.leap || b.alpha || b.rcut || b.scR || b.hcR || b.mrDash || b.mrGrab || b.ylDash || b.krDash || b.krR || b.vgDash || b.vgFin || b.chE || b.chQ || b.chRide || b.stasisT > time || b.itDash || hhBusy(b) || alBusy(b) || mtBusy(b) || gdBusy(b) || tmBusy(b) || dbBusy(b) || riBusy(b) || bpBusy(b) || xcBusy(b) || sdBusy(b) || efBusy(b) || dlBusy(b)) return;
   if (chBotBoard(b, dt)) return;                                  // 아군 카론이 버스 시동 중: 타러 감
   if (b.ylRevive) { moveChamp(b, 0, 0, dt); return; }
   if (b.key === 'thoma') aiThomaCC(b);                                                       // 토마: CC 중 전화위복
