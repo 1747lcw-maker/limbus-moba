@@ -13813,7 +13813,7 @@ function drawLiuEnBody(g,c){
 // 가치우: 검은 한푸, 붉은 비단 장포, 금빛 머리 장식과 부적 장봉
 function drawGachiuBody(g,c){
  const a=c.face||0,r=c.r,ink='#111116',red='#8f2029',gold='#c99a3d',skin='#d7b99f';
- g.save();g.translate(c.x,c.y);g.rotate(a);
+ g.save();g.translate(c.x,c.y);g.rotate(a);g.scale(1.28,1.28);
  // 길게 늘어지는 검은 겉옷과 붉은 앞섶
  g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(-r*.04,r*.2,r*1.16,r*.84,0,0,7);g.fill();
  g.fillStyle=ink;g.strokeStyle='#51434a';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.72,-r*.48);g.lineTo(-r*.43,-r*.9);g.lineTo(r*.34,-r*.88);g.lineTo(r*.82,-r*.42);g.lineTo(r*.7,r*.78);g.lineTo(r*.22,r*1.02);g.lineTo(-r*.62,r*.82);g.closePath();g.fill();g.stroke();
@@ -13843,7 +13843,7 @@ function drawGachiuBody(g,c){
 }
 function drawGachiuSwing(g,c,k){
  const r=c.r,progress=easeOut(Math.min(1,k*1.35));g.save();g.translate(c.x,c.y);g.rotate(c.face||0);
- g.globalAlpha=1-progress*.65;g.strokeStyle='#8d2028';g.lineWidth=E(12);g.lineCap='round';g.beginPath();g.arc(0,0,r+E(27),-.95,.95*progress);g.stroke();
+ g.globalAlpha=1-progress*.65;g.scale(1.22,1.22);g.strokeStyle='#8d2028';g.lineWidth=E(12);g.lineCap='round';g.beginPath();g.arc(0,0,r+E(27),-.95,.95*progress);g.stroke();
  g.strokeStyle='#d5b36a';g.lineWidth=E(3);g.beginPath();g.arc(0,0,r+E(27),-.85,.85*progress);g.stroke();
  for(let i=0;i<5;i++){const t=progress*(.25+i*.16),x=Math.cos(-.85+t*1.7)*(r+E(27)),y=Math.sin(-.85+t*1.7)*(r+E(27));g.save();g.translate(x,y);g.rotate(t*2);g.fillStyle=i%2?'#c58c42':'#a52a32';g.fillRect(-E(3),-E(8),E(6),E(16));g.restore();}
  g.restore();
