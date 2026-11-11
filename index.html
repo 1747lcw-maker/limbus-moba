@@ -3946,7 +3946,37 @@ function vespaThrow(c,t,amount,kind='basic'){if(!t||!t.alive)return;const a=Math
 function vespaStick(c,t,amount,kind){if(!c.vespaSpears)c.vespaSpears=[];c.vespaSpears.push({tgt:t,amount,kind,at:time});fx.push({type:'vsStick',x:t.x,y:t.y,r:t.r*1.25,t:0,life:.38});}
 function vespaRecall(c){const list=(c.vespaSpears||[]).filter(s=>s.tgt&&s.tgt.alive&&s.tgt.team!==c.team);if(!list.length){c.vespaWReady=false;return false;}const per=new Map();for(const s of list)per.set(s.tgt,(per.get(s.tgt)||0)+s.amount);for(const [u,total] of per){const n=list.filter(s=>s.tgt===u).length;damage(c,u,total*.42+n*(18+c.ad*.12),{skill:true,type:'physical',color:'#f4c52c'});fx.push({type:'vsRecall',x:u.x,y:u.y,r:u.r*2,t:0,life:.58,count:n});}c.vespaSpears=[];c.vespaWReady=false;sfxPlay('swing',c.x,c.y,1.15,.72);text(c.x,c.y-c.r-E(48),'회수!','#ffd84a',true,.8);return true;}
 function vespaTick(c,dt){if(!c.alive)return;c.vespaPassiveThink=(c.vespaPassiveThink||0)-dt;if(c.vespaPassiveThink<=0){c.vespaPassiveThink=.12;if(time>=(c.vespaPassiveCd||0)){const a=champs().filter(x=>x.alive&&x.team===c.team&&x!==c).sort((x,y)=>dist(c,x)-dist(c,y))[0],selfLow=c.hp<c.maxHp*.3,allyLow=a&&a.hp<a.maxHp*.3;if(selfLow||allyLow){c.vespaPassiveCd=time+90;for(const u of [c,allyLow?a:null].filter(Boolean)){u.shield=Math.max(u.shield||0,c.maxHp*.5);u.shieldT=Math.max(u.shieldT||0,3.5);fx.push({type:'vsGuard',x:u.x,y:u.y,r:u.r*2,t:0,life:.72});}c.vespaFuryUntil=time+5;text(c.x,c.y-c.r-E(54),'지키겠습니다.','#ffdb48',true,.9);sfxPlay('ult',c.x,c.y,.9,1.1);}}}}
-function drawVespaFx(g,f,k){const e=easeOut(k);g.save();g.translate(f.x,f.y);g.globalAlpha=1-k;if(f.type==='vsSlash'){g.rotate(f.ang||0);g.strokeStyle='#fff0a0';g.lineWidth=E(10)*(1-k);g.beginPath();g.arc(0,0,f.r*(.5+e),-.95,.95);g.stroke();g.strokeStyle='#f4c52c';g.lineWidth=E(4);g.beginPath();g.arc(0,0,f.r*(.55+e),-.9,.9);g.stroke();}else if(f.type==='vsStick'||f.type==='vsRecall'){g.strokeStyle='#f4c52c';g.lineWidth=E(4)*(1-k);g.beginPath();g.arc(0,0,f.r*(.5+e),0,7);g.stroke();for(let i=0;i<Math.min(8,f.count||1);i++){const a=i/Math.max(1,Math.min(8,f.count||1))*Math.PI*2;g.beginPath();g.moveTo(Math.cos(a)*f.r*.6,Math.sin(a)*f.r*.6);g.lineTo(Math.cos(a)*f.r*1.35,Math.sin(a)*f.r*1.35);g.stroke();}}else{g.rotate(f.ang||0);g.strokeStyle='#fff0a0';g.lineWidth=E(6)*(1-k);g.beginPath();g.arc(0,0,f.r||E(55),-1.1,1.1);g.stroke();g.strokeStyle='#f4c52c';g.lineWidth=E(2);g.stroke();}g.restore();}
+function drawVespaFx(g,f,k){
+ const e=easeOut(k),fade=1-k,r=Math.max(E(24),f.r||E(58)),gold='#ffd52e',bright='#fff5a6',black='#17130a';
+ g.save();g.translate(f.x,f.y);g.globalAlpha=fade;
+ // 모든 베스파 효과에 황금빛 외곽광과 검은 잔상을 공통 적용
+ g.shadowColor=gold;g.shadowBlur=E(18);
+ if(f.type==='vsSlash'){
+  g.rotate(f.ang||0);
+  for(let j=0;j<3;j++){g.strokeStyle=j===0?black:j===1?gold:bright;g.lineWidth=E(j===0?13:j===1?7:2)*(1-k);g.beginPath();g.arc(0,0,r*(.48+e*.55)+E(j*5),-.98+j*.09,.98-j*.09);g.stroke();}
+  for(let i=0;i<9;i++){const a=-.9+i*.225,rr=r*(.65+e*.42);g.fillStyle=i%3?bright:black;g.beginPath();g.arc(Math.cos(a)*rr,Math.sin(a)*rr,E(2.2)*(1-k),0,7);g.fill();}
+ }else if(f.type==='vsStick'||f.type==='vsRecall'){
+  g.rotate(time*1.8);
+  g.strokeStyle=black;g.lineWidth=E(8)*(1-k);g.beginPath();g.arc(0,0,r*(.55+e*.22),0,7);g.stroke();
+  g.strokeStyle=gold;g.lineWidth=E(4)*(1-k);g.beginPath();g.arc(0,0,r*(.55+e*.22),0,7);g.stroke();
+  const count=Math.min(12,f.count||5);for(let i=0;i<count;i++){const a=i/count*Math.PI*2+time*2,rr=r*(.65+e*.5);g.save();g.rotate(a);g.fillStyle=i%2?bright:black;g.beginPath();g.moveTo(rr,-E(3));g.lineTo(rr+E(13)*(1-k),0);g.lineTo(rr,E(3));g.closePath();g.fill();g.restore();}
+ }else if(f.type==='vsGuard'){
+  const a=f.ang||0;g.rotate(a);
+  // 전방 방어막: 검은 테두리 안쪽에 밝은 금빛 방패 문양
+  g.fillStyle='rgba(15,12,5,.35)';g.beginPath();g.moveTo(0,-r*.9);g.quadraticCurveTo(r*1.2,-r*.5,r*1.05,r*.35);g.quadraticCurveTo(0,r*1.35,-r*1.05,r*.35);g.quadraticCurveTo(-r*1.2,-r*.5,0,-r*.9);g.fill();
+  g.strokeStyle=black;g.lineWidth=E(12)*(1-k);g.beginPath();g.arc(0,0,r, a?-.8:-.95, a? .8:.95);g.stroke();
+  g.strokeStyle=gold;g.lineWidth=E(7)*(1-k);g.beginPath();g.arc(0,0,r,-.92,.92);g.stroke();
+  g.strokeStyle=bright;g.lineWidth=E(2.5)*(1-k);g.beginPath();g.arc(0,0,r-E(5),-.8,.8);g.stroke();
+ }else{
+  // 스킬 발동/궁극기: 다중 파동과 방사형 금빛 파편
+  g.rotate(f.ang||0);
+  for(let j=0;j<3;j++){g.strokeStyle=j===0?black:j===1?gold:bright;g.lineWidth=E(j===0?12:j===1?6:2)*(1-k);g.beginPath();g.arc(0,0,r*(.28+e*.95)+E(j*7),-1.05+j*.12,1.05-j*.12);g.stroke();}
+  for(let i=0;i<16;i++){const a=i/16*Math.PI*2+time*.7,inner=r*(.3+e*.35),outer=r*(.8+e*.65);g.save();g.rotate(a);g.fillStyle=i%3===0?black:(i%2?gold:bright);g.beginPath();g.moveTo(inner,-E(3));g.lineTo(outer,0);g.lineTo(inner,E(3));g.closePath();g.fill();g.restore();}
+ }
+ // 주변에 튀는 작은 별빛 입자
+ for(let i=0;i<7;i++){const a=i/7*Math.PI*2+time*1.5,rr=r*(.72+e*.42);g.fillStyle=i%2?bright:black;g.beginPath();g.arc(Math.cos(a)*rr,Math.sin(a)*rr,E(2.4)*(1-k),0,7);g.fill();}
+ g.shadowBlur=0;g.restore();
+}
 function castExtraSkill(c,key,ang,frac){
  if(c.key==='vespa'){
   const n=rk(c,key),cds={Q:[9,8.5,8,7.5],W:[14,13,12,11],E:[18,17,16,15],R:[105,90,75]},cd=cds[key][n],gold='#f4c52c';
@@ -13452,6 +13482,19 @@ function drawChamp(g, c) {
   g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(c.x, c.y + E(10), c.r * shd, c.r * .6 * shd, 0, 0, 7); g.fill();
   const jk = c.joltT > 0 ? c.joltT / .12 : 0;
   g.save(); g.translate(c.joltX * jk || 0, -lift + (c.joltY * jk || 0));
+  if (c.key === 'vespa' && c.vespaFuryUntil > time) { // 패시브 피해량 +15%: 실제 버프 시간에만 지속되는 황금 아우라
+    const remain = Math.max(0, Math.min(1, (c.vespaFuryUntil - time) / .45));
+    const pulse = .5 + .5 * Math.sin(time * 9), spin = time * 1.9, ar = c.r * (1.48 + pulse * .12);
+    g.save(); g.translate(c.x, c.y);
+    g.globalAlpha = .72 * remain;
+    g.shadowColor = '#ffd52e'; g.shadowBlur = E(24);
+    g.fillStyle = 'rgba(255,205,28,.13)'; g.beginPath(); g.arc(0,0,ar*1.22,0,Math.PI*2); g.fill();
+    g.strokeStyle = '#17130a'; g.lineWidth = E(7); g.beginPath(); g.arc(0,0,ar*1.13,0,Math.PI*2); g.stroke();
+    g.strokeStyle = '#ffc928'; g.lineWidth = E(4); g.beginPath(); g.arc(0,0,ar*(1.02+pulse*.08),0,Math.PI*2); g.stroke();
+    g.strokeStyle = '#fff2a0'; g.lineWidth = E(1.8); g.setLineDash([E(9),E(7)]); g.lineDashOffset = -time*E(35); g.beginPath(); g.arc(0,0,ar*1.34,0,Math.PI*2); g.stroke(); g.setLineDash([]);
+    for (let i=0;i<10;i++) { const a=spin+i/10*Math.PI*2, rr=ar*(.92+.12*Math.sin(time*5+i)); g.save(); g.rotate(a); g.fillStyle=i%3===0?'#17130a':(i%2?'#fff4a8':'#ffd52e'); g.beginPath(); g.moveTo(rr,-E(3)); g.lineTo(rr+E(10),0); g.lineTo(rr,E(3)); g.closePath(); g.fill(); g.restore(); }
+    g.shadowBlur=0; g.restore();
+  }
   if (c.iceT > 0) drawIceAura(g, c);
   if (c.vampT > 0) {                                                   // 이상 R 이후 흡혈: 회색 깃털 고리
     for (let i = 0; i < 6; i++) { const a = time * 1.2 + i / 6 * Math.PI * 2; feather(g, c.x + Math.cos(a) * c.r * 1.6, c.y + Math.sin(a) * c.r * 1.6, a + Math.PI / 2, E(10)); }
