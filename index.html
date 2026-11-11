@@ -19841,7 +19841,7 @@ $('shopBtn').addEventListener('click', () => openShop(!shopOpen));
 addEventListener('keydown', e => { if (spectating || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; if (e.key.toLowerCase() === 'p') openShop(!shopOpen); if (e.key === 'Escape' && shopOpen) openShop(false); });
 
 // ═════════════ 점수판 (탭) ═════════════
-const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', bot:'#7a3438'};
+const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', bot:'#7a3438'};
 const TEAM_SIZE = 5;
 let boardOpen = false, boardT = 0;
 function openBoard(on) {
