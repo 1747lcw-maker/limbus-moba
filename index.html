@@ -3947,35 +3947,53 @@ function vespaStick(c,t,amount,kind){if(!c.vespaSpears)c.vespaSpears=[];c.vespaS
 function vespaRecall(c){const list=(c.vespaSpears||[]).filter(s=>s.tgt&&s.tgt.alive&&s.tgt.team!==c.team);if(!list.length){c.vespaWReady=false;return false;}const per=new Map();for(const s of list)per.set(s.tgt,(per.get(s.tgt)||0)+s.amount);for(const [u,total] of per){const n=list.filter(s=>s.tgt===u).length;damage(c,u,total*.42+n*(18+c.ad*.12),{skill:true,type:'physical',color:'#f4c52c'});fx.push({type:'vsRecall',x:u.x,y:u.y,r:u.r*2,t:0,life:.58,count:n});}c.vespaSpears=[];c.vespaWReady=false;sfxPlay('swing',c.x,c.y,1.15,.72);text(c.x,c.y-c.r-E(48),'회수!','#ffd84a',true,.8);return true;}
 function vespaTick(c,dt){if(!c.alive)return;c.vespaPassiveThink=(c.vespaPassiveThink||0)-dt;if(c.vespaPassiveThink<=0){c.vespaPassiveThink=.12;if(time>=(c.vespaPassiveCd||0)){const a=champs().filter(x=>x.alive&&x.team===c.team&&x!==c).sort((x,y)=>dist(c,x)-dist(c,y))[0],selfLow=c.hp<c.maxHp*.3,allyLow=a&&a.hp<a.maxHp*.3;if(selfLow||allyLow){c.vespaPassiveCd=time+90;for(const u of [c,allyLow?a:null].filter(Boolean)){u.shield=Math.max(u.shield||0,c.maxHp*.5);u.shieldT=Math.max(u.shieldT||0,3.5);fx.push({type:'vsGuard',x:u.x,y:u.y,r:u.r*2,t:0,life:.72});}c.vespaFuryUntil=time+5;text(c.x,c.y-c.r-E(54),'지키겠습니다.','#ffdb48',true,.9);sfxPlay('ult',c.x,c.y,.9,1.1);}}}}
 function drawVespaFx(g,f,k){
- const e=easeOut(k),fade=1-k,r=Math.max(E(24),f.r||E(58)),gold='#ffd52e',bright='#fff5a6',black='#17130a';
+ const e=easeOut(k),fade=1-k,r=Math.max(E(24),f.r||E(58)),gold='#ffd21f',bright='#fffbd0',white='#ffffff',black='#17130a';
+ const pulse=.82+Math.sin(time*18)*.18,spread=1+e*.9;
  g.save();g.translate(f.x,f.y);g.globalAlpha=fade;
- // 모든 베스파 효과에 황금빛 외곽광과 검은 잔상을 공통 적용
- g.shadowColor=gold;g.shadowBlur=E(18);
+ // 강한 외곽 발광과 밝은 중심광을 겹쳐 작은 화면에서도 선명하게 표시
+ g.globalCompositeOperation='lighter';g.shadowColor=gold;g.shadowBlur=E(34);
+ g.strokeStyle='rgba(255,211,35,.34)';g.lineWidth=E(15)*(1-k);
+ g.beginPath();g.arc(0,0,r*(.42+e*.78),0,Math.PI*2);g.stroke();
+ g.shadowBlur=E(16);
  if(f.type==='vsSlash'){
   g.rotate(f.ang||0);
-  for(let j=0;j<3;j++){g.strokeStyle=j===0?black:j===1?gold:bright;g.lineWidth=E(j===0?13:j===1?7:2)*(1-k);g.beginPath();g.arc(0,0,r*(.48+e*.55)+E(j*5),-.98+j*.09,.98-j*.09);g.stroke();}
-  for(let i=0;i<9;i++){const a=-.9+i*.225,rr=r*(.65+e*.42);g.fillStyle=i%3?bright:black;g.beginPath();g.arc(Math.cos(a)*rr,Math.sin(a)*rr,E(2.2)*(1-k),0,7);g.fill();}
+  // 넓은 초승달형 검격: 어두운 외곽선 + 금빛 본체 + 백색 중심선
+  for(let j=0;j<5;j++){
+   const widths=[E(25),E(17),E(9),E(4),E(1.5)];
+   g.strokeStyle=[black,'#ff9f00',gold,bright,white][j];g.lineWidth=widths[j]*(1-k*.72);
+   g.shadowBlur=E(j===0?5:25);
+   g.beginPath();g.ellipse(0,0,r*(.72+e*.58),r*(.24+e*.12),0,-1.12+j*.025,1.12-j*.025);g.stroke();
+  }
+  // 검격을 따라 튀는 긴 불꽃 파편
+  for(let i=0;i<22;i++){
+   const a=-1.18+i*.112,rr=r*(.56+e*.72),len=E(7+(i%4)*4)*(1-k*.5);
+   g.save();g.rotate(a);g.fillStyle=i%4===0?white:(i%2?gold:bright);
+   g.shadowBlur=E(18);g.beginPath();g.moveTo(rr,-len*.35);g.lineTo(rr+len*2.2,0);g.lineTo(rr,len*.35);g.closePath();g.fill();g.restore();
+  }
  }else if(f.type==='vsStick'||f.type==='vsRecall'){
-  g.rotate(time*1.8);
-  g.strokeStyle=black;g.lineWidth=E(8)*(1-k);g.beginPath();g.arc(0,0,r*(.55+e*.22),0,7);g.stroke();
-  g.strokeStyle=gold;g.lineWidth=E(4)*(1-k);g.beginPath();g.arc(0,0,r*(.55+e*.22),0,7);g.stroke();
-  const count=Math.min(12,f.count||5);for(let i=0;i<count;i++){const a=i/count*Math.PI*2+time*2,rr=r*(.65+e*.5);g.save();g.rotate(a);g.fillStyle=i%2?bright:black;g.beginPath();g.moveTo(rr,-E(3));g.lineTo(rr+E(13)*(1-k),0);g.lineTo(rr,E(3));g.closePath();g.fill();g.restore();}
+  g.rotate(time*2.3);
+  for(let j=0;j<4;j++){g.strokeStyle=[black,'#ff9f00',gold,white][j];g.lineWidth=E([15,10,5,2][j])*(1-k*.7);g.shadowBlur=E(22);g.beginPath();g.arc(0,0,r*(.48+e*.38)+E(j*5),.15+j*.12,Math.PI*1.85-j*.12);g.stroke();}
+  const count=Math.min(20,Math.max(10,f.count||14));
+  for(let i=0;i<count;i++){const a=i/count*Math.PI*2+time*2.6,rr=r*(.55+e*.72);g.save();g.rotate(a);g.fillStyle=i%4===0?white:(i%2?gold:bright);g.shadowBlur=E(20);g.beginPath();g.moveTo(rr,-E(4));g.lineTo(rr+E(19)*(1-k*.45),0);g.lineTo(rr,E(4));g.closePath();g.fill();g.restore();}
  }else if(f.type==='vsGuard'){
   const a=f.ang||0;g.rotate(a);
-  // 전방 방어막: 검은 테두리 안쪽에 밝은 금빛 방패 문양
-  g.fillStyle='rgba(15,12,5,.35)';g.beginPath();g.moveTo(0,-r*.9);g.quadraticCurveTo(r*1.2,-r*.5,r*1.05,r*.35);g.quadraticCurveTo(0,r*1.35,-r*1.05,r*.35);g.quadraticCurveTo(-r*1.2,-r*.5,0,-r*.9);g.fill();
-  g.strokeStyle=black;g.lineWidth=E(12)*(1-k);g.beginPath();g.arc(0,0,r, a?-.8:-.95, a? .8:.95);g.stroke();
-  g.strokeStyle=gold;g.lineWidth=E(7)*(1-k);g.beginPath();g.arc(0,0,r,-.92,.92);g.stroke();
-  g.strokeStyle=bright;g.lineWidth=E(2.5)*(1-k);g.beginPath();g.arc(0,0,r-E(5),-.8,.8);g.stroke();
+  // 전방 방패를 큰 반투명 면과 겹겹의 발광 테두리로 강조
+  g.fillStyle='rgba(255,205,35,.2)';g.beginPath();g.moveTo(0,-r*1.05);g.quadraticCurveTo(r*1.45,-r*.62,r*1.28,r*.42);g.quadraticCurveTo(0,r*1.62,-r*1.28,r*.42);g.quadraticCurveTo(-r*1.45,-r*.62,0,-r*1.05);g.fill();
+  for(let j=0;j<4;j++){g.strokeStyle=[black,'#ff9f00',gold,white][j];g.lineWidth=E([17,12,7,2.5][j])*(1-k*.65);g.shadowBlur=E(24);g.beginPath();g.arc(0,0,r*(1+j*.045),-.98,.98);g.stroke();}
+  for(let i=0;i<13;i++){const a=-.92+i*.153;g.save();g.rotate(a);g.fillStyle=i%3?bright:white;g.shadowBlur=E(20);g.beginPath();g.moveTo(r*.78,-E(3));g.lineTo(r*1.45,0);g.lineTo(r*.78,E(3));g.closePath();g.fill();g.restore();}
  }else{
-  // 스킬 발동/궁극기: 다중 파동과 방사형 금빛 파편
+  // 투척/궁극기: 넓은 충격파, 방사형 창날, 중심 섬광
   g.rotate(f.ang||0);
-  for(let j=0;j<3;j++){g.strokeStyle=j===0?black:j===1?gold:bright;g.lineWidth=E(j===0?12:j===1?6:2)*(1-k);g.beginPath();g.arc(0,0,r*(.28+e*.95)+E(j*7),-1.05+j*.12,1.05-j*.12);g.stroke();}
-  for(let i=0;i<16;i++){const a=i/16*Math.PI*2+time*.7,inner=r*(.3+e*.35),outer=r*(.8+e*.65);g.save();g.rotate(a);g.fillStyle=i%3===0?black:(i%2?gold:bright);g.beginPath();g.moveTo(inner,-E(3));g.lineTo(outer,0);g.lineTo(inner,E(3));g.closePath();g.fill();g.restore();}
+  for(let j=0;j<5;j++){g.strokeStyle=[black,'#ff9700',gold,bright,white][j];g.lineWidth=E([17,12,8,4,1.5][j])*(1-k*.72);g.shadowBlur=E(26);g.beginPath();g.arc(0,0,r*(.25+e*1.25)+E(j*5),-1.18+j*.12,1.18-j*.12);g.stroke();}
+  for(let i=0;i<24;i++){const a=i/24*Math.PI*2+time*.9,inner=r*(.22+e*.28),outer=r*(.88+e*.92);g.save();g.rotate(a);g.fillStyle=i%6===0?white:(i%2?gold:bright);g.shadowBlur=E(20);g.beginPath();g.moveTo(inner,-E(4));g.lineTo(outer,0);g.lineTo(inner,E(4));g.closePath();g.fill();g.restore();}
+  g.fillStyle='rgba(255,244,170,.8)';g.shadowBlur=E(38);g.beginPath();g.arc(0,0,r*.2*pulse,0,Math.PI*2);g.fill();
  }
- // 주변에 튀는 작은 별빛 입자
- for(let i=0;i<7;i++){const a=i/7*Math.PI*2+time*1.5,rr=r*(.72+e*.42);g.fillStyle=i%2?bright:black;g.beginPath();g.arc(Math.cos(a)*rr,Math.sin(a)*rr,E(2.4)*(1-k),0,7);g.fill();}
- g.shadowBlur=0;g.restore();
+ // 모든 베스파 스킬 공통: 큰 회전 룬 고리와 별 모양 섬광
+ g.rotate(-time*1.15);
+ for(let j=0;j<2;j++){g.strokeStyle=j?bright:gold;g.lineWidth=E(j?2:3)*(1-k);g.setLineDash([E(8),E(7)]);g.beginPath();g.arc(0,0,r*(1.05+e*.58+j*.1),0,Math.PI*2);g.stroke();}
+ g.setLineDash([]);
+ for(let i=0;i<12;i++){const a=i/12*Math.PI*2+time*1.8,rr=r*(.8+e*.88);g.save();g.rotate(a);g.fillStyle=i%3===0?white:gold;g.shadowBlur=E(25);g.beginPath();g.moveTo(rr,-E(3));g.lineTo(rr+E(10),0);g.lineTo(rr,E(3));g.lineTo(rr-E(5),0);g.closePath();g.fill();g.restore();}
+ g.globalCompositeOperation='source-over';g.shadowBlur=0;g.restore();
 }
 function castExtraSkill(c,key,ang,frac){
  if(c.key==='vespa'){
