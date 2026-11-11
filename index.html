@@ -915,6 +915,7 @@ function visionUpdate(only) {
       if (u.structure) { const c = u.visCells || (u.visCells = visCells(u.x, u.y, u.kind === 'nexus' ? SIGHT.nexus : SIGHT.turret)); for (let k = 0; k < c.length; k++) arr[c[k]] = 1; }
       else if (isChamp(u)) castVision(arr, u.x, u.y, SIGHT.champ * (u.chE ? KCH.E.sight : 1));
       else if (isMinion(u)) visStamp(arr, u.x, u.y, SIGHT.minion);
+      else if(u.kind==='gachiuJaro')visStamp(arr,u.x,u.y,E(360));
       else if (u.kind === 'bongy') visStamp(arr, u.x, u.y, E(450));
       else if (u.kind === 'siege') visStamp(arr, u.x, u.y, SIGHT.siege);
     }
@@ -11665,7 +11666,7 @@ function updateStructure(s, dt) {
   if (!inRange(s.target)) {
     s.target = null;
     let bd = Infinity;
-    for (const u of units) if ((isMinion(u) || u.kind === 'siege' || u.kind === 'bongy') && inRange(u) && dist(s, u) < bd) { bd = dist(s, u); s.target = u; }
+    for (const u of units) if ((isMinion(u) || u.kind === 'siege' || u.kind === 'bongy' || u.kind === 'gachiuJaro') && inRange(u) && dist(s, u) < bd) { bd = dist(s, u); s.target = u; }
     if (!s.target) for (const c of champs()) if (inRange(c)) { s.target = c; break; }
   }
   if (s.target && s.atkT <= 0) {
@@ -13136,7 +13137,7 @@ function update(dt) {
   }
 
   const movers = units.filter(u => u.alive && !u.pull && !u.leap && !u.hidden && !(u.dash && u.dash.don) && !u.xcDash &&   // 돈키호테 돌진은 벽 통과
-    (isMinion(u) || isChamp(u) || isMonster(u) || (u.kind === 'bongy' && !u.bpDash)));   // 끌려가거나 점프 중이면 밀어내기 제외
+    (isMinion(u) || isChamp(u) || isMonster(u) || u.kind === 'gachiuJaro' || (u.kind === 'bongy' && !u.bpDash)));   // 끌려가거나 점프 중이면 밀어내기 제외
   for (let i = 0; i < movers.length; i++) for (let j = i + 1; j < movers.length; j++) {
     const a = movers[i], b = movers[j];
     const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, min = a.r + b.r;
