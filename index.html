@@ -13679,7 +13679,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -13695,6 +13695,7 @@ function drawChamp(g, c) {
   if (c.flashT > 0) { g.fillStyle = `rgba(255,255,255,${Math.min(1, c.flashT / .1) * .85})`; g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.fill(); }
   if (!window.__mvpDraw) { g.strokeStyle = c.flashT > 0 ? '#ffffff' : sideCol(c); g.lineWidth = E(5); g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.stroke(); }
   if (c.key === 'roland') drawRolandBody(g,c);
+  if (c.key === 'blueReverb') drawBlueReverbBody(g,c);
   if (c.key === 'liuEn') drawLiuEnBody(g,c);
   if (c.key === 'gachiu') drawGachiuBody(g,c);
   if (c.gachiuAuraUntil > time) drawGachiuAura(g,c);
@@ -13902,6 +13903,60 @@ function drawLiuEnBody(g,c){
  }
  // 가면 주위의 먹물 잔상
  g.save();g.globalAlpha=.24+.12*Math.sin(time*6);g.strokeStyle='#92949e';g.lineWidth=E(2);g.setLineDash([E(5),E(7)]);g.beginPath();g.arc(c.x,c.y,r*2.18,time*.2,time*.2+Math.PI*1.6);g.stroke();g.setLineDash([]);g.restore();
+}
+
+// 푸른 잔향: 청색·은색 의상과 세부 장식이 살아 있는 대형 초승달 낫
+function drawBlueReverbBody(g,c){
+ const a=c.face||0,r=c.r,navy='#102b50',blue='#24558b',bright='#6fbaff',silver='#cbd8e8',white='#f1f6ff',dark='#172437';
+ g.save();g.translate(c.x,c.y);g.rotate(a);
+ const sway=Math.sin(time*2.1)*.035;
+ // 낫 자루와 거대한 초승달 칼날은 몸 뒤쪽에 배치
+ g.save();g.rotate(sway);
+ g.lineCap='round';g.lineJoin='round';
+ g.shadowColor='#4a9fff';g.shadowBlur=E(13);
+ const shaft=g.createLinearGradient(-r*1.55,-r*2.7,-r*.05,r*.75);
+ shaft.addColorStop(0,'#edf4ff');shaft.addColorStop(.28,'#6484aa');shaft.addColorStop(.52,'#dce8f7');shaft.addColorStop(1,'#24456c');
+ g.strokeStyle=dark;g.lineWidth=E(8);g.beginPath();g.moveTo(-r*.12,r*.65);g.lineTo(-r*1.48,-r*2.45);g.stroke();
+ g.strokeStyle=shaft;g.lineWidth=E(5);g.beginPath();g.moveTo(-r*.12,r*.65);g.lineTo(-r*1.48,-r*2.45);g.stroke();
+ // 자루의 은색 연결 고리와 푸른 손잡이 띠
+ for(let i=0;i<5;i++){const t=.16+i*.15,x=-r*.12-r*1.36*t,y=r*.65-r*3.1*t;g.strokeStyle=i%2?bright:silver;g.lineWidth=E(i%2?2:3);g.beginPath();g.moveTo(x-E(3),y-E(5));g.lineTo(x+E(3),y+E(5));g.stroke();}
+ // 낫 머리의 금속 소켓
+ g.fillStyle=silver;g.strokeStyle=dark;g.lineWidth=E(2);g.beginPath();g.ellipse(-r*1.48,-r*2.45,r*.19,r*.24,-.45,0,Math.PI*2);g.fill();g.stroke();
+ g.strokeStyle=bright;g.lineWidth=E(2);g.beginPath();g.arc(-r*1.48,-r*2.45,r*.14,-2.7,.5);g.stroke();
+ // 날의 두 겹 곡선: 은빛 본체와 푸른 외곽선
+ const blade=g.createLinearGradient(-r*2.9,-r*3.6,-r*.9,-r*1.7);
+ blade.addColorStop(0,'#f7fbff');blade.addColorStop(.38,'#b8c9df');blade.addColorStop(.72,'#e8f1fb');blade.addColorStop(1,'#6b91bb');
+ g.shadowColor='#5daeff';g.shadowBlur=E(18);
+ g.fillStyle=blade;g.strokeStyle='#18395f';g.lineWidth=E(3);
+ g.beginPath();g.moveTo(-r*1.48,-r*2.45);
+ g.bezierCurveTo(-r*2.12,-r*2.12,-r*2.12,-r*1.1,-r*2.92,-r*.46);
+ g.bezierCurveTo(-r*2.52,-r*1.82,-r*2.43,-r*2.68,-r*1.48,-r*2.45);
+ g.closePath();g.fill();g.stroke();
+ g.shadowBlur=0;
+ g.strokeStyle=white;g.lineWidth=E(1.8);g.beginPath();g.moveTo(-r*1.55,-r*2.39);g.bezierCurveTo(-r*2.18,-r*2.03,-r*2.18,-r*1.2,-r*2.76,-r*.62);g.stroke();
+ // 칼날 안쪽의 푸른 홈과 각인
+ g.strokeStyle='#4d91d1';g.lineWidth=E(2.2);g.beginPath();g.moveTo(-r*1.68,-r*2.35);g.bezierCurveTo(-r*2.08,-r*2.03,-r*2.13,-r*1.58,-r*2.42,-r*1.12);g.stroke();
+ for(let i=0;i<4;i++){const x=-r*(1.78+i*.13),y=-r*(2.12-i*.27);g.save();g.translate(x,y);g.rotate(-.72);g.strokeStyle=i%2?white:bright;g.lineWidth=E(1.25);g.beginPath();g.moveTo(-E(3),0);g.lineTo(0,-E(4));g.lineTo(E(3),0);g.stroke();g.restore();}
+ g.restore();
+ // 길게 떨어지는 청색 코트와 은색 안감
+ g.fillStyle='rgba(3,12,25,.38)';g.beginPath();g.ellipse(-r*.08,r*.25,r*.98,r*.76,0,0,7);g.fill();
+ g.fillStyle=navy;g.strokeStyle=silver;g.lineWidth=E(1.8);g.beginPath();
+ g.moveTo(-r*.72,-r*.35);g.lineTo(-r*.48,r*.42);g.lineTo(-r*.82,r*1.12);g.lineTo(-r*.12,r*.82);g.lineTo(r*.18,r*1.22);g.lineTo(r*.68,r*.42);g.lineTo(r*.58,-r*.42);g.lineTo(0,-r*.7);g.closePath();g.fill();g.stroke();
+ g.fillStyle=blue;g.beginPath();g.moveTo(-r*.18,-r*.48);g.lineTo(r*.12,-r*.48);g.lineTo(r*.36,r*.95);g.lineTo(-r*.05,r*.72);g.closePath();g.fill();
+ g.strokeStyle=bright;g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.48,r*.35);g.lineTo(-r*.65,r*.94);g.moveTo(r*.46,r*.35);g.lineTo(r*.2,r*.98);g.stroke();
+ // 어깨의 은색 견갑과 푸른 금속 테두리
+ for(const side of [-1,1]){g.fillStyle='#6f89a8';g.strokeStyle=white;g.lineWidth=E(1.5);g.beginPath();g.moveTo(side*r*.22,-r*.47);g.lineTo(side*r*.78,-r*.55);g.lineTo(side*r*.9,-r*.12);g.lineTo(side*r*.42,r*.02);g.closePath();g.fill();g.stroke();g.strokeStyle=bright;g.lineWidth=E(2);g.beginPath();g.moveTo(side*r*.34,-r*.37);g.lineTo(side*r*.72,-r*.43);g.stroke();}
+ // 목과 얼굴, 뒤로 흐르는 푸른 머리카락
+ g.fillStyle='#d7e1ef';g.beginPath();g.arc(0,-r*.56,r*.39,0,7);g.fill();
+ g.fillStyle='#102c51';g.beginPath();g.moveTo(-r*.39,-r*.68);g.quadraticCurveTo(-r*.24,-r*1.18,r*.22,-r*.95);g.lineTo(r*.42,-r*.48);g.lineTo(r*.12,-r*.64);g.lineTo(-r*.12,-r*.42);g.closePath();g.fill();
+ g.fillStyle='#3975b0';g.beginPath();g.moveTo(-r*.25,-r*.72);g.quadraticCurveTo(-r*.8,-r*.35,-r*.55,r*.38);g.lineTo(-r*.33,r*.08);g.lineTo(-r*.14,-r*.52);g.closePath();g.fill();
+ // 얼굴을 가로지르는 은빛 장식과 눈의 푸른 반사광
+ g.strokeStyle=silver;g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.25,-r*.58);g.lineTo(r*.28,-r*.58);g.stroke();
+ g.fillStyle=bright;g.shadowColor=bright;g.shadowBlur=E(7);g.fillRect(r*.08,-r*.61,E(4),E(2));g.shadowBlur=0;
+ // 가슴의 은색 공명 문양
+ g.strokeStyle=white;g.lineWidth=E(1.7);g.beginPath();g.moveTo(0,-r*.25);g.lineTo(r*.13,-r*.05);g.lineTo(0,r*.14);g.lineTo(-r*.13,-r*.05);g.closePath();g.stroke();
+ g.strokeStyle=bright;g.lineWidth=E(1.2);g.beginPath();g.arc(0,-r*.05,r*.2,-2.5,.7);g.stroke();
+ g.restore();
 }
 
 // 가치우: 검은 한푸, 붉은 비단 장포, 금빛 머리 장식과 부적 장봉
@@ -21993,6 +22048,7 @@ const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8
 const cxClassHtml = k => (CX_CLASS[k] || []).map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join('');
 const cxCol = k => {
   if (k === 'roland') return '#090a0d';
+  if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
   if (k === 'liuEn') return '#41464f';
   if (k === 'gachiu') return '#d12b9a';
   if (k === 'vespa') return '#d5aa16';
