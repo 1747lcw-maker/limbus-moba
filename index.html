@@ -3434,6 +3434,7 @@ function damage(src, tgt, amount, opts = {}) {
   }
   if (src && src.key === 'heathcliff' && tgt.team !== src.team && !tgt.structure && !opts.noStack && !opts.noBleed && (opts.basic || opts.skill)) hcBleedAdd(src, tgt);   // 뼈 부수기: 출혈
   if (tgt.key === 'vergil' && tgt.vgParryT > time && src && isChamp(src) && src.team !== tgt.team && !opts.noParry && !(opts.noProc && !opts.skill)) { vgParry(tgt, src); return; }   // 간파
+  if(src&&src.key==='vespa'&&src.vespaFuryUntil>time)amount*=1.15;
   if (src && src.vgGaze > time) amount *= 1 + KVG.P.dmgUp;                                  // 붉은시선 개안
   if (src && src.spGasT > time) amount *= 1 - SPELLS.gas.weak;
   if(isChamp(src)&&src.key==='liuEn'&&tgt.liuOrderBy===src)amount*=1.2;                               // 착란 가스: 주는 피해 감소
@@ -3830,6 +3831,7 @@ function basicAttack(c, t) {
   if (c.key === 'thoma' && !t.structure) dmg = tmBasic(c, t, dmg);   // 사지절단
   if (c.key === 'charon' && !t.structure) dmg = chBasic(c, t, dmg);   // 민폐 승객 정리 표식   // 붉은시선: 열기 · 표식 추가 피해   // 정화: 망치로 내려침
   if (c.key === 'yuri') yuriBeam(c, t, dmg, crit);                  // 광선 평타
+  else if(c.key==='vespa'){vespaThrow(c,t,dmg,'basic');}
   else if (c.st.ranged) { if (c.key === 'dongbaek') dbTwinShot(c, t, dmg, crit); projectiles.push({x:c.x + Math.cos(c.face + .5) * c.r, y:c.y + Math.sin(c.face + .5) * c.r, tgt:t, src:c, amount:dmg, speed:E(c.key === 'outis' || c.key === 'saude' ? 2400 : 1500), color:'#ffc4dc', size:E(7), opts:{basic:true, crit, alW:alUseW(c)}, alyssa:c.key === 'alyssa', faust:c.key === 'faust', outis:c.key === 'outis', saude:c.key === 'saude', honglu:c.key === 'honglu', hoh:c.key === 'hohenheim', lastShot:c.key === 'outis' && c.ammo <= 0}); }   // 원거리: 투사체
   else damage(c, t, dmg, enhanced ? {color:'#d9a066', basic:true, skill:true, crit} : {basic:true, crit});
   if (c.key === 'meursault') mrPassive(c, t);                      // 이방인
@@ -3939,7 +3941,22 @@ function liuDamage(c,u,amount,key){
  if(u.liuOrderBy===c&&key!=='R'&&!c.liuCdrUsed){c.cd[key]=Math.max(0,(c.cd[key]||0)-4);c.liuCdrUsed=true;fx.push({type:'lyCdr',x:c.x,y:c.y,r:c.r*2,t:0,life:.55});if(c===player)text(c.x,c.y-c.r-E(72),key+' 쿨타임 -4초','#a9e8ff',true,.75);}
 }
 function liuNearest(c,range,champOnly=false){return units.filter(u=>u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&!u.ward&&(!champOnly||isChamp(u))&&(!isChamp(u)||seenBy(c.team,u))&&dist(c,u)<=range).sort((a,b)=>(isChamp(b)?1:0)-(isChamp(a)?1:0)||dist(c,a)-dist(c,b))[0]||null;}
+function vespaFoes(c,range){return units.filter(u=>u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&!u.ward&&seenBy(c.team,u)&&dist(c,u)<=range);}
+function vespaThrow(c,t,amount,kind='basic'){if(!t||!t.alive)return;const a=Math.atan2(t.y-c.y,t.x-c.x);projectiles.push({x:c.x+Math.cos(a)*c.r,y:c.y+Math.sin(a)*c.r,tgt:t,src:c,amount,speed:E(kind==='ult'?1250:kind==='W'?1750:1450),color:'#f4c52c',size:E(kind==='ult'?12:kind==='W'?9:6),vespa:true,vespaKind:kind,opts:{basic:kind==='basic',skill:kind!=='basic',type:'physical',color:'#e8b928'}});}
+function vespaStick(c,t,amount,kind){if(!c.vespaSpears)c.vespaSpears=[];c.vespaSpears.push({tgt:t,amount,kind,at:time});fx.push({type:'vsStick',x:t.x,y:t.y,r:t.r*1.25,t:0,life:.38});}
+function vespaRecall(c){const list=(c.vespaSpears||[]).filter(s=>s.tgt&&s.tgt.alive&&s.tgt.team!==c.team);if(!list.length){c.vespaWReady=false;return false;}const per=new Map();for(const s of list)per.set(s.tgt,(per.get(s.tgt)||0)+s.amount);for(const [u,total] of per){const n=list.filter(s=>s.tgt===u).length;damage(c,u,total*.42+n*(18+c.ad*.12),{skill:true,type:'physical',color:'#f4c52c'});fx.push({type:'vsRecall',x:u.x,y:u.y,r:u.r*2,t:0,life:.58,count:n});}c.vespaSpears=[];c.vespaWReady=false;sfxPlay('swing',c.x,c.y,1.15,.72);text(c.x,c.y-c.r-E(48),'회수!','#ffd84a',true,.8);return true;}
+function vespaTick(c,dt){if(!c.alive)return;c.vespaPassiveThink=(c.vespaPassiveThink||0)-dt;if(c.vespaPassiveThink<=0){c.vespaPassiveThink=.12;if(time>=(c.vespaPassiveCd||0)){const a=champs().filter(x=>x.alive&&x.team===c.team&&x!==c).sort((x,y)=>dist(c,x)-dist(c,y))[0],selfLow=c.hp<c.maxHp*.3,allyLow=a&&a.hp<a.maxHp*.3;if(selfLow||allyLow){c.vespaPassiveCd=time+90;for(const u of [c,allyLow?a:null].filter(Boolean)){u.shield=Math.max(u.shield||0,c.maxHp*.5);u.shieldT=Math.max(u.shieldT||0,3.5);fx.push({type:'vsGuard',x:u.x,y:u.y,r:u.r*2,t:0,life:.72});}c.vespaFuryUntil=time+5;text(c.x,c.y-c.r-E(54),'지키겠습니다.','#ffdb48',true,.9);sfxPlay('ult',c.x,c.y,.9,1.1);}}}}
+function drawVespaFx(g,f,k){const e=easeOut(k);g.save();g.translate(f.x,f.y);g.globalAlpha=1-k;if(f.type==='vsSlash'){g.rotate(f.ang||0);g.strokeStyle='#fff0a0';g.lineWidth=E(10)*(1-k);g.beginPath();g.arc(0,0,f.r*(.5+e),-.95,.95);g.stroke();g.strokeStyle='#f4c52c';g.lineWidth=E(4);g.beginPath();g.arc(0,0,f.r*(.55+e),-.9,.9);g.stroke();}else if(f.type==='vsStick'||f.type==='vsRecall'){g.strokeStyle='#f4c52c';g.lineWidth=E(4)*(1-k);g.beginPath();g.arc(0,0,f.r*(.5+e),0,7);g.stroke();for(let i=0;i<Math.min(8,f.count||1);i++){const a=i/Math.max(1,Math.min(8,f.count||1))*Math.PI*2;g.beginPath();g.moveTo(Math.cos(a)*f.r*.6,Math.sin(a)*f.r*.6);g.lineTo(Math.cos(a)*f.r*1.35,Math.sin(a)*f.r*1.35);g.stroke();}}else{g.rotate(f.ang||0);g.strokeStyle='#fff0a0';g.lineWidth=E(6)*(1-k);g.beginPath();g.arc(0,0,f.r||E(55),-1.1,1.1);g.stroke();g.strokeStyle='#f4c52c';g.lineWidth=E(2);g.stroke();}g.restore();}
 function castExtraSkill(c,key,ang,frac){
+ if(c.key==='vespa'){
+  const n=rk(c,key),cds={Q:[9,8.5,8,7.5],W:[14,13,12,11],E:[18,17,16,15],R:[105,90,75]},cd=cds[key][n],gold='#f4c52c';
+  if(key==='W'&&c.vespaWReady){vespaRecall(c);return;}
+  if(key==='Q'){if(ang===null)ang=autoAim(c,E(470));c.face=ang;const t=vespaFoes(c,E(470)).filter(u=>Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-ang),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-ang)))<.72).sort((a,b)=>dist(c,a)-dist(c,b))[0];c.cd.Q=c.cdMax.Q=cd*hasteMul(c);if(t){const dx=t.x-c.x,dy=t.y-c.y,d=Math.hypot(dx,dy)||1,step=Math.max(0,d-E(90));c.x+=dx/d*step;c.y+=dy/d*step;damage(c,t,62+n*28+c.ad*.72,{skill:true,type:'physical',color:gold});fx.push({type:'vsSlash',x:t.x,y:t.y,ang:c.face,r:t.r*2,t:0,life:.48});}else{c.x+=Math.cos(ang)*E(230);c.y+=Math.sin(ang)*E(230);fx.push({type:'vsSlash',x:c.x,y:c.y,ang,r:E(90),t:0,life:.42});}c.x=Math.max(E(25),Math.min(W-E(25),c.x));c.y=Math.max(E(25),Math.min(H-E(25),c.y));sfxPlay('swing',c.x,c.y,1.05,1.18);return;}
+  if(key==='W'){if(ang===null)ang=autoAim(c,E(650));c.face=ang;const t=vespaFoes(c,E(650)).filter(u=>Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-ang),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-ang)))<.32).sort((a,b)=>dist(c,a)-dist(c,b))[0];if(!t)return;c.cd.W=c.cdMax.W=cd*hasteMul(c);c.vespaWReady=true;vespaThrow(c,t,105+n*38+c.ad*1.05,'W');fx.push({type:'vsCast',x:c.x,y:c.y,ang,r:E(100),t:0,life:.35});sfxPlay('gun',c.x,c.y,1.05,.72);return;}
+  if(key==='E'){if(ang===null)ang=c.face||0;c.face=ang;c.cd.E=c.cdMax.E=cd*hasteMul(c);c.vespaGuardUntil=time+.85;c.vespaGuardAng=ang;fx.push({type:'vsGuard',x:c.x,y:c.y,r:c.r*2.6,ang,t:0,life:.7});sfxPlay('clang',c.x,c.y,1.1,.8);text(c.x,c.y-c.r-E(42),'막고 튕기기','#ffe16a',true,.75);return;}
+  if(key==='R'){if(ang===null)ang=autoAim(c,E(750));const t=vespaFoes(c,E(750)).sort((a,b)=>{const aa=Math.atan2(a.y-c.y,a.x-c.x),ab=Math.atan2(b.y-c.y,b.x-c.x),da=Math.abs(Math.atan2(Math.sin(aa-ang),Math.cos(aa-ang))),db=Math.abs(Math.atan2(Math.sin(ab-ang),Math.cos(ab-ang)));return da-db||dist(c,a)-dist(c,b);})[0];if(!t)return;c.cd.R=c.cdMax.R=cd*hasteMul(c);vespaThrow(c,t,220+n*115+c.ad*1.55,'ult');fx.push({type:'vsCast',x:c.x,y:c.y,ang:Math.atan2(t.y-c.y,t.x-c.x),r:E(150),t:0,life:.5});sfxPlay('ult',c.x,c.y,1.2,.85);text(c.x,c.y-c.r-E(48),'노란작살!','#ffe16a',true,1);return;}
+ }
+
  if(c.key==='liuEn'){
   const n=rk(c,key),cds={Q:[8,7.5,7,6.5],W:[14,13,12,11],E:[16,15,14,13],R:[100,85,70]},cd=cds[key][n]*hasteMul(c);
   if(key==='R'&&c.liuFormUntil>time&&c.liuFuriosoReady&&!c.liuFurioso){const target=liuNearest(c,E(600),true);if(!target)return;c.liuFuriosoReady=false;target.stunT=Math.max(target.stunT||0,6.5);target.cast=null;target.dash=null;c.liuFurioso={target,index:0,nextAt:time,rank:n,damage:48+n*16+c.ap*.42};fx.push({type:'lyAwaken',x:target.x,y:target.y,r:target.r*2.6,t:0,life:1});text(target.x,target.y,'FURIOSO REPLICA','#e1e8f5',true,1.25);sfxPlay('ult',target.x,target.y,1.35);return;}
@@ -4043,7 +4060,7 @@ function castExtraSkill(c,key,ang,frac){
   }
 }
 function castSkillCore(c, key, ang, frac = null) {
-  const recast = (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso) || (c.key === 'liuEn' && key === 'R' && c.liuFormUntil > time && c.liuFuriosoReady && !c.liuFurioso);   // 이스마엘 재사용
+  const recast = (c.key === 'vespa' && key === 'W' && !!c.vespaWReady) || (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso) || (c.key === 'liuEn' && key === 'R' && c.liuFormUntil > time && c.liuFuriosoReady && !c.liuFurioso);   // 이스마엘 재사용
   const tmFree = c.key === 'thoma' && key === 'R' && !tmBusy(c);   // 토마 전화위복: 군중 제어 중에도 사용
   if (!c.alive || !c.rank[key] || (c.stunT > 0 && !tmFree) || (c.cast && !tmFree) || (c.cd[key] > 0 && !recast) || gameOver) return;
   if (!tmFree && (c.tauntT > time || c.fearT > time)) return;          // 도발·공포 중엔 스킬 불가
@@ -11592,6 +11609,7 @@ function champTimers(c, dt) {
     }
     if(c.rolandFormUntil>0&&time>=c.rolandFormUntil&&!c.rolandFurioso){c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;}
   }
+  if(c.key==='vespa')vespaTick(c,dt);
   if (c.key === 'rodion') rodionTick(c, dt);
   if (c.key === 'yisang') yisangTick(c, dt);
   if (c.key === 'ishmael') ishmaelTick(c, dt);
@@ -13012,10 +13030,13 @@ function update(dt) {
   bpWorldTick(dt);                                                   // 봉이 아빠: 생닭 벽 · 가마솥
 
   projectiles = projectiles.filter(p => {
-    if (!p.tgt.alive) return false;
-    const dx = p.tgt.x - p.x, dy = p.tgt.y - p.y, d = Math.hypot(dx, dy), step = p.speed * dt;
-    if (d <= step + p.tgt.r * 0.5) { if (efProjBlock(p)) return false; damage(p.src, p.tgt, p.amount, p.opts || {basic:isMinion(p.src) || isMonster(p.src)}); if (p.src && p.src.key === 'dongbaek' && p.opts && p.opts.basic) dbOnHit(p.src, p.tgt, p.opts); if (p.src && p.src.key === 'saude' && p.opts && p.opts.basic) sdOnHit(p.src, p.tgt, p.opts); return false; }
-    p.x += dx / d * step; p.y += dy / d * step; return true;
+    if(!p.tgt||!p.tgt.alive)return false;const v=p.tgt,dx=v.x-p.x,dy=v.y-p.y,d=Math.hypot(dx,dy),step=p.speed*dt;
+    if(d<=step+v.r*.5){
+     if(v.key==='vespa'&&v.vespaGuardUntil>time&&p.src&&p.src.team!==v.team&&!p.vespaReflected){const da=Math.atan2(p.y-v.y,p.x-v.x),diff=Math.abs(Math.atan2(Math.sin(da-v.vespaGuardAng),Math.cos(da-v.vespaGuardAng)));if(diff<1.15){const old=p.src;p.src=v;p.tgt=old;p.x=v.x+Math.cos(v.vespaGuardAng)*v.r;p.y=v.y+Math.sin(v.vespaGuardAng)*v.r;p.amount*=1.25;p.vespaReflected=true;p.color='#ffe45c';fx.push({type:'vsReflect',x:v.x,y:v.y,ang:v.vespaGuardAng,r:v.r*2,t:0,life:.42});sfxPlay('clang',v.x,v.y,.9,1.2);return true;}}
+     if(efProjBlock(p))return false;damage(p.src,v,p.amount,p.opts||{basic:isMinion(p.src)||isMonster(p.src)});
+     if(p.vespa){if(p.vespaKind==='basic'||p.vespaKind==='W')vespaStick(p.src,v,p.amount,p.vespaKind);else fx.push({type:'vsRecall',x:v.x,y:v.y,r:v.r*2,t:0,life:.58,count:1});}
+     if(p.src&&p.src.key==='dongbaek'&&p.opts&&p.opts.basic)dbOnHit(p.src,v,p.opts);if(p.src&&p.src.key==='saude'&&p.opts&&p.opts.basic)sdOnHit(p.src,v,p.opts);return false;
+    }p.x+=dx/d*step;p.y+=dy/d*step;return true;
   });
 
   units = units.filter(u => u.alive || u.structure || isChamp(u));
@@ -13542,6 +13563,7 @@ function drawChamp(g, c) {
   g.globalAlpha = 1;
   g.restore();
   if (window.__mvpDraw) return;                                       // MVP 연출: 이름·체력바 없이 몸만
+  if(c.key!=='vespa')for(const v of champs())if(v.key==='vespa'&&v.vespaSpears)for(const sp of v.vespaSpears)if(sp.tgt===c&&c.alive){const a=Math.atan2(c.y-v.y,c.x-v.x)+Math.PI*.72;g.save();g.translate(c.x,c.y);g.rotate(a);g.strokeStyle='#9b6c17';g.lineWidth=E(4);g.beginPath();g.moveTo(-c.r*.2,0);g.lineTo(c.r*1.35,0);g.stroke();g.fillStyle='#f4d04f';g.beginPath();g.moveTo(c.r*1.35,0);g.lineTo(c.r*1.75,-E(4));g.lineTo(c.r*1.75,E(4));g.closePath();g.fill();g.restore();}
   drawStatus(g, c);
   if(c.liuOrderBy&&c.liuOrderBy.alive&&c.liuOrderBy.team!==c.team)drawLiuOrderBadge(g,c);
   if(c.silenceUntil>time){g.save();g.strokeStyle='rgba(185,205,230,.95)';g.lineWidth=E(3);g.setLineDash([E(4),E(4)]);g.beginPath();g.arc(c.x,c.y,c.r+E(17),0,7);g.stroke();g.setLineDash([]);g.restore();}
@@ -13925,6 +13947,7 @@ function drawProjectiles(g) {
   for (const p of projectiles) {
     if (p._done || !p.tgt) continue;                                   // (멀티 손님: 이미 닿은 투사체)
     if (p.src && p.src.team !== player.team && !visAt(player.team, p.x, p.y)) continue;
+    if(p.vespa){const a=Math.atan2(p.tgt.y-p.y,p.tgt.x-p.x);g.save();g.translate(p.x,p.y);g.rotate(a);g.strokeStyle='#7a5414';g.lineWidth=E(p.vespaKind==='ult'?7:4);g.beginPath();g.moveTo(-E(24),0);g.lineTo(E(18),0);g.stroke();g.fillStyle=p.vespaKind==='ult'?'#fff0a0':'#f4c52c';g.beginPath();g.moveTo(E(18),0);g.lineTo(E(5),-E(8));g.lineTo(E(5),E(8));g.closePath();g.fill();g.restore();continue;}
     if (p.outis) {                                       // 오티스 평타: 짧은 탄 궤적
       const a = Math.atan2(p.tgt.y - p.y, p.tgt.x - p.x);
       g.strokeStyle = p.lastShot ? '#ff7a4a' : '#ffe08a'; g.lineWidth = E(p.lastShot ? 4 : 2.5); g.lineCap = 'round';
@@ -17925,6 +17948,7 @@ function drawFx(g) {
     const k = Math.max(0, f.t / f.life);
     if (!fxSeen(f)) continue;
     if (f.type === 'wardSet' || f.type === 'wardDie') { drawWardFx(g, f, k); continue; }
+    if(f.type.startsWith('vs')){drawVespaFx(g,f,k);continue;}
     if(f.type.startsWith('ly')){drawLiuEnFx(g,f,k);continue;}
     if (f.type === 'bloodBurst') { drawBloodFx(g, f, k); continue; }
     if (f.type === 'spike') drawSpike(g, f);
@@ -21233,7 +21257,7 @@ R:{name:'내게는 고통밖에 없습니다. 그외에는...',cd:[95,80,65],tex
   },
   blueReverb:{P:{name:'푸른 공명',text:()=> '원거리 마법 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'푸른 파동',cd:[7,6.5,6,5.5],range:520,text:H=>'푸른 에너지를 직선으로 방출해 경로상의 적에게 마법 피해를 줍니다.'},W:{name:'잔향 폭발',cd:[13,12,11,10],range:600,text:H=>'넓은 직선으로 잔향을 폭발시켜 적에게 피해를 주고 1.1초 동안 둔화시킵니다.'},E:{name:'공명 가속',cd:[15,14,13,12],text:H=>'체력을 회복하고 2.5초 동안 공명 가속 효과를 얻습니다.'},R:{name:'푸른 장막',cd:[95,80,65],range:600,text:H=>'지정 지점에 푸른 파동을 폭발시켜 넓은 범위의 적에게 큰 피해를 줍니다.'}},
   purpleTear:{P:{name:'전술 숙련',text:()=> '근접 암살 전술에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'변형 검격',cd:[7,6.5,6,5.5],range:350,text:H=>'전방 직선의 적을 보라빛 검격으로 베어 물리 피해를 줍니다.'},W:{name:'연속 참격',cd:[13,12,11,10],range:420,text:H=>'넓은 수평 범위를 연속으로 베어 피해를 주고 적을 둔화시킵니다.'},E:{name:'전술 전환',cd:[15,14,13,12],text:H=>'전술을 전환해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'보라빛 종결',cd:[95,80,65],range:430,text:H=>'보라빛 힘을 지정 지점에서 폭발시켜 주변 적에게 큰 피해를 줍니다.'}},
-  vespa:{P:{name:'저격수의 감각',text:()=> '긴 사거리의 원거리 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'정밀 사격',cd:[7,6.5,6,5.5],range:520,text:H=>'정밀한 직선 사격으로 경로상의 적에게 물리 피해를 줍니다.'},W:{name:'관통 탄환',cd:[13,12,11,10],range:600,text:H=>'더 넓고 긴 관통 사격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'후퇴 사격',cd:[15,14,13,12],text:H=>'사격 자세를 정비해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'집중 포화',cd:[95,80,65],range:600,text:H=>'지정한 위치에 집중 포화를 퍼부어 넓은 범위에 큰 피해를 줍니다.'}},
+  vespa:{P:{name:'지키겠습니다.',text:H=>'베스파 또는 가장 가까운 아군 챔피언의 체력이 30% 아래로 내려가면 자신과 해당 아군에게 베스파 최대 체력의 50% 보호막을 부여합니다. 발동 후 90초 동안 재발동하지 않으며 보호막은 3.5초 유지됩니다. 베스파는 5초 동안 주는 피해가 15% 증가합니다.'},Q:{name:'베어내겠습니다.',cd:[9,8.5,8,7.5],range:470,text:H=>'사미라의 E처럼 지정 방향으로 빠르게 돌진하며 카타나로 베어 물리 피해를 줍니다. 적을 향해 사용하면 대상 바로 앞까지 파고들고, 대상이 없으면 짧게 전진합니다.'},W:{name:'궁니르.',cd:[14,13,12,11],range:650,text:H=>'강화된 황금 궁니르를 던져 처음 맞은 적에게 물리 피해를 주고 몸에 박아 둡니다. 적중하면 재사용할 수 있습니다.'},E:{name:'막고 튕기기',cd:[18,17,16,15],text:H=>'카타나를 정면으로 세워 0.85초 동안 방어합니다. 정면에서 날아오는 적 투사체를 막아내고 발사자에게 되돌려 보내며, 반사된 투사체는 피해가 25% 증가합니다.'},R:{name:'노란작살',cd:[105,90,75],range:750,text:H=>'사거리 750 안의 적 하나를 추적하는 거대한 황금 궁니르를 던집니다. 적중하면 강력한 물리 피해를 줍니다.'}},
   naihwang:{P:{name:'뇌전의 기세',text:()=> '강력한 근접 공격과 뇌전 연출을 사용하는 전사입니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'뇌전 강타',cd:[7,6.5,6,5.5],range:350,text:H=>'전방으로 뇌전을 실은 강타를 날려 피해를 줍니다.'},W:{name:'천둥 가르기',cd:[13,12,11,10],range:420,text:H=>'천둥처럼 넓게 가르며 피해를 주고 적을 둔화합니다.'},E:{name:'기세 올리기',cd:[15,14,13,12],text:H=>'기세를 끌어올려 3초 동안 추가 공격력을 얻습니다.'},R:{name:'낙뢰 진격',cd:[95,80,65],range:430,text:H=>'지정 지점에 낙뢰를 떨어뜨려 주변 적에게 큰 피해를 줍니다.'}},
   gachiu:{P:{name:'철벽의 의지',text:()=> '높은 체력과 방어 능력을 가진 탱커입니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'철벽 타격',cd:[7,6.5,6,5.5],range:350,text:H=>'전방의 적에게 철벽 같은 일격을 가해 피해를 줍니다.'},W:{name:'수호의 파동',cd:[13,12,11,10],range:420,text:H=>'넓은 범위에 수호의 파동을 일으켜 적에게 피해를 주고 둔화시킵니다.'},E:{name:'방어 태세',cd:[15,14,13,12],text:H=>'4초 동안 보호막을 얻어 적의 공격을 막습니다.'},R:{name:'최후의 방벽',cd:[95,80,65],range:430,text:H=>'넓은 범위에 강력한 충격파를 일으켜 적에게 큰 피해를 주고 추가 보호막을 얻습니다.'}},
   indigoElder:{P:{name:'노장의 경험',text:()=> '긴 사거리와 안정적인 원거리 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'쪽빛 탄환',cd:[7,6.5,6,5.5],range:520,text:H=>'쪽빛 탄환을 직선으로 발사해 적에게 피해를 줍니다.'},W:{name:'관통 사격',cd:[13,12,11,10],range:600,text:H=>'긴 사거리의 관통 사격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'거리 벌리기',cd:[15,14,13,12],text:H=>'노련하게 자세를 정비해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'노장의 일격',cd:[95,80,65],range:600,text:H=>'지정 지점에 노장의 일격을 집중해 넓은 범위에 큰 피해를 줍니다.'}},
@@ -21520,6 +21544,7 @@ const cxCol = k => {
   const el = document.querySelector(`.sel-card[data-champ="${k}"] .sel-token`);
   return el ? el.style.background : '#777';
 };
+const CX_VESPA_ICON_SVG={P:'<path d="M48 14 L57 35 L79 27 L66 48 L83 62 L59 63 L48 86 L37 63 L13 62 L30 48 L17 27 L39 35Z" fill="#f4c52c" stroke="#fff0a0" stroke-width="3"/>',Q:'<path d="M15 75 L72 18 L83 29 L26 86Z" fill="#d8e1e9" stroke="#f4c52c" stroke-width="4"/>',W:'<path d="M12 50 L76 50 L65 37 L90 50 L65 63 L76 50" fill="#f4c52c" stroke="#fff0a0" stroke-width="3"/>',E:'<path d="M48 12 L83 76 L13 76Z" fill="#242830" stroke="#f4c52c" stroke-width="5"/><path d="M48 28 L48 62" stroke="#fff0a0" stroke-width="5"/>',R:'<path d="M48 5 L63 40 L92 48 L63 56 L48 91 L33 56 L4 48 L33 40Z" fill="#f4c52c" stroke="#fff4b8" stroke-width="4"/>'};
 const CX_LIU_ICON_SVG = {
  P:'<circle cx="48" cy="48" r="27" fill="none" stroke="#bdeaff" stroke-width="3"/><g fill="#a9dff4" stroke="#f0fbff" stroke-width="1.5"><ellipse cx="48" cy="25" rx="6" ry="13"/><ellipse cx="64" cy="32" rx="6" ry="13" transform="rotate(45 64 32)"/><ellipse cx="71" cy="48" rx="6" ry="13" transform="rotate(90 71 48)"/><ellipse cx="64" cy="64" rx="6" ry="13" transform="rotate(135 64 64)"/><ellipse cx="48" cy="71" rx="6" ry="13"/><ellipse cx="32" cy="64" rx="6" ry="13" transform="rotate(45 32 64)"/><ellipse cx="25" cy="48" rx="6" ry="13" transform="rotate(90 25 48)"/><ellipse cx="32" cy="32" rx="6" ry="13" transform="rotate(135 32 32)"/></g><circle cx="48" cy="48" r="7" fill="#eafaff"/>',
  Q:'<path d="M18 68 L72 25 L79 31 L27 76Z" fill="#080b12" stroke="#dce8f3" stroke-width="3"/><path d="M16 55 L68 18 M26 78 L80 42" stroke="#b9d8f0" stroke-width="3" stroke-linecap="round"/>',
@@ -21528,6 +21553,7 @@ const CX_LIU_ICON_SVG = {
  R:'<g stroke="#f5fbff" stroke-width="2"><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(40 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(80 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(120 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(160 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(200 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(240 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#111722" transform="rotate(280 48 48)"/><path d="M48 8 L53 36 L48 42 L43 36Z" fill="#e1eaf4" transform="rotate(320 48 48)"/></g><circle cx="48" cy="48" r="13" fill="#080b12" stroke="#dce8f3" stroke-width="3"/><circle cx="48" cy="48" r="5" fill="#a9dff4"/>'
 };
 const cxIcon = (k, key) => {
+  if(k==='vespa')return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="18" fill="#111318"/>'+CX_VESPA_ICON_SVG[key]+'</svg>');
   if (k === 'liuEn' && CX_LIU_ICON_SVG[key]) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><defs><radialGradient id="g"><stop stop-color="#667b91"/><stop offset="1" stop-color="#080b12"/></radialGradient></defs><circle cx="48" cy="48" r="47" fill="url(#g)"/>${CX_LIU_ICON_SVG[key]}</svg>`;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
