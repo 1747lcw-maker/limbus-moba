@@ -2349,12 +2349,13 @@ function aiDraftAdvance(){
     $('adStatus').textContent=`${teamName} 밴 차례`;
     $('adSub').textContent=`${a.phase===1?'1차':'2차'} 밴 · 양 팀이 번갈아 챔피언을 금지합니다`;
     $('adGridNote').textContent='AI가 금지할 챔피언을 고르는 중…';$('adGrid').innerHTML='';
+    $('adSub').textContent='상대 조합과 위협적인 챔피언을 검토하고 있습니다…';
     aiDraftTimer=setTimeout(()=>{
       const pool=CHAMP_POOL.filter(k=>!d.used.has(k));
       const key=pool[Math.floor(Math.random()*pool.length)];
       d.used.add(key);d.bans.push({team:a.team,key});aiDraftBans=d.bans.map(x=>x.key);
-      d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,420);
-    },520);return;
+      d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,850);
+    },1800+Math.random()*1000);return;
   }
   if(a.team==='blue'&&!d.userPicked&&!d.spectator){
     $('adStatus').textContent='파랑팀 · 내 챔피언 선택';
@@ -2367,16 +2368,17 @@ function aiDraftAdvance(){
   $('adStatus').textContent=`${teamName} 픽 차례`;
   $('adSub').textContent=`${ROLE_NAME[role]} 포지션 챔피언을 선택하는 중…`;
   $('adGridNote').textContent='AI가 팀 조합과 포지션을 고려해 선택합니다';$('adGrid').innerHTML='';
+  $('adSub').textContent=`${ROLE_NAME[role]} 후보들을 비교하고 팀 시너지를 검토하고 있습니다…`;
   aiDraftTimer=setTimeout(()=>{
     const key=pickForRoles([role],[...d.used])[0]||CHAMP_POOL.find(k=>!d.used.has(k));
-    d.used.add(key);d[a.team].push({role,key});d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,420);
-  },620);
+    d.used.add(key);d[a.team].push({role,key});d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,850);
+  },2400+Math.random()*1200);
 }
 function aiDraftUserPick(key){
   const d=aiDraftState;if(!d||d.userPicked||d.used.has(key))return;
   d.userPicked=true;d.used.add(key);d.blue.push({role:chosenRole,key});chosenChamp=key;
   d.step++;aiDraftRender();$('adStatus').textContent=`${aiDraftName(key)} 선택 완료!`;$('adSub').textContent='이제 양 팀 AI가 남은 픽을 진행합니다';
-  aiDraftTimer=setTimeout(aiDraftAdvance,650);
+  aiDraftTimer=setTimeout(aiDraftAdvance,1000);
 }
 function aiDraftFinish(){
   const d=aiDraftState;if(!d)return;
@@ -2403,7 +2405,7 @@ function aiDraftFinish(){
       text(player.x+E(80),player.y-E(80),`${ROLE_NAME[chosenRole]} 상대: ${STATS[bot.key].name}`,'#ff8a8a',true,3);
       if(chosenRole==='jungle'){shopSel='hunter';text(player.x+E(80),player.y-E(130),'정글: 상점에서 사냥꾼의 칼을 사세요','#d8b36a',true,4);}
     }
-  },900);
+  },1400);
 }
 $('aiDraft').addEventListener('click',e=>{const b=e.target.closest('[data-draft-champ]');if(b&&!b.disabled)aiDraftUserPick(b.dataset.draftChamp);});
 $('select').addEventListener('click', e => {
