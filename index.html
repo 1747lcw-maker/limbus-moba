@@ -3319,6 +3319,15 @@ function damage(src, tgt, amount, opts = {}) {
   let hpLoss = amount;
   if (tgt.shield > 0) { const a = Math.min(tgt.shield, hpLoss); tgt.shield -= a; hpLoss -= a; }   // 보호막 먼저
   tgt.hp -= hpLoss;
+  // 롤랑 패시브: 적 챔피언의 스킬/기본 공격에 실제로 피격될 때만, 50초마다 보호막 발동
+  if (tgt.key === 'roland' && isChamp(src) && src.team !== tgt.team && (opts.basic || opts.skill) && !opts.noProc && hpLoss > 0 && time >= (tgt.rolandPassiveReadyAt || 0)) {
+    const sh = 95 + tgt.level * 9;
+    tgt.rolandPassiveReadyAt = time + 50;
+    tgt.shield = Math.max(tgt.shield || 0, sh);
+    tgt.shieldT = 2.5;
+    fx.push({type:'rlAwaken',x:tgt.x,y:tgt.y,r:tgt.r*1.65,t:0,life:.62});
+    if (tgt === player) text(tgt.x,tgt.y-tgt.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.8);
+  }
   if (tgt.key === 'ricardo' && src && src.team !== tgt.team) riGrudge(tgt, amount);   // 리카르도: 원한
   if (opts.basic && isChamp(src) && isMinion(tgt) && tgt.hp > 0 && tgt.hp <= csExecHp(tgt)) {   // 막타 보조: 체력이 일정 이하인 미니언은 평타만 맞혀도 처치
     tgt.hp = 0; fx.push({type:'pop', x:tgt.x, y:tgt.y, r:tgt.r * 1.2, color:'#ffe29a', t:0, life:.25});
@@ -3612,6 +3621,10 @@ function basicAttack(c, t) {
   c.atkT = 1 / Math.min(2.5, c.as * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c)) * (c.frostT > time ? .85 : 1));
   c.swingT = 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
+  if (c.key === 'roland') {
+    fx.push({type:'rlSlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(34),t.r*1.25),t:0,life:.34,crit:!!c.swingCrit});
+    fx.push({type:'rlDash',x:(c.x+t.x)/2,y:(c.y+t.y)/2,ang:c.face,len:Math.min(E(125),dist(c,t)),t:0,life:.22});
+  }
   let dmg = c.ad;
   const crit = rollCrit(c);
   c.swingCrit = crit;
@@ -11386,8 +11399,6 @@ function champTimers(c, dt) {
     else c.cast.t += dt;
   }
   if (c.key === 'roland') {
-    c.rolandMove=(c.rolandMove||0)+Math.hypot(c.x-(c.rolandPX??c.x),c.y-(c.rolandPY??c.y));c.rolandPX=c.x;c.rolandPY=c.y;
-    if(c.rolandMove>=E(390)){c.rolandMove=0;const sh=95+c.level*9;c.shield=Math.max(c.shield||0,sh);c.shieldT=2.5;if(c===player)text(c.x,c.y-c.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.7);}
     if(c.rolandFuriDash){
       const D=c.rolandFuriDash,k=Math.max(0,Math.min(1,(time-D.start)/D.duration)),e=1-Math.pow(1-k,3);
       c.x=D.sx+(D.tx-D.sx)*e;c.y=D.sy+(D.ty-D.sy)*e;
@@ -17582,7 +17593,17 @@ function drawCharonAim(g, sh, AC) {                                             
 
 function drawRolandFx(g,f,k){
  const p=1-k,e=easeOut(k);g.save();g.globalAlpha=p;
- if(f.type==='rlThrust'||f.type==='rlDash'){g.translate(f.x,f.y);g.rotate(f.ang);const L=f.len||E(350);g.lineCap='round';g.strokeStyle='#090b11';g.lineWidth=f.type==='rlDash'?E(22)*(1-k*.7):E(15)*(1-k*.6);g.beginPath();g.moveTo(f.type==='rlDash'?-L*e:0,0);g.lineTo(f.type==='rlDash'?L*(1-e):L*(.5+e*.5),0);g.stroke();g.strokeStyle='#d8e1f0';g.lineWidth=E(3);g.beginPath();g.moveTo(0,-E(8));g.lineTo(L*(.65+e*.35),0);g.lineTo(0,E(8));g.stroke()}
+ if(f.type==='rlSlash'){
+  g.translate(f.x,f.y);g.rotate(f.ang||0);const R=f.r||E(45);
+  g.lineCap='round';g.lineJoin='round';
+  g.strokeStyle='#090b11';g.lineWidth=E(f.crit?17:13)*(1-k*.55);
+  g.beginPath();g.moveTo(-R*.72,-R*.72);g.quadraticCurveTo(R*.18,-R*.18,R*.82,R*.55);g.stroke();
+  g.strokeStyle=f.crit?'#fff0c9':'#d8e1f0';g.lineWidth=E(f.crit?6:4)*(1-k*.7);
+  g.beginPath();g.moveTo(-R*.68,-R*.76);g.quadraticCurveTo(R*.12,-R*.12,R*.78,R*.48);g.stroke();
+  g.strokeStyle='#9ba9c1';g.lineWidth=E(2);g.beginPath();g.moveTo(-R*.3,-R*.9);g.lineTo(R*.92,R*.72);g.stroke();
+  if(f.crit){g.strokeStyle='#fff';g.lineWidth=E(2);g.beginPath();g.arc(0,0,R*.7,-.9,.9);g.stroke();}
+ }
+ else if(f.type==='rlThrust'||f.type==='rlDash'){g.translate(f.x,f.y);g.rotate(f.ang);const L=f.len||E(350);g.lineCap='round';g.strokeStyle='#090b11';g.lineWidth=f.type==='rlDash'?E(22)*(1-k*.7):E(15)*(1-k*.6);g.beginPath();g.moveTo(f.type==='rlDash'?-L*e:0,0);g.lineTo(f.type==='rlDash'?L*(1-e):L*(.5+e*.5),0);g.stroke();g.strokeStyle='#d8e1f0';g.lineWidth=E(3);g.beginPath();g.moveTo(0,-E(8));g.lineTo(L*(.65+e*.35),0);g.lineTo(0,E(8));g.stroke()}
  else if(f.type==='rlSpin'){g.translate(f.x,f.y);g.rotate(k*3);for(let j=0;j<3;j++){g.strokeStyle=j===1?'#d6e0f0':'#090b11';g.lineWidth=E(13-j*3)*(1-k);g.beginPath();g.arc(0,0,f.r*(.5+j*.2),-.7,5.4);g.stroke()}for(let i=0;i<8;i++){g.save();g.rotate(i*Math.PI/4+k*3);g.fillStyle=i%2?'#0a0c12':'#cbd6e8';g.fillRect(-E(3),-f.r*.9,E(6),E(25));g.restore()}}
  else if(f.type==='rlAwaken'){g.translate(f.x,f.y);g.strokeStyle='#d6e0f0';g.lineWidth=E(3);g.beginPath();g.arc(0,0,f.r*(.5+e*2),0,7);g.stroke();for(let i=0;i<12;i++){g.save();g.rotate(i*Math.PI/6);g.fillStyle=i%2?'#080a10':'#aebbd0';g.beginPath();g.moveTo(-E(5),-f.r*.4);g.lineTo(0,-f.r*(.8+e*1.5));g.lineTo(E(5),-f.r*.4);g.fill();g.restore()}}
  else if(f.type==='rlFuri'){g.translate(f.x,f.y);g.rotate(f.ang||0);g.rotate((f.weapon||0)*Math.PI*.222);let L=f.r*(1.4+e*.8);g.strokeStyle='#080a10';g.lineWidth=E(15)*(1-k*.5);g.lineCap='round';g.beginPath();g.moveTo(-L*.7,-L*.2);g.lineTo(L*.7,L*.2);g.stroke();g.strokeStyle='#dce6f5';g.lineWidth=E(3);g.beginPath();g.moveTo(-L*.7,-L*.2);g.lineTo(L*.7,L*.2);g.stroke();g.strokeStyle='#a99acb';g.lineWidth=E(2);g.beginPath();g.arc(0,0,f.r*(.6+e*1.5),-.8,1.1);g.stroke()}
@@ -20849,7 +20870,7 @@ CODEX_SK.gregor = {
 };
 
 const EXTRA_CODEX = {
-  roland:{P:{name:'어느 도서관의 사서',text:()=> '일정 거리를 이동하면 야스오처럼 보호막을 얻습니다. 치명타 확률 보너스가 적용되는 전투 패시브입니다.'},Q:{name:'그건 그거고 이건 이거야',cd:[7,6.5,6,5.5],range:350,text:H=>'전방을 찌르는 단일 직선 공격입니다. 야스오 Q와 같은 기본 찌르기이며 3타 회오리바람은 없습니다.'},W:{name:'함부로 끊어 낼 수는 없어',cd:[13,12,11,10],range:430,text:H=>'이렐리아 Q처럼 적에게 돌진해 피해를 줍니다. 이 공격으로 적을 처치하면 재사용 대기시간이 초기화됩니다.'},E:{name:'안젤리카를 위한 춤',cd:[18,16,14,12],text:H=>'사미라 W처럼 주변을 회전 베기하며 투사체를 막아내는 기술입니다.'},R:{name:'내게는 고통밖에 없습니다. 그외에는...',cd:[95,80,65],text:H=>'12초 동안 뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 28% 흡혈이 붙고 R을 재사용해 적 하나를 속박한 뒤 9개의 무기로 FURIOSO를 시전합니다.'}},
+  roland:{P:{name:'어느 도서관의 사서',text:()=> '적 챔피언의 스킬 또는 기본 공격에 피격되면 보호막을 얻습니다. 발동 후 재사용 대기시간은 50초입니다.'},Q:{name:'그건 그거고 이건 이거야',cd:[7,6.5,6,5.5],range:350,text:H=>'전방을 찌르는 단일 직선 공격입니다. 야스오 Q와 같은 기본 찌르기이며 3타 회오리바람은 없습니다.'},W:{name:'함부로 끊어 낼 수는 없어',cd:[13,12,11,10],range:430,text:H=>'이렐리아 Q처럼 적에게 돌진해 피해를 줍니다. 이 공격으로 적을 처치하면 재사용 대기시간이 초기화됩니다.'},E:{name:'안젤리카를 위한 춤',cd:[18,16,14,12],text:H=>'사미라 W처럼 주변을 회전 베기하며 투사체를 막아내는 기술입니다.'},R:{name:'내게는 고통밖에 없습니다. 그외에는...',cd:[95,80,65],text:H=>'12초 동안 뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 28% 흡혈이 붙고 R을 재사용해 적 하나를 속박한 뒤 9개의 무기로 FURIOSO를 시전합니다.'}},
   blueReverb:{P:{name:'푸른 공명',text:()=> '원거리 마법 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'푸른 파동',cd:[7,6.5,6,5.5],range:520,text:H=>'푸른 에너지를 직선으로 방출해 경로상의 적에게 마법 피해를 줍니다.'},W:{name:'잔향 폭발',cd:[13,12,11,10],range:600,text:H=>'넓은 직선으로 잔향을 폭발시켜 적에게 피해를 주고 1.1초 동안 둔화시킵니다.'},E:{name:'공명 가속',cd:[15,14,13,12],text:H=>'체력을 회복하고 2.5초 동안 공명 가속 효과를 얻습니다.'},R:{name:'푸른 장막',cd:[95,80,65],range:600,text:H=>'지정 지점에 푸른 파동을 폭발시켜 넓은 범위의 적에게 큰 피해를 줍니다.'}},
   purpleTear:{P:{name:'전술 숙련',text:()=> '근접 암살 전술에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'변형 검격',cd:[7,6.5,6,5.5],range:350,text:H=>'전방 직선의 적을 보라빛 검격으로 베어 물리 피해를 줍니다.'},W:{name:'연속 참격',cd:[13,12,11,10],range:420,text:H=>'넓은 수평 범위를 연속으로 베어 피해를 주고 적을 둔화시킵니다.'},E:{name:'전술 전환',cd:[15,14,13,12],text:H=>'전술을 전환해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'보라빛 종결',cd:[95,80,65],range:430,text:H=>'보라빛 힘을 지정 지점에서 폭발시켜 주변 적에게 큰 피해를 줍니다.'}},
   vespa:{P:{name:'저격수의 감각',text:()=> '긴 사거리의 원거리 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'정밀 사격',cd:[7,6.5,6,5.5],range:520,text:H=>'정밀한 직선 사격으로 경로상의 적에게 물리 피해를 줍니다.'},W:{name:'관통 탄환',cd:[13,12,11,10],range:600,text:H=>'더 넓고 긴 관통 사격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'후퇴 사격',cd:[15,14,13,12],text:H=>'사격 자세를 정비해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'집중 포화',cd:[95,80,65],range:600,text:H=>'지정한 위치에 집중 포화를 퍼부어 넓은 범위에 큰 피해를 줍니다.'}},
