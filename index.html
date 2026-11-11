@@ -1824,6 +1824,7 @@ function resetGame() {
   bots = heroes.filter(c => c !== player);
   bot = heroes.find(c => c.team === 'red' && c.role === chosenRole);          // 내 라인(정글) 상대
   units.push(...heroes);
+  for(const c of heroes)if(c.key==='gachiu')makeGachiuJaro(c);
   initCamps(); banner = null; killFeed = [];
   corpses = [];
   wards = []; for (const c of heroes) { c.wards = 1; giveSpells(c, c === player && !spectating ? chosenSpells : c.mpSpells || defaultSpells(c.role, c.key)); { const me = c === player && !spectating && !c.mpRune; applyPage(c, me ? chosenPage.ks : c.mpRune || defaultRune(c.role, c.key), me ? pagePerks(chosenPage) : c.mpPerks); } recalcStats(c); }
@@ -1991,7 +1992,7 @@ const CHAMP_UI = {
   purpleTear:{names:{Q:'변형 검격', W:'연속 참격', E:'전술 전환', R:'보라빛 종결'},cast:{},desc:{Q:'보라빛 검격으로 전방의 적을 베어 피해를 줍니다.',W:'넓은 범위를 연속으로 베고 적의 이동을 둔화합니다.',E:'전술을 전환해 잠시 공격력이 상승합니다.',R:'보라빛 힘을 한 점에 모아 광역 피해와 둔화를 일으킵니다.'}},
   vespa:{names:{Q:'정밀 사격', W:'관통 탄환', E:'후퇴 사격', R:'집중 포화'},cast:{},desc:{Q:'정밀한 일직선 사격으로 적을 공격합니다.',W:'더 넓고 긴 관통 사격을 가해 적을 둔화합니다.',E:'사격 자세를 정비해 잠시 공격력이 상승합니다.',R:'지정한 위치에 집중 포화를 퍼부어 범위 피해와 둔화를 줍니다.'}},
   naihwang:{names:{Q:'뇌전 강타', W:'천둥 가르기', E:'기세 올리기', R:'낙뢰 진격'},cast:{},desc:{Q:'전방으로 뇌전을 실은 강타를 날려 피해를 줍니다.',W:'천둥처럼 넓게 가르며 피해를 주고 적을 둔화합니다.',E:'기세를 끌어올려 잠시 공격력이 상승합니다.',R:'지정한 지점에 낙뢰를 떨어뜨려 주변 적에게 큰 피해와 둔화를 줍니다.'}},
-  gachiu:{names:{Q:'철벽 타격', W:'수호의 파동', E:'방어 태세', R:'최후의 방벽'},cast:{},desc:{Q:'철벽 같은 일격으로 전방의 적을 공격합니다.',W:'수호의 파동을 넓게 퍼뜨려 적에게 피해와 둔화를 줍니다.',E:'보호막을 얻어 잠시 받는 피해를 막습니다.',R:'넓은 범위에 강력한 충격을 일으키고 추가 보호막을 얻습니다.'}},
+  gachiu:{names:{Q:'묘여... 길을 열어라!!',W:'대답하거라...',E:'옥기린의 가호',R:'몸소 보여주지..'},cast:{},desc:{Q:'살아 있는 자로가 적을 향해 질풍참으로 돌진합니다. 자로가 살아 있을 때만 사용할 수 있습니다.',W:'적 하나에게 물리 피해를 입히고 1.3초 동안 침묵시킵니다.',E:'아군에게 가치우 최대 체력의 20%, 자신에게는 10%만큼의 보호막을 부여합니다.',R:'5초 동안 곤봉에 천사 링 형태의 망 5개를 띄웁니다. 기본 공격과 W 피해량이 5배가 됩니다.'}},
   indigoElder:{names:{Q:'쪽빛 탄환', W:'관통 사격', E:'거리 벌리기', R:'노장의 일격'},cast:{},desc:{Q:'쪽빛 탄환을 직선으로 발사해 적을 공격합니다.',W:'긴 사거리의 관통 사격으로 피해를 주고 적을 둔화합니다.',E:'노련하게 거리를 벌리며 잠시 공격력이 상승합니다.',R:'지정한 지점에 노장의 일격을 집중해 광역 피해와 둔화를 줍니다.'}},
   liuEn:{names:{Q:'파도 소리가 밀려오는 구나',W:'결말은 보지않는 편이 좋겠구나',E:'오늘 동화책은 이것으로',R:'네프. 준비 완료. Furioso replica'},cast:{},desc:{Q:'요네의 W처럼 전방을 크게 휩쓸어 마법 피해를 입히고 보호막을 얻습니다.',W:'90% 확률로 낫, 10% 확률로 손도끼를 꺼내 적에게 돌진합니다.',E:'나피리의 E처럼 돌진해 주변 적에게 피해를 주고 침묵시킵니다.',R:'준비 후 재시전하면 대상에게 9연속 돌진 참격을 가합니다.'}},
   callisto:{names:{Q:'월광 베기', W:'연속 돌진', E:'그림자 보법', R:'월식 참격'},cast:{},desc:{Q:'달빛을 머금은 검격으로 전방의 적을 벱니다.',W:'연속 참격을 넓게 펼쳐 적을 둔화시킵니다.',E:'그림자 보법으로 전투 리듬을 끌어올려 잠시 공격력이 상승합니다.',R:'월식의 힘을 폭발시켜 지정한 지점에 광역 피해와 둔화를 줍니다.'}},
@@ -2056,6 +2057,7 @@ const CHAMP_UI = {
 const skillNames = c => (CHAMP_UI[c.key] || CHAMP_UI.gregor).names;
 // 조준 모양: {len, wid} 직선 / {circle} 원형 / {ring} 사거리 / null = 즉시
 function aimShape(c, key) {
+  if(c.key==='gachiu'&&['Q','W','E'].includes(key))return {point:E(key==='Q'?650:key==='W'?470:520)};
   if (key === 'I') return itemShape(c);
   if (key === 'H') return null;
   if (key === 'D' || key === 'F') return spellShape(c, key);
@@ -3482,6 +3484,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (src && src.key === 'heathcliff' && tgt.team !== src.team && !tgt.structure && !opts.noStack && !opts.noBleed && (opts.basic || opts.skill)) hcBleedAdd(src, tgt);   // 뼈 부수기: 출혈
   if (tgt.key === 'vergil' && tgt.vgParryT > time && src && isChamp(src) && src.team !== tgt.team && !opts.noParry && !(opts.noProc && !opts.skill)) { vgParry(tgt, src); return; }   // 간파
   if(src&&src.key==='vespa'&&src.vespaFuryUntil>time)amount*=1.15;
+  if(src&&src.key==='gachiu'&&opts.basic&&src.gachiuRUntil>time)amount*=5;
   if (src && src.vgGaze > time) amount *= 1 + KVG.P.dmgUp;                                  // 붉은시선 개안
   if (src && src.spGasT > time) amount *= 1 - SPELLS.gas.weak;
   if(isChamp(src)&&src.key==='liuEn'&&tgt.liuOrderBy===src)amount*=1.2;                               // 착란 가스: 주는 피해 감소
@@ -3692,6 +3695,7 @@ function kill(u, src) {
   chEnkKill(u, src);
   sdOnKill(u, src);                                                   // 소드: 처치 관여 → 작전의 전율                                                  // 메피는 배고파: 엔케팔린
   u.alive = false; u.hp = 0; u.mark = null; u.gwT = 0; u.spore = null;
+  if(u.kind==='gachiuJaro'){if(u.owner)u.owner.jaroRespawnAt=time+60;deathFx(u,src);if(u.owner&&(u.owner===player||u.owner.team===player.team))text(u.x,u.y-E(35),'자로 전투 불능 · 60초 후 부활','#c9b5df',true,1);return;}
   alOnDeath(u);                                                      // 알리사: 0.3초 뒤 자폭
   mtOnDeath(u);
   gdOnDeath(u);
@@ -3977,7 +3981,23 @@ function castSkill(c, key, ang, frac = null) {                // 공통 후처�
   return r;
 }
 
-const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','naihwang','gachiu','indigoElder','liuEn','callisto']);
+function gachiuPick(c,ang,frac,range,enemy){
+ const pool=units.filter(u=>u!==c&&u.alive&&targetable(u)&&!u.structure&&!u.ward&&u.kind!=='gachiuJaro'&&(enemy?u.team!==c.team:u.team===c.team)&&dist(c,u)<=range&&(!isChamp(u)||seenBy(c.team,u)));
+ if(!pool.length)return null;if(ang==null)return pool.sort((a,b)=>(isChamp(b)?1:0)-(isChamp(a)?1:0)||dist(c,a)-dist(c,b))[0];
+ const d=range*Math.max(.05,Math.min(1,frac??.55)),px=c.x+Math.cos(ang)*d,py=c.y+Math.sin(ang)*d;
+ return pool.sort((a,b)=>Math.hypot(a.x-px,a.y-py)-Math.hypot(b.x-px,b.y-py)||(isChamp(b)?1:0)-(isChamp(a)?1:0))[0];
+}
+function castGachiu(c,key,ang,frac){
+ const i=rk(c,key),cds={Q:[13,12,11,10],W:[11,10,9,8],E:[16,15,14,13],R:[100,85,70]},cd=cds[key][i]*hasteMul(c),red='#d12b9a';
+ if(key==='Q'){const j=c.jaro;if(!j||!j.alive){if(c===player)text(c.x,c.y-c.r-E(48),'자로가 쓰러져 있습니다','#e4a6d2',false,.9);return false;}const t=gachiuPick(c,ang,frac,E(650),true);if(!t)return false;const d=dist(j,t),a=Math.atan2(t.y-j.y,t.x-j.x),stop=Math.max(0,d-j.r-t.r-E(12));j.qDash={tgt:t,sx:j.x,sy:j.y,ex:j.x+Math.cos(a)*stop,ey:j.y+Math.sin(a)*stop,t:0,dur:.24,damage:95+i*30+c.ad*.72};j.face=a;c.face=a;c.cd.Q=c.cdMax.Q=cd;fx.push({type:'pop',x:j.x,y:j.y,r:j.r*1.8,color:'#b9a4d2',t:0,life:.32});sfxPlay('whoosh',j.x,j.y,1.05,.78);text(c.x,c.y-c.r-E(48),'묘여... 길을 열어라!!','#cbb2dc',true,.8);return true;}
+ if(key==='W'){const t=gachiuPick(c,ang,frac,E(470),true);if(!t)return false;c.cd.W=c.cdMax.W=cd;c.face=Math.atan2(t.y-c.y,t.x-c.x);damage(c,t,(82+i*27+c.ad*.82)*(c.gachiuRUntil>time?5:1),{skill:true,type:'physical',color:red});if(t.alive&&!t.structure){t.silenceUntil=Math.max(t.silenceUntil||0,time+1.3);fx.push({type:'hitmark',x:t.x,y:t.y,r:t.r*1.25,ang:c.face,t:0,life:.4});}fx.push({type:'burst',x:t.x,y:t.y,r:t.r*1.65,t:0,life:.38,col:red});sfxPlay('clang',t.x,t.y,1,.72);return true;}
+ if(key==='E'){const t=gachiuPick(c,ang,frac,E(520),false)||c,amount=c.maxHp*(t===c?.10:.20);c.cd.E=c.cdMax.E=cd;t.shield=Math.max(t.shield||0,amount);t.shieldT=Math.max(t.shieldT||0,4);fx.push({type:'burst',x:t.x,y:t.y,r:t.r*2.1,t:0,life:.55,col:'#e8d6a1'});sfxPlay('chime',t.x,t.y,1,.9);text(t.x,t.y-t.r-E(38),'옥기린의 가호','#f0dca6',true,.9);return true;}
+ if(key==='R'){c.cd.R=c.cdMax.R=cd;c.gachiuRUntil=time+5;c.gachiuRStacks=5;fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2.8,t:0,life:.7,col:'#f3d58a'});sfxPlay('ult',c.x,c.y,1.1,.9);text(c.x,c.y-c.r-E(55),'몸소 보여주지..','#f3d58a',true,1);return true;}return false;
+}
+function makeGachiuJaro(owner){const hp=470+owner.level*58,j=baseUnit({kind:'gachiuJaro',team:owner.team,owner,x:owner.x-E(55),y:owner.y+E(42),r:E(25),hp,maxHp:hp,armor:32+owner.level*2,mr:28+owner.level*1.5,dmg:25+owner.level*4,atkT:.5,retargetT:0,face:owner.face||0});owner.jaro=j;owner.jaroRespawnAt=0;units.push(j);return j;}
+function gachiuJaroTick(j,dt){const o=j.owner;if(!o)return;j.atkT-=dt;if(j.qDash){const q=j.qDash;q.t+=dt;const k=Math.min(1,q.t/q.dur);j.x=q.sx+(q.ex-q.sx)*k;j.y=q.sy+(q.ey-q.sy)*k;if(k>=1){const t=q.tgt;if(t&&t.alive&&t.team!==j.team&&dist(j,t)<j.r+t.r+E(75)){damage(o,t,q.damage,{skill:true,type:'physical',color:'#b9a4d2'});fx.push({type:'vsSlash',x:t.x,y:t.y,ang:j.face,r:t.r*1.9,t:0,life:.42});}else fx.push({type:'vsSlash',x:j.x,y:j.y,ang:j.face,r:E(75),t:0,life:.3);j.qDash=null;}return;}const foes=units.filter(u=>u!==j&&u.alive&&u.team!==j.team&&targetable(u)&&!u.structure&&!u.ward&&u.kind!=='gachiuJaro'&&dist(j,u)<E(390)&&(!isChamp(u)||seenBy(j.team,u)));const t=foes.sort((a,b)=>(isChamp(b)?1:0)-(isChamp(a)?1:0)||dist(j,a)-dist(j,b))[0]||null;let mx=0,my=0;if(t){const d=dist(j,t);j.face=Math.atan2(t.y-j.y,t.x-j.x);if(d>j.r+t.r+E(35)){mx=Math.cos(j.face);my=Math.sin(j.face);}else if(j.atkT<=0){j.atkT=1.35;damage(o,t,j.dmg,{basic:true,type:'physical',color:'#a99abf'});j.swingT=.2;}}else if(o.alive){const dx=o.x-E(48)-j.x,dy=o.y+E(42)-j.y,d=Math.hypot(dx,dy);if(d>E(75)){mx=dx/d;my=dy/d;j.face=Math.atan2(dy,dx);}}const sp=E(315)*speedMul(j);[mx,my]=steerAround(j,mx,my);j.x+=mx*sp*dt;j.y+=my*sp*dt;collideWorld(j);}
+function drawGachiuJaro(g,j){const r=j.r,a=j.face||0;g.save();g.fillStyle='rgba(0,0,0,.38)';g.beginPath();g.ellipse(j.x,j.y+E(9),r*1.25,r*.62,0,0,7);g.fill();g.translate(j.x,j.y);g.rotate(a);g.shadowColor='#a78bc4';g.shadowBlur=E(13);g.fillStyle='#17131d';g.strokeStyle='#78658e';g.lineWidth=E(2);g.beginPath();g.ellipse(0,r*.12,r*1.18,r*.62,0,0,7);g.fill();g.stroke();g.beginPath();g.moveTo(-r*.72,r*.05);g.quadraticCurveTo(-r*1.45,r*.22,-r*1.5,-r*.55);g.quadraticCurveTo(-r*1.18,-r*.18,-r*.75,-r*.2);g.stroke();g.beginPath();g.moveTo(r*.55,-r*.2);g.lineTo(r*.52,-r*1.05);g.lineTo(r*.98,-r*.48);g.lineTo(r*1.08,-r*1.08);g.lineTo(r*1.35,-r*.2);g.quadraticCurveTo(r*1.1,r*.3,r*.55,r*.25);g.closePath();g.fill();g.stroke();g.fillStyle='#c8b9d9';g.beginPath();g.ellipse(r*.96,-r*.1,r*.42,r*.32,0,0,7);g.fill();g.fillStyle='#edc9ee';for(const x of [r*.8,r*1.12]){g.beginPath();g.ellipse(x,-r*.17,E(3),E(2.2),0,0,7);g.fill();}g.strokeStyle='#a88acb';g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.45,-r*.25);g.lineTo(-r*.72,-r*.62);g.moveTo(-r*.12,-r*.3);g.lineTo(-r*.18,-r*.7);g.stroke();for(const x of [-r*.58,-r*.08,r*.35]){g.strokeStyle='#302638';g.lineWidth=E(5);g.beginPath();g.moveTo(x,r*.42);g.lineTo(x-r*.08,r*.86);g.stroke();}g.shadowBlur=0;g.restore();if(j.flashT>0){g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(j.x,j.y,r,0,7);g.fill();}drawStatus(g,j);hpBar(g,j,E(52),E(6),TEAM_COL[j.team]);}
+const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','naihwang','indigoElder','liuEn','callisto']);
 function liuWeaponRoll(c,forced=null){
  const mods=[-.20,-.10,0,.10,.20,.30,.40,.45,.50],names=['손도끼','망치','채찍','스틸레토','레이피어','랜스','바스타드 소드','대검','낫'];let idx=forced;
  if(idx==null){const missing=Math.max(0,1-c.hp/Math.max(1,c.maxHp)),weights=mods.map((_,i)=>Math.pow(1+missing*1.8,i*.72));let roll=Math.random()*weights.reduce((a,b)=>a+b,0);idx=weights.findIndex(w=>(roll-=w)<=0);if(idx<0)idx=8;}
@@ -4162,6 +4182,7 @@ function castSkillCore(c, key, ang, frac = null) {
   cancelRecall(c);
   if (c.blink || c.leap || c.alpha || c.rcut) return;
   if (c.chRide) return;                                              // 메피에 탄 동안엔 스킬 불가
+  if (c.key === 'gachiu') { castGachiu(c,key,ang,frac); return; }
   if (EXTRA_CHAMP_KEYS.has(c.key)) { castExtraSkill(c, key, ang, frac); return; }
   if (c.key === 'dongrang') {
     if (castDongrang(c, key, ang, frac) === false) return;
@@ -13076,6 +13097,7 @@ function update(dt) {
   updatePlayer(dt, ix, iy); }
   if (mpRole === 'host') mpHostRemotes(dt);                              // 멀티: 다른 사람 챔피언
   for (const b of bots) updateBot(b, dt);
+  for(const c of heroes)if(c.key==='gachiu'&&c.alive&&(!c.jaro||!c.jaro.alive)&&time>=(c.jaroRespawnAt||0))makeGachiuJaro(c);
   updateShots(dt);
   updateMirrors(dt);
   updateHarpoons(dt);
@@ -13107,6 +13129,7 @@ function update(dt) {
     if (isMinion(u)) updateMinion(u, dt);
     else if (u.kind === 'siege' && u.alive) updateSiege(u, dt);
     else if (u.kind === 'bongy') bpPetTick(u, dt);
+    else if(u.kind==='gachiuJaro')gachiuJaroTick(u,dt);
     else if (isMonster(u)) updateMonster(u, dt);
     else if (u.structure) updateStructure(u, dt);
   }
@@ -13865,6 +13888,7 @@ function drawGachiuBody(g,c){
    g.fillStyle='#a72c35';g.fillRect(-r*.055,r*.37,r*.11,r*.09);
    g.restore();
  }
+ if(c.gachiuRUntil>time){g.save();g.globalCompositeOperation='lighter';g.shadowColor='#f8df9a';g.shadowBlur=E(12);for(let i=0;i<5;i++){const x=r*(1.86+(i%2)*.24),y=r*(-.25+Math.floor(i/2)*.17),rr=E(8+i%2*1.5);g.strokeStyle='rgba(255,231,166,.95)';g.lineWidth=E(2.2);g.beginPath();g.ellipse(x,y,rr,rr*1.16,0,0,Math.PI*2);g.stroke();g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=E(1);g.beginPath();g.ellipse(x,y,rr*.68,rr*.9,0,0,Math.PI*2);g.stroke();}g.restore();}
  g.restore();g.restore();
 }
 function drawGachiuSwing(g,c,k){
@@ -18606,6 +18630,7 @@ function render() {
   for (const u of units) if (u.alive && isMinion(u) && seeU(u)) drawMinion(ctx, u);
   for (const u of units) if (u.alive && u.kind === 'siege' && seeU(u)) drawSiege(ctx, u);
   for (const u of units) if (u.alive && u.kind === 'bongy' && seeU(u)) drawBongy(ctx, u);
+  for (const u of units) if (u.alive && u.kind === 'gachiuJaro' && seeU(u)) drawGachiuJaro(ctx,u);
   for (const u of units) if (u.alive && isMonster(u) && seeU(u)) drawMonster(ctx, u);
   drawMirrors(ctx);
   drawLinks(ctx);
