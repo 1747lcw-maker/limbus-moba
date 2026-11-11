@@ -12363,7 +12363,7 @@ function pickForRoles(roles, taken = []) {                            // 자리�
   return out;
 }
 const CHAMP_POOL = ['gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto'];
-const AI_PICK_EXCLUDED = new Set(['blueReverb','purpleTear','naihwang','gachiu','indigoElder','callisto']);
+const AI_PICK_EXCLUDED = new Set(); // 모든 챔피언 AI 밴픽 허용
 const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // 미구현 캐릭터는 AI 선택 후보에서 제외, 플레이어는 직접 선택 가능
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
 const enemiesOf = b => champs().filter(c => c.team !== b.team && (!c.alive || seenBy(b.team, c)));   // 시야에 보이는 적만 (죽은 적은 알 수 있음)
