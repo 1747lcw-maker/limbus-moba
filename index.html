@@ -176,6 +176,7 @@
     font:600 11px system-ui,sans-serif;color:var(--ink);pointer-events:none;max-width:calc(100vw - 16px)}
   #spec[hidden]{display:none}
   #spec button{font:inherit;color:inherit;cursor:pointer;pointer-events:auto}
+  #spec .spec-help{padding:5px 10px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:rgba(7,12,16,.82);color:#e8edf2;font:600 11px/1.35 system-ui,sans-serif;text-align:center;pointer-events:none;text-shadow:0 1px 2px #000}
   .spv{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 6px;border-radius:12px;background:rgba(8,12,14,.78);border:1px solid rgba(255,255,255,.12)}
   .spv .tok{width:22px;height:22px;border-radius:50%;border:2px solid #fff}
   .spv .nm{font-weight:800;font-size:13px;white-space:nowrap}
@@ -768,6 +769,7 @@
 <div id="mp" hidden><div class="mpw"><header><button type="button" id="mpBack">← 메인</button><h2 id="mpTitle">멀티플레이</h2></header><div class="mp-body" id="mpBody"></div></div><div id="mpToast" role="status"></div></div>
 <div id="spec" hidden>
   <div class="spv" id="specView"></div>
+  <div class="spec-help">드래그: 화면 이동 · 휠: 확대/축소 · 챔피언 클릭: 시점 전환</div>
   <div class="spb">
     <div class="spt blue" id="specBlue"></div>
     <div class="spc"><div class="lbl">관전</div><div class="row"><button type="button" data-spd="1" aria-pressed="true">1×</button><button type="button" data-spd="2" aria-pressed="false">2×</button><button type="button" data-spd="4" aria-pressed="false">4×</button></div><button type="button" id="specExit">나가기</button></div>
@@ -867,6 +869,7 @@ const vCell = (x, y) => { const cx = Math.floor(x / VCELL), cy = Math.floor(y / 
 const bushAt = (x, y) => { const i = vCell(x, y); return i < 0 ? 0 : VBUSH[i]; };
 const visAt = (team, x, y) => { const i = vCell(x, y); return i >= 0 && VIS[team][i] === 1; };
 function seenBy(team, u) {                                       // team 이 u 를 볼 수 있나
+  if (spectating) return true;
   if (!u || u.team === team || u.structure) return true;
   if (u.revealT > time) return true;
   if (u.dlInvT > time) return false;                             // 동랑 은신
@@ -1039,11 +1042,12 @@ function updateFog() {
   fogCtx.putImageData(fogImg, 0, 0);
 }
 function drawFog(g) {
-  if (gameOver) return;
+  if (gameOver || spectating) return;
   updateFog();
   g.save(); g.imageSmoothingEnabled = true; g.drawImage(fogCvs, 0, 0, W, H); g.restore();
 }
-function fxSeen(f) {                                              // 안개 속 적 이펙트는 숨김
+function fxSeen(f) {
+  if (spectating) return true;                                              // 안개 속 적 이펙트는 숨김
   const o = f.owner;
   if (o && o.team) { if (o.team === player.team) return true; if (!(f.x !== undefined)) return seenBy(player.team, o); }
   if (f.x === undefined || f.y === undefined) return true;
@@ -2122,11 +2126,11 @@ cvs.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse' && e.button === 2) { const w = mmWorld(x, y); if (player && player.alive) { player.target = null; pcMove = {x:w.x, y:w.y, am:false}; pcMark = {x:w.x, y:w.y, t:time, col:'#6cf08a'}; } return; }
     if (mm.id === null) { mm.id = e.pointerId; mmLook = mmWorld(x, y); cvs.setPointerCapture(e.pointerId); return; }
   }
-  if (spectating) {                                                   // 관전: 화면의 챔피언을 누르면 그 시점으로
-    const wx = cam.x + (x - vw / 2) / zoom, wy = cam.y + (y - vh / 2) / zoom;
-    const c = heroes.filter(h => h.alive && seenBy(player.team, h) && Math.hypot(h.x - wx, h.y - wy) < h.r + E(24)).sort((a, b) => Math.hypot(a.x - wx, a.y - wy) - Math.hypot(b.x - wx, b.y - wy))[0];
-    if (c) specView(c);
-    return;
+  if (spectating) {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    specDrag.id=e.pointerId;specDrag.x=x;specDrag.y=y;specDrag.camX=cam.x;specDrag.camY=cam.y;specDrag.moved=false;
+    specCamera.free=true;specCamera.x=cam.x;specCamera.y=cam.y;specCamera.zoom=zoomMul;
+    cvs.setPointerCapture(e.pointerId);e.preventDefault();return;
   }
   if (e.pointerType === 'mouse') {
     mouse.x = x; mouse.y = y; mouse.on = true;
@@ -2182,6 +2186,12 @@ cvs.addEventListener('pointerdown', e => {
   }
 });
 cvs.addEventListener('pointermove', e => {
+  if (e.pointerId === specDrag.id && spectating) {
+    const dx=e.clientX-specDrag.x,dy=e.clientY-specDrag.y;
+    if(Math.hypot(dx,dy)>5)specDrag.moved=true;
+    if(specDrag.moved){specCamera.x=specDrag.camX-dx/Math.max(.25,zoom);specCamera.y=specDrag.camY-dy/Math.max(.25,zoom);}
+    return;
+  }
   if (e.pointerId === mm.id) { mmLook = mmWorld(e.clientX, e.clientY); return; }
   const x = e.clientX, y = e.clientY;
   if (e.pointerId === stick.id) {
@@ -2222,8 +2232,15 @@ const endPointer = e => {
     skAim.id = null; skAim.aiming = false; skAim.overCancel = false;
   }
 };
-cvs.addEventListener('pointerup', endPointer);
-cvs.addEventListener('pointercancel', endPointer);
+cvs.addEventListener('pointerup', e => {
+  if(e.pointerId===specDrag.id){
+    const moved=specDrag.moved,wx=cam.x+(specDrag.x-vw/2)/zoom,wy=cam.y+(specDrag.y-vh/2)/zoom;specDrag.id=null;
+    if(!moved){const c=heroes.filter(h=>h.alive&&Math.hypot(h.x-wx,h.y-wy)<h.r+E(30)).sort((a,b)=>Math.hypot(a.x-wx,a.y-wy)-Math.hypot(b.x-wx,b.y-wy))[0];if(c)specView(c);else{specCamera.free=true;specCamera.x=cam.x;specCamera.y=cam.y;}}
+    return;
+  }endPointer(e);
+});
+cvs.addEventListener('pointercancel', e => {if(e.pointerId===specDrag.id){specDrag.id=null;return;}endPointer(e);});
+cvs.addEventListener('wheel',e=>{if(!spectating)return;e.preventDefault();specCamera.free=true;specCamera.x=cam.x;specCamera.y=cam.y;specCamera.zoom=Math.max(.38,Math.min(1.45,(specCamera.zoom||zoomMul)*Math.exp(-e.deltaY*.0012)));},{passive:false});
 cvs.addEventListener('lostpointercapture', e => {                     // 결과 화면 등이 떠서 손가락을 놓침: 손을 뗀 것으로 처리 (스킬은 쓰지 않음)
   if (e.pointerId === stick.id) { stick.id = null; stick.dx = stick.dy = 0; }
   if (e.pointerId === atk.id) { atk.id = null; atk.aiming = false; atk.dx = atk.dy = 0; }
@@ -2436,6 +2453,8 @@ $('sprFile').addEventListener('change', e => {
 let dpr = 1, vw = 0, vh = 0, zoom = 1, baseZoom = 1, zoomMul = 1;
 const VIEW_K = window.DEMO ? 1 : .8;                                               // 기본 시야 배율: 작을수록 멀리 봄 (.8 = 예전보다 가로세로 1.25배 넓게)
 const cam = {x: 300, y: MID};
+const specCamera = {free:false,x:W/2,y:H/2,zoom:1};
+const specDrag = {id:null,x:0,y:0,camX:0,camY:0,moved:false};
 const SFX_DATA = {
   hit1:'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',
   hit2:'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',
@@ -13111,12 +13130,14 @@ function updateView(dt) {                                               // 카�
     camFree.x = Math.max(hw0, Math.min(W - hw0, camFree.x)); camFree.y = Math.max(hh0, Math.min(H - hh0, camFree.y));
   }
   let camTx = camFree.on && !spectating ? camFree.x : player.x, camTy = camFree.on && !spectating ? camFree.y : player.y, wantZoom = 1;
-  if (player.key === 'outis' && player.alive && player.snipe) {                  // 저격: 시야 확장 + 조준 방향으로
+  if(spectating&&!specCamera.free){camTx=player.x;camTy=player.y;wantZoom=1;}
+  if(spectating&&specCamera.free){camTx=specCamera.x;camTy=specCamera.y;wantZoom=specCamera.zoom;}
+  if (!spectating && player.key === 'outis' && player.alive && player.snipe) {                  // 저격: 시야 확장 + 조준 방향으로
     const a = skAim.id !== null && skAim.key === 'R' && skAim.aiming ? snipeClamp(player, Math.atan2(skAim.dy, skAim.dx)) : player.snipe.ang;
     camTx = player.x + Math.cos(a) * E(KO.R.range) * .32; camTy = player.y + Math.sin(a) * E(KO.R.range) * .32; wantZoom = .5;
   }
-  if (fAim && skAim.id === 'kb' && !portalR2) wantZoom = .35;   // PC 조준: 시야만 넓히고 카메라는 고정 (커서로 도착지 지정)
-  else if (fAim) {                                            // 파우스트와 도착지가 둘 다 보이도록 시야를 넓힘
+  if (!spectating && fAim && skAim.id === 'kb' && !portalR2) wantZoom = .35;   // PC 조준: 시야만 넓히고 카메라는 고정 (커서로 도착지 지정)
+  else if (!spectating && fAim) {                                            // 파우스트와 도착지가 둘 다 보이도록 시야를 넓힘
     const pt = portalR2 ? {x:player.cast.portal.tx, y:player.cast.portal.ty}
       : faustRPoint(player, Math.atan2(skAim.dy, skAim.dx), Math.min(1, Math.hypot(skAim.dx, skAim.dy) / SK_BTN.maxDrag));
     wantZoom = .6;
@@ -13156,6 +13177,7 @@ function updateView(dt) {                                               // 카�
     }
   }
   zoomMul += (wantZoom - zoomMul) * (1 - Math.exp(-dt * 5)); zoom = baseZoom * zoomMul;
+  if(spectating&&specCamera.free){zoomMul=specCamera.zoom;zoom=baseZoom*zoomMul;}
   const ck = 1 - Math.exp(-dt * 8);
   if (mmLook) { camTx = mmLook.x; camTy = mmLook.y; }                   // 미니맵으로 둘러보기
   const ck2 = mmLook || (camFree.on && !spectating) ? 1 - Math.exp(-dt * 22) : ck;   // 화면 고정 해제 중엔 바로바로 따라감
@@ -22086,7 +22108,7 @@ const specOrder = () => { const byRole = (a, b) => ROLES.indexOf(a.role) - ROLES
 function specStart() {
   if(aiDraftTimer)clearTimeout(aiDraftTimer);
   aiDraftState=null;aiDraftBans=[];aiDraftLineup=null;
-  spectating=true;specSpeed=1;mpLineup=null;
+  spectating=true;specSpeed=1;mpLineup=null;specCamera.free=false;specCamera.zoom=1;specDrag.id=null;
   chosenRole=ROLES[Math.floor(Math.random()*ROLES.length)];
   chosenChamp=pickForRoles([chosenRole],[])[0]||'gregor';
   openMenu(false);$('select').hidden=true;$('spec').hidden=true;document.body.classList.remove('spec');
@@ -22097,14 +22119,14 @@ function specStart() {
 }
 function specEnd() {
   if (!spectating) return;
-  spectating = false; specSpeed = 1; mmLook = null;
+  spectating = false; specSpeed = 1; mmLook = null;specCamera.free=false;specDrag.id=null;
   document.body.classList.remove('spec'); $('spec').hidden = true;
 }
 function specView(c) {
   if (!c || c === player || !spectating) return;
   player = c; bots = heroes.filter(h => h !== c);
   bot = heroes.find(h => h.team !== c.team && h.role === c.role) || bot;
-  mmLook = null; pcMove = null;
+  mmLook = null; pcMove = null;specCamera.free=false;specCamera.zoom=1;specCamera.x=c.x;specCamera.y=c.y;
   specUpdate();
 }
 function specBuild() {
