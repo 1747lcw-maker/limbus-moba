@@ -512,6 +512,7 @@
   #aiDraft .ad-wrap{width:min(1500px,100%);min-height:100%;display:grid;grid-template-rows:auto auto 1fr;gap:12px}
   #aiDraft .ad-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #ffffff24;padding:4px 2px 12px}
   #aiDraft .ad-head h2{margin:0;font-size:clamp(18px,3vw,30px);letter-spacing:.12em;color:#f0d9a8}
+  #adSkip{padding:9px 16px;border:1px solid #e6c35c;border-radius:9px;background:linear-gradient(135deg,#e6c35c,#bd8735);color:#17120a;font:900 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 12px #0006}#adSkip:hover{filter:brightness(1.12)}#adSkip[hidden]{display:none}
   #aiDraft .ad-phase{font-size:12px;color:#d7c49a;letter-spacing:.12em}
   #aiDraft .ad-status{text-align:center;padding:12px;border:1px solid #ffffff22;border-radius:12px;background:#ffffff09}
   #aiDraft .ad-status strong{display:block;font-size:clamp(18px,3vw,26px);margin-bottom:4px}
@@ -757,7 +758,7 @@
 </div>
 <div id="aiDraft" hidden>
   <div class="ad-wrap">
-    <div class="ad-head"><h2>RIFT · CHAMPION SELECT</h2><span class="ad-phase" id="adPhase">BAN PHASE 1</span></div>
+    <div class="ad-head"><h2>RIFT · CHAMPION SELECT</h2><span class="ad-phase" id="adPhase">BAN PHASE 1</span><button type="button" id="adSkip" hidden>⏭ 스킵</button></div>
     <div class="ad-status"><strong id="adStatus">밴픽 준비 중</strong><small id="adSub">양 팀이 번갈아 밴과 픽을 진행합니다</small></div>
     <div class="ad-main">
       <section class="ad-team blue"><h3>BLUE TEAM</h3><div id="adBlue"></div></section>
@@ -2386,6 +2387,7 @@ function aiDraftRender(){
 function aiDraftStart(spectator=false){
   if(aiDraftTimer)clearTimeout(aiDraftTimer);
   aiDraftState={bans:[],blue:[],red:[],used:new Set(),step:0,blueRoles:spectator?ROLES.slice():ROLES.filter(r=>r!==chosenRole),redRoles:ROLES.slice(),userPicked:false,spectator};
+  $('adSkip').hidden=!spectator;
   $('select').hidden=true;$('aiDraft').hidden=false;aiDraftSfx('start');aiDraftRender();aiDraftAdvance();
 }
 function aiDraftAdvance(){
@@ -2428,6 +2430,34 @@ function aiDraftUserPick(key){
   d.step++;aiDraftRender();$('adStatus').textContent=`${aiDraftName(key)} 선택 완료!`;$('adSub').textContent='이제 양 팀 AI가 남은 픽을 진행합니다';
   aiDraftTimer=setTimeout(aiDraftAdvance,1000);
 }
+function aiDraftSkip(){
+  const d=aiDraftState;
+  if(!d||!d.spectator)return;
+  if(aiDraftTimer){clearTimeout(aiDraftTimer);aiDraftTimer=null;}
+  // 밴픽 진행 중 남아 있는 모든 선택을 즉시 채워 결과 화면을 완성한다.
+  for(const action of AI_DRAFT_ORDER.slice(d.step)){
+    if(action.type==='ban'){
+      const pool=AI_CHAMP_POOL.filter(k=>!d.used.has(k));
+      if(!pool.length)continue;
+      const key=pool[Math.floor(Math.random()*pool.length)];
+      d.used.add(key);d.bans.push({team:action.team,key});
+    }else{
+      const team=action.team;
+      const taken=new Set(d[team].map(x=>x.role));
+      const role=ROLES.find(r=>!taken.has(r));
+      if(!role)continue;
+      const key=pickForRoles([role],[...d.used])[0]||AI_CHAMP_POOL.find(k=>!d.used.has(k));
+      if(!key)continue;
+      d.used.add(key);d[team].push({role,key});
+    }
+  }
+  // 현재 진행 중인 비동기 선택도 무효화하고 완료 상태로 전환한다.
+  d.step=AI_DRAFT_ORDER.length;
+  d.skipped=true;
+  aiDraftBans=d.bans.map(x=>x.key);
+  aiDraftRender();
+  aiDraftFinish();
+}
 function aiDraftFinish(){
   const d=aiDraftState;if(!d)return;
   const all=[...d.blue,...d.red].map(x=>x.key);
@@ -2453,8 +2483,9 @@ function aiDraftFinish(){
       text(player.x+E(80),player.y-E(80),`${ROLE_NAME[chosenRole]} 상대: ${STATS[bot.key].name}`,'#ff8a8a',true,3);
       if(chosenRole==='jungle'){shopSel='hunter';text(player.x+E(80),player.y-E(130),'정글: 상점에서 사냥꾼의 칼을 사세요','#d8b36a',true,4);}
     }
-  },1400);
+  },d.skipped?3200:1400);
 }
+$('adSkip').addEventListener('click',aiDraftSkip);
 $('aiDraft').addEventListener('click',e=>{const b=e.target.closest('[data-draft-champ]');if(b&&!b.disabled)aiDraftUserPick(b.dataset.draftChamp);});
 $('select').addEventListener('click', e => {
   if (e.target.closest('#selBack')) { selStep('role'); return; }
