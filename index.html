@@ -13613,6 +13613,7 @@ function drawLiuEnBody(g,c){
  g.fillStyle='#c5c7ce';g.beginPath();g.moveTo(-r*.26,-r*1.02);g.lineTo(r*.05,-r*.68);g.lineTo(-r*.12,r*.48);g.lineTo(-r*.3,r*.58);g.lineTo(-r*.52,r*.02);g.closePath();g.fill();
  g.fillStyle='#777b86';g.beginPath();g.moveTo(r*.42,-r*1.08);g.lineTo(r*.88,-r*.72);g.lineTo(r*.96,-r*.12);g.lineTo(r*.68,r*.72);g.lineTo(r*.42,r*.34);g.lineTo(r*.56,-r*.3);g.closePath();g.fill();
  g.strokeStyle='#343740';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.36,-r*.28);g.lineTo(r*.74,-r*.28);g.stroke();
+ g.restore(); // 이후 무기와 잔상은 월드 좌표계에서 그린다
  // 먹물에 잠긴 아홉 무기: 손도끼, 망치, 채찍, 스틸레토, 레이피어, 랜스, 바스타드 소드, 대검, 낫
  for(let i=0;i<9;i++){
    const an=a+Math.PI*2*i/9-time*.11,rr=r*1.92,x=c.x+Math.cos(an)*rr,y=c.y+Math.sin(an)*rr;
@@ -13630,7 +13631,6 @@ function drawLiuEnBody(g,c){
  }
  // 가면 주위의 먹물 잔상
  g.save();g.globalAlpha=.24+.12*Math.sin(time*6);g.strokeStyle='#92949e';g.lineWidth=E(2);g.setLineDash([E(5),E(7)]);g.beginPath();g.arc(c.x,c.y,r*2.18,time*.2,time*.2+Math.PI*1.6);g.stroke();g.setLineDash([]);g.restore();
- g.restore();
 }
 
 function drawCCTag(g, c, cc, by) {
