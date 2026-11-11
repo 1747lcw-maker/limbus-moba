@@ -4012,6 +4012,8 @@ function castSkill(c, key, ang, frac = null) {                // 공통 후처�
   if (key === 'D' || key === 'F') return castSpell(c, key, ang, frac);   // 소환사 주문
   if (key === 'T') return placeWard(c, ang, frac);               // 와드
   if (key === 'G') return c.key === 'ran' ? rnForge(c) : tmDevour(c);                           // 토마 P: 시체 먹기
+  // FURIOSO 연속 참격 중에는 다른 챔피언 스킬이 콤보를 덮어쓰지 못하도록 잠금
+  if (c.rolandFurioso || c.liuFurioso) return false;
   const prevR = c.cd ? c.cd.R : 0, cd0 = c.cd ? c.cd[key] : 0, cast0 = c.cast;
   const r = castSkillCore(c, key, ang, frac);
   if (c.cd && (c.cd[key] > cd0 + .1 || (c.cast && c.cast !== cast0))) sfxNoteCast(c, key);
