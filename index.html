@@ -13590,7 +13590,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'liuEn' ? '#292a30' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -13607,6 +13607,7 @@ function drawChamp(g, c) {
   if (!window.__mvpDraw) { g.strokeStyle = c.flashT > 0 ? '#ffffff' : sideCol(c); g.lineWidth = E(5); g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.stroke(); }
   if (c.key === 'roland') drawRolandBody(g,c);
   if (c.key === 'liuEn') drawLiuEnBody(g,c);
+  if (c.key === 'gachiu') drawGachiuBody(g,c);
   if (c.key === 'vespa') drawVespaBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
   if (c.key === 'ryoshu') drawRyoshuBody(g, c);
@@ -13662,12 +13663,13 @@ function drawChamp(g, c) {
       drawFaustCast(g, c, k);
     } else if (c.key === 'ryoshu') {   // 아라야시키 베기
       drawKatanaSwing(g, c, k);
-    } else if (c.key === 'honglu' || c.key === 'sinclair' || c.key === 'heathcliff' || c.key === 'meursault' || c.key === 'yuri' || c.key === 'kromer' || c.key === 'vergil' || c.key === 'charon' || c.key === 'hohenheim' || c.key === 'alyssa' || c.key === 'marten' || c.key === 'guido' || c.key === 'thoma' || c.key === 'dongbaek' || c.key === 'gubo' || c.key === 'ricardo' || c.key === 'bongdad' || c.key === 'xichun' || c.key === 'wei' || c.key === 'saude' || c.key === 'effie' || c.key === 'ran' || c.key === 'dongrang') {   // 몸통 그리기에서 처리
+    } else if (c.key === 'honglu' || c.key === 'sinclair' || c.key === 'heathcliff' || c.key === 'meursault' || c.key === 'yuri' || c.key === 'kromer' || c.key === 'vergil' || c.key === 'charon' || c.key === 'hohenheim' || c.key === 'alyssa' || c.key === 'marten' || c.key === 'guido' || c.key === 'thoma' || c.key === 'dongbaek' || c.key === 'gubo' || c.key === 'ricardo' || c.key === 'bongdad' || c.key === 'xichun' || c.key === 'wei' || c.key === 'saude' || c.key === 'effie' || c.key === 'ran' || c.key === 'dongrang' || c.key === 'gachiu') {   // 몸통 그리기에서 처리
     } else if (c.key === 'outis') {    // 사격 반동은 몸통 그리기에서
     } else if (c.key === 'donq') {     // 랜스 찌르기는 몸통 그리기에서
     } else if (c.key === 'ishmael') {  // 검은 메이스 휘두르기 (세 번째 평타는 주황)
       drawMaceSwing(g, c, k);
-    } else if (c.key === 'rodion') {   // 검은 할버드 휘두르기 (얼음 상태면 푸른빛)
+    } else if (c.key === 'gachiu') { drawGachiuSwing(g,c,k);
+     } else if (c.key === 'rodion') {   // 검은 할버드 휘두르기 (얼음 상태면 푸른빛)
       drawHalberdSwing(g, c, k);
     } else {
       g.strokeStyle = c.key === 'yisang' ? `rgba(236,238,244,${1 - k})` : `rgba(255,245,210,${1 - k})`; g.lineWidth = E(c.key === 'yisang' ? 12 : 10);
@@ -13808,6 +13810,45 @@ function drawLiuEnBody(g,c){
  g.save();g.globalAlpha=.24+.12*Math.sin(time*6);g.strokeStyle='#92949e';g.lineWidth=E(2);g.setLineDash([E(5),E(7)]);g.beginPath();g.arc(c.x,c.y,r*2.18,time*.2,time*.2+Math.PI*1.6);g.stroke();g.setLineDash([]);g.restore();
 }
 
+// 가치우: 검은 한푸, 붉은 비단 장포, 금빛 머리 장식과 부적 장봉
+function drawGachiuBody(g,c){
+ const a=c.face||0,r=c.r,ink='#111116',red='#8f2029',gold='#c99a3d',skin='#d7b99f';
+ g.save();g.translate(c.x,c.y);g.rotate(a);
+ // 길게 늘어지는 검은 겉옷과 붉은 앞섶
+ g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(-r*.04,r*.2,r*1.16,r*.84,0,0,7);g.fill();
+ g.fillStyle=ink;g.strokeStyle='#51434a';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.72,-r*.48);g.lineTo(-r*.43,-r*.9);g.lineTo(r*.34,-r*.88);g.lineTo(r*.82,-r*.42);g.lineTo(r*.7,r*.78);g.lineTo(r*.22,r*1.02);g.lineTo(-r*.62,r*.82);g.closePath();g.fill();g.stroke();
+ g.fillStyle=red;g.beginPath();g.moveTo(-r*.26,-r*.78);g.lineTo(r*.02,-r*.66);g.lineTo(r*.2,r*.82);g.lineTo(-r*.04,r*.92);g.closePath();g.fill();
+ g.strokeStyle=gold;g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.36,-r*.68);g.lineTo(-r*.08,r*.78);g.stroke();
+ // 붉은 비늘 무늬 스카프
+ g.fillStyle='#6f1822';g.strokeStyle='#bd7547';g.lineWidth=E(1.4);g.beginPath();g.moveTo(-r*.8,-r*.5);g.quadraticCurveTo(-r*.2,-r*1.04,r*.65,-r*.55);g.lineTo(r*.88,-r*.2);g.quadraticCurveTo(r*.18,-r*.58,-r*.62,-r*.18);g.closePath();g.fill();g.stroke();
+ for(let i=0;i<7;i++){g.beginPath();g.moveTo(-r*.48+i*r*.17,-r*.55);g.lineTo(-r*.36+i*r*.17,-r*.42);g.lineTo(-r*.25+i*r*.17,-r*.54);g.stroke();}
+ // 얼굴, 묶은 흑발과 길게 늘어진 뒷머리
+ g.fillStyle=skin;g.beginPath();g.ellipse(r*.12,-r*.56,r*.36,r*.39,0,0,7);g.fill();
+ g.fillStyle='#090a0e';g.beginPath();g.moveTo(-r*.28,-r*.57);g.quadraticCurveTo(-r*.34,-r*1.12,r*.16,-r*1.12);g.quadraticCurveTo(r*.55,-r*1.04,r*.48,-r*.5);g.lineTo(r*.34,-r*.34);g.lineTo(r*.25,-r*.78);g.lineTo(-r*.05,-r*.66);g.closePath();g.fill();
+ g.beginPath();g.moveTo(-r*.22,-r*.58);g.quadraticCurveTo(-r*.72,-r*.2,-r*.55,r*.68);g.quadraticCurveTo(-r*.38,r*.9,-r*.3,r*.48);g.lineTo(-r*.08,-r*.42);g.fill();
+ g.strokeStyle='#24232a';g.lineWidth=E(2);for(let i=0;i<3;i++){g.beginPath();g.moveTo(-r*.28-i*r*.04,-r*.4);g.quadraticCurveTo(-r*.5-i*r*.03,r*.1,-r*.42-i*r*.02,r*.62);g.stroke();}
+ // 금빛 비녀와 오른뺨 흉터
+ g.strokeStyle=gold;g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.02,-r*1.02);g.lineTo(r*.42,-r*1.12);g.lineTo(r*.57,-r*.92);g.stroke();
+ g.fillStyle='#e4bd62';g.beginPath();g.arc(r*.48,-r*1.02,E(3.5),0,7);g.fill();
+ g.strokeStyle='#873d39';g.lineWidth=E(2.4);g.beginPath();g.moveTo(r*.28,-r*.48);g.lineTo(r*.43,-r*.27);g.lineTo(r*.36,-r*.18);g.stroke();
+ // 허리의 꼬인 밧줄
+ g.strokeStyle='#b48a55';g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.5,r*.46);g.quadraticCurveTo(0,r*.62,r*.52,r*.42);g.stroke();
+ // 부적과 갈색 붕대를 감은 장봉
+ g.save();g.translate(r*.54,r*.42);g.rotate(-.72);
+ g.strokeStyle='#4a3328';g.lineWidth=E(6);g.lineCap='round';g.beginPath();g.moveTo(-r*.36,r*.14);g.lineTo(r*2.38,-r*.08);g.stroke();
+ g.strokeStyle='#b9a17c';g.lineWidth=E(3);for(let i=0;i<8;i++){const x=-r*.28+i*r*.09;g.beginPath();g.moveTo(x,-r*.01);g.lineTo(x+r*.08,r*.2);g.stroke();}
+ g.strokeStyle=gold;g.lineWidth=E(3);g.beginPath();g.moveTo(r*2.18,-r*.1);g.lineTo(r*2.42,-r*.08);g.stroke();
+ for(let i=0;i<3;i++){const x=r*(.35+i*.55);g.fillStyle=i===1?'#d5b45d':'#a92b30';g.strokeStyle='#e6c77d';g.lineWidth=E(1);g.beginPath();g.moveTo(x,-r*.04);g.lineTo(x+r*.22,r*.02);g.lineTo(x+r*.18,r*.58);g.lineTo(x-r*.02,r*.49);g.closePath();g.fill();g.stroke();g.strokeStyle='#e9d9a5';g.beginPath();g.moveTo(x+r*.03,r*.12);g.lineTo(x+r*.15,r*.39);g.stroke();}
+ g.restore();g.restore();
+}
+function drawGachiuSwing(g,c,k){
+ const r=c.r,progress=easeOut(Math.min(1,k*1.35));g.save();g.translate(c.x,c.y);g.rotate(c.face||0);
+ g.globalAlpha=1-progress*.65;g.strokeStyle='#8d2028';g.lineWidth=E(12);g.lineCap='round';g.beginPath();g.arc(0,0,r+E(27),-.95,.95*progress);g.stroke();
+ g.strokeStyle='#d5b36a';g.lineWidth=E(3);g.beginPath();g.arc(0,0,r+E(27),-.85,.85*progress);g.stroke();
+ for(let i=0;i<5;i++){const t=progress*(.25+i*.16),x=Math.cos(-.85+t*1.7)*(r+E(27)),y=Math.sin(-.85+t*1.7)*(r+E(27));g.save();g.translate(x,y);g.rotate(t*2);g.fillStyle=i%2?'#c58c42':'#a52a32';g.fillRect(-E(3),-E(8),E(6),E(16));g.restore();}
+ g.restore();
+}
+ 
 // 베스파: 검정·노랑 스트릿 재킷, 안경, 양손의 궁니르와 환도
 function drawVespaBody(g,c){
  const a=c.face||0,r=c.r,black='#101216',yellow='#f2c21b',gold='#d9a51b',steel='#c8d0d8';
