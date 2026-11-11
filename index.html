@@ -1600,7 +1600,7 @@ const KI = {
 };
 const BASE_CRIT_DMG = 1.75;
 const asRatio = c => Math.max(1, c.as / c.st.as[0]);
-const critChance = c => Math.min(1, (c.crit || 0) + (c.key === 'rodion' ? c.pStacks * KR.P.per : 0));
+const critChance = c => Math.min(1, (c.crit || 0) * (c.key === 'roland' ? 2 : 1) + (c.key === 'rodion' ? c.pStacks * KR.P.per : 0));
 const critMult = c => BASE_CRIT_DMG + (c.key === 'dongbaek' ? KDB.P.critDmg : 0) + (c.key === 'rodion' && c.rank.W ? KR.W.critDmg[c.rank.W - 1] : 0) + (hasItem(c, 'justitia') ? 0.25 : 0);
 
 const TURRET_RANGE = E(480);   // 캐릭터 기준 480
@@ -3781,10 +3781,10 @@ function castExtraSkill(c, key, ang, frac) {
         if(isChamp(u))callForHelp(c,u);const before=u.hp;damage(c,u,64+n*31+c.ad*.95,{skill:true,color});u._rolandLastDamage=Math.max(0,before-u.hp);healOnHit(u);
         if(!u.alive){c.cd.W=0;c.cdMax.W=0;}
       }
-      fx.push({type:'burst',x:c.x,y:c.y,r:c.r*1.9,t:0,life:.28,col:color});sfxPlay('dash',c.x,c.y,.95);text(c.x,c.y-c.r-E(35),skillNames(c).W,color,true,.8);return;
+      fx.push({type:'burst',x:c.x,y:c.y,r:c.r*1.9,t:0,life:.28,col:color});sfxPlay('swing',c.x,c.y,.95,1.25);text(c.x,c.y-c.r-E(35),skillNames(c).W,color,true,.8);return;
     }
     if (key === 'E') {
-      c.cd.E=c.cdMax.E=([18,16,14,12][n])*hasteMul(c);c.rolandSpinUntil=time+.75;
+      c.cd.E=c.cdMax.E=([18,16,14,12][n])*hasteMul(c);c.rolandSpinUntil=time+.75;c.guardT=.75;c.guardAng=ang===null?(c.face||0):ang;c.guardRed=1;
       for(const u of units)if(u.alive&&u.team!==c.team&&targetable(u)&&dist(c,u)<E(155)+u.r){
         if(isChamp(u))callForHelp(c,u);const before=u.hp;damage(c,u,55+n*30+c.ad*.62,{skill:true,color});u._rolandLastDamage=Math.max(0,before-u.hp);healOnHit(u);
       }
