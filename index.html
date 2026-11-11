@@ -1133,8 +1133,8 @@ const STATS = {
            hp:[790, 145], regen:[2.2, 0.2], ad:[54, 3.0], armor:[46, 6.0], mr:[40, 3.4], as:[0.60, 0.018]},
   indigoElder: {name:'쪽빛노인', r:28, range:535, speed:285, acquire:575, ranged:true,
            hp:[530, 102], regen:[1.4, 0.12], ad:[60, 3.2], armor:[24, 4.5], mr:[31, 2.7], as:[0.67, 0.028]},
-  liuEn: {name:'뤼엔', r:31, range:110, speed:305, acquire:270,
-           hp:[650, 122], regen:[1.8, 0.16], ad:[67, 4.0], armor:[35, 5.0], mr:[33, 2.8], as:[0.67, 0.026]},
+  liuEn: {name:'뤼엔', r:31, range:110, speed:305, acquire:270, ap:[22, 8],
+           hp:[650, 122], regen:[1.8, 0.16], ad:[62, 3.5], armor:[35, 5.0], mr:[33, 2.8], as:[0.67, 0.026]},
   callisto: {name:'칼리스토', r:30, range:100, speed:300, acquire:265,
            hp:[640, 120], regen:[1.7, 0.15], ad:[65, 3.8], armor:[34, 5.0], mr:[33, 2.8], as:[0.66, 0.025]},
   bot:    {name:'훈련용 봇', r:30, range:70, speed:270, acquire:400,
@@ -1989,7 +1989,7 @@ const CHAMP_UI = {
   naihwang:{names:{Q:'뇌전 강타', W:'천둥 가르기', E:'기세 올리기', R:'낙뢰 진격'},cast:{},desc:{Q:'전방으로 뇌전을 실은 강타를 날려 피해를 줍니다.',W:'천둥처럼 넓게 가르며 피해를 주고 적을 둔화합니다.',E:'기세를 끌어올려 잠시 공격력이 상승합니다.',R:'지정한 지점에 낙뢰를 떨어뜨려 주변 적에게 큰 피해와 둔화를 줍니다.'}},
   gachiu:{names:{Q:'철벽 타격', W:'수호의 파동', E:'방어 태세', R:'최후의 방벽'},cast:{},desc:{Q:'철벽 같은 일격으로 전방의 적을 공격합니다.',W:'수호의 파동을 넓게 퍼뜨려 적에게 피해와 둔화를 줍니다.',E:'보호막을 얻어 잠시 받는 피해를 막습니다.',R:'넓은 범위에 강력한 충격을 일으키고 추가 보호막을 얻습니다.'}},
   indigoElder:{names:{Q:'쪽빛 탄환', W:'관통 사격', E:'거리 벌리기', R:'노장의 일격'},cast:{},desc:{Q:'쪽빛 탄환을 직선으로 발사해 적을 공격합니다.',W:'긴 사거리의 관통 사격으로 피해를 주고 적을 둔화합니다.',E:'노련하게 거리를 벌리며 잠시 공격력이 상승합니다.',R:'지정한 지점에 노장의 일격을 집중해 광역 피해와 둔화를 줍니다.'}},
-  liuEn:{names:{Q:'화염권', W:'연환격', E:'불꽃 질주', R:'홍염 난무'},cast:{},desc:{Q:'불꽃을 두른 주먹으로 전방의 적을 강타합니다.',W:'연속으로 넓게 공격해 피해를 주고 적을 둔화합니다.',E:'불꽃 질주를 준비해 잠시 공격력이 상승합니다.',R:'홍염을 폭발시켜 지정한 범위의 적에게 큰 피해와 둔화를 줍니다.'}},
+  liuEn:{names:{Q:'파도 소리가 밀려오는 구나',W:'결말은 보지않는 편이 좋겠구나',E:'오늘 동화책은 이것으로',R:'네프. 준비 완료. Furioso replica'},cast:{},desc:{Q:'요네의 W처럼 전방을 크게 휩쓸어 마법 피해를 입히고 보호막을 얻습니다.',W:'90% 확률로 낫, 10% 확률로 손도끼를 꺼내 적에게 돌진합니다.',E:'나피리의 E처럼 돌진해 주변 적에게 피해를 주고 침묵시킵니다.',R:'준비 후 재시전하면 대상에게 9연속 돌진 참격을 가합니다.'}},
   callisto:{names:{Q:'월광 베기', W:'연속 돌진', E:'그림자 보법', R:'월식 참격'},cast:{},desc:{Q:'달빛을 머금은 검격으로 전방의 적을 벱니다.',W:'연속 참격을 넓게 펼쳐 적을 둔화시킵니다.',E:'그림자 보법으로 전투 리듬을 끌어올려 잠시 공격력이 상승합니다.',R:'월식의 힘을 폭발시켜 지정한 지점에 광역 피해와 둔화를 줍니다.'}},
 
   gregor: {names:{Q:'꿰뚫기', W:'심장', E:'내장파기', R:'어느 날'},
@@ -3435,7 +3435,8 @@ function damage(src, tgt, amount, opts = {}) {
   if (src && src.key === 'heathcliff' && tgt.team !== src.team && !tgt.structure && !opts.noStack && !opts.noBleed && (opts.basic || opts.skill)) hcBleedAdd(src, tgt);   // 뼈 부수기: 출혈
   if (tgt.key === 'vergil' && tgt.vgParryT > time && src && isChamp(src) && src.team !== tgt.team && !opts.noParry && !(opts.noProc && !opts.skill)) { vgParry(tgt, src); return; }   // 간파
   if (src && src.vgGaze > time) amount *= 1 + KVG.P.dmgUp;                                  // 붉은시선 개안
-  if (src && src.spGasT > time) amount *= 1 - SPELLS.gas.weak;                               // 착란 가스: 주는 피해 감소
+  if (src && src.spGasT > time) amount *= 1 - SPELLS.gas.weak;
+  if(isChamp(src)&&src.key==='liuEn'&&tgt.liuOrderBy===src)amount*=1.2;                               // 착란 가스: 주는 피해 감소
   if (isChamp(src) && hasBuff(src, 'punish')) amount *= 1.15;
   if (isChamp(src) && src.team !== tgt.team) amount *= efAmp(src);                          // 에피 공동 작전                              // 환상체의 가호
   if (isChamp(src)) amount *= wyrmMul(src.team);
@@ -3771,11 +3772,13 @@ function basicAttack(c, t) {
   c.atkT = 1 / Math.min(2.5, c.as * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c)) * (c.frostT > time ? .85 : 1));
   c.swingT = 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
+  if(c.key==='liuEn')fx.push({type:'lySlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(38),t.r*1.5),t:0,life:.48,weapon:c.liuWeapon||0});
   if (c.key === 'roland') {
     fx.push({type:'rlSlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(34),t.r*1.25),t:0,life:.34,crit:!!c.swingCrit});
     fx.push({type:'rlDash',x:(c.x+t.x)/2,y:(c.y+t.y)/2,ang:c.face,len:Math.min(E(125),dist(c,t)),t:0,life:.22});
   }
-  let dmg = c.ad;
+  if(c.key==='liuEn')liuWeaponRoll(c);
+  let dmg = c.ad * (c.key==='liuEn' ? (c.liuWeaponMul||1) : 1);
   const crit = rollCrit(c);
   c.swingCrit = crit;
   if (crit) { dmg *= critMult(c); critFx(t, c.face, c.iceT > 0); }
@@ -3904,6 +3907,7 @@ function aiAimNoise(c, key, ang, frac) {                     // AI가 쏘는 논
 }
 function castSkill(c, key, ang, frac = null) {                // 공통 후처리: 궁극기 가속, 골드러시
   [ang, frac] = aiAimNoise(c, key, ang, frac);
+  if(c.key==='liuEn'&&c.silenceUntil>time&&['Q','W','E','R'].includes(key))return false;
   if (c.chRide || c.stasisT > time) return false;               // 메피 탑승 · 시간 정지 중
   if (key === 'I') return useActive(c, ang, frac);              // 사용 아이템 (PC 2)
   if (key === 'H') return drinkPotion(c);                       // 물약 (PC 1)
@@ -3925,8 +3929,27 @@ function castSkill(c, key, ang, frac = null) {                // 공통 후처�
 }
 
 const EXTRA_CHAMP_KEYS = new Set(['roland','blueReverb','purpleTear','vespa','naihwang','gachiu','indigoElder','liuEn','callisto']);
-function castExtraSkill(c, key, ang, frac) {
-  if (c.key === 'roland') {
+function liuWeaponRoll(c,forced=null){
+ const mods=[-.20,-.10,0,.10,.20,.30,.40,.45,.50],names=['손도끼','망치','채찍','스틸레토','레이피어','랜스','바스타드 소드','대검','낫'];let idx=forced;
+ if(idx==null){const missing=Math.max(0,1-c.hp/Math.max(1,c.maxHp)),weights=mods.map((_,i)=>Math.pow(1+missing*1.8,i*.72));let roll=Math.random()*weights.reduce((a,b)=>a+b,0);idx=weights.findIndex(w=>(roll-=w)<=0);if(idx<0)idx=8;}
+ c.liuWeapon=idx;c.liuWeaponMul=1+mods[idx];c.liuWeaponName=names[idx];fx.push({type:'lyWeapon',x:c.x,y:c.y,r:c.r*1.7,t:0,life:.5,weapon:idx});if(c===player)text(c.x,c.y-c.r-E(52),names[idx]+' ('+(mods[idx]>=0?'+':'')+Math.round(mods[idx]*100)+'%)','#c8d9eb',true,.65);return idx;
+}
+function liuDamage(c,u,amount,key){
+ if(!u||!u.alive)return;damage(c,u,amount*(c.liuWeaponMul||1),{skill:true,type:'magic',color:'#b8c3d8'});
+ if(u.liuOrderBy===c&&key!=='R'&&!c.liuCdrUsed){c.cd[key]=Math.max(0,(c.cd[key]||0)-4);c.liuCdrUsed=true;fx.push({type:'lyCdr',x:c.x,y:c.y,r:c.r*2,t:0,life:.55});if(c===player)text(c.x,c.y-c.r-E(72),key+' 쿨타임 -4초','#a9e8ff',true,.75);}
+}
+function liuNearest(c,range,champOnly=false){return units.filter(u=>u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&!u.ward&&(!champOnly||isChamp(u))&&(!isChamp(u)||seenBy(c.team,u))&&dist(c,u)<=range).sort((a,b)=>(isChamp(b)?1:0)-(isChamp(a)?1:0)||dist(c,a)-dist(c,b))[0]||null;}
+function castExtraSkill(c,key,ang,frac){
+ if(c.key==='liuEn'){
+  const n=rk(c,key),cds={Q:[8,7.5,7,6.5],W:[14,13,12,11],E:[16,15,14,13],R:[100,85,70]},cd=cds[key][n]*hasteMul(c);
+  if(key==='R'&&c.liuFormUntil>time&&c.liuFuriosoReady&&!c.liuFurioso){const target=liuNearest(c,E(600),true);if(!target)return;c.liuFuriosoReady=false;target.stunT=Math.max(target.stunT||0,6.5);target.cast=null;target.dash=null;c.liuFurioso={target,index:0,nextAt:time,rank:n,damage:48+n*16+c.ap*.42};fx.push({type:'lyAwaken',x:target.x,y:target.y,r:target.r*2.6,t:0,life:1});text(target.x,target.y,'FURIOSO REPLICA','#e1e8f5',true,1.25);sfxPlay('ult',target.x,target.y,1.35);return;}
+  liuWeaponRoll(c,key==='W'?(Math.random()<.9?8:0):null);c.liuCdrUsed=false;
+  if(key==='Q'){if(ang===null)ang=autoAim(c,E(350));c.face=ang;c.cd.Q=c.cdMax.Q=cd;const len=E(350),wid=E(105),hits=segHits(c,ang,len,wid);let count=0;fx.push({type:'lyWave',x:c.x,y:c.y,ang,len,wid,t:0,life:.7});for(const u of hits){if(isChamp(u))callForHelp(c,u);liuDamage(c,u,55+n*27+c.ap*.68,'Q');if(isChamp(u))count++;}if(count){c.shield=Math.max(c.shield||0,38+n*13+c.ap*.42+count*13);c.shieldT=1.8;}sfxPlay('swing',c.x,c.y,1.1,.82);text(c.x,c.y-c.r-E(38),skillNames(c).Q,'#c8d6e9',true,.85);return;}
+  if(key==='W'){if(ang===null)ang=autoAim(c,E(590));c.face=ang;const target=liuNearest(c,E(620)),sx=c.x,sy=c.y;let tx=c.x+Math.cos(ang)*E(430),ty=c.y+Math.sin(ang)*E(430);if(target){const dx=target.x-c.x,dy=target.y-c.y,d=Math.hypot(dx,dy)||1;tx=target.x-dx/d*(c.r+target.r+E(8));ty=target.y-dy/d*(c.r+target.r+E(8));}c.x=Math.max(E(25),Math.min(W-E(25),tx));c.y=Math.max(E(25),Math.min(H-E(25),ty));c.cd.W=c.cdMax.W=cd;const len=Math.hypot(c.x-sx,c.y-sy);fx.push({type:'lyDash',x:(sx+c.x)/2,y:(sy+c.y)/2,ang,len:len+E(100),t:0,life:.68});for(const u of units)if(u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&dist(u,c)<E(135)+u.r){if(isChamp(u))callForHelp(c,u);liuDamage(c,u,75+n*32+c.ap*.72,'W');}fx.push({type:'lyBurst',x:c.x,y:c.y,r:E(150),t:0,life:.62});sfxPlay('swing',c.x,c.y,1.2,.72);text(c.x,c.y-c.r-E(38),skillNames(c).W,'#c8d6e9',true,.85);return;}
+  if(key==='E'){if(ang===null)ang=autoAim(c,E(500));c.face=ang;const sx=c.x,oldX=c.x,oldY=c.y,target=liuNearest(c,E(510),true);if(target){const dx=target.x-c.x,dy=target.y-c.y,d=Math.hypot(dx,dy)||1;c.x=target.x-dx/d*(c.r+target.r+E(12));c.y=target.y-dy/d*(c.r+target.r+E(12));}else{c.x+=Math.cos(ang)*E(420);c.y+=Math.sin(ang)*E(420);}c.x=Math.max(E(25),Math.min(W-E(25),c.x));c.y=Math.max(E(25),Math.min(H-E(25),c.y));c.cd.E=c.cdMax.E=cd;fx.push({type:'lyDash',x:(sx+c.x)/2,y:(oldY+c.y)/2,ang,len:Math.hypot(c.x-oldX,c.y-oldY)+E(110),t:0,life:.68});fx.push({type:'lyBurst',x:c.x,y:c.y,r:E(185),t:0,life:.72});for(const u of units)if(u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&dist(u,c)<E(185)+u.r){if(isChamp(u))callForHelp(c,u);liuDamage(c,u,82+n*34+c.ap*.82,'E');if(u.alive&&!u.structure){u.silenceUntil=Math.max(u.silenceUntil||0,time+1.15);fx.push({type:'lySilence',x:u.x,y:u.y,r:u.r*1.8,t:0,life:.7});}}sfxPlay('ult',c.x,c.y,1.08,.9);text(c.x,c.y-c.r-E(38),skillNames(c).E,'#c8d6e9',true,.85);return;}
+  if(key==='R'){c.cd.R=c.cdMax.R=cd;c.liuFormUntil=time+12;c.liuFuriosoReady=true;c.shield=Math.max(c.shield||0,c.maxHp*.15);c.shieldT=2.5;fx.push({type:'lyAwaken',x:c.x,y:c.y,r:c.r*2.8,t:0,life:1.05});fx.push({type:'lyBurst',x:c.x,y:c.y,r:c.r*3.8,t:0,life:.95});sfxPlay('ult',c.x,c.y,1.3,.78);text(c.x,c.y-c.r-E(48),'네프. 준비 완료.','#e0e6f0',true,1);return;}
+ }
+ if (c.key === 'roland') {
     const n = rk(c, key), form = c.rolandFormUntil > time, color = form ? '#a8b8d8' : '#d8c6ff';
     const healOnHit = u => { if (form) c.hp = Math.min(c.maxHp, c.hp + Math.max(1, u._rolandLastDamage || 0) * .28); };
     if (key === 'Q') {
@@ -11549,6 +11572,12 @@ function champTimers(c, dt) {
     if (c.stunT > 0 && !c.cast.unstoppable) c.cast = null;          // 기절하면 시전 끊김
     else c.cast.t += dt;
   }
+  if(c.key==='liuEn'){
+    if(c.liuFuriDash){const D=c.liuFuriDash,k=Math.max(0,Math.min(1,(time-D.start)/D.duration)),e=1-Math.pow(1-k,3);c.x=D.sx+(D.tx-D.sx)*e;c.y=D.sy+(D.ty-D.sy)*e;if(k>=1)c.liuFuriDash=null;}
+    if(c.liuFurioso){const F=c.liuFurioso,T=F.target;if(!T||!T.alive||!c.alive){c.liuFurioso=null;c.liuFormUntil=0;c.liuFuriosoReady=false;}else if(time>=F.nextAt&&F.index<9){const i=F.index++,sx=c.x,sy=c.y,dx=T.x-c.x,dy=T.y-c.y,d=Math.hypot(dx,dy)||1,ang=Math.atan2(dy,dx),tx=T.x-dx/d*(c.r+T.r+E(5)),ty=T.y-dy/d*(c.r+T.r+E(5)),weapon=liuWeaponRoll(c);c.face=ang;c.liuFuriDash={sx,sy,tx,ty,start:time,duration:.22};T.stunT=Math.max(T.stunT||0,.72);T.cast=null;T.dash=null;damage(c,T,F.damage*(c.liuWeaponMul||1),{skill:true,type:'magic',color:'#d8dfeb'});fx.push({type:'lyFuri',x:T.x,y:T.y,ang,r:T.r,t:0,life:.62,weapon});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.4,t:0,life:.2});text(T.x,T.y-T.r-E(18),(i+1)+'/9','#e1e8f5',false,.4);sfxPlay('swing',T.x,T.y,.8,1.05+i*.025);F.nextAt+=.48;if(F.index>=9||!T.alive){c.liuFurioso=null;c.liuFormUntil=0;c.liuFuriosoReady=false;c.cd.R=c.cdMax.R=([100,85,70][F.rank])*hasteMul(c);sfxPlay('boom',T.x,T.y,1.2);text(T.x,T.y,'FURIOSO REPLICA','#e1e8f5',true,1.2);}}}
+    if(c.liuFormUntil>0&&time>=c.liuFormUntil&&!c.liuFurioso){c.liuFormUntil=0;c.liuFuriosoReady=false;}
+    if(time>=(c.liuOrderNext||0)){for(const u of units)if(u.liuOrderBy===c)u.liuOrderBy=null;const target=liuNearest(c,E(1800),true);if(target){target.liuOrderBy=c;target.liuOrderUntil=time+10;fx.push({type:'lyMark',x:target.x,y:target.y,r:target.r*2.3,t:0,life:.9});}c.liuOrderNext=time+10;}
+  }
   if (c.key === 'roland') {
     if(c.rolandFuriDash){
       const D=c.rolandFuriDash,k=Math.max(0,Math.min(1,(time-D.start)/D.duration)),e=1-Math.pow(1-k,3);
@@ -17827,6 +17856,15 @@ function drawRolandFx(g,f,k){
  g.restore();
 }
 
+function drawLiuEnFx(g,f,k){
+ const p=1-k,e=easeOut(k),ink='#08090d',edge='#555b68',silver='#d8dce8';g.save();g.globalAlpha=p;g.lineCap='round';g.lineJoin='round';
+ if(f.type==='lyMark'){g.translate(f.x,f.y);const r=f.r||E(42),pulse=.85+.15*Math.sin(time*8);g.shadowColor='#83d9ff';g.shadowBlur=E(20);for(let i=0;i<8;i++){g.save();g.rotate(i*Math.PI/4);g.fillStyle=i%2?'#b9eaff':'#f0fbff';g.beginPath();g.moveTo(0,-r*.15);g.bezierCurveTo(r*.4,-r*.85,r*.75,-r*.2,0,r*.4);g.bezierCurveTo(-r*.75,-r*.2,-r*.4,-r*.85,0,-r*.15);g.fill();g.restore();}g.shadowBlur=0;g.fillStyle='#4da9d4';g.beginPath();g.arc(0,0,r*.17,0,7);g.fill();g.strokeStyle='#e6f8ff';g.lineWidth=E(2);g.beginPath();g.arc(0,0,r*.72*pulse,0,7);g.stroke();g.fillStyle='#e6f8ff';g.font=`900 ${E(13)}px system-ui`;g.textAlign='center';g.fillText('지령 대상',0,-r*1.12);}
+ else if(f.type==='lySlash'||f.type==='lyFuri'){g.translate(f.x,f.y);g.rotate(f.ang||0);const r=f.r||E(48);g.shadowColor='#b8c8e5';g.shadowBlur=E(16);g.strokeStyle=ink;g.lineWidth=E(f.type==='lyFuri'?26:18)*(1-k*.5);g.beginPath();g.moveTo(-r*.95,-r*.72);g.quadraticCurveTo(-r*.12,r*.72,r*.92,r*.5);g.stroke();g.strokeStyle=silver;g.lineWidth=E(4)*(1-k*.6);g.beginPath();g.moveTo(-r*.82,-r*.7);g.quadraticCurveTo(-r*.08,r*.48,r*.82,r*.43);g.stroke();for(let i=0;i<6;i++){g.strokeStyle=i%2?edge:ink;g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.55+i*r*.18,-r*.58);g.lineTo(r*(.25+i*.12),r*(.35-i*.07));g.stroke();}if(f.type==='lyFuri'){g.strokeStyle='#c6d1e3';g.lineWidth=E(2);g.beginPath();g.arc(0,0,r*(.9+e),-.9,1.5);g.stroke();}}
+ else if(f.type==='lyWave'||f.type==='lyDash'){g.translate(f.x,f.y);g.rotate(f.ang||0);const L=f.len||E(300),w=f.wid||E(85);g.shadowColor='#aabbd8';g.shadowBlur=E(18);for(let i=0;i<5;i++){g.strokeStyle=i%2?silver:ink;g.lineWidth=E(i%2?4:15)*(1-k*.5);g.beginPath();if(f.type==='lyWave')g.arc(0,0,L*(.2+i*.085),-.92+i*.1,.92+i*.1);else{g.moveTo(-L*.5,-w*.25+i*w*.12);g.quadraticCurveTo(0,-w*.45+i*w*.2,L*(.45+e*.08),w*.12+i*w*.1);}g.stroke();}for(let i=0;i<15;i++){const a=-.95+i*.135;g.fillStyle=i%2?edge:silver;g.beginPath();g.moveTo(L*.43*Math.cos(a),L*.43*Math.sin(a));g.lineTo(L*(.58+e*.12)*Math.cos(a+.04),L*(.58+e*.12)*Math.sin(a+.04));g.lineTo(L*.42*Math.cos(a+.08),L*.42*Math.sin(a+.08));g.fill();}}
+ else{g.translate(f.x,f.y);const r=f.r||E(65);g.shadowColor='#b7c9e5';g.shadowBlur=E(20);for(let i=0;i<4;i++){g.strokeStyle=i%2?silver:ink;g.lineWidth=E(13-i*2)*(1-k*.55);g.beginPath();g.arc(0,0,r*(.4+i*.22)*(1+e*.2),-1.25+i*.18,5.2+i*.18);g.stroke();}for(let i=0;i<12;i++){g.save();g.rotate(i*Math.PI/6+k*.4);g.fillStyle=i%2?ink:silver;g.beginPath();g.moveTo(-E(5),-r*.55);g.lineTo(0,-r*(1+e*.4));g.lineTo(E(5),-r*.55);g.closePath();g.fill();g.restore();}if(f.type==='lyWeapon'){g.fillStyle=silver;g.font=`900 ${E(14)}px system-ui`;g.textAlign='center';g.fillText(['손도끼','망치','채찍','스틸레토','레이피어','랜스','바스타드 소드','대검','낫'][f.weapon||0],0,-r*1.25);}}
+ g.restore();
+}
+
 function drawFx(g) {
   g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const f of fx) {
@@ -17835,6 +17873,7 @@ function drawFx(g) {
     const k = Math.max(0, f.t / f.life);
     if (!fxSeen(f)) continue;
     if (f.type === 'wardSet' || f.type === 'wardDie') { drawWardFx(g, f, k); continue; }
+    if(f.type.startsWith('ly')){drawLiuEnFx(g,f,k);continue;}
     if (f.type === 'bloodBurst') { drawBloodFx(g, f, k); continue; }
     if (f.type === 'spike') drawSpike(g, f);
     else if (f.type === 'puff') {
@@ -21100,7 +21139,7 @@ R:{name:'내게는 고통밖에 없습니다. 그외에는...',cd:[95,80,65],tex
   naihwang:{P:{name:'뇌전의 기세',text:()=> '강력한 근접 공격과 뇌전 연출을 사용하는 전사입니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'뇌전 강타',cd:[7,6.5,6,5.5],range:350,text:H=>'전방으로 뇌전을 실은 강타를 날려 피해를 줍니다.'},W:{name:'천둥 가르기',cd:[13,12,11,10],range:420,text:H=>'천둥처럼 넓게 가르며 피해를 주고 적을 둔화합니다.'},E:{name:'기세 올리기',cd:[15,14,13,12],text:H=>'기세를 끌어올려 3초 동안 추가 공격력을 얻습니다.'},R:{name:'낙뢰 진격',cd:[95,80,65],range:430,text:H=>'지정 지점에 낙뢰를 떨어뜨려 주변 적에게 큰 피해를 줍니다.'}},
   gachiu:{P:{name:'철벽의 의지',text:()=> '높은 체력과 방어 능력을 가진 탱커입니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'철벽 타격',cd:[7,6.5,6,5.5],range:350,text:H=>'전방의 적에게 철벽 같은 일격을 가해 피해를 줍니다.'},W:{name:'수호의 파동',cd:[13,12,11,10],range:420,text:H=>'넓은 범위에 수호의 파동을 일으켜 적에게 피해를 주고 둔화시킵니다.'},E:{name:'방어 태세',cd:[15,14,13,12],text:H=>'4초 동안 보호막을 얻어 적의 공격을 막습니다.'},R:{name:'최후의 방벽',cd:[95,80,65],range:430,text:H=>'넓은 범위에 강력한 충격파를 일으켜 적에게 큰 피해를 주고 추가 보호막을 얻습니다.'}},
   indigoElder:{P:{name:'노장의 경험',text:()=> '긴 사거리와 안정적인 원거리 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'쪽빛 탄환',cd:[7,6.5,6,5.5],range:520,text:H=>'쪽빛 탄환을 직선으로 발사해 적에게 피해를 줍니다.'},W:{name:'관통 사격',cd:[13,12,11,10],range:600,text:H=>'긴 사거리의 관통 사격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'거리 벌리기',cd:[15,14,13,12],text:H=>'노련하게 자세를 정비해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'노장의 일격',cd:[95,80,65],range:600,text:H=>'지정 지점에 노장의 일격을 집중해 넓은 범위에 큰 피해를 줍니다.'}},
-  liuEn:{P:{name:'아홉 무기',text:()=> '검은 정장과 흰 장갑, 얼굴 대부분을 덮는 거대한 백색 가면을 착용합니다. 손도끼·망치·채찍·스틸레토·레이피어·랜스·바스타드 소드·대검·낫, 아홉 무기를 어두운 먹빛 회색으로 다룹니다.'},Q:{name:'화염권',cd:[7,6.5,6,5.5],range:350,text:H=>'불꽃을 두른 주먹으로 전방의 적을 강타해 피해를 줍니다.'},W:{name:'연환격',cd:[13,12,11,10],range:420,text:H=>'연속으로 넓게 공격해 피해를 주고 적을 둔화시킵니다.'},E:{name:'불꽃 질주',cd:[15,14,13,12],text:H=>'불꽃의 기세를 끌어올려 3초 동안 추가 공격력을 얻습니다.'},R:{name:'홍염 난무',cd:[95,80,65],range:430,text:H=>'홍염을 폭발시켜 지정 범위의 적에게 큰 피해를 줍니다.'}},
+  liuEn:{P:{name:'지령 · 가짜',text:H=>'10초마다 가장 가까운 적 챔피언에게 하늘색 장미 표식을 새깁니다. 표식 대상은 뤼엔에게 받는 피해가 20% 증가하고, 뤼엔의 스킬 피해 적중 시 해당 스킬의 남은 재사용 대기시간이 4초 감소합니다(R 제외). 손도끼·망치·채찍·스틸레토·레이피어·랜스·바스타드 소드·대검·낫의 아홉 무기는 평타 또는 스킬 사용 때 무작위로 바뀝니다. 무기 순서대로 피해량이 -20% / -10% / 0% / +10% / +20% / +30% / +40% / +45% / +50% 변동하며, 체력이 낮을수록 강한 무기가 나올 확률이 증가합니다. 두 효과는 중첩됩니다.'},Q:{name:'파도 소리가 밀려오는 구나',cd:[8,7.5,7,6.5],range:350,text:H=>'요네의 W처럼 전방을 크게 휩쓸어 마법 피해를 입히고 적중한 챔피언 수에 비례해 보호막을 얻습니다.'},W:{name:'결말은 보지않는 편이 좋겠구나',cd:[14,13,12,11],range:590,text:H=>'90% 확률로 낫, 10% 확률로 손도끼를 꺼내 적에게 돌진해 주변을 베어 마법 피해를 입힙니다.'},E:{name:'오늘 동화책은 이것으로',cd:[16,15,14,13],range:440,text:H=>'나피리의 E처럼 전방으로 돌진해 주변 적에게 마법 피해를 입히고 1.15초 동안 침묵시킵니다.'},R:{name:'네프. 준비 완료. Furioso replica',cd:[100,85,70],range:560,text:H=>'롤랑의 FURIOSO와 같은 2단계 궁극기입니다. 준비 후 다시 시전하면 대상에게 9연속 돌진 참격을 가합니다.'}},
   callisto:{P:{name:'월광의 검술',text:()=> '빠른 근접 검술에 특화된 전사입니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'월광 베기',cd:[7,6.5,6,5.5],range:350,text:H=>'달빛을 머금은 검격으로 전방의 적을 베어 피해를 줍니다.'},W:{name:'연속 돌진',cd:[13,12,11,10],range:420,text:H=>'넓고 긴 참격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'그림자 보법',cd:[15,14,13,12],text:H=>'그림자 보법으로 전투 리듬을 끌어올려 3초 동안 추가 공격력을 얻습니다.'},R:{name:'월식 참격',cd:[95,80,65],range:430,text:H=>'월식의 힘을 폭발시켜 지정 지점의 적에게 큰 피해를 줍니다.'}}
 };
 for (const [key, skills] of Object.entries(EXTRA_CODEX)) CODEX_SK[key] = skills;
