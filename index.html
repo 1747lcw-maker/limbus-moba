@@ -2343,6 +2343,39 @@ const AI_DRAFT_ORDER = [
 ];
 function aiDraftName(key){return STATS[key]?.name || key;}
 function aiDraftPortrait(key){return CHAMP_COL[key] || '#46515f';}
+function aiDraftSfx(kind){
+  const ctx=SFX.ctx;if(!SFX.on||!ctx||!SFX.out||document.hidden)return;
+  if(ctx.state==='suspended'){ctx.resume().catch(()=>{});return;}
+  const now=ctx.currentTime;
+  const tone=(freq,dur,vol,wave='sine',endFreq=freq,delay=0)=>{
+    const o=ctx.createOscillator(),g=ctx.createGain();o.type=wave;o.frequency.setValueAtTime(freq,now+delay);
+    if(endFreq!==freq)o.frequency.exponentialRampToValueAtTime(Math.max(30,endFreq),now+delay+dur);
+    g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(vol,now+delay+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(SFX.out);o.start(now+delay);o.stop(now+delay+dur+.025);
+  };
+  if(kind==='ban'){
+    tone(155,.34,.22,'triangle',62);
+    tone(920,.19,.12,'square',280,.012);
+    tone(2450,.09,.055,'sawtooth',620,.018);
+  }else if(kind==='pick'){
+    tone(523,.38,.13,'sine',784);
+    tone(659,.42,.11,'triangle',988,.055);
+    tone(1047,.34,.075,'sine',1318,.11);
+  }else if(kind==='turn'){
+    tone(660,.12,.075,'sine',660);
+    tone(880,.16,.085,'sine',880,.105);
+  }else if(kind==='start'){
+    tone(196,.65,.13,'triangle',392);
+    tone(392,.62,.12,'sine',587,.12);
+    tone(587,.7,.1,'sine',784,.24);
+  }else if(kind==='ready'){
+    tone(392,.75,.14,'triangle',392);
+    tone(494,.8,.14,'sine',494,.08);
+    tone(587,.85,.14,'sine',587,.16);
+    tone(784,1,.16,'sine',784,.25);
+    tone(988,1.1,.13,'sine',988,.38);
+  }
+}
 function aiDraftRender(){
   const d=aiDraftState;if(!d)return;
   const slotHtml=(team)=>d[team].map((x,i)=>`<div class="ad-slot">${x?(`<span class="ad-avatar" style="background:${aiDraftPortrait(x.key)}">${esc(aiDraftName(x.key).slice(0,1))}</span><span>${esc(aiDraftName(x.key))}<small>${esc(ROLE_NAME[x.role])}</small></span>`):'<span class="ad-empty">?</span><span>대기 중</span>'}</div>`).join('');
@@ -2355,12 +2388,12 @@ function aiDraftRender(){
 function aiDraftStart(spectator=false){
   if(aiDraftTimer)clearTimeout(aiDraftTimer);
   aiDraftState={bans:[],blue:[],red:[],used:new Set(),step:0,blueRoles:spectator?ROLES.slice():ROLES.filter(r=>r!==chosenRole),redRoles:ROLES.slice(),userPicked:false,spectator};
-  $('select').hidden=true;$('aiDraft').hidden=false;aiDraftRender();aiDraftAdvance();
+  $('select').hidden=true;$('aiDraft').hidden=false;aiDraftSfx('start');aiDraftRender();aiDraftAdvance();
 }
 function aiDraftAdvance(){
   const d=aiDraftState;if(!d)return;
   if(d.step>=AI_DRAFT_ORDER.length){aiDraftFinish();return;}
-  const a=AI_DRAFT_ORDER[d.step], teamName=a.team==='blue'?'파랑팀':'빨강팀';
+  const a=AI_DRAFT_ORDER[d.step], teamName=a.team==='blue'?'파랑팀':'빨강팀';aiDraftSfx('turn');
   $('adPhase').textContent=a.type==='ban'?`BAN PHASE ${a.phase}`:`PICK PHASE ${a.phase}`;
   if(a.type==='ban'){
     $('adStatus').textContent=`${teamName} 밴 차례`;
@@ -2370,7 +2403,7 @@ function aiDraftAdvance(){
     aiDraftTimer=setTimeout(()=>{
       const pool=CHAMP_POOL.filter(k=>!d.used.has(k));
       const key=pool[Math.floor(Math.random()*pool.length)];
-      d.used.add(key);d.bans.push({team:a.team,key});aiDraftBans=d.bans.map(x=>x.key);
+      d.used.add(key);d.bans.push({team:a.team,key});aiDraftBans=d.bans.map(x=>x.key);aiDraftSfx('ban');
       d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,850);
     },1800+Math.random()*1000);return;
   }
@@ -2388,12 +2421,12 @@ function aiDraftAdvance(){
   $('adSub').textContent=`${ROLE_NAME[role]} 후보들을 비교하고 팀 시너지를 검토하고 있습니다…`;
   aiDraftTimer=setTimeout(()=>{
     const key=pickForRoles([role],[...d.used])[0]||CHAMP_POOL.find(k=>!d.used.has(k));
-    d.used.add(key);d[a.team].push({role,key});d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,850);
+    d.used.add(key);d[a.team].push({role,key});aiDraftSfx('pick');d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,850);
   },2400+Math.random()*1200);
 }
 function aiDraftUserPick(key){
   const d=aiDraftState;if(!d||d.userPicked||d.used.has(key))return;
-  d.userPicked=true;d.used.add(key);d.blue.push({role:chosenRole,key});chosenChamp=key;
+  d.userPicked=true;d.used.add(key);d.blue.push({role:chosenRole,key});chosenChamp=key;aiDraftSfx('pick');
   d.step++;aiDraftRender();$('adStatus').textContent=`${aiDraftName(key)} 선택 완료!`;$('adSub').textContent='이제 양 팀 AI가 남은 픽을 진행합니다';
   aiDraftTimer=setTimeout(aiDraftAdvance,1000);
 }
@@ -2406,7 +2439,7 @@ function aiDraftFinish(){
   aiDraftBans=d.bans.map(x=>x.key);
   aiDraftLineup={fresh:true,blue:d.blue.slice(),red:d.red.slice()};
   $('adPhase').textContent='READY';$('adStatus').textContent='밴픽 완료';$('adSub').textContent='10명의 챔피언이 모두 결정되었습니다. 게임을 시작합니다.';
-  $('adGridNote').textContent='전투 시작!';$('adGrid').innerHTML='';
+  $('adGridNote').textContent='전투 시작!';$('adGrid').innerHTML='';aiDraftSfx('ready');
   aiDraftTimer=setTimeout(()=>{
     const spectator=d.spectator;
     $('aiDraft').hidden=true;aiDraftState=null;mpLineup=null;
