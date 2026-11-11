@@ -505,6 +505,38 @@
   .pc-keys{display:none;margin:10px 0 0;font:500 12px system-ui,sans-serif;color:#b8c4bc;line-height:1.6;text-align:center}
   .pc-keys b{color:#f0d9a8}
   @media (hover:hover) and (pointer:fine){ .pc-keys{display:block} }
+
+  /* AI draft lobby */
+  #aiDraft{position:fixed;inset:0;z-index:120;background:radial-gradient(ellipse at 50% 0%,#26364a 0%,#111820 48%,#080d13 100%);display:flex;align-items:stretch;justify-content:center;overflow:auto;padding:clamp(8px,2vw,24px);box-sizing:border-box}
+  #aiDraft .ad-wrap{width:min(1500px,100%);min-height:100%;display:grid;grid-template-rows:auto auto 1fr;gap:12px}
+  #aiDraft .ad-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #ffffff24;padding:4px 2px 12px}
+  #aiDraft .ad-head h2{margin:0;font-size:clamp(18px,3vw,30px);letter-spacing:.12em;color:#f0d9a8}
+  #aiDraft .ad-phase{font-size:12px;color:#d7c49a;letter-spacing:.12em}
+  #aiDraft .ad-status{text-align:center;padding:12px;border:1px solid #ffffff22;border-radius:12px;background:#ffffff09}
+  #aiDraft .ad-status strong{display:block;font-size:clamp(18px,3vw,26px);margin-bottom:4px}
+  #aiDraft .ad-status small{color:#aebbc8}
+  #aiDraft .ad-main{display:grid;grid-template-columns:minmax(150px,1fr) minmax(280px,1.5fr) minmax(150px,1fr);gap:12px;min-height:0}
+  #aiDraft .ad-team{border:1px solid #ffffff20;border-radius:14px;padding:10px;background:#08111bc9;min-width:0}
+  #aiDraft .ad-team h3{margin:0 0 10px;font-size:14px;letter-spacing:.08em}
+  #aiDraft .ad-team.blue h3{color:#70baff} #aiDraft .ad-team.red h3{color:#ff8585}
+  #aiDraft .ad-slot{display:flex;align-items:center;gap:8px;min-height:45px;padding:6px;margin:5px 0;border-radius:8px;background:#ffffff08;border:1px solid #ffffff12;font-size:12px}
+  #aiDraft .ad-slot img{width:34px;height:34px;object-fit:cover;border-radius:6px;background:#26303b}
+  #aiDraft .ad-slot .ad-empty{width:34px;height:34px;border-radius:6px;background:#ffffff0d;display:grid;place-items:center;color:#788797;font-size:18px}
+  #aiDraft .ad-slot small{display:block;color:#93a3b4;margin-top:2px}
+  #aiDraft .ad-center{display:flex;flex-direction:column;gap:10px;min-width:0}
+  #aiDraft .ad-bans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #aiDraft .ad-banbox{padding:8px;border-radius:9px;background:#ffffff08;border:1px solid #ffffff16}
+  #aiDraft .ad-banbox b{display:block;font-size:11px;margin-bottom:6px;color:#c6d0da}
+  #aiDraft .ad-banbox span{display:inline-block;font-size:11px;margin:2px;padding:3px 6px;border-radius:5px;background:#702e35;color:#ffd7d7}
+  #aiDraft .ad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;overflow:auto;align-content:start;padding:2px;max-height:min(55vh,650px)}
+  #aiDraft .ad-champ{border:1px solid #ffffff1c;background:#ffffff0a;color:#eaf0f6;border-radius:9px;padding:7px 4px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;font-size:11px;cursor:pointer}
+  #aiDraft .ad-champ img{width:48px;height:48px;object-fit:cover;border-radius:7px;background:#25303b}
+  #aiDraft .ad-champ:disabled{opacity:.22;filter:grayscale(1);cursor:not-allowed}
+  #aiDraft .ad-champ:not(:disabled):hover{border-color:#e6c35c;background:#e6c35c18}
+  #aiDraft .ad-grid-note{text-align:center;color:#aebbc8;font-size:12px;padding:6px}
+  #aiDraft .ad-grid-note button{margin-left:8px;padding:7px 12px;border:0;border-radius:7px;background:#e6c35c;color:#1b1a15;font-weight:800}
+  @media(max-width:700px){#aiDraft .ad-main{grid-template-columns:1fr 1.3fr 1fr;gap:5px}#aiDraft .ad-team{padding:5px}#aiDraft .ad-slot{font-size:10px;gap:4px;padding:4px}#aiDraft .ad-slot img,#aiDraft .ad-slot .ad-empty{width:25px;height:25px}#aiDraft .ad-grid{grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:4px}#aiDraft .ad-champ img{width:38px;height:38px}#aiDraft .ad-team h3{font-size:11px}}
+  @media(max-width:430px){#aiDraft{padding:6px}#aiDraft .ad-main{grid-template-columns:90px minmax(0,1fr) 90px}#aiDraft .ad-slot{display:block;text-align:center;min-height:54px}#aiDraft .ad-slot img,#aiDraft .ad-slot .ad-empty{display:block;margin:0 auto 3px}#aiDraft .ad-slot small{font-size:9px}}
 </style>
 
 <canvas id="c"></canvas>
@@ -719,6 +751,17 @@
         <b>동랑</b>
         <span class="go">선택</span>
       </button>
+    </div>
+  </div>
+</div>
+<div id="aiDraft" hidden>
+  <div class="ad-wrap">
+    <div class="ad-head"><h2>RIFT · CHAMPION SELECT</h2><span class="ad-phase" id="adPhase">BAN PHASE 1</span></div>
+    <div class="ad-status"><strong id="adStatus">밴픽 준비 중</strong><small id="adSub">양 팀이 번갈아 밴과 픽을 진행합니다</small></div>
+    <div class="ad-main">
+      <section class="ad-team blue"><h3>BLUE TEAM</h3><div id="adBlue"></div></section>
+      <section class="ad-center"><div class="ad-bans"><div class="ad-banbox"><b>파랑팀 밴</b><div id="adBlueBans"></div></div><div class="ad-banbox"><b>빨강팀 밴</b><div id="adRedBans"></div></div></div><div class="ad-grid-note" id="adGridNote">AI가 차례대로 밴픽을 진행합니다</div><div class="ad-grid" id="adGrid"></div></section>
+      <section class="ad-team red"><h3>RED TEAM</h3><div id="adRed"></div></section>
     </div>
   </div>
 </div>
@@ -2273,6 +2316,85 @@ function selStep(step) {
   $('selTitle').textContent = step === 'role' ? '라인 선택' : `AI 밴픽 · 챔피언 선택 · ${ROLE_NAME[chosenRole]}`;
 }
 $('again').addEventListener('click', () => { specEnd(); if (mpLineup && mpLineup.duel) duelCleanup(); if (mpLineup) { mpLineup = null; mpEndSync(); if (MP.code) mpLeave(''); $('mp').hidden = true; } $('over').hidden = true; started = false; $('select').hidden = true; $('menu').hidden = false; selStep('role'); });
+
+let aiDraftState = null, aiDraftTimer = null;
+const AI_DRAFT_ORDER = [
+  ...['blue','red','blue','red','blue','red'].map(team=>({type:'ban',team,phase:1})),
+  ...['blue','red','red','blue','blue','red'].map(team=>({type:'pick',team,phase:1})),
+  ...['red','blue','red','blue'].map(team=>({type:'ban',team,phase:2})),
+  ...['red','blue','blue','red'].map(team=>({type:'pick',team,phase:2}))
+];
+function aiDraftName(key){return STATS[key]?.name || key;}
+function aiDraftPortrait(key){try{return champPortrait(key)?.toDataURL?.() || '';}catch{return '';}}
+function aiDraftRender(){
+  const d=aiDraftState;if(!d)return;
+  const slotHtml=(team)=>d[team].map((x,i)=>`<div class="ad-slot">${x?(`<img src="${aiDraftPortrait(x.key)}" alt=""><span>${esc(aiDraftName(x.key))}<small>${esc(ROLE_NAME[x.role])}</small></span>`):'<span class="ad-empty">?</span><span>대기 중</span>'}</div>`).join('');
+  $('adBlue').innerHTML=slotHtml('blue');$('adRed').innerHTML=slotHtml('red');
+  $('adBlueBans').innerHTML=d.bans.filter(x=>x.team==='blue').map(x=>`<span>${esc(aiDraftName(x.key))}</span>`).join('')||'<small>없음</small>';
+  $('adRedBans').innerHTML=d.bans.filter(x=>x.team==='red').map(x=>`<span>${esc(aiDraftName(x.key))}</span>`).join('')||'<small>없음</small>';
+  const used=new Set([...d.bans.map(x=>x.key),...d.blue.map(x=>x?.key),...d.red.map(x=>x?.key)].filter(Boolean));
+  $('adGrid').innerHTML=CHAMP_POOL.map(k=>`<button type="button" class="ad-champ" data-draft-champ="${k}" ${used.has(k)?'disabled':''}><img src="${aiDraftPortrait(k)}" alt=""><span>${esc(aiDraftName(k))}</span></button>`).join('');
+}
+function aiDraftStart(){
+  if(aiDraftTimer)clearTimeout(aiDraftTimer);
+  aiDraftState={bans:[],blue:[],red:[],used:new Set(),step:0,blueRoles:ROLES.filter(r=>r!==chosenRole),redRoles:ROLES.slice(),userPicked:false};
+  $('select').hidden=true;$('aiDraft').hidden=false;aiDraftAdvance();
+}
+function aiDraftAdvance(){
+  const d=aiDraftState;if(!d)return;
+  if(d.step>=AI_DRAFT_ORDER.length){aiDraftFinish();return;}
+  const a=AI_DRAFT_ORDER[d.step], teamName=a.team==='blue'?'파랑팀':'빨강팀';
+  $('adPhase').textContent=a.type==='ban'?`BAN PHASE ${a.phase}`:`PICK PHASE ${a.phase}`;
+  if(a.type==='ban'){
+    $('adStatus').textContent=`${teamName} 밴 차례`;
+    $('adSub').textContent=`${a.phase===1?'1차':'2차'} 밴 · 양 팀이 번갈아 챔피언을 금지합니다`;
+    $('adGridNote').textContent='AI가 금지할 챔피언을 고르는 중…';$('adGrid').innerHTML='';
+    aiDraftTimer=setTimeout(()=>{
+      const pool=CHAMP_POOL.filter(k=>!d.used.has(k));
+      const key=pool[Math.floor(Math.random()*pool.length)];
+      d.used.add(key);d.bans.push({team:a.team,key});aiDraftBans=d.bans.map(x=>x.key);
+      d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,420);
+    },520);return;
+  }
+  if(a.team==='blue'&&!d.userPicked){
+    $('adStatus').textContent='파랑팀 · 내 챔피언 선택';
+    $('adSub').textContent=`${ROLE_NAME[chosenRole]} 포지션으로 플레이할 챔피언을 선택하세요`;
+    $('adGridNote').textContent='직접 챔피언을 선택하면 AI 밴픽이 이어집니다';
+    aiDraftRender();return;
+  }
+  const roles=a.team==='blue'?d.blueRoles:d.redRoles;
+  const role=roles.shift()||ROLES.find(r=>!(a.team==='blue'?d.blue:d.red).some(x=>x.role===r));
+  $('adStatus').textContent=`${teamName} 픽 차례`;
+  $('adSub').textContent=`${ROLE_NAME[role]} 포지션 챔피언을 선택하는 중…`;
+  $('adGridNote').textContent='AI가 팀 조합과 포지션을 고려해 선택합니다';$('adGrid').innerHTML='';
+  aiDraftTimer=setTimeout(()=>{
+    const key=pickForRoles([role],[...d.used])[0]||CHAMP_POOL.find(k=>!d.used.has(k));
+    d.used.add(key);d[a.team].push({role,key});d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,420);
+  },620);
+}
+function aiDraftUserPick(key){
+  const d=aiDraftState;if(!d||d.userPicked||d.used.has(key))return;
+  d.userPicked=true;d.used.add(key);d.blue.push({role:chosenRole,key});chosenChamp=key;
+  d.step++;aiDraftRender();$('adStatus').textContent=`${aiDraftName(key)} 선택 완료!`;$('adSub').textContent='이제 양 팀 AI가 남은 픽을 진행합니다';
+  aiDraftTimer=setTimeout(aiDraftAdvance,650);
+}
+function aiDraftFinish(){
+  const d=aiDraftState;if(!d)return;
+  const all=[...d.blue,...d.red].map(x=>x.key);
+  if(all.length!==10||new Set(all).size!==10||d.bans.some(x=>all.includes(x.key))){
+    $('adStatus').textContent='밴픽 오류 · 다시 진행합니다';aiDraftTimer=setTimeout(aiDraftStart,900);return;
+  }
+  aiDraftBans=d.bans.map(x=>x.key);
+  aiDraftLineup={fresh:true,blue:d.blue.slice(),red:d.red.slice()};
+  $('adPhase').textContent='READY';$('adStatus').textContent='밴픽 완료';$('adSub').textContent='10명의 챔피언이 모두 결정되었습니다. 게임을 시작합니다.';
+  $('adGridNote').textContent='전투 시작!';$('adGrid').innerHTML='';
+  aiDraftTimer=setTimeout(()=>{
+    $('aiDraft').hidden=true;aiDraftState=null;mpLineup=null;resetGame();started=true;
+    text(player.x+E(80),player.y-E(80),`${ROLE_NAME[chosenRole]} 상대: ${STATS[bot.key].name}`,'#ff8a8a',true,3);
+    if(chosenRole==='jungle'){shopSel='hunter';text(player.x+E(80),player.y-E(130),'정글: 상점에서 사냥꾼의 칼을 사세요','#d8b36a',true,4);}
+  },900);
+}
+$('aiDraft').addEventListener('click',e=>{const b=e.target.closest('[data-draft-champ]');if(b&&!b.disabled)aiDraftUserPick(b.dataset.draftChamp);});
 $('select').addEventListener('click', e => {
   if (e.target.closest('#selBack')) { selStep('role'); return; }
   if (e.target.closest('[data-rpedit]')) { rpOpen(); return; }
@@ -2285,27 +2407,8 @@ $('select').addEventListener('click', e => {
     renderSpellPick(); return; }
   const r = e.target.closest('[data-role]'); if (r) {
     chosenRole = r.dataset.role; chosenSpells = chosenRole === 'jungle' ? ['warp', 'hook'] : chosenRole === 'support' ? ['warp', 'ampule'] : ['warp', 'brand'];
-    aiDraftLineup = null;
-    const pool = CHAMP_POOL.slice(), bans = [];
-    for (const team of ['blue', 'red']) for (let i = 0; i < 2; i++) {
-      const candidates = pool.filter(k => !bans.includes(k));
-      const k = candidates[Math.floor(Math.random() * candidates.length)];
-      if (k) bans.push(k);
-    }
-    aiDraftBans = bans; selStep('champ'); selRecommend(chosenRole); return;
+    aiDraftLineup = null; aiDraftBans = []; aiDraftStart(); return;
   }
-  const b = e.target.closest('[data-champ]'); if (!b) return;
-  chosenChamp = b.dataset.champ;
-  if (aiDraftBans.includes(chosenChamp)) return;
-  mpLineup = null;
-  const blueRoles = ROLES.filter(role => role !== chosenRole), blueKeys = pickForRoles(blueRoles, [...aiDraftBans, chosenChamp]);
-  const blue = [{role:chosenRole, key:chosenChamp}, ...blueRoles.map((role, i) => ({role, key:blueKeys[i]}))];
-  const redKeys = pickForRoles(ROLES, [...aiDraftBans, ...blue.map(x => x.key)]);
-  const red = ROLES.map((role, i) => ({role, key:redKeys[i]}));
-  aiDraftLineup = {fresh:true, blue, red};
-  resetGame(); started = true; $('select').hidden = true;
-  text(player.x + E(80), player.y - E(80), `${ROLE_NAME[chosenRole]} 상대: ${STATS[bot.key].name}`, '#ff8a8a', true, 3);
-  if (chosenRole === 'jungle') { shopSel = 'hunter'; text(player.x + E(80), player.y - E(130), '정글: 상점에서 사냥꾼의 칼을 사세요', '#d8b36a', true, 4); }
 });
 $('spr').addEventListener('click', () => $('sprFile').click());
 $('sprFile').addEventListener('change', e => {
@@ -21629,7 +21732,7 @@ function cxDemo(k, key, fresh) {
 }
 function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; }
 
-$('mVsAi').addEventListener('click', () => { aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
+$('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
 $('mSpec').addEventListener('click', () => specStart());
 
