@@ -3320,7 +3320,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (tgt.shield > 0) { const a = Math.min(tgt.shield, hpLoss); tgt.shield -= a; hpLoss -= a; }   // 보호막 먼저
   tgt.hp -= hpLoss;
   // 롤랑 패시브: 적 챔피언의 스킬/기본 공격에 실제로 피격될 때만, 50초마다 보호막 발동
-  if (tgt.key === 'roland' && isChamp(src) && src.team !== tgt.team && (opts.basic || opts.skill) && !opts.noProc && hpLoss > 0 && time >= (tgt.rolandPassiveReadyAt || 0)) {
+  if (tgt.key === 'roland' && isChamp(src) && src.team !== tgt.team && (opts.basic || opts.skill) && !opts.noProc && amount > 0 && time >= (tgt.rolandPassiveReadyAt || 0)) {
     const sh = 95 + tgt.level * 9;
     tgt.rolandPassiveReadyAt = time + 50;
     tgt.shield = Math.max(tgt.shield || 0, sh);
