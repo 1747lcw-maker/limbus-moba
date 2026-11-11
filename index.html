@@ -21469,8 +21469,42 @@ const CX_CLASS = {                                              // 역할군: [�
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = k => (CX_CLASS[k] || []).map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join('');
-const cxCol = k => { if (k === 'xichun') return 'linear-gradient(90deg, #c8202c 50%, #26262c 50%)'; const el = document.querySelector(`.sel-card[data-champ="${k}"] .sel-token`); return el ? el.style.background : '#777'; };
-const cxIcon = (k, key) => { const cv = skillIconCanvas(k, key); try { return cv ? cv.toDataURL() : ''; } catch { return ''; } };
+const cxCol = k => {
+  if (k === 'xichun') return 'linear-gradient(90deg, #c8202c 50%, #26262c 50%)';
+  return CHAMP_COL[k] || (document.querySelector(`.sel-card[data-champ="${k}"] .sel-token`)?.style.background) || '#777';
+};
+function cxLiuFallbackIcon(key) {
+  const cv=document.createElement('canvas');cv.width=cv.height=96;
+  const g=cv.getContext('2d');
+  const bg=g.createRadialGradient(35,28,3,48,48,58);bg.addColorStop(0,'#596d80');bg.addColorStop(1,'#080b12');
+  g.fillStyle=bg;g.beginPath();g.arc(48,48,47,0,Math.PI*2);g.fill();
+  g.save();g.translate(48,48);g.lineCap='round';g.lineJoin='round';
+  const line=(x1,y1,x2,y2,col,w)=>{g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();};
+  const slash=(x1,y1,x2,y2)=>{line(x1,y1,x2,y2,'#080b12',11);line(x1,y1,x2,y2,'#d9e6f2',2.5);};
+  if(key==='P'){
+    g.strokeStyle='#bceaff';g.lineWidth=2.5;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();
+    for(let i=0;i<8;i++){g.save();g.rotate(i*Math.PI/4);g.fillStyle='#a9dff4';g.beginPath();g.ellipse(0,-13,4,9,0,0,Math.PI*2);g.fill();g.strokeStyle='#f0fbff';g.lineWidth=1;g.stroke();g.restore();}
+    g.fillStyle='#e8faff';g.beginPath();g.arc(0,0,6,0,7);g.fill();
+  } else if(key==='Q'){
+    g.save();g.rotate(-.55);slash(-25,9,25,-10);slash(-20,16,19,-3);g.restore();
+    for(let i=0;i<5;i++){const a=-1.2+i*.48;line(Math.cos(a)*17,Math.sin(a)*17,Math.cos(a)*28,Math.sin(a)*28,'#b9d8f0',2);}
+  } else if(key==='W'){
+    g.save();g.rotate(-.6);line(-18,20,11,-12,'#111722',7);line(-18,20,11,-12,'#e1eaf4',2.5);
+    g.strokeStyle='#e1eaf4';g.lineWidth=5;g.beginPath();g.moveTo(8,-12);g.quadraticCurveTo(31,-29,27,-5);g.quadraticCurveTo(24,8,9,2);g.stroke();g.restore();
+  } else if(key==='E'){
+    g.rotate(-.45);g.fillStyle='#111722';g.strokeStyle='#e1eaf4';g.lineWidth=2.5;g.beginPath();g.moveTo(-22,-14);g.lineTo(4,-18);g.lineTo(22,-8);g.lineTo(17,16);g.lineTo(-8,19);g.lineTo(-23,7);g.closePath();g.fill();g.stroke();
+    line(-14,-5,12,8,'#9fc4df',2);line(-14,3,9,14,'#9fc4df',2);
+  } else {
+    for(let i=0;i<9;i++){g.save();g.rotate(i*Math.PI*2/9);g.fillStyle=i%2?'#111722':'#dce7f2';g.strokeStyle='#f5fbff';g.lineWidth=1.2;g.beginPath();g.moveTo(-3,-5);g.lineTo(0,-31);g.lineTo(3,-5);g.closePath();g.fill();g.stroke();g.restore();}
+    g.fillStyle='#080b12';g.strokeStyle='#e4eff8';g.lineWidth=2.5;g.beginPath();g.arc(0,0,10,0,7);g.fill();g.stroke();g.fillStyle='#a9dff4';g.beginPath();g.arc(0,0,4,0,7);g.fill();
+  }
+  g.restore();return cv.toDataURL();
+}
+const cxIcon = (k, key) => {
+  try { const cv=skillIconCanvas(k,key); if(cv) return cv.toDataURL(); } catch(e) {}
+  if(k==='liuEn' && ['P','Q','W','E','R'].includes(key)) { try{return cxLiuFallbackIcon(key);}catch(e){} }
+  return '';
+};
 let cxChamp = null, cxKey = 'P';
 
 function openMenu(on) { $('menu').hidden = !on; }
