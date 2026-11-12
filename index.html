@@ -4157,55 +4157,39 @@ function liuNearest(c,range,champOnly=false){return units.filter(u=>u.alive&&u.t
 function vespaFoes(c,range){return units.filter(u=>u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&!u.ward&&seenBy(c.team,u)&&dist(c,u)<=range);}
 function vespaThrow(c,t,amount,kind='basic'){if(!t||!t.alive)return;const a=Math.atan2(t.y-c.y,t.x-c.x);projectiles.push({x:c.x+Math.cos(a)*c.r,y:c.y+Math.sin(a)*c.r,tgt:t,src:c,amount,speed:E(kind==='ult'?1250:kind==='W'?1750:1450),color:'#f4c52c',size:E(kind==='ult'?12:kind==='W'?9:6),vespa:true,vespaKind:kind,opts:{basic:kind==='basic',skill:kind!=='basic',type:'physical',color:'#e8b928'}});}
 function vespaStick(c,t,amount,kind){if(!c.vespaSpears)c.vespaSpears=[];c.vespaSpears.push({tgt:t,amount,kind,at:time});fx.push({type:'vsStick',x:t.x,y:t.y,r:t.r*1.25,t:0,life:.38});}
-function vespaRecall(c){const list=(c.vespaSpears||[]).filter(s=>s.tgt&&s.tgt.alive&&s.tgt.team!==c.team);if(!list.length){c.vespaWReady=false;return false;}const per=new Map();for(const s of list)per.set(s.tgt,(per.get(s.tgt)||0)+s.amount);for(const [u,total] of per){const n=list.filter(s=>s.tgt===u).length;damage(c,u,total*.42+n*(18+c.ad*.12),{skill:true,type:'physical',color:'#f4c52c'});fx.push({type:'vsRecall',x:u.x,y:u.y,r:u.r*2,t:0,life:.58,count:n});}c.vespaSpears=[];c.vespaWReady=false;sfxPlay('swing',c.x,c.y,1.15,.72);text(c.x,c.y-c.r-E(48),'회수!','#ffd84a',true,.8);return true;}
+function vespaRecall(c){const list=(c.vespaSpears||[]).filter(s=>s.tgt&&s.tgt.alive&&s.tgt.team!==c.team);if(!list.length){c.vespaWReady=false;return false;}const per=new Map();for(const s of list){const v=per.get(s.tgt)||{amount:0,count:0};v.amount+=s.amount;v.count++;per.set(s.tgt,v);}for(const [u,v] of per){damage(c,u,v.amount*.42+v.count*(18+c.ad*.12),{skill:true,type:'physical',color:'#f4c52c'});fx.push({type:'vsRecall',x:u.x,y:u.y,r:u.r*2,t:0,life:.58,count:v.count});}c.vespaSpears=[];c.vespaWReady=false;sfxPlay('swing',c.x,c.y,1.15,.72);text(c.x,c.y-c.r-E(48),'회수!','#ffd84a',true,.8);return true;}
 function vespaTick(c,dt){if(!c.alive)return;c.vespaPassiveThink=(c.vespaPassiveThink||0)-dt;if(c.vespaPassiveThink<=0){c.vespaPassiveThink=.12;if(time>=(c.vespaPassiveCd||0)){const a=champs().filter(x=>x.alive&&x.team===c.team&&x!==c).sort((x,y)=>dist(c,x)-dist(c,y))[0],selfLow=c.hp<c.maxHp*.3,allyLow=a&&a.hp<a.maxHp*.3;if(selfLow||allyLow){c.vespaPassiveCd=time+90;for(const u of [c,allyLow?a:null].filter(Boolean)){u.shield=Math.max(u.shield||0,c.maxHp*.5);u.shieldT=Math.max(u.shieldT||0,3.5);fx.push({type:'vsGuard',x:u.x,y:u.y,r:u.r*2,t:0,life:.72});}c.vespaFuryUntil=time+5;text(c.x,c.y-c.r-E(54),'지키겠습니다.','#ffdb48',true,.9);sfxPlay('ult',c.x,c.y,.9,1.1);}}}}
 function drawVespaFx(g,f,k){
  const e=easeOut(k),fade=1-k,r=Math.max(E(24),f.r||E(58)),gold='#ffd21f',bright='#fffbd0',white='#ffffff',black='#17130a';
- const pulse=.82+Math.sin(time*18)*.18,spread=1+e*.9;
- g.save();g.translate(f.x,f.y);g.globalAlpha=fade;
- // 강한 외곽 발광과 밝은 중심광을 겹쳐 작은 화면에서도 선명하게 표시
- g.globalCompositeOperation='lighter';g.shadowColor=gold;g.shadowBlur=E(34);
- g.strokeStyle='rgba(255,211,35,.34)';g.lineWidth=E(15)*(1-k);
+ // 베스파 이펙트는 짧은 시간에 여러 개 겹치므로 그림자 블러와 반복 도형 수를 제한해 프레임 부하를 줄인다.
+ g.save();g.translate(f.x,f.y);g.globalAlpha=fade;g.globalCompositeOperation='lighter';
+ g.shadowColor=gold;g.shadowBlur=E(9);
+ g.strokeStyle='rgba(255,211,35,.3)';g.lineWidth=E(5)*(1-k);
  g.beginPath();g.arc(0,0,r*(.42+e*.78),0,Math.PI*2);g.stroke();
- g.shadowBlur=E(16);
  if(f.type==='vsSlash'){
   g.rotate(f.ang||0);
-  // 넓은 초승달형 검격: 어두운 외곽선 + 금빛 본체 + 백색 중심선
-  for(let j=0;j<5;j++){
-   const widths=[E(25),E(17),E(9),E(4),E(1.5)];
-   g.strokeStyle=[black,'#ff9f00',gold,bright,white][j];g.lineWidth=widths[j]*(1-k*.72);
-   g.shadowBlur=E(j===0?5:25);
-   g.beginPath();g.ellipse(0,0,r*(.72+e*.58),r*(.24+e*.12),0,-1.12+j*.025,1.12-j*.025);g.stroke();
-  }
-  // 검격을 따라 튀는 긴 불꽃 파편
-  for(let i=0;i<22;i++){
-   const a=-1.18+i*.112,rr=r*(.56+e*.72),len=E(7+(i%4)*4)*(1-k*.5);
-   g.save();g.rotate(a);g.fillStyle=i%4===0?white:(i%2?gold:bright);
-   g.shadowBlur=E(18);g.beginPath();g.moveTo(rr,-len*.35);g.lineTo(rr+len*2.2,0);g.lineTo(rr,len*.35);g.closePath();g.fill();g.restore();
-  }
+  for(let j=0;j<3;j++){g.strokeStyle=[black,gold,white][j];g.lineWidth=E([15,7,2][j])*(1-k*.72);g.beginPath();g.ellipse(0,0,r*(.72+e*.58),r*(.24+e*.12),0,-1.12+j*.035,1.12-j*.035);g.stroke();}
+  g.shadowBlur=E(6);
+  for(let i=0;i<8;i++){const a=-1.18+i*.31,rr=r*(.56+e*.72),len=E(9+(i%3)*3)*(1-k*.5);g.save();g.rotate(a);g.fillStyle=i%3===0?white:gold;g.beginPath();g.moveTo(rr,-len*.35);g.lineTo(rr+len*2,0);g.lineTo(rr,len*.35);g.closePath();g.fill();g.restore();}
  }else if(f.type==='vsStick'||f.type==='vsRecall'){
   g.rotate(time*2.3);
-  for(let j=0;j<4;j++){g.strokeStyle=[black,'#ff9f00',gold,white][j];g.lineWidth=E([15,10,5,2][j])*(1-k*.7);g.shadowBlur=E(22);g.beginPath();g.arc(0,0,r*(.48+e*.38)+E(j*5),.15+j*.12,Math.PI*1.85-j*.12);g.stroke();}
-  const count=Math.min(20,Math.max(10,f.count||14));
-  for(let i=0;i<count;i++){const a=i/count*Math.PI*2+time*2.6,rr=r*(.55+e*.72);g.save();g.rotate(a);g.fillStyle=i%4===0?white:(i%2?gold:bright);g.shadowBlur=E(20);g.beginPath();g.moveTo(rr,-E(4));g.lineTo(rr+E(19)*(1-k*.45),0);g.lineTo(rr,E(4));g.closePath();g.fill();g.restore();}
+  for(let j=0;j<2;j++){g.strokeStyle=j?white:gold;g.lineWidth=E(j?2:6)*(1-k*.7);g.beginPath();g.arc(0,0,r*(.5+e*.38)+E(j*5),.15+j*.12,Math.PI*1.85-j*.12);g.stroke();}
+  const count=Math.min(8,Math.max(4,Math.ceil((f.count||8)*.5)));
+  for(let i=0;i<count;i++){const a=i/count*Math.PI*2+time*2.6,rr=r*(.55+e*.72);g.save();g.rotate(a);g.fillStyle=i%3===0?white:gold;g.beginPath();g.moveTo(rr,-E(3));g.lineTo(rr+E(14)*(1-k*.45),0);g.lineTo(rr,E(3));g.closePath();g.fill();g.restore();}
  }else if(f.type==='vsGuard'){
-  const a=f.ang||0;g.rotate(a);
-  // 전방 방패를 큰 반투명 면과 겹겹의 발광 테두리로 강조
-  g.fillStyle='rgba(255,205,35,.2)';g.beginPath();g.moveTo(0,-r*1.05);g.quadraticCurveTo(r*1.45,-r*.62,r*1.28,r*.42);g.quadraticCurveTo(0,r*1.62,-r*1.28,r*.42);g.quadraticCurveTo(-r*1.45,-r*.62,0,-r*1.05);g.fill();
-  for(let j=0;j<4;j++){g.strokeStyle=[black,'#ff9f00',gold,white][j];g.lineWidth=E([17,12,7,2.5][j])*(1-k*.65);g.shadowBlur=E(24);g.beginPath();g.arc(0,0,r*(1+j*.045),-.98,.98);g.stroke();}
-  for(let i=0;i<13;i++){const a=-.92+i*.153;g.save();g.rotate(a);g.fillStyle=i%3?bright:white;g.shadowBlur=E(20);g.beginPath();g.moveTo(r*.78,-E(3));g.lineTo(r*1.45,0);g.lineTo(r*.78,E(3));g.closePath();g.fill();g.restore();}
- }else{
-  // 투척/궁극기: 넓은 충격파, 방사형 창날, 중심 섬광
   g.rotate(f.ang||0);
-  for(let j=0;j<5;j++){g.strokeStyle=[black,'#ff9700',gold,bright,white][j];g.lineWidth=E([17,12,8,4,1.5][j])*(1-k*.72);g.shadowBlur=E(26);g.beginPath();g.arc(0,0,r*(.25+e*1.25)+E(j*5),-1.18+j*.12,1.18-j*.12);g.stroke();}
-  for(let i=0;i<24;i++){const a=i/24*Math.PI*2+time*.9,inner=r*(.22+e*.28),outer=r*(.88+e*.92);g.save();g.rotate(a);g.fillStyle=i%6===0?white:(i%2?gold:bright);g.shadowBlur=E(20);g.beginPath();g.moveTo(inner,-E(4));g.lineTo(outer,0);g.lineTo(inner,E(4));g.closePath();g.fill();g.restore();}
-  g.fillStyle='rgba(255,244,170,.8)';g.shadowBlur=E(38);g.beginPath();g.arc(0,0,r*.2*pulse,0,Math.PI*2);g.fill();
+  g.fillStyle='rgba(255,205,35,.16)';g.beginPath();g.moveTo(0,-r*1.05);g.quadraticCurveTo(r*1.45,-r*.62,r*1.28,r*.42);g.quadraticCurveTo(0,r*1.62,-r*1.28,r*.42);g.quadraticCurveTo(-r*1.45,-r*.62,0,-r*1.05);g.fill();
+  for(let j=0;j<2;j++){g.strokeStyle=j?white:gold;g.lineWidth=E(j?2.5:9)*(1-k*.65);g.beginPath();g.arc(0,0,r*(1+j*.05),-.98,.98);g.stroke();}
+  g.shadowBlur=E(5);
+  for(let i=0;i<7;i++){const a=-.92+i*.30;g.save();g.rotate(a);g.fillStyle=i%3?bright:white;g.beginPath();g.moveTo(r*.78,-E(3));g.lineTo(r*1.4,0);g.lineTo(r*.78,E(3));g.closePath();g.fill();g.restore();}
+ }else{
+  g.rotate(f.ang||0);
+  for(let j=0;j<3;j++){g.strokeStyle=[black,gold,white][j];g.lineWidth=E([11,6,2][j])*(1-k*.72);g.beginPath();g.arc(0,0,r*(.25+e*1.25)+E(j*5),-1.18+j*.12,1.18-j*.12);g.stroke();}
+  g.shadowBlur=E(7);
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2+time*.9,inner=r*(.22+e*.28),outer=r*(.88+e*.92);g.save();g.rotate(a);g.fillStyle=i%4===0?white:gold;g.beginPath();g.moveTo(inner,-E(3));g.lineTo(outer,0);g.lineTo(inner,E(3));g.closePath();g.fill();g.restore();}
+  g.fillStyle='rgba(255,244,170,.8)';g.beginPath();g.arc(0,0,r*.2,0,Math.PI*2);g.fill();
  }
- // 모든 베스파 스킬 공통: 큰 회전 룬 고리와 별 모양 섬광
- g.rotate(-time*1.15);
- for(let j=0;j<2;j++){g.strokeStyle=j?bright:gold;g.lineWidth=E(j?2:3)*(1-k);g.setLineDash([E(8),E(7)]);g.beginPath();g.arc(0,0,r*(1.05+e*.58+j*.1),0,Math.PI*2);g.stroke();}
- g.setLineDash([]);
- for(let i=0;i<12;i++){const a=i/12*Math.PI*2+time*1.8,rr=r*(.8+e*.88);g.save();g.rotate(a);g.fillStyle=i%3===0?white:gold;g.shadowBlur=E(25);g.beginPath();g.moveTo(rr,-E(3));g.lineTo(rr+E(10),0);g.lineTo(rr,E(3));g.lineTo(rr-E(5),0);g.closePath();g.fill();g.restore();}
+ // 공통 룬 장식도 소수의 선으로만 유지
  g.globalCompositeOperation='source-over';g.shadowBlur=0;g.restore();
 }
 function nhInit(c){if(c.nhMag!=='tiger'&&c.nhMag!=='basic')c.nhMag='basic';if(!Number.isFinite(c.nhAmmo))c.nhAmmo=6;if(!Number.isFinite(c.nhInstinctN))c.nhInstinctN=0;}
