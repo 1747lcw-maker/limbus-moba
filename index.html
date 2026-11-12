@@ -19888,6 +19888,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   alyssa:    {coat:'#e04a24', pants:'#2a0a08', hair:'#c8281e', skin:'#f4dccc', eye:'#ffb04a', fx:'flame', line:'아른거리는 불에 홀려 다가온다면, 흔적도 없이 태워버릴 뿐.'},
   hohenheim: {coat:'#2e55b8', pants:'#141a26', hair:'#2a2420', skin:'#e8d6c6', eye:'#7fd8ff', fx:'bolt', line:'고만고만한 방식이지만, 가끔은 쓸모가 있군.'},
   charon:    {coat:'#26393a', pants:'#1a2626', hair:'#e9edf0', skin:'#b8babc', eye:'#f6f1e6', fx:'bus', line:'부릉부릉. 카론과 메피는 멈추지 않아.'},
+  indigoElder:{coat:'#526b80',pants:'#182633',hair:'#d6e0e8',skin:'#d9d4ca',eye:'#9edcff',fx:'chain',line:'대호수의 규칙은 끝나지 않는다. 다음 포경을 준비하라.'},
 };
 let mvp = null, mvpRun = false;
 function mvpOpen(c, dev) {
@@ -20023,6 +20024,11 @@ const MVP_ACT = {
   },
   xichun: A => mvpXcDuo(A),                                                                // 가시춘과 웨이: 둘이 함께 등장하는 합동 공격
   wei: A => mvpXcDuo(A),
+  indigoElder: A => {
+    const a=A.a, k=mE(mClamp(a/.7,0,1)), sweep=mClamp((a-.35)/.45,0,1);
+    return {back:g=>{g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.75*k;for(let j=0;j<3;j++){const rr=A.Rb*(1.8+j*.62);g.strokeStyle=j===1?'rgba(190,225,245,.8)':'rgba(92,155,190,.65)';g.lineWidth=A.Rb*(.035+j*.012);g.beginPath();g.ellipse(A.x,A.floor-A.Rb*.85,rr*(.55+sweep*.9),rr*.32,-.12+j*.12,Math.PI*(1.05+sweep*.18),Math.PI*(1.95+sweep*.18));g.stroke();}if(sweep>0){g.strokeStyle='rgba(205,235,250,'+(1-sweep)*.9+')';g.lineWidth=A.Rb*.16;g.beginPath();g.moveTo(A.x-A.Rb*5,A.floor-A.Rb*2.8);g.lineTo(A.x+A.Rb*5,A.floor-A.Rb*.35);g.moveTo(A.x-A.Rb*5,A.floor-A.Rb*.35);g.lineTo(A.x+A.Rb*5,A.floor-A.Rb*2.8);g.stroke();}g.restore();},
+      front:g=>{const x=A.x+A.Rb*(.95+sweep*.45),y=A.floor-A.Rb*(1.65-sweep*.2);g.save();g.translate(x,y);g.rotate(-.7+sweep*1.4);g.lineCap='round';g.strokeStyle='#253c50';g.lineWidth=A.Rb*.18;g.beginPath();g.moveTo(-A.Rb*1.1,0);g.lineTo(A.Rb*1.55,0);g.stroke();g.fillStyle='#dcecf5';g.beginPath();g.moveTo(A.Rb*1.45,-A.Rb*.22);g.lineTo(A.Rb*2.35,0);g.lineTo(A.Rb*1.45,A.Rb*.22);g.closePath();g.fill();g.strokeStyle='#a9d9f0';g.lineWidth=A.Rb*.055;g.beginPath();g.moveTo(-A.Rb*.3,-A.Rb*.16);g.lineTo(A.Rb*1.8,-A.Rb*.16);g.stroke();g.restore();}};
+  },
   bongdad: A => {                                                                           // 가마솥이 끓어오르고 봉이들이 둘레를 뛰어다님
     const a = A.a, k = mE(mClamp(a / .6, 0, 1));
     return {back: g => {
@@ -20288,6 +20294,8 @@ const MVP_ACT = {
   liuEn:A=>{const a=A.a,k=mE(mClamp(a/.65,0,1));return{back:g=>{g.save();g.globalCompositeOperation='lighter';for(let i=0;i<9;i++){const q=i*.7+a*2,x=A.x+Math.cos(q)*A.Rb*(1+k),y=A.floor-A.Rb*1.3+Math.sin(q)*A.Rb*.8;g.fillStyle=i%2?'rgba(255,95,35,.85)':'rgba(255,210,105,.9)';g.beginPath();g.arc(x,y,A.Rb*(.06+.04*Math.sin(a*8+i)),0,7);g.fill();}g.restore();},front:g=>{g.save();g.strokeStyle='#ff9a45';g.lineWidth=A.Rb*.18;g.lineCap='round';g.beginPath();g.moveTo(A.x-A.Rb*.4,A.floor-A.Rb*2.4);g.quadraticCurveTo(A.x+A.Rb*2,A.floor-A.Rb*2.8,A.x+A.Rb*1.4,A.floor-A.Rb*.7);g.stroke();g.restore();}};},
   naihwang:A=>{const a=A.a,k=mE(mClamp(a/.6,0,1));return{back:g=>{g.save();g.globalCompositeOperation='lighter';g.strokeStyle='#ff5548';g.lineWidth=A.Rb*.055;for(let i=0;i<6;i++){const q=i*Math.PI/3+a*1.5;g.beginPath();g.moveTo(A.x,A.floor-A.Rb*1.5);g.lineTo(A.x+Math.cos(q)*A.Rb*(1.5+2*k),A.floor-A.Rb*1.5+Math.sin(q)*A.Rb*(1.2+2*k));g.stroke();}g.restore();},front:g=>{g.save();g.translate(A.x+A.Rb*.7,A.floor-A.Rb*1.6);g.rotate(-.8+Math.sin(a*12)*.12);g.strokeStyle='#f4d0b8';g.lineWidth=A.Rb*.12;g.beginPath();g.moveTo(-A.Rb,A.Rb);g.lineTo(A.Rb*1.2,-A.Rb);g.stroke();g.restore();}};},
   blueReverb:A=>{const a=A.a,k=mE(mClamp(a/.7,0,1));return{back:g=>{g.save();g.globalCompositeOperation='lighter';for(let i=0;i<6;i++){g.strokeStyle=i%2?'rgba(70,170,255,.65)':'rgba(220,245,255,.85)';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(A.x,A.floor-A.Rb*1.2,A.Rb*(.6+i*.42)*k,A.Rb*(.25+i*.17)*k,0,0,7);g.stroke();}g.restore();},front:g=>{g.save();g.strokeStyle='#a9eaff';g.lineWidth=A.Rb*.09;g.beginPath();g.moveTo(A.x-A.Rb*1.5,A.floor-A.Rb*2.2);g.lineTo(A.x+A.Rb*1.5,A.floor-A.Rb*.8);g.stroke();g.restore();}};},
+,
+  indigoElder: A => { const a=A.a,k=mE(mClamp(a/.7,0,1)),sw=mClamp((a-.35)/.45,0,1); return {back:g=>{g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.7*k;for(let j=0;j<3;j++){const r=A.Rb*(1.8+j*.62);g.strokeStyle=j===1?'rgba(190,225,245,.8)':'rgba(92,155,190,.65)';g.lineWidth=A.Rb*.045;g.beginPath();g.ellipse(A.x,A.floor-A.Rb*.85,r*(.55+sw*.9),r*.32,-.12+j*.12,Math.PI*1.05,Math.PI*1.95);g.stroke();}if(sw>0){g.strokeStyle='rgba(205,235,250,'+(1-sw)*.9+')';g.lineWidth=A.Rb*.16;g.beginPath();g.moveTo(A.x-A.Rb*5,A.floor-A.Rb*2.8);g.lineTo(A.x+A.Rb*5,A.floor-A.Rb*.35);g.moveTo(A.x-A.Rb*5,A.floor-A.Rb*.35);g.lineTo(A.x+A.Rb*5,A.floor-A.Rb*2.8);g.stroke();}g.restore();},front:g=>{g.save();g.translate(A.x+A.Rb*(.95+sw*.45),A.floor-A.Rb*1.5);g.rotate(-.7+sw*1.4);g.strokeStyle='#253c50';g.lineWidth=A.Rb*.18;g.beginPath();g.moveTo(-A.Rb*1.1,0);g.lineTo(A.Rb*1.55,0);g.stroke();g.fillStyle='#dcecf5';g.beginPath();g.moveTo(A.Rb*1.45,-A.Rb*.22);g.lineTo(A.Rb*2.35,0);g.lineTo(A.Rb*1.45,A.Rb*.22);g.closePath();g.fill();g.restore();}}; },
 
 };
 function mvpXcToken(g, M, ch, x, floorY, Rb, face, alpha = 1) {                      // 승리 연출: 두 번째 사람을 같은 방식으로 그림
@@ -22375,20 +22383,22 @@ function cxSpellsHtml() {
   return `<h3 class="cx-sh">소환사 주문 <small>D · F 키 / 귀환 버튼 옆 두 버튼</small></h3><div class="cx-spells">${SPELL_ORDER.map(id => { const sp = SPELLS[id];
     return `<div class="cx-spell"><img src="${icon(id)}" alt=""><div><b>${esc(sp.name)}</b><small>롤의 ${sp.lol} · 재사용 대기시간 ${sp.cd}초${sp.range ? ' · 사거리 ' + sp.range : ''}</small><p>${esc(sp.desc)}</p></div></div>`; }).join('')}</div>`;
 }
-function cxStatRows(k) {
+function cxStatRows(k, form = cxIndigoRole) {
   const st = STATS[k], L = MAX_LEVEL - 1, f = v => cxFmt(Math.round(v * 100) / 100);
-  // 도감에도 쪽빛 노인의 선택 전투 형태별 실제 기본 스탯 보정치를 반영한다.
-  let hp = [...st.hp], regen = [...st.regen], ad = [...st.ad], armor = [...st.armor], mr = [...st.mr], asMul = 1;
+  // recalcStats와 동일한 순서로 형태 보정치를 계산해 도감 수치와 인게임 수치가 어긋나지 않게 한다.
+  let hp0 = st.hp[0], hpG = st.hp[1], regen0 = st.regen[0], regenG = st.regen[1];
+  let ad0 = st.ad[0], adG = st.ad[1], armor0 = st.armor[0], armorG = st.armor[1];
+  let mr0 = st.mr[0], mrG = st.mr[1], asMul = 1;
   if (k === 'indigoElder') {
-    const form = cxIndigoRole || 'tank';
-    if (form === 'tank') { hp = hp.map(v => v * 1.35); regen[0] += 0.35; ad = ad.map(v => v * 0.82); armor[0] += 14; mr[0] += 14; asMul = 0.90; }
-    else if (form === 'support') { hp = hp.map(v => v * 1.10); ad = ad.map(v => v * 0.95); armor[0] += 7; mr[0] += 7; }
-    else { ad = ad.map(v => v * 1.12); asMul = 1.10; }
+    form = form || 'tank';
+    if (form === 'tank') { hp0 *= 1.35; hpG *= 1.35; regen0 += 0.35; ad0 *= 0.82; adG *= 0.82; armor0 += 14; mr0 += 14; asMul = 0.90; }
+    else if (form === 'support') { hp0 *= 1.10; hpG *= 1.10; ad0 *= 0.95; adG *= 0.95; armor0 += 7; mr0 += 7; }
+    else { ad0 *= 1.12; adG *= 1.12; asMul = 1.10; }
   }
   const row = (n, a, grow, lv15, unit = '') => `<tr><th>${n}</th><td>${a}${unit}</td><td>${grow}</td><td>${lv15}${unit}</td></tr>`;
-  const lin = (n, arr, unit = '') => row(n, f(arr[0]), '+' + f(arr[1]), f(arr[0] + arr[1] * L), unit);
-  return lin('체력', hp) + lin('체력 재생', regen, '/초') + lin('공격력', ad) + (st.ap ? lin('주문력', st.ap) : '') +
-    lin('방어력', armor) + lin('마법 저항력', mr) +
+  const lin = (n, base, growth, unit = '') => row(n, f(base), '+' + f(growth), f(base + growth * L), unit);
+  return lin('체력', hp0, hpG) + lin('체력 재생', regen0, regenG, '/초') + lin('공격력', ad0, adG) + (st.ap ? lin('주문력', st.ap[0], st.ap[1]) : '') +
+    lin('방어력', armor0, armorG) + lin('마법 저항력', mr0, mrG) +
     row('공격 속도', f(st.as[0] * asMul), '+' + f(st.as[1] * 100) + '%', f(st.as[0] * (1 + st.as[1] * L) * asMul)) +
     row('사거리', st.range, '—', st.range) + row('이동 속도', st.speed, '—', st.speed);
 }
@@ -22408,7 +22418,7 @@ function cxDetail(k, key = 'P', roleOverride = null) {
         <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
           <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+(chosenRole === 'support' ? '서포터·원거리 형태' : chosenRole === 'bottom' ? '원딜·원거리 형태' : '탱커·원거리 형태') : ''}</small></div></div></div>
         ${k === 'indigoElder' ? `<div class="cx-form-picks" role="tablist" aria-label="쪽빛노인 전투 형태"><button type="button" data-ie-form="tank" aria-pressed="${cxIndigoRole==='tank'}">탱커 형태 <small>탑·정글·미드</small></button><button type="button" data-ie-form="ranged" aria-pressed="${cxIndigoRole==='ranged'}">원딜 형태 <small>바텀</small></button><button type="button" data-ie-form="support" aria-pressed="${cxIndigoRole==='support'}">서포터 형태 <small>서포터</small></button></div>` : ''}
-        <details class="cx-stats" open><summary>기초 스탯 개요</summary>
+        <details class="cx-stats" open><summary>기초 스탯 개요${k === 'indigoElder' ? ' · ' + ({tank:'탱커 보정 적용',ranged:'원딜 보정 적용',support:'서포터 보정 적용'}[cxIndigoRole] || '탱커 보정 적용') : ''}</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
         </details>
         ${cxTabsHtml(k, key)}
@@ -22713,6 +22723,7 @@ Object.assign(CX_COMBO, {
   roland:[{name:'검은 침묵의 연속 참격',sum:'Q와 W로 빈틈을 파고들고 E로 주변을 쓸어낸 다음, 뒤틀림에서 FURIOSO를 끝까지 이어가는 롤랑의 대표 연계예요.',steps:[['Q','긴 찌르기로 적을 견제하며 접근해요.'],['W','대상 앞으로 돌진해 강한 검격을 꽂아요.'],['E','먹물을 흩뿌리듯 회전 참격으로 주변 적을 베고 투사체를 막아요.'],['R','뒤틀림 상태에 진입해 보호막과 피해 회복 효과를 얻어요.'],['R','재사용해 FURIOSO를 발동하고 연속 참격을 끝까지 이어가요.']],chain:(A,S)=>[S.k('Q'),S.k('W'),S.k('E'),S.k('R'),S.k('R')] }],
   liuEn:[{name:'흑염 연화 연격',sum:'뤼엔의 돌진과 연속 베기를 연결해 적에게 붙은 뒤, 화염의 힘을 집중해 마무리하는 근접 연계예요.',steps:[['Q','전방으로 파고들어 첫 검격을 적중시켜요.'],['W','연속 베기로 적을 압박하고 다음 공격의 틈을 만들어요.'],['평타','붙어 있는 동안 기본 공격으로 피해를 보태요.'],['E','강화 효과와 위치 조정을 활용해 추격을 이어가요.'],['R','궁극기의 강력한 화염 참격으로 마무리해요.']],chain:(A,S)=>[S.k('Q'),S.k('W'),S.atk(),S.k('E'),S.k('R')] }],
   naihwang:[{name:'맹호의 연속 난참',sum:'초절맹호살격난참의 연속 시전 흐름을 살려 기본기를 먼저 맞히고 궁극기의 폭발적인 연타로 끝내는 뇌횡의 콤보예요.',steps:[['Q','전방으로 진입하며 첫 번째 공격을 맞혀요.'],['W','상대의 움직임을 묶고 후속 공격을 준비해요.'],['E','측면을 잡아 다음 공격이 빗나가지 않도록 해요.'],['R','초절맹호살격난참으로 연속 참격을 퍼부어요.'],['R','재사용 가능한 연속 공격을 끝까지 이어가요.']],chain:(A,S)=>[S.k('Q'),S.k('W'),S.k('E'),S.k('R')] }],
+  indigoElder:[{name:'대호수의 포경 작전',sum:'먼 거리에서 작살을 꽂아 출혈과 둔화를 걸고, 바다 영역으로 전장을 장악한 뒤 고래 사냥의 X자 처형으로 마무리하는 연계예요. 선택한 형태에 따라 Q·W의 부가 효과가 달라집니다.',steps:[['Q','직선 작살을 먼저 적중시켜 형태별 효과를 부여해요. 탱커는 적중 피해만큼 회복하고, 원딜은 4초 출혈을 남기며, 서포터는 이동 속도를 낮춰요.'],['W','부채꼴 갈고리 작살로 후속 타격을 넣어요. 탱커는 최대 체력 비례 출혈, 원딜은 이동 속도와 피해량 증가, 서포터는 속박으로 추격을 이어가요.'],['E','넓은 바다 영역을 펼쳐 시야와 진입 경로를 장악하고, 서포터 형태라면 아군 강화 효과도 제공해요.'],['R','마지막으로 X자 포경 구역을 지정해 체력이 낮아진 적을 처형하고, 성공 시 팀 전체에 골드를 안겨요.']],chain:(A,S)=>[S.k('Q'),S.k('W'),S.k('E',{run:()=>castSkill(player,'E',null)}),S.k('R')]}],
   blueReverb:[{name:'푸른 잔향의 6중 진동',sum:'Q와 E를 적중시켜 진동을 빠르게 쌓고, 6중첩 속박을 만든 순간 궁극기와 아군 화력으로 한타를 여는 제어 연계예요.',steps:[['Q','푸른 궤적을 맞혀 진동을 쌓고 적의 이동·피해 능력을 낮춰요.'],['E','전주를 적중시켜 진동 중첩을 추가하고 아군에게 강화 효과를 줘요.'],['Q','다시 푸른 궤적을 맞혀 진동 6중첩 속박을 노려요.'],['W','잔향의 막으로 자신과 아군을 투사체로부터 보호해요.'],['R','잔향 악단으로 속박된 적과 주변 적에게 광역 피해와 혼란을 퍼뜨려요.']],chain:(A,S)=>[S.k('Q'),S.k('E'),S.k('Q'),S.k('W'),S.k('R')] }]
 });
 
