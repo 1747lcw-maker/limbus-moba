@@ -22290,7 +22290,7 @@ const CX_CLASS = {                                              // 역할군: [�
   roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
-const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터'] : role === 'bottom' ? ['원거리'] : ['탱커']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
+const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
 const cxCol = k => {
   if (k === 'roland') return '#090a0d';
   if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
@@ -22373,7 +22373,7 @@ function cxDetail(k, key = 'P') {
     <div class="cx-detail">
       <div class="cx-left">
         <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
-          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+(chosenRole === 'support' ? '서포터 형태' : chosenRole === 'bottom' ? '원딜 형태' : '탱커 형태') : ''}</small></div></div></div>
+          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+(chosenRole === 'support' ? '서포터·원거리 형태' : chosenRole === 'bottom' ? '원딜·원거리 형태' : '탱커·원거리 형태') : ''}</small></div></div></div>
         <details class="cx-stats" open><summary>기초 스탯 개요</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
         </details>
