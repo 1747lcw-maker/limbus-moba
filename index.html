@@ -844,8 +844,8 @@
        else { if(el('menu'))el('menu').hidden=true; if(el('codex'))el('codex').hidden=false; }
      } else if (id === 'mVicDev' && typeof mvpOpen === 'function') mvpOpen('gregor', true);
    } catch (err) {
-     console.error('[메뉴 복구 경로 오류]', id, err);
-     window.__menuRecoveryError = {button:id, message:String(err && err.message || err)};
+     console.error('[메뉴 복구 경로 오류]', b.id, err);
+     window.__menuRecoveryError = {button:b.id, message:String(err && err.message || err)};
    }
  }, true);
  // 기존 초기화가 끝까지 진행되면 아래 원래 버튼 핸들러가 우선권을 갖습니다.
