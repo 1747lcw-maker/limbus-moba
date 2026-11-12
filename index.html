@@ -12297,7 +12297,7 @@ function farmAim(b, k, sh, mins, extra) {                // 가장 많은 미니
   return best;
 }
 function aiFarmGeneric(b, near) {
-  const list = FARM_SK[b.key]; if (!list || !list.length) return false;
+  const list = FARM_SK[b.key] || [];
   const mins = units.filter(u => isMinion(u) && u.alive && u.team !== b.team && targetable(u) && dist(b, u) < E(520)).sort((p, q) => dist(b, p) - dist(b, q));
   if (mins.length < 2) return false;
   for (const [k, need, extra] of list) {
