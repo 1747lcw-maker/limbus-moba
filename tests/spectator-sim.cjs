@@ -31,7 +31,7 @@ function parseCard(card) {
   };
 
   try {
-    for (let matchNo = 1; matchNo <= 10; matchNo++) {
+    for (let matchNo = 1; matchNo <= 3; matchNo++) {
       const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
       const errors = [];
       page.on('pageerror', e => errors.push({ type: 'pageerror', message: e.message, stack: e.stack }));
@@ -42,6 +42,20 @@ function parseCard(card) {
       const t0 = Date.now();
 
       try {
+        await page.route('http://127.0.0.1:4173/', async route => {
+          const response = await route.fetch();
+          let html = await response.text();
+          const marker = '})();\\n</script>';
+          const hook = `window.__simState = () => ({
+            time,
+            gameOver,
+            heroes: heroes.map(c => ({key:c.key,name:c.name,team:c.team,role:c.role,level:c.level,k:c.k,d:c.d,a:c.a,hp:Math.round(c.hp),maxHp:Math.round(c.maxHp),alive:c.alive,mode:c.mode,gold:Math.round(c.gold)})),
+            structures: units.filter(u => u.kind === 'turret' || u.kind === 'nexus').map(u => ({kind:u.kind,team:u.team,alive:u.alive,hp:Math.round(u.hp),maxHp:Math.round(u.maxHp)}))
+          });\\n`;
+          if (!html.includes(marker)) throw new Error('Could not inject simulation state hook');
+          html = html.replace(marker, hook + marker);
+          await route.fulfill({ response, body: html });
+        });
         await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForSelector('#mSpec', { timeout: 15000 });
         await page.locator('#mSpec').click();
@@ -64,7 +78,7 @@ function parseCard(card) {
         await page.locator('#spec [data-spd="4"]').evaluate(el => { el.dataset.spd = '12'; });
         await page.locator('#spec [data-spd="12"]').click();
 
-        const durationMs = 90000;
+        const durationMs = 150000;
         let nextSample = 0;
         while (Date.now() - t0 < durationMs) {
           const elapsed = Math.round((Date.now() - t0) / 1000);
@@ -88,6 +102,7 @@ function parseCard(card) {
               });
               return {
                 cards: rows,
+                simState: window.__simState ? window.__simState() : null,
                 overVisible: !!document.querySelector('#over') && !document.querySelector('#over').hidden,
                 overText: document.querySelector('#overText')?.textContent || '',
                 draftVisible: !!document.querySelector('#aiDraft') && getComputedStyle(document.querySelector('#aiDraft')).display !== 'none',
@@ -106,6 +121,7 @@ function parseCard(card) {
         }
         match.wallSeconds = Math.round((Date.now() - t0) / 1000);
         match.finalCards = match.samples.at(-1)?.cards || [];
+        match.finalState = match.samples.at(-1)?.simState || null;
         match.teamTotals = ['blue', 'red'].map(team => {
           const cs = match.finalCards.filter(c => c.team === team);
           return {
