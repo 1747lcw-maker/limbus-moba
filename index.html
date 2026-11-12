@@ -13700,6 +13700,18 @@ function champHpBar(g, u, w, h, col) {
   g.fillStyle = col; g.fillRect(x, y, hp * px, h);
   g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(x, y, hp * px, h * .35);          // 윗면 광택
   if (sh > 0) { g.fillStyle = '#eef3ff'; g.fillRect(x + hp * px, y, sh * px, h); }
+  // 쪽빛 노인 R 처형선: 적 쪽빛 노인이 사거리 안에 있고 대상 체력이 30% 이하일 때 체력바에 표시
+  const ieCanExecute = u.alive && u.hp / u.maxHp <= .30 && heroes.some(c =>
+    c.alive && c.key === 'indigoElder' && c.team !== u.team && c.rank && c.rank.R > 0 &&
+    dist(c, u) <= E(680) + E(112) + u.r
+  );
+  if (ieCanExecute) {
+    g.save(); g.font = '900 ' + Math.round(E(10)) + 'px system-ui'; g.textAlign = 'center';
+    g.fillStyle = 'rgba(8,24,34,.92)'; g.fillRect(x + w / 2 - E(29), y - E(13), E(58), E(11));
+    g.strokeStyle = '#a9e8ff'; g.lineWidth = E(1); g.strokeRect(x + w / 2 - E(29), y - E(13), E(58), E(11));
+    g.fillStyle = '#c9f2ff'; g.shadowColor = '#62cfff'; g.shadowBlur = E(5);
+    g.fillText('처형 가능', x + w / 2, y - E(4)); g.restore();
+  }
   g.fillStyle = 'rgba(8,10,12,.85)';
   for (let v = 100; v < total; v += 100) {
     const big = v % 1000 === 0, tx = x + v * px;
