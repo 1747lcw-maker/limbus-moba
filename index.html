@@ -13168,10 +13168,10 @@ function updateBot(b, dt) {
     if ((b.gbRage||0)>=20 && !(b.gbFormUntil>time) && !(b.gbTransformUntil>time) && b.cd.R<=0) {
       b.thinkT=.55; castSkillCore(b,'R',a,Math.min(1,pd/E(560))); moveChamp(b,0,0,dt); return;
     }
-    if (b.gbFormUntil>time && b.gbRStage<2 && b.gbRStage===0 && pd<E(560) && b.cd.R<=0) {
+    if (b.gbFormUntil>time && b.gbRStage===0 && pd<E(560)) {
       b.thinkT=.65; castSkillCore(b,'R',a,Math.min(1,pd/E(560))); moveChamp(b,0,0,dt); return;
     }
-    if (b.gbFormUntil>time && b.gbRStage===1 && b.cd.R<=0) {
+    if (b.gbFormUntil>time && b.gbRStage===1) {
       b.thinkT=.65; castSkillCore(b,'R',a,Math.min(1,pd/E(520))); moveChamp(b,0,0,dt); return;
     }
     if (b.gbQStage>0 && time<b.gbQUntil && b.cd.Q<=0) {
@@ -19123,7 +19123,7 @@ function drawButtons(g) {
                  : ish ? (k === 'W' && player.guardT > 0) || (k === 'R' && ishCanExecute(player))
                  : yi ? (k === 'W' && mirrors.some(m => m.owner === player && Math.hypot(m.x - player.x, m.y - player.y) < E(KY.W.range))) || (k === 'R' && player.vampT > 0)
                  : rod ? (k === 'W' && player.pStacks >= KR.W.need) || (k === 'Q' && player.qStack >= KR.Q.need) || (k === 'R' && !!rodTargetR(player)) || (k === 'Q' && rodQMode(player) === 'circle')
-                       : (k === 'W' && !!(player.mtW || player.gdW)) || (k === 'R' && !!player.gdR) || (k === 'R' && !!player.dbR) || (k === 'R' && rForm(player)) || (k === 'E' && player.eStacks > 0) || (k === 'R' && !!player.snipe);
+                       : (k === 'R' && player.key === 'gebura' && player.gbFormUntil > time && player.gbRStage < 2) || (k === 'W' && !!(player.mtW || player.gdW)) || (k === 'R' && !!player.gdR) || (k === 'R' && !!player.dbR) || (k === 'R' && rForm(player)) || (k === 'E' && player.eStacks > 0) || (k === 'R' && !!player.snipe);
     const osn = k === 'R' && player.key === 'outis' && !!player.snipe;     // 오티스 저격 중: R = 발포 버튼
     const learned = player.rank[k] > 0 && !(rod && k === 'R' && !rodTargetR(player) && cd <= 0);
     g.globalAlpha = learned ? 1 : .45;
@@ -19137,7 +19137,7 @@ function drawButtons(g) {
       for (let i = 0; i < KR.Q.need - 1; i++) { g.fillStyle = i < player.qStack ? '#ffcf6b' : 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(p.x - 6 * ui + i * 12 * ui, p.y - r - 5 * ui, 3 * ui, 0, 7); g.fill(); }
     if (player.key === 'marten' && k === 'Q' && player.rank.Q > 0)                   // 마튼: 나무뿌리 충전 수
       for (let i = 0; i < KMT.Q.n; i++) { g.fillStyle = i < (player.mtQn ?? KMT.Q.n) ? '#ffd36a' : 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(p.x - 6 * ui + i * 12 * ui, p.y - r - 5 * ui, 3.2 * ui, 0, 7); g.fill(); }
-    const reuse = (ish && active && cd > 0) || (player.key === 'marten' && k === 'W' && player.mtW) || (player.key === 'guido' && k === 'W' && player.gdW) || (player.key === 'dongbaek' && k === 'R' && player.dbR) || osn;
+    const reuse = (player.key === 'gebura' && k === 'R' && player.gbFormUntil > time && player.gbRStage < 2) || (ish && active && cd > 0) || (player.key === 'marten' && k === 'W' && player.mtW) || (player.key === 'guido' && k === 'W' && player.gdW) || (player.key === 'dongbaek' && k === 'R' && player.dbR) || osn;
     if (cd > 0 && !reuse) {
       g.fillStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.moveTo(p.x, p.y);
       g.arc(p.x, p.y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (cd / player.cdMax[k])); g.closePath(); g.fill();
