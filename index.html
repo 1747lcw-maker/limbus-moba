@@ -2001,7 +2001,7 @@ const CHAMP_UI = {
   vespa:{names:{Q:'정밀 사격', W:'관통 탄환', E:'후퇴 사격', R:'집중 포화'},cast:{},desc:{Q:'정밀한 일직선 사격으로 적을 공격합니다.',W:'더 넓고 긴 관통 사격을 가해 적을 둔화합니다.',E:'사격 자세를 정비해 잠시 공격력이 상승합니다.',R:'지정한 위치에 집중 포화를 퍼부어 범위 피해와 둔화를 줍니다.'}},
   naihwang:{names:{Q:'이연격', W:'삼연격', E:'쾌도난마', R:'초절맹호살격난참'},cast:{},desc:{Q:'돌진하며 두 번 연속 베기. 첫 타격 후 0.75초 뒤 재사용 가능. 기본탄 2발 또는 맹호탄 1발 소모.',W:'돌진하며 세 번 연속 베기. 두 번 재사용 가능하며 각 재사용 대기시간은 0.75초. 기본탄 3발 또는 맹호탄 2발 소모.',E:'도약하며 세 번 연속 베기. 두 번 재사용 가능하며 각 재사용 대기시간은 0.75초. 기본탄 3발 또는 맹호탄 2발 소모.',R:'맹호탄 장전 중에만 사용 가능. 무적 없이 다섯 번 도약·참격. 네 번 재사용 가능하며 각 재사용 대기시간은 0.75초. 맹호탄 5발 소모. 다른 스킬보다 높은 피해.'},passive:'재장전: 기본탄 12발을 모두 사용하면 맹호탄 8발을 장전합니다. 맹호탄은 모든 피해를 70% 강화하며 모두 소진하면 기본탄 12발로 돌아갑니다.'},
   gachiu:{names:{Q:'묘여... 길을 열어라!!',W:'대답하거라...',E:'옥기린의 가호',R:'몸소 보여주지..'},cast:{},desc:{Q:'자로가 적에게 질풍참으로 돌진합니다. 자로가 살아 있을 때만 사용할 수 있습니다.',W:'적 하나에게 물리 피해를 입히고 1.3초 동안 침묵시킵니다.',E:'아군에게 가치우 최대 체력의 20%, 자신에게는 10%만큼의 보호막을 부여합니다.',R:'5초 동안 곤봉에 회전하지 않는 천사 링 형태의 망 5개를 고정해 띄웁니다. 기본 공격과 W 피해량이 5배가 됩니다.'}},
-  indigoElder:{names:{Q:'쪽빛 탄환', W:'관통 사격', E:'거리 벌리기', R:'노장의 일격'},cast:{},desc:{Q:'쪽빛 탄환을 직선으로 발사해 적을 공격합니다.',W:'긴 사거리의 관통 사격으로 피해를 주고 적을 둔화합니다.',E:'노련하게 거리를 벌리며 잠시 공격력이 상승합니다.',R:'지정한 지점에 노장의 일격을 집중해 광역 피해와 둔화를 줍니다.'}},
+  indigoElder:{names:{Q:'작살 쏘기',W:'갈고리 작살 쏘기',E:'여긴 대호수의 한가운데야',R:'고래 사냥 -포경-'},cast:{},desc:{Q:'강력한 작살을 직선으로 발사합니다. 탱커는 적중 피해만큼 회복, 원거리 딜러는 피해량만큼 4초 출혈, 서포터는 2초간 이동 속도 15% 감소를 부여합니다.',W:'애쉬 W처럼 부채꼴로 작살을 발사합니다. 탱커는 최대 체력 10% 출혈, 원거리 딜러는 3초간 이동 속도·피해량 10% 증가, 서포터는 1초 속박을 얻습니다.',E:'4.5초간 넓은 바다 영역을 펼쳐 적의 시야를 차단합니다. 서포터 형태는 영역 내 아군 공격력 10%, 방어력 8% 증가.',R:'지연 후 X자 영역을 처형합니다. 체력 30% 이하 적은 처형되며 성공하면 아군에게 각각 300골드를 지급하고 재사용할 수 있습니다.'}},
   liuEn:{names:{Q:'파도 소리가 밀려오는 구나',W:'결말은 보지않는 편이 좋겠구나',E:'오늘 동화책은 이것으로',R:'네프. 준비 완료. Furioso replica'},cast:{},desc:{Q:'요네의 W처럼 전방을 크게 휩쓸어 마법 피해를 입히고 보호막을 얻습니다.',W:'90% 확률로 낫, 10% 확률로 손도끼를 꺼내 적에게 돌진합니다.',E:'나피리의 E처럼 돌진해 주변 적에게 피해를 주고 침묵시킵니다.',R:'준비 후 재시전하면 대상에게 9연속 돌진 참격을 가합니다.'}},
   callisto:{names:{Q:'월광 베기', W:'연속 돌진', E:'그림자 보법', R:'월식 참격'},cast:{},desc:{Q:'달빛을 머금은 검격으로 전방의 적을 벱니다.',W:'연속 참격을 넓게 펼쳐 적을 둔화시킵니다.',E:'그림자 보법으로 전투 리듬을 끌어올려 잠시 공격력이 상승합니다.',R:'월식의 힘을 폭발시켜 지정한 지점에 광역 피해와 둔화를 줍니다.'}},
 
@@ -3889,6 +3889,8 @@ function basicAttack(c, t) {
     fx.push({type:'rlDash',x:(c.x+t.x)/2,y:(c.y+t.y)/2,ang:c.face,len:Math.min(E(125),dist(c,t)),t:0,life:.22});
   }
   if(c.key==='liuEn')liuWeaponRoll(c);
+
+  if(c.key==='indigoElder'&&!t.structure){const hitDmg=c.ad*(c.ieAtkStage===1?1.18:1)*(crit?critMult(c):1);c.ieAtkStage=c.ieAtkStage||0;if(c.ieAtkStage===0){damage(c,t,hitDmg,{basic:true,crit,color:'#a9cce0'});c.ieAtkStage=1;c.ieHarpoon={tgt:t,until:time+5,damage:hitDmg};t.ieHarpoonBy=c;t.ieHarpoonUntil=time+5;fx.push({type:'ieShot',x:c.x,y:c.y,ang:c.face,len:dist(c,t),t:0,life:.35,wide:false});fx.push({type:'ieHit',x:t.x,y:t.y,ang:c.face,r:t.r*1.6,t:0,life:.35});}else{damage(c,t,hitDmg,{basic:true,crit,color:'#a9cce0'});indigoApplyBleed(c,t,hitDmg*.05,3);fx.push({type:'ieBlood',x:t.x,y:t.y,r:t.r*1.4,t:0,life:.65});c.ieHarpoon=null;c.ieAtkStage=0;t.ieHarpoonBy=null;t.ieHarpoonUntil=0;}return;}
   let dmg = c.ad * (c.key==='liuEn' ? (c.liuWeaponMul||1) : 1) * (c.key==='naihwang' ? 1.42 * (c.nhShotTiger?2:1) : 1) * (c.key==='roland' ? 1.3 : 1);
   const crit = rollCrit(c);
   c.swingCrit = crit;
@@ -4275,6 +4277,15 @@ function castExtraSkill(c,key,ang,frac){
     text(x,y,skillNames(c).R,color,true,1);
   }
 }
+
+function indigoRuleName(n){return ['작살의 둔화','골드 약탈','대호수의 속박'][n]||'대호수의 규칙';}
+function indigoApplyBleed(src,u,total,duration=3){if(!u||!u.alive||u.structure)return;u.ieBleed={src,total,left:duration,until:time+duration,acc:0};fx.push({type:'ieBlood',x:u.x,y:u.y,r:u.r*1.3,t:0,life:.7});}
+function indigoMarkTargets(c){const foes=units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u)&&(!isChamp(u)||seenBy(c.team,u))).sort((a,b)=>dist(c,a)-dist(c,b)).slice(0,2);c.ieRule=Math.floor(Math.random()*3);c.ieNextRule=time+30;for(const u of foes){u.ieMarkedBy=c;u.ieMarkUntil=time+30;fx.push({type:'ieWave',target:u,x:u.x,y:u.y,r:u.r*1.6,t:0,life:.8});}if(c===player||c.team===player.team)text(c.x,c.y-c.r-E(52),'대호수의 규칙: '+indigoRuleName(c.ieRule),'#8edcff',true,1);}
+function indigoTick(c,dt){if(!c||c.key!=='indigoElder')return;if(c.ieNextRule==null||time>=c.ieNextRule)indigoMarkTargets(c);if(c.ieHarpoon&&(!c.ieHarpoon.tgt||!c.ieHarpoon.tgt.alive||time>c.ieHarpoon.until)){c.ieHarpoon=null;c.ieAtkStage=0;}if(c.ieZone&&time>=c.ieZone.until)c.ieZone=null;}
+function indigoHit(c,u,key){if(!u||!u.alive||u.structure)return;const role=c.indigoForm||'ranged',n=rk(c,key),base=key==='Q'?58+n*27+c.ad*.72:68+n*29+c.ad*.82,color='#80c9e8';damage(c,u,base,{skill:true,type:'physical',color});if(u.ieMarkedBy===c&&u.ieMarkUntil>time){if(key==='Q'){u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.30);}if(key==='W'){const stolen=Math.max(0,(u.gold||0)*.10);u.gold=Math.max(0,(u.gold||0)-stolen);c.gold=(c.gold||0)+stolen;if(stolen>0)text(u.x,u.y-u.r-E(36),'-'+Math.floor(stolen)+' 골드','#f1d16b',true,.8);}if(key==='E')u.rootT=Math.max(u.rootT||0,time+2.5);}if(key==='Q'){if(role==='tank')c.hp=Math.min(c.maxHp,c.hp+base);else if(role==='ranged')indigoApplyBleed(c,u,base,4);else{u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.15);}}if(key==='W'){if(role==='tank')indigoApplyBleed(c,u,c.maxHp*.10,4);else if(role==='ranged'){c.ieHasteUntil=time+3;c.ieDamageUntil=time+3;}else u.rootT=Math.max(u.rootT||0,time+1);}fx.push({type:'ieHit',x:u.x,y:u.y,ang:Math.atan2(u.y-c.y,u.x-c.x),r:u.r*1.7,t:0,life:.45});}
+function castIndigoElder(c,key,ang,frac){const n=rk(c,key),cds={Q:[8,7.5,7,6.5],W:[13,12,11,10],E:[20,18,16,14],R:[100,90,80]};if(!c.alive||!c.rank[key]||c.cd[key]>0||c.stunT>0||c.cast||gameOver)return false;const cd=cds[key][n]*hasteMul(c),role=c.indigoForm||'ranged';if(key==='Q'||key==='W'){const len=E(key==='Q'?590:650),a=ang==null?autoAim(c,len):ang;c.face=a;const hits=segHits(c,a,len,E(key==='Q'?72:145));for(const u of hits)indigoHit(c,u,key);fx.push({type:'ieShot',x:c.x,y:c.y,ang:a,len,t:0,life:.42,wide:key==='W'});c.cd[key]=c.cdMax[key]=cd;sfxPlay('shot',c.x,c.y,1.1,key==='W'?.78:1);return true;}if(key==='E'){c.cd.E=c.cdMax.E=cd;c.ieZone={until:time+4.5,role};fx.push({type:'ieWaveZone',owner:c,r:E(390),t:0,life:4.5});for(const u of units){if(!u.alive||u.structure||dist(c,u)>E(390)+u.r)continue;if(u.team!==c.team){u.blindT=Math.max(u.blindT||0,4.5);if(u.ieMarkedBy===c&&u.ieMarkUntil>time&&c.ieRule===2)u.rootT=Math.max(u.rootT||0,time+2.5);}else if(role==='support'){u.ieSupportUntil=time+4.5;u.ieSupportOwner=c;}}sfxPlay('wave',c.x,c.y,1.15);return true;}if(key==='R'){const range=E(680),a=ang==null?autoAim(c,range):ang,fr=Math.max(.08,Math.min(1,frac??.65)),px=c.x+Math.cos(a)*range*fr,py=c.y+Math.sin(a)*range*fr;const hit=units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u)&&Math.hypot(u.x-px,u.y-py)<E(112)+u.r);c.face=a;c.cd.R=c.cdMax.R=cd;c.ieRResolveAt=time+.62;c.ieRTargets=hit;c.ieRPoint={x:px,y:py};fx.push({type:'ieX',x:px,y:py,r:E(112),t:0,life:1.05});sfxPlay('ult',px,py,1.2);return true;}return false;}
+function indigoResolveUlt(c){const hit=c.ieRTargets||[];c.ieRTargets=null;c.ieRResolveAt=0;let executed=false;for(const u of hit){if(!u.alive||u.team===c.team)continue;if(u.hp/u.maxHp<=.30){damage(c,u,999999,{type:'true',skill:true,noProc:true,color:'#b8eaff'});executed=true;for(const a of heroes)if(a.team===c.team&&a!==c&&a.alive)a.gold=(a.gold||0)+300;text(u.x,u.y-u.r-E(40),'처형! 아군 +300 골드','#ffe28a',true,1);}else damage(c,u,105+rk(c,'R')*65+c.ad*.9,{skill:true,type:'physical',color:'#8edcff'});}if(executed){c.cd.R=0;c.cdMax.R=0;}}
+
 function castSkillCore(c, key, ang, frac = null) {
   if(c.rolandFurioso||c.liuFurioso)return false; // 연속 궁극기 도중 다른 스킬 입력은 무시하고 상태 유지
   const recast = (c.key === 'vespa' && key === 'W' && !!c.vespaWReady) || (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso) || (c.key === 'liuEn' && key === 'R' && c.liuFormUntil > time && c.liuFuriosoReady && !c.liuFurioso);   // 이스마엘 재사용
@@ -4287,6 +4298,7 @@ function castSkillCore(c, key, ang, frac = null) {
   if (c.blink || c.leap || c.alpha || c.rcut) return;
   if (c.chRide) return;                                              // 메피에 탄 동안엔 스킬 불가
   if (c.key === 'gachiu') { castGachiu(c,key,ang,frac); return; }
+  if (c.key === 'indigoElder') { castIndigoElder(c,key,ang,frac); return; }
   if (EXTRA_CHAMP_KEYS.has(c.key)) { castExtraSkill(c, key, ang, frac); return; }
   if (c.key === 'dongrang') {
     if (castDongrang(c, key, ang, frac) === false) return;
@@ -13215,6 +13227,7 @@ function update(dt) {
   if (gameOver) { if (mpRole === 'host') mpHostTick(dt); return; }   // 끝난 뒤에도 방장은 손님들에게 결과를 계속 알려 줌
   if (window.DEMO) demoTick(dt);
   time += dt;
+  for(const c of heroes)if(c.key==='indigoElder'){indigoTick(c,dt);if(c.ieRResolveAt&&time>=c.ieRResolveAt)indigoResolveUlt(c);}
   for(const c of champs())if(c.key==='naihwang'&&c.nhCombo&&time>c.nhCombo.expires){c.nhCombo=null;c.nhInvUntil=0;}
 
   if (time >= nextWave) {
@@ -13287,6 +13300,7 @@ function update(dt) {
       if (time >= u.burn.until) u.burn = null;
       else if ((u.burn.tick -= dt) <= 0) { u.burn.tick = .5; damage(u.burn.src, u, u.burn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff6a4a'}); if (!u.alive) continue; }
     }
+    if(u.ieBleed){const b=u.ieBleed;if(time>=b.until||!b.src||!b.src.alive)u.ieBleed=null;else{b.acc+=dt;if(b.acc>=.25){b.acc-=.25;const amt=b.total*(.25/Math.max(.25,b.left));damage(b.src,u,amt,{type:'true',noProc:true,noStack:true,color:'#ff3454'});b.left=Math.max(0,b.left-.25);}}}
     if (u.nhBurn) {                                  // 뇌횡: 맹호의 화염
       if (time >= u.nhBurn.until) u.nhBurn = null;
       else if ((u.nhBurn.tick -= dt) <= 0) { u.nhBurn.tick = .5; damage(u.nhBurn.src, u, u.nhBurn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff7438'}); if (!u.alive) continue; }
@@ -13626,6 +13640,8 @@ function champHpBar(g, u, w, h, col) {
 function drawStatus(g, u) {
   if(u.brVibe>0&&u.brVibeUntil>time){g.save();g.textAlign='center';g.font=`900 ${Math.round(E(12))}px system-ui`;g.fillStyle='#8ed2ff';g.shadowColor='#399dff';g.shadowBlur=E(9);g.fillText('♫ '+u.brVibe+'/6',u.x,u.y-u.r-E(24));g.restore();}
   if(u.brWardUntil>time){g.save();g.strokeStyle='rgba(100,180,255,.9)';g.shadowColor='#58b7ff';g.shadowBlur=E(14);g.lineWidth=E(4);g.beginPath();g.arc(u.x,u.y,u.r+E(12)+Math.sin(time*9)*E(3),0,Math.PI*2);g.stroke();g.restore();}
+  if(u.ieMarkedBy&&u.ieMarkUntil>time){g.save();g.font='900 '+Math.round(E(19))+'px system-ui';g.textAlign='center';g.fillStyle='#8edcff';g.shadowColor='#39bfff';g.shadowBlur=E(13);g.fillText('🌊',u.x,u.y-u.r-E(24)-Math.sin(time*7)*E(3));g.restore();}
+  if(u.ieBleed&&u.ieBleed.until>time){g.save();g.strokeStyle='#ff344f';g.shadowColor='#ff1e3d';g.shadowBlur=E(12);g.lineWidth=E(4);g.beginPath();g.arc(u.x,u.y,u.r+E(8)+Math.sin(time*12)*E(2),0,Math.PI*2);g.stroke();g.fillStyle='#ff344f';g.font='900 '+Math.round(E(11))+'px system-ui';g.textAlign='center';g.fillText('출혈',u.x,u.y-u.r-E(12));g.restore();}
   if (u.gwT > time && u.alive) {                           // 치유 감소: 몸 옆에 금 간 붉은 십자
     const x = u.x + u.r + E(7), y = u.y - u.r + E(2), s = E(5);
     g.fillStyle = 'rgba(20,6,8,.75)'; g.beginPath(); g.arc(x, y, s * 1.5, 0, 7); g.fill();
@@ -18601,6 +18617,9 @@ function drawBlueReverbFx(g,f,k){
  g.beginPath();g.arc(0,0,R*(.92+e*.48),-1.02+e*.18,.9+e*.18);g.stroke();
  g.restore();
 }
+
+function drawIndigoFx(g,f,k){const e=1-k;g.save();if(f.type==='ieWave'){const u=f.target;if(!u||!u.alive){g.restore();return;}g.globalAlpha=e;g.translate(u.x,u.y-u.r-E(23));g.strokeStyle='#8edcff';g.lineWidth=E(3);g.shadowColor='#48c9ff';g.shadowBlur=E(12);g.beginPath();g.arc(0,0,E(12)+k*E(8),0,Math.PI*2);g.stroke();g.fillStyle='#b8edff';g.font='900 '+Math.round(E(16))+'px system-ui';g.textAlign='center';g.fillText('〰',0,E(4));}else if(f.type==='ieBlood'){g.globalAlpha=e;g.strokeStyle='#ff2447';g.lineWidth=E(5);g.shadowColor='#ff1e3d';g.shadowBlur=E(14);for(let i=0;i<7;i++){const a=i*2.4+k*4;g.beginPath();g.moveTo(f.x+Math.cos(a)*f.r*.4,f.y+Math.sin(a)*f.r*.4);g.lineTo(f.x+Math.cos(a)*f.r*(1.1+k),f.y+Math.sin(a)*f.r*(1.1+k));g.stroke();}}else if(f.type==='ieShot'){g.globalAlpha=e;g.translate(f.x,f.y);g.rotate(f.ang);const L=f.len*(.25+.75*k);g.shadowColor='#8edcff';g.shadowBlur=E(16);g.strokeStyle='#d8f5ff';g.lineWidth=f.wide?E(9):E(6);g.beginPath();g.moveTo(0,0);g.lineTo(L,0);g.stroke();g.strokeStyle='#64bce8';g.lineWidth=E(2);for(let i=0;i<8;i++){const x=L*i/8;g.beginPath();g.moveTo(x,-E(12)*(1-k));g.lineTo(x+E(22),E(12)*(1-k));g.stroke();}g.fillStyle='#e8fbff';g.beginPath();g.moveTo(L,0);g.lineTo(L-E(28),-E(11));g.lineTo(L-E(22),0);g.lineTo(L-E(28),E(11));g.closePath();g.fill();}else if(f.type==='ieHit'){g.globalAlpha=e;g.translate(f.x,f.y);g.rotate(f.ang);g.strokeStyle='#a8e7ff';g.lineWidth=E(4);g.shadowColor='#3abaff';g.shadowBlur=E(15);for(let i=0;i<5;i++){g.beginPath();g.moveTo(-f.r*.4,i*E(5)-E(10));g.lineTo(f.r*(.6+k),i*E(7)-E(14));g.stroke();}}else if(f.type==='ieWaveZone'){const o=f.owner;if(!o||!o.alive){g.restore();return;}g.globalAlpha=.65;g.strokeStyle='#55bfe8';g.lineWidth=E(5);g.shadowColor='#42caff';g.shadowBlur=E(18);const rr=f.r*(.94+.04*Math.sin(time*4));g.beginPath();g.arc(o.x,o.y,rr,0,Math.PI*2);g.stroke();g.strokeStyle='rgba(200,245,255,.85)';g.lineWidth=E(2);for(let j=0;j<3;j++){g.beginPath();g.arc(o.x,o.y,rr*(.72+j*.12),time*1.4+j,time*1.4+j+Math.PI*.8);g.stroke();}g.fillStyle='rgba(45,155,205,.12)';g.beginPath();g.arc(o.x,o.y,rr,0,Math.PI*2);g.fill();}else if(f.type==='ieX'){g.globalAlpha=e;g.translate(f.x,f.y);g.shadowColor='#59caff';g.shadowBlur=E(18);g.strokeStyle='#e4faff';g.lineWidth=E(7);const L=f.r*(.25+.8*k);for(const a of [-.78,.78]){g.save();g.rotate(a);g.beginPath();g.moveTo(-L,0);g.lineTo(L,0);g.stroke();g.restore();}g.strokeStyle='#9be8ff';g.lineWidth=E(3);g.beginPath();g.arc(0,0,f.r*(.6+.5*k),0,Math.PI*2);g.stroke();}g.restore();}
+
 function drawFx(g) {
   g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const f of fx) {
@@ -18609,6 +18628,7 @@ function drawFx(g) {
     const k = Math.max(0, f.t / f.life);
     if (!fxSeen(f)) continue;
     if (f.type === 'wardSet' || f.type === 'wardDie') { drawWardFx(g, f, k); continue; }
+    if(f.type.startsWith('ie')){drawIndigoFx(g,f,k);continue;}
     if(f.type.startsWith('nh')){drawNaihwangSkillFx(g,f,k);continue;}
     if(f.type.startsWith('vs')){drawVespaFx(g,f,k);continue;}
     if(f.type.startsWith('gc')){drawGachiuFx(g,f,k);continue;}
@@ -22015,7 +22035,7 @@ R:{name:'내게는 고통밖에 없습니다. 그외에는...',cd:[75,60,45],tex
  E:{name:'쾌도난마',cd:11,range:828,text:H=>'적을 향해 15% 더 멀리 도약하며 세 번 연속 참격을 가합니다. 전체 피해량이 25% 증가하고 맹호탄 사용 시 추가 피해 배율이 100%로 상승합니다. 시전 중 받는 피해가 15% 감소합니다. 각 재사용 간격은 0.75초이며 기본 탄환 3발 또는 맹호탄 2발을 소모하고, 연속 타격 후 재사용 대기시간은 11초입니다.'},
  R:{name:'초절맹호살격난참',cd:65,range:864,text:H=>'맹호탄 장전 중에만 사용할 수 있는 궁극기입니다. 무적 상태로 적을 향해 20% 더 멀리 도약하며 다섯 번 연속 참격합니다. 전체 피해량 25% 증가, 마지막 타격은 추가로 20% 증가합니다. 마지막 타격 적중 시 2초 동안 이동 속도 20% 증가. 네 번 재사용할 수 있고 각 재사용 간격은 0.75초이며 맹호탄 5발을 소모하고, 연속 타격 후 재사용 대기시간은 65초입니다.'}
  },
-  indigoElder:{P:{name:'노장의 경험',text:()=> '긴 사거리와 안정적인 원거리 공격에 특화되어 있습니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'쪽빛 탄환',cd:[7,6.5,6,5.5],range:520,text:H=>'쪽빛 탄환을 직선으로 발사해 적에게 피해를 줍니다.'},W:{name:'관통 사격',cd:[13,12,11,10],range:600,text:H=>'긴 사거리의 관통 사격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'거리 벌리기',cd:[15,14,13,12],text:H=>'노련하게 자세를 정비해 3초 동안 추가 공격력을 얻습니다.'},R:{name:'노장의 일격',cd:[95,80,65],range:600,text:H=>'지정 지점에 노장의 일격을 집중해 넓은 범위에 큰 피해를 줍니다.'}},
+  indigoElder:{P:{name:'대호수의 규칙',text:H=>'30초마다 가장 가까운 적 2명에게 대호수 표식을 새기고, 작살 둔화·골드 약탈·영역 속박 중 하나의 규칙을 무작위로 적용합니다. 규칙은 30초마다 교체됩니다.'},Q:{name:'작살 쏘기',cd:[8,7.5,7,6.5],range:590,text:H=>'탱커는 적중 피해만큼 회복, 원거리 딜러는 피해량만큼 4초 출혈, 서포터는 2초간 이동 속도 15% 감소.'},W:{name:'갈고리 작살 쏘기',cd:[13,12,11,10],range:650,text:H=>'탱커는 최대 체력 10% 출혈, 원거리 딜러는 3초간 이동 속도·피해량 10% 증가, 서포터는 1초 속박.'},E:{name:'여긴 대호수의 한가운데야',cd:[20,18,16,14],text:H=>'4.5초간 바다 영역을 펼쳐 적 시야를 차단하고 서포터는 영역 내 아군 공격력 10%, 방어력 8% 증가.'},R:{name:'고래 사냥 -포경-',cd:[100,90,80],range:680,text:H=>'지연 후 X자 영역을 처형합니다. 체력 30% 이하 적은 처형되며 성공하면 아군에게 각각 300골드를 지급하고 재사용할 수 있습니다.'}},
   liuEn:{P:{name:'지령 · 가짜',text:H=>'10초마다 가장 가까운 적 챔피언에게 하늘색 장미 표식을 새깁니다. 표식 대상은 뤼엔에게 받는 피해가 20% 증가하고, 뤼엔의 스킬 피해 적중 시 해당 스킬의 남은 재사용 대기시간이 4초 감소합니다(R 제외). 손도끼·망치·채찍·스틸레토·레이피어·랜스·바스타드 소드·대검·낫의 아홉 무기는 평타 또는 스킬 사용 때 무작위로 바뀝니다. 무기 순서대로 피해량이 -20% / -10% / 0% / +10% / +20% / +30% / +40% / +45% / +50% 변동하며, 체력이 낮을수록 강한 무기가 나올 확률이 증가합니다. 두 효과는 중첩됩니다.'},Q:{name:'파도 소리가 밀려오는 구나',cd:[8,7.5,7,6.5],range:350,text:H=>'요네의 W처럼 전방을 크게 휩쓸어 마법 피해를 입히고 적중한 챔피언 수에 비례해 보호막을 얻습니다.'},W:{name:'결말은 보지않는 편이 좋겠구나',cd:[14,13,12,11],range:590,text:H=>'90% 확률로 낫, 10% 확률로 손도끼를 꺼내 적에게 돌진해 주변을 베어 마법 피해를 입힙니다.'},E:{name:'오늘 동화책은 이것으로',cd:[16,15,14,13],range:440,text:H=>'나피리의 E처럼 전방으로 돌진해 주변 적에게 마법 피해를 입히고 1.15초 동안 침묵시킵니다.'},R:{name:'네프. 준비 완료. Furioso replica',cd:[100,85,70],range:560,text:H=>'롤랑의 FURIOSO와 같은 2단계 궁극기입니다. 준비 후 다시 시전하면 대상에게 9연속 돌진 참격을 가합니다.'}},
   callisto:{P:{name:'월광의 검술',text:()=> '빠른 근접 검술에 특화된 전사입니다. 별도 패시브 발동 효과는 아직 없습니다.'},Q:{name:'월광 베기',cd:[7,6.5,6,5.5],range:350,text:H=>'달빛을 머금은 검격으로 전방의 적을 베어 피해를 줍니다.'},W:{name:'연속 돌진',cd:[13,12,11,10],range:420,text:H=>'넓고 긴 참격으로 적에게 피해를 주고 둔화시킵니다.'},E:{name:'그림자 보법',cd:[15,14,13,12],text:H=>'그림자 보법으로 전투 리듬을 끌어올려 3초 동안 추가 공격력을 얻습니다.'},R:{name:'월식 참격',cd:[95,80,65],range:430,text:H=>'월식의 힘을 폭발시켜 지정 지점의 적에게 큰 피해를 줍니다.'}}
 };
