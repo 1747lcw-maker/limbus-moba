@@ -12726,8 +12726,6 @@ function aiJungle(b, hpB) {
   if (!b.fullClear) {
     const cp = own.find(c => up(c));
     if (cp) return {unit:low(cp)};
-    const unvisited = own.find(c => c.respawnAt == null && !c.mobs.length);
-    if (unvisited) { const side=b.team==='blue'?-1:1; return {x:unvisited.x+E(90)*side,y:unvisited.y}; }
     b.fullClear = true; b.gankCd = 0;
   }
   // 갱 중이면 유지하되, 대상이 사라지거나 위험해지면 빠르게 포기
