@@ -31,7 +31,7 @@ function parseCard(card) {
   };
 
   try {
-    for (let matchNo = 1; matchNo <= 3; matchNo++) {
+    for (let matchNo = 1; matchNo <= 10; matchNo++) {
       const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
       const errors = [];
       page.on('pageerror', e => errors.push({ type: 'pageerror', message: e.message, stack: e.stack }));
@@ -49,7 +49,7 @@ function parseCard(card) {
             time,
             gameOver,
             heroes: heroes.map(c => ({key:c.key,name:c.name,team:c.team,role:c.role,level:c.level,k:c.k,d:c.d,a:c.a,hp:Math.round(c.hp),maxHp:Math.round(c.maxHp),alive:c.alive,mode:c.mode,gold:Math.round(c.gold)})),
-            structures: units.filter(u => u.kind === 'turret' || u.kind === 'nexus').map(u => ({kind:u.kind,team:u.team,alive:u.alive,hp:Math.round(u.hp),maxHp:Math.round(u.maxHp)}))
+            structures: units.filter(u => u.kind === 'turret' || u.kind === 'nexus').map(u => ({kind:u.kind,team:u.team,alive:u.alive,hp:Math.round(u.hp),maxHp:Math.round(u.maxHp)})),\n            destroyedNexusTeam: (units.find(u => u.kind === 'nexus' && !u.alive) || {}).team || null
           });\n`;
           const scriptEnd = html.lastIndexOf('</script>');
           const iifeEnd = html.lastIndexOf('})();', scriptEnd);
@@ -79,7 +79,7 @@ function parseCard(card) {
         await page.locator('#spec [data-spd="4"]').evaluate(el => { el.dataset.spd = '12'; });
         await page.locator('#spec [data-spd="12"]').click();
 
-        const durationMs = 150000;
+        const durationMs = 120000;
         let nextSample = 0;
         while (Date.now() - t0 < durationMs) {
           const elapsed = Math.round((Date.now() - t0) / 1000);
@@ -112,11 +112,7 @@ function parseCard(card) {
             });
             match.samples.push({ elapsedWallSeconds: elapsed, ...snap });
             nextSample += 10;
-            if (snap.overVisible) {
-              match.completed = true;
-              match.outcome = snap.overText;
-              break;
-            }
+            if (snap.overVisible || snap.simState?.gameOver) {\n              match.completed = true;\n              match.outcome = snap.simState?.destroyedNexusTeam ? (snap.simState.destroyedNexusTeam === 'red' ? 'blue' : 'red') + ' team win' : snap.overText;\n              break;\n            }
           }
           await page.waitForTimeout(500);
         }
@@ -157,7 +153,20 @@ function parseCard(card) {
   } finally {
     report.finishedAt = new Date().toISOString();
     const championTotals = {};
+    const championRoleTotals = {};
     for (const match of report.matches) {
+      for (const hero of (match.finalState?.heroes || [])) {
+        const key = hero.key + '|' + hero.role;
+        const row = championRoleTotals[key] || (championRoleTotals[key] = {key:hero.key,name:hero.name,role:hero.role,appearances:0,kills:0,deaths:0,assists:0,wins:0,losses:0});
+        row.appearances++;
+        row.kills += hero.k || 0;
+        row.deaths += hero.d || 0;
+        row.assists += hero.a || 0;
+        if (match.finalState.destroyedNexusTeam) {
+          if (hero.team !== match.finalState.destroyedNexusTeam) row.wins++;
+          else row.losses++;
+        }
+      }
       for (const card of (match.finalCards || [])) {
         const row = championTotals[card.name] || (championTotals[card.name] = { appearances: 0, kills: 0, deaths: 0, assists: 0, levelTotal: 0, levelSamples: 0 });
         row.appearances++;
@@ -171,7 +180,7 @@ function parseCard(card) {
       row.kda = row.deaths ? +((row.kills + row.assists) / row.deaths).toFixed(2) : null;
       row.avgLevel = row.levelSamples ? +(row.levelTotal / row.levelSamples).toFixed(2) : null;
     }
-    report.championTotals = championTotals;
+    report.championTotals = championTotals;\n    report.championRoleTotals = championRoleTotals;
     report.summary = {
       matchesAttempted: report.matches.length,
       matchesCompleted: report.matches.filter(m => m.completed).length,
