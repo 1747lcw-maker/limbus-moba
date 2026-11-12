@@ -1740,7 +1740,7 @@ function recalcStats(c) {
   if (c.key === 'alyssa') c.maxHp += c.ap;                              // 작열하는 홍염살: 주문력 1당 체력 1
   if (c.key === 'indigoElder') {
     // 쪽빛 노인은 모든 포지션에서 원거리 공격을 유지하고, 선택 라인에 따라 전투 역할만 전환한다.
-    if (c.role === 'top' || c.role === 'jungle' || c.role === 'mid') { c.maxHp *= 1.22; c.armor += 14; c.mr += 14; c.ad *= .92; c.as *= .94; c.regen += 0.35; c.indigoForm = 'tank'; }
+    if (c.role === 'top' || c.role === 'jungle' || c.role === 'mid') { c.maxHp *= 1.35; c.armor += 14; c.mr += 14; c.ad *= .82; c.as *= .90; c.regen += 0.35; c.indigoForm = 'tank'; }
     else if (c.role === 'support') { c.maxHp *= 1.10; c.armor += 7; c.mr += 7; c.ad *= .95; c.indigoForm = 'support'; }
     else { c.ad *= 1.12; c.as *= 1.10; c.indigoForm = 'ranged'; }
   }
