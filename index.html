@@ -4384,7 +4384,7 @@ function castExtraSkill(c,key,ang,frac){
 
 function indigoRuleName(n){return ['작살의 둔화','골드 약탈','대호수의 속박'][n]||'대호수의 규칙';}
 function indigoApplyBleed(src,u,total,duration=3){if(!u||!u.alive||u.structure)return;u.ieBleed={src,total,duration,left:duration,until:time+duration,acc:0};fx.push({type:'ieBlood',x:u.x,y:u.y,r:u.r*1.3,t:0,life:.7});}
-function indigoMarkTargets(c){const foes=units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u)&&(!isChamp(u)||seenBy(c.team,u))).sort((a,b)=>dist(c,a)-dist(c,b)).slice(0,2);c.ieRule=Math.floor(Math.random()*3);c.ieNextRule=time+30;for(const u of foes){u.ieMarkedBy=c;u.ieMarkUntil=time+30;fx.push({type:'ieWave',target:u,x:u.x,y:u.y,r:u.r*1.6,t:0,life:.8});}if(c===player||c.team===player.team)text(c.x,c.y-c.r-E(52),'대호수의 규칙: '+indigoRuleName(c.ieRule),'#8edcff',true,1);}
+function indigoMarkTargets(c){const foes=units.filter(u=>isChamp(u)&&u.alive&&u.team!==c.team&&targetable(u)&&seenBy(c.team,u)).sort((a,b)=>dist(c,a)-dist(c,b)).slice(0,2);c.ieRule=Math.floor(Math.random()*3);c.ieNextRule=time+30;for(const u of foes){u.ieMarkedBy=c;u.ieMarkUntil=time+30;fx.push({type:'ieWave',target:u,x:u.x,y:u.y,r:u.r*1.6,t:0,life:.8});}if(c===player||c.team===player.team)text(c.x,c.y-c.r-E(52),'대호수의 규칙: '+indigoRuleName(c.ieRule),'#8edcff',true,1);}
 function indigoTick(c,dt){if(!c||c.key!=='indigoElder')return;if(c.ieNextRule==null||time>=c.ieNextRule)indigoMarkTargets(c);if(c.ieHarpoon&&(!c.ieHarpoon.tgt||!c.ieHarpoon.tgt.alive||time>c.ieHarpoon.until)){c.ieHarpoon=null;c.ieAtkStage=0;}if(c.ieZone&&time>=c.ieZone.until)c.ieZone=null;if(c.ieZone&&c.ieZone.until>time){for(const u of units){if(!u.alive||u.structure||dist(c,u)>E(390)+u.r)continue;if(u.team===c.team){u.ieMistUntil=time+.18;u.ieMistTeam=c.team;if(c.ieZone.role==='support'){u.ieSupportUntil=time+.18;u.ieSupportOwner=c;}}else{u.blindT=Math.max(u.blindT||0,.18);if(u.ieMarkedBy===c&&u.ieMarkUntil>time&&c.ieRule===2)u.rootT=Math.max(u.rootT||0,time+.18);}}}}
 function indigoHit(c,u,key){if(!u||!u.alive||u.structure)return;const role=c.indigoForm||'ranged',n=rk(c,key),base=key==='Q'?58+n*27+c.ad*.72:68+n*29+c.ad*.82,color='#80c9e8';damage(c,u,base,{skill:true,type:'physical',color});if(u.ieMarkedBy===c&&u.ieMarkUntil>time){if(key==='Q'){u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.30);}if(key==='W'){const stolen=Math.max(0,(u.gold||0)*.10);u.gold=Math.max(0,(u.gold||0)-stolen);c.gold=(c.gold||0)+stolen;if(stolen>0)text(u.x,u.y-u.r-E(36),'-'+Math.floor(stolen)+' 골드','#f1d16b',true,.8);}if(key==='E')u.rootT=Math.max(u.rootT||0,time+2.5);}if(key==='Q'){if(role==='tank')c.hp=Math.min(c.maxHp,c.hp+base);else if(role==='ranged')indigoApplyBleed(c,u,base,4);else{u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.15);}}if(key==='W'){if(role==='tank')indigoApplyBleed(c,u,c.maxHp*.10,4);else if(role==='ranged'){c.ieHasteUntil=time+3;c.ieDamageUntil=time+3;}else u.rootT=Math.max(u.rootT||0,time+1);}fx.push({type:'ieHit',x:u.x,y:u.y,ang:Math.atan2(u.y-c.y,u.x-c.x),r:u.r*1.7,t:0,life:.45});}
 function castIndigoElder(c,key,ang,frac){const n=rk(c,key),cds={Q:[8,7.5,7,6.5],W:[13,12,11,10],E:[20,18,16,14],R:[100,90,80]};if(!c.alive||!c.rank[key]||c.cd[key]>0||c.stunT>0||c.cast||gameOver)return false;const cd=cds[key][n]*hasteMul(c),role=c.indigoForm||'ranged';if(key==='Q'||key==='W'){const len=E(key==='Q'?590:650),a=ang==null?autoAim(c,len):ang;c.face=a;const hits=key==='Q'?segHits(c,a,len,E(72)):[...new Set(Array.from({length:7},(_,i)=>segHits(c,a+(i-3)*.105,len,E(44))).flat())];for(const u of hits)indigoHit(c,u,key);fx.push({type:'ieShot',x:c.x,y:c.y,ang:a,len,t:0,life:.42,wide:key==='W'});c.cd[key]=c.cdMax[key]=cd;sfxPlay('shot',c.x,c.y,1.1,key==='W'?.78:1);return true;}if(key==='E'){c.cd.E=c.cdMax.E=cd;c.ieZone={until:time+4.5,role};fx.push({type:'ieWaveZone',owner:c,r:E(390),t:0,life:4.5});for(const u of units){if(!u.alive||u.structure||dist(c,u)>E(390)+u.r)continue;if(u.team!==c.team){u.blindT=Math.max(u.blindT||0,4.5);if(u.ieMarkedBy===c&&u.ieMarkUntil>time&&c.ieRule===2)u.rootT=Math.max(u.rootT||0,time+2.5);}else{u.ieMistUntil=time+4.5;u.ieMistTeam=c.team;if(role==='support'){u.ieSupportUntil=time+4.5;u.ieSupportOwner=c;}}}sfxPlay('wave',c.x,c.y,1.15);return true;}if(key==='R'){const range=E(680),a=ang==null?autoAim(c,range):ang,fr=Math.max(.08,Math.min(1,frac??.65)),px=c.x+Math.cos(a)*range*fr,py=c.y+Math.sin(a)*range*fr;const hit=units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u)&&Math.hypot(u.x-px,u.y-py)<E(112)+u.r);c.face=a;c.cd.R=c.cdMax.R=cd;c.ieRResolveAt=time+.62;c.ieRTargets=hit;c.ieRPoint={x:px,y:py};fx.push({type:'ieX',x:px,y:py,r:E(112),t:0,life:1.05});sfxPlay('ult',px,py,1.2);return true;}return false;}
@@ -12719,44 +12719,45 @@ function aiJungleTarget() { return null; }       // 라이너는 정글 캠프�
 
 // 정글러: 첫 정글 다 돌기 → 갱 / 캠프 / 에픽
 function aiJungle(b, hpB) {
-  const own = JG_ROUTE.map(id => camps.find(c => c.id === id + '_' + b.team));
+  const own = JG_ROUTE.map(id => camps.find(c => c.id === id + '_' + b.team)).filter(Boolean);
   const up = cp => cp.respawnAt === null && cp.mobs.some(m => m.alive);
   const low = cp => cp.mobs.filter(m => m.alive).sort((x, y) => x.hp - y.hp)[0];
+  // 첫 정글 동선: 이미 처치했거나 재생성 대기 중인 캠프를 붙잡고 기다리지 않고 다음 캠프로 이동
   if (!b.fullClear) {
-    const cp = own.find(c => !(c.respawnAt !== null && c.mobs.length));    // 아직 한 번도 안 잡힌 캠프
-    if (!cp) { b.fullClear = true; b.gankCd = 0; }
-    else if (up(cp)) return {unit:low(cp)};
-    else { const s = b.team === 'blue' ? -1 : 1; return {x:cp.x + E(90) * s, y:cp.y}; }   // 나올 때까지 캠프 앞에서 대기
+    const cp = own.find(c => up(c));
+    if (cp) return {unit:low(cp)};
+    const unvisited = own.find(c => c.respawnAt == null && !c.mobs.length);
+    if (unvisited) { const side=b.team==='blue'?-1:1; return {x:unvisited.x+E(90)*side,y:unvisited.y}; }
+    b.fullClear = true; b.gankCd = 0;
   }
-  // 갱 중이면 유지 (대상이 죽었거나, 포탑 안으로 숨었거나, 시간이 지나면 끝)
+  // 갱 중이면 유지하되, 대상이 사라지거나 위험해지면 빠르게 포기
   if (b.gank) {
     const t = b.gank.t;
-    if (!t.alive || t.recalling || time > b.gank.until || dangerFor(b, t) || hpB < .4) { b.gank = null; b.gankCd = time + 18; }
-    else if (!seenBy(b.team, t)) {                                // 시야에서 사라짐: 마지막으로 본 곳까지 가 보고, 3초 넘게 안 보이면 포기
-      const ls = t.seen && t.seen[b.team];
-      if (ls && time - ls.t < 3 && Math.hypot(ls.x - b.x, ls.y - b.y) > E(60)) return {x:ls.x, y:ls.y};
-      b.gank = null; b.gankCd = time + 12;
-    }
-    else return {unit:t, gank:true};
+    if (!t || !t.alive || t.recalling || time > b.gank.until || dangerFor(b,t) || hpB < .4) { b.gank=null; b.gankCd=time+12; }
+    else if (!seenBy(b.team,t)) {
+      const ls=t.seen&&t.seen[b.team];
+      if(ls&&time-ls.t<2.5&&Math.hypot(ls.x-b.x,ls.y-b.y)>E(60))return{x:ls.x,y:ls.y};
+      b.gank=null;b.gankCd=time+8;
+    } else return {unit:t,gank:true};
   }
-  // 갱 대상 고르기: 아군 라이너가 근처에 있고, 포탑 밖에 나와 있는 적 라이너 (체력 낮을수록 우선)
-  if (time >= (b.gankCd || 0) && hpB > .55) {
-    let best = null, bs = Infinity;
-    for (const e of enemiesOf(b)) {
-      if (!e.alive || e.role === 'jungle' || e.recalling || dangerFor(b, e)) continue;
-      const ally = alliesOf(b).find(a => a.alive && a.role === e.role && dist(a, e) < E(1000));
-      const s = e.hp / e.maxHp - (ally ? .25 : 0) + dist(b, e) / E(8000);
-      if (s < bs) { bs = s; best = e; }
+  // 아군 라이너가 교전 중이거나 적이 낮은 체력이라면 캠프보다 갱킹을 우선
+  if(time>=(b.gankCd||0)&&hpB>.35){
+    let best=null,bs=Infinity;
+    for(const e of enemiesOf(b)){
+      if(!e.alive||e.role==='jungle'||e.recalling||!seenBy(b.team,e))continue;
+      const ally=alliesOf(b).find(a=>a.alive&&a.role===e.role&&dist(a,e)<E(1150));
+      const allyFighting=alliesOf(b).some(a=>a.alive&&dist(a,e)<E(850)&&((a.lastDmgT??99)<2||(e.lastDmgT??99)<2));
+      if(dangerFor(b,e)&&dist(b,e)>E(550))continue;
+      const score=e.hp/e.maxHp-(ally?.30:0)-(allyFighting?.22:0)+dist(b,e)/E(7000);
+      if(score<bs){bs=score;best=e;}
     }
-    if (best && bs < .85) { b.gank = {t:best, until:time + 16}; return {unit:best, gank:true}; }
+    if(best&&bs<.95){b.gank={t:best,until:time+13};return{unit:best,gank:true};}
   }
-  // 내 정글 캠프 중 가까운 것
-  let cp = null, cd = Infinity;
-  for (const c of own) if (up(c)) { const d = Math.hypot(c.x - b.x, c.y - b.y); if (d < cd) { cd = d; cp = c; } }
-  if (cp) return {unit:low(cp)};
-  // 잡을 게 없으면: 곧 나올 캠프 앞에서 대기
-  const next = own.filter(c => c.respawnAt !== null).sort((x, y) => x.respawnAt - y.respawnAt)[0];
-  if (next) { const s = b.team === 'blue' ? -1 : 1; return {x:next.x + E(90) * s, y:next.y}; }
+  // 현재 살아 있는 자기 캠프만 선택
+  let cp=null,cd=Infinity;
+  for(const c of own)if(up(c)){const d=dist(c,b);if(d<cd){cd=d;cp=c;}}
+  if(cp)return{unit:low(cp)};
+  // 재생성 대기 중에는 캠프 앞에서 정지하지 않고 라인·아군 쪽 운영으로 복귀
   return null;
 }
 
@@ -12953,6 +12954,23 @@ function teamPlan(team) {                                    // 12초마다 팀 
 }
 function aiMacro(b, hpB, p, pd) {                             // 반환: 이동할 지점 (없으면 평소 행동)
   if (hpB < .3) return null;
+  // 정글러도 아군 포탑 방어를 최우선한다. 포탑 주변에 적 챔피언·대규모 미니언 웨이브가 보이면 캠프 운영 중단.
+  if (b.role === 'jungle' && hpB > .22) {
+    let threatened=null, threatScore=0;
+    for(const t of units){
+      if(t.kind!=='turret'||!t.alive||t.team!==b.team)continue;
+      const foes=heroes.filter(e=>e.alive&&e.team!==b.team&&seenBy(b.team,e)&&dist(e,t)<E(1050));
+      const wave=units.filter(m=>isMinion(m)&&m.alive&&m.team!==b.team&&dist(m,t)<E(620));
+      const score=foes.length*3+Math.min(4,wave.length)+(1-t.hp/t.maxHp)*1.5;
+      if((foes.length||wave.length>=3)&&score>threatScore){threatScore=score;threatened={t,foes,wave};}
+    }
+    if(threatened){
+      const {t,foes,wave}=threatened;
+      const focus=foes.sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]||wave.sort((a,b)=>a.hp-b.hp)[0];
+      const away=focus?Math.atan2(focus.y-t.y,focus.x-t.x):0;
+      return{x:t.x+Math.cos(away)*E(190),y:t.y+Math.sin(away)*E(190),defend:true};
+    }
+  }
   const sg = units.find(u => u.kind === 'siege' && u.alive && u.team !== b.team && dist(u, b) < E(1600));   // 적 철거 거수: 잡으러 감
   if (sg && hpB > .4 && dist(sg, b) > E(500) && !(p.alive && pd < E(500))) return {x:sg.x, y:sg.y, defend:true};
   const th = baseThreat(b.team);
@@ -13046,6 +13064,22 @@ function updateBot(b, dt) {
   if (!b.path) { b.path = aiLanePath(b); b.wp = 0; }
   const pd = p.alive ? edge(b, p) : Infinity;
   const ev = p.alive ? aiEvaluate(b, p) : {canKill:false, inDanger:false, score:1};
+  // 정글러가 적 챔피언과 마주치면 캠프 판단보다 교전을 우선한다. 단, 적 포탑 안으로 무리하게 추격하지 않는다.
+  if(b.role==='jungle'){
+    const intruder=nearestEnemyChamp(b,E(980));
+    if(intruder&&((dist(b,intruder)<E(650))||alliesOf(b).some(a=>a.alive&&dist(a,intruder)<E(760)&&((a.lastDmgT??99)<2||(intruder.lastDmgT??99)<2)))){
+      const id=aiEvaluate(b,intruder),range=E(b.st.range)+E(35);
+      b.target=intruder;
+      if(id.inDanger&&hpB<.42){const spot=towerSpot(b);go(spot.x,spot.y);moveChamp(b,dx,dy,dt);return;}
+      if(!dangerFor(b,intruder)||dist(b,intruder)<E(430)){
+        if(b.thinkT<=0){b.thinkT=react();if(aiCombo(b,intruder)){moveChamp(b,0,0,dt);return;}}
+        if(edge(b,intruder)>range)go(intruder.x,intruder.y);
+        else if(b.atkT<=0)basicAttack(b,intruder);
+        else {const st=aiStrafe(b,intruder,.3);dx=st.x;dy=st.y;}
+        moveChamp(b,dx,dy,dt);return;
+      }
+    }
+  }
   if ((b.spThinkT = (b.spThinkT || 0) - dt) <= 0) { b.spThinkT = .25; aiSpells(b, p, hpB, ev); aiActive(b, p, hpB); }   // 소환사 주문
   if (aiBackdoor(b, dt)) return;                                      // 백도어 (불리할 때 가끔)
 
