@@ -13427,8 +13427,9 @@ function updateView(dt) {                                               // 카�
   $('gold').textContent = Math.floor(player.gold) + ' G';
   $('cs').textContent = player.cs;
   $('kd').textContent = player.k + '/' + player.d;
-  const teamK = t => champs().reduce((n, c) => n + (c.team === t ? c.k : 0), 0), myT = player.team;
-  $('scMe').textContent = teamK(myT); $('scEn').textContent = teamK(myT === 'blue' ? 'red' : 'blue');
+  const teamK = t => champs().reduce((n, c) => n + (c.team === t ? c.k : 0), 0);
+  // 관전 대상의 팀과 무관하게 스코어는 항상 블루 : 레드 순서로 표시
+  $('scMe').textContent = teamK('blue'); $('scEn').textContent = teamK('red');
   if (spectating && (specT -= dt) <= 0) { specT = .2; specUpdate(); }
   $('lv').textContent = player.level;
   $('xpbar').style.width = (player.level >= MAX_LEVEL ? 100 : player.xp / xpToNext(player.level) * 100) + '%';
