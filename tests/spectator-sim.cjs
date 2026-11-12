@@ -112,7 +112,11 @@ function parseCard(card) {
             });
             match.samples.push({ elapsedWallSeconds: elapsed, ...snap });
             nextSample += 10;
-            if (snap.overVisible || snap.simState?.gameOver) {\n              match.completed = true;\n              match.outcome = snap.simState?.destroyedNexusTeam ? (snap.simState.destroyedNexusTeam === 'red' ? 'blue' : 'red') + ' team win' : snap.overText;\n              break;\n            }
+            if (snap.overVisible || snap.simState?.gameOver) {
+              match.completed = true;
+              match.outcome = snap.simState?.destroyedNexusTeam ? (snap.simState.destroyedNexusTeam === 'red' ? 'blue' : 'red') + ' team win' : snap.overText;
+              break;
+            }
           }
           await page.waitForTimeout(500);
         }
@@ -180,7 +184,8 @@ function parseCard(card) {
       row.kda = row.deaths ? +((row.kills + row.assists) / row.deaths).toFixed(2) : null;
       row.avgLevel = row.levelSamples ? +(row.levelTotal / row.levelSamples).toFixed(2) : null;
     }
-    report.championTotals = championTotals;\n    report.championRoleTotals = championRoleTotals;
+    report.championTotals = championTotals;
+    report.championRoleTotals = championRoleTotals;
     report.summary = {
       matchesAttempted: report.matches.length,
       matchesCompleted: report.matches.filter(m => m.completed).length,
