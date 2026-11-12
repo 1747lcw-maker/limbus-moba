@@ -817,7 +817,39 @@
 
 <script>
 (() => {
-// 메뉴 입력은 기존 버튼별 핸들러에 맡겨 이벤트 중복 차단을 방지합니다.
+ // 기존 초기화가 중간에 실패했을 때만 작동하는 메뉴 복구 경로
+ document.addEventListener('click', function menuRecovery(ev) {
+   if (window.__menuHandlersReady === true) return;
+   const t = ev.target instanceof Element ? ev.target : ev.target && ev.target.parentElement;
+   const b = t && t.closest('#mVsAi,#mSpec,#mMulti,#mDuel,#mCodex,#mVicDev');
+   if (!b) return;
+   ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation();
+   const el = id => document.getElementById(id);
+   try {
+     const id = b.id;
+     if (id === 'mVsAi') {
+       if (el('menu')) el('menu').hidden = true;
+       if (el('select')) el('select').hidden = false;
+       if (typeof selStep === 'function') selStep('role');
+     } else if (id === 'mSpec') {
+       if (el('menu')) el('menu').hidden = true;
+       if (el('select')) el('select').hidden = true;
+       if (el('specPickMode')) el('specPickMode').hidden = false;
+     } else if (id === 'mMulti' || id === 'mDuel') {
+       if (typeof mpOpen === 'function') {
+         MP.duelMode = id === 'mDuel'; mpOpen(true);
+       } else if (el('mp')) { if(el('menu'))el('menu').hidden=true; el('mp').hidden=false; }
+     } else if (id === 'mCodex') {
+       if (typeof openCodex === 'function') openCodex(true);
+       else { if(el('menu'))el('menu').hidden=true; if(el('codex'))el('codex').hidden=false; }
+     } else if (id === 'mVicDev' && typeof mvpOpen === 'function') mvpOpen('gregor', true);
+   } catch (err) {
+     console.error('[메뉴 복구 경로 오류]', id, err);
+     window.__menuRecoveryError = {button:id, message:String(err && err.message || err)};
+   }
+ }, true);
+ // 기존 초기화가 끝까지 진행되면 아래 원래 버튼 핸들러가 우선권을 갖습니다.
+
 const PAGE_SRC = '<!doctype html>\n' + document.documentElement.outerHTML;   // 도감 시연용 (같은 게임을 iframe에서 시연 모드로)
 const cvs = document.getElementById('c');
 const ctx = cvs.getContext('2d');
@@ -23330,6 +23362,8 @@ function demoTick(dt) {
   if (demo.t >= demo.len) { demo.t = 0; demo.i = 0; demo.n++; demoReset(); }
 }
 
+// 모든 기본 이벤트 핸들러 등록이 끝났음을 표시해 복구 경로의 중복 실행을 막습니다.
+window.__menuHandlersReady = true;
 // CODEX_END
 if (window.DEMO) demoInit();
 requestAnimationFrame(loop);
