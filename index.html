@@ -3654,8 +3654,9 @@ function damage(src, tgt, amount, opts = {}) {
   if (isChamp(src) && isChamp(tgt)) riOnChampHit(src, tgt);         // 리카르도: 복수 장부
   amount = riDmg(src, tgt, amount);                                  // 위축 · 장부 · 형님의 시험 · 처형 명령                       // 토마 P: 먹는 동안 피해 감소
   if (isChamp(tgt) && tgt.gdGuard) amount = gdRedirect(src, tgt, amount, opts);   // 귀도 집행 유예: 30% 대신 받음
-  if (src && src.team !== tgt.team && isChamp(src) && src.key === 'gebura') geburaGainRage(src);
-  if (src && src.team !== tgt.team && isChamp(tgt) && tgt.key === 'gebura') geburaGainRage(tgt);
+  if (src && src.team !== tgt.team && isChamp(src) && src.key === 'gebura' && isChamp(tgt)) geburaGainRage(src);
+  // 게부라의 피격 분노는 적 챔피언에게 피해를 받았을 때만 증가합니다. 미니언·정글몹 피해는 제외.
+  if (src && src.team !== tgt.team && isChamp(src) && isChamp(tgt) && tgt.key === 'gebura') geburaGainRage(tgt);
   const preMit = amount;
   amount = Math.max(1, Math.round(mitigate(tgt, amount, opts.type || 'physical', src)));
   let hpLoss = amount;
@@ -13129,6 +13130,32 @@ function updateBot(b, dt) {
   }
   const stance = b.stance || 'farm';
 
+  // 게부라 AI: 전투 중 Q 3단 연계, 근접 W, 추격 E, 분노 20 이상 R 변신을 적극 사용
+  if (b.key === 'gebura' && p.alive && pd < E(720) && seenBy(b.team,p) && b.thinkT <= 0 && stance !== 'retreat') {
+    const a=Math.atan2(p.y-b.y,p.x-b.x);
+    if ((b.gbRage||0)>=20 && !(b.gbFormUntil>time) && !(b.gbTransformUntil>time) && b.cd.R<=0) {
+      b.thinkT=.55; castSkillCore(b,'R',a,Math.min(1,pd/E(560))); moveChamp(b,0,0,dt); return;
+    }
+    if (b.gbFormUntil>time && b.gbRStage<2 && b.gbRStage===0 && pd<E(560) && b.cd.R<=0) {
+      b.thinkT=.65; castSkillCore(b,'R',a,Math.min(1,pd/E(560))); moveChamp(b,0,0,dt); return;
+    }
+    if (b.gbFormUntil>time && b.gbRStage===1 && b.cd.R<=0) {
+      b.thinkT=.65; castSkillCore(b,'R',a,Math.min(1,pd/E(520))); moveChamp(b,0,0,dt); return;
+    }
+    if (b.gbQStage>0 && time<b.gbQUntil && b.cd.Q<=0) {
+      b.thinkT=.38; castSkillCore(b,'Q',a,Math.min(1,pd/E(430))); moveChamp(b,0,0,dt); return;
+    }
+    if (pd<E(470) && b.cd.Q<=0) {
+      b.thinkT=.42; castSkillCore(b,'Q',a,Math.min(1,pd/E(280))); moveChamp(b,0,0,dt); return;
+    }
+    if (pd<E(190) && !b.gbW && b.cd.W<=0) {
+      b.thinkT=.7; castSkillCore(b,'W',a,null); moveChamp(b,0,0,dt); return;
+    }
+    if (pd>E(180) && pd<E(650) && b.cd.E<=0) {
+      b.thinkT=.75; castSkillCore(b,'E',a,Math.min(1,pd/E(650))); moveChamp(b,0,0,dt); return;
+    }
+  }
+
   // ── 후퇴: 포탑 쪽으로. 몰리면 이동기, 그래도 붙으면 돌아서서 반격
   if (stance === 'retreat') {
     b.target = null;
@@ -18979,11 +19006,11 @@ function drawFx(g) {
       }
       g.globalAlpha = 1 - k * k * k; g.fillStyle = f.color;
       const pop = (1 + .8 * Math.max(0, 1 - k / .1) - .12 * Math.min(1, Math.max(0, (k - .1) / .1))) * (f.acc && !f.fin && f.bump ? 1 + .18 * Math.max(0, 1 - (time - f.bump) / .1) : 1) * (f.fin && f.n >= DMG_ACC.fin ? 1.12 : 1);   // 크게 튀어나와 '쿵' 하고 자리 잡음 (연타 중엔 맞을 때마다 살짝 부풂)
-      const num = /^\d/.test(f.text), sz = (f.big ? 21 : num ? 15 : 13) * pop;
+      const num = /^\d/.test(f.text), sz = (f.big ? 16 : num ? 13 : 11) * pop;
       g.font = `900 ${Math.round(sz)}px system-ui,sans-serif`;
       const dx = num ? (f.x % 2 < 1 ? -1 : 1) * k * E(16) : 0, dy = num ? -E(30) * Math.sin(Math.min(1, k * 1.6) * Math.PI * .5) + k * k * E(10) : -k * E(40);
       const sh = f.big && k < .12 ? (Math.random() - .5) * 3 : 0;
-      g.strokeStyle = 'rgba(0,0,0,.85)'; g.lineWidth = f.big ? 5 : 4; g.lineJoin = 'round';
+      g.strokeStyle = 'rgba(0,0,0,.85)'; g.lineWidth = f.big ? 3.2 : 2.5; g.lineJoin = 'round';
       g.strokeText(f.text, f.x + dx + sh, f.y + dy); g.fillText(f.text, f.x + dx + sh, f.y + dy);
       g.globalAlpha = 1;
     }
