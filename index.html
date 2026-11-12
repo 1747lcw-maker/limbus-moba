@@ -1148,8 +1148,8 @@ const STATS = {
   bot:    {name:'훈련용 봇', r:30, range:70, speed:270, acquire:400,
            hp:[600, 95], regen:[1.6, 0.14], ad:[58, 3.6], armor:[32, 4.2], mr:[32, 1.9], as:[0.68, 0.025]},
   // 미니언은 웨이브마다 조금씩 강해짐 (hpWave, dmgWave)
-  melee:  {r:20, hp:450, hpWave:9, dmg:12, dmgWave:0.4, armor:0, mr:0, interval:1.25, range:45,  speed:250, gold:30, xp:60},
-  ranged: {r:17, hp:290, hpWave:6, dmg:23, dmgWave:0.8, armor:0, mr:0, interval:1.6,  range:420, speed:250, gold:20, xp:30, bullet:900},
+  melee:  {r:20, hp:450, hpWave:9, dmg:12, dmgWave:0.3, armor:0, mr:0, interval:1.25, range:45,  speed:250, gold:30, xp:60},
+  ranged: {r:17, hp:290, hpWave:6, dmg:23, dmgWave:0.6, armor:0, mr:0, interval:1.6,  range:420, speed:250, gold:20, xp:30, bullet:900},
   // 포탑: 같은 챔피언을 연속으로 치면 한 발마다 +40%, 최대 +120%
   turret: {r:42, hp:2800, armor:50, mr:50, dmgChamp:170, heatUp:0.4, heatMax:1.2, minionPct:{melee:0.45, ranged:0.7},
            interval:1.2, bullet:1400},
@@ -3523,6 +3523,8 @@ function damage(src, tgt, amount, opts = {}) {
   if(tgt&&tgt.key==='naihwang'&&tgt.nhEGuardUntil>time&&src&&src.team!==tgt.team)amount*=.85;
   if(tgt&&src&&src.team!==tgt.team&&((tgt.key==='liuEn'&&tgt.liuFurioso)||(tgt.key==='roland'&&tgt.rolandFurioso)))return; // FURIOSO 진행 중 무적
   if (!targetable(tgt) || tgt.ward) return;
+  // 초반 라인전 보호: 저레벨 챔피언은 미니언에게 받는 피해가 감소 (레벨 1~4: 30/22/14/8%)
+  if (isMinion(src) && isChamp(tgt)) amount *= tgt.level <= 1 ? 0.70 : tgt.level === 2 ? 0.78 : tgt.level === 3 ? 0.86 : tgt.level === 4 ? 0.92 : 1;
   if (tgt.sdInvT > time && src && src.team !== tgt.team) { sdDodge(tgt); return; }
   if (src && src.team !== tgt.team && (src.dlInvT > time || tgt.dlInvT > time)) dlOnDamage(src, tgt);   // 동랑: 피해를 주고받으면 은신 해제
   if (tgt.efE && src && src.team !== tgt.team && opts.skill && !opts.efDone && src.x !== undefined && Math.hypot(src.x - tgt.x, src.y - tgt.y) > E(KEF.E.far)) { const k = efBlock(tgt, src.x, src.y); if (!k) return; amount *= k; }   // 에피 진격: 멀리서 날아온 스킬   // 소드 회피: 무적
