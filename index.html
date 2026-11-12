@@ -817,6 +817,43 @@
 
 <script>
 (() => {
+// 메뉴 안전 진입: 뒤쪽 초기화/이벤트 등록이 실패해도 메뉴 버튼은 동작하도록 가장 먼저 캡처
+document.addEventListener('click', function menuEmergencyEntry(ev) {
+  const t = ev.target instanceof Element ? ev.target : ev.target && ev.target.parentElement;
+  const btn = t && t.closest('#mVsAi,#mSpec,#mMulti,#mDuel,#mCodex,#mVicDev');
+  if (!btn) return;
+  ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation();
+  try {
+    const id = btn.id;
+    if (id === 'mVsAi') {
+      if (typeof aiDraftTimer !== 'undefined' && aiDraftTimer) clearTimeout(aiDraftTimer);
+      aiDraftState = null; $('aiDraft').hidden = true; aiDraftBans = []; aiDraftLineup = null;
+      openMenu(false); $('select').hidden = false; selStep('role');
+    } else if (id === 'mSpec') {
+      if (typeof aiDraftTimer !== 'undefined' && aiDraftTimer) clearTimeout(aiDraftTimer);
+      aiDraftState = null; aiDraftBans = []; aiDraftLineup = null;
+      spectating = false; specSpeed = 1; mpLineup = null;
+      chosenRole = ROLES[Math.floor(Math.random() * ROLES.length)];
+      chosenChamp = pickForRoles([chosenRole], [])[0] || 'gregor';
+      $('menu').hidden = true; $('select').hidden = true; $('spec').hidden = true; $('aiDraft').hidden = true;
+      $('specPickMode').hidden = false; document.body.classList.remove('spec');
+    } else if (id === 'mMulti') {
+      openMenu(false); MP.duelMode = false; mpOpen(true);
+    } else if (id === 'mDuel') {
+      openMenu(false); MP.duelMode = true; mpOpen(true);
+    } else if (id === 'mCodex') {
+      openMenu(false); openCodex(true);
+    } else if (id === 'mVicDev') {
+      mvpOpen('gregor', true);
+    }
+  } catch (err) {
+    console.error('[메뉴 긴급 진입 오류]', btn.id, err);
+    // 적어도 메뉴가 클릭 불가 상태로 고정되지 않도록 진단 정보 노출
+    window.__menuEmergencyError = {button:btn.id, message:String(err && err.message || err)};
+    const menu = document.getElementById('menu');
+    if (menu) menu.hidden = false;
+  }
+}, true);
 const PAGE_SRC = '<!doctype html>\n' + document.documentElement.outerHTML;   // 도감 시연용 (같은 게임을 iframe에서 시연 모드로)
 const cvs = document.getElementById('c');
 const ctx = cvs.getContext('2d');
