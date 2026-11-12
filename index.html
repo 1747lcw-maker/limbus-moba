@@ -22895,6 +22895,8 @@ document.addEventListener('click', e => {
     if (aiDraftTimer) clearTimeout(aiDraftTimer);
     aiDraftState=null;aiDraftBans=[];aiDraftLineup=null;
     spectating=false;specSpeed=1;mpLineup=null;
+    chosenRole=ROLES[Math.floor(Math.random()*ROLES.length)];
+    chosenChamp=pickForRoles([chosenRole],[])[0]||'gregor';
     $('menu').hidden=true;$('select').hidden=true;$('spec').hidden=true;$('aiDraft').hidden=true;
     $('specPickMode').hidden=false;document.body.classList.remove('spec');
   } catch(err) { console.error('[spectator pick mode]',err);$('specPickMode').hidden=false; }
