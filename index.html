@@ -4406,11 +4406,13 @@ function castSkillCore(c, key, ang, frac = null) {
   if(c.rolandFurioso||c.liuFurioso)return false; // 연속 궁극기 도중 다른 스킬 입력은 무시하고 상태 유지
   const recast = (c.key === 'gebura' && ((key === 'Q' && c.gbQStage > 0 && time < c.gbQUntil) || (key === 'R' && c.gbFormUntil > time && c.gbRStage < 2))) || (c.key === 'vespa' && key === 'W' && !!c.vespaWReady) || (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso) || (c.key === 'liuEn' && key === 'R' && c.liuFormUntil > time && c.liuFuriosoReady && !c.liuFurioso);   // 이스마엘 재사용
   const tmFree = c.key === 'thoma' && key === 'R' && !tmBusy(c);   // 토마 전화위복: 군중 제어 중에도 사용
-  if (c.silenceUntil > time && ['Q','W','E','R'].includes(key)) return;
+  // CC 면역/저지불가 상태는 CC에 의한 스킬 봉쇄를 무시한다.
+  const ccImmune = (c.ccImmuneUntil || 0) > time || (c.ccImmuneT || 0) > time || (c.unstoppableUntil || 0) > time || c.ccImmune === true || !!(c.cast && c.cast.unstoppable);
+  const ccSkillLocked = !ccImmune && (c.stunT > 0 || c.airT > 0 || c.tauntT > time || c.fearT > time || c.silenceUntil > time);
+  if (!tmFree && ccSkillLocked) return;
   if (c.key === 'gebura' && c.gbTransformUntil > time) return;
   const nhComboBusy=c.key==='naihwang'&&!!c.nhCombo;
-  if (!c.alive || !c.rank[key] || (c.stunT > 0 && !tmFree) || (c.cast && !tmFree) || (nhComboBusy&&(c.nhCombo.key!==key||time<c.nhCombo.nextAt||time>c.nhCombo.expires)) || (c.cd[key] > 0 && !recast && !(nhComboBusy&&c.nhCombo.key===key)) || gameOver) return;
-  if (!tmFree && (c.tauntT > time || c.fearT > time)) return;          // 도발·공포 중엔 스킬 불가
+  if (!c.alive || !c.rank[key] || (c.cast && !tmFree) || (nhComboBusy&&(c.nhCombo.key!==key||time<c.nhCombo.nextAt||time>c.nhCombo.expires)) || (c.cd[key] > 0 && !recast && !(nhComboBusy&&c.nhCombo.key===key)) || gameOver) return;
   cancelRecall(c);
   if (c.blink || c.leap || c.alpha || c.rcut) return;
   if (c.chRide) return;                                              // 메피에 탄 동안엔 스킬 불가
