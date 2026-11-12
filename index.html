@@ -3286,6 +3286,24 @@ function aiJungleSkill(b, m) {
   }
   if (b.key === 'gubo' && ready('Q') && d < E(KGB.Q.len) * .92) { castSkill(b, 'Q', a); return true; }
   if (b.key === 'rodion' && ready('W') && d < E(KR.W.radius) - E(20) && b.pStacks >= KR.W.need) { castSkill(b, 'W', a); return true; }
+  // 개별 예외 목록에 없는 챔피언도 피해형 기본 스킬로 정글 캠프를 빠르게 정리한다.
+  // 사거리·형태가 확인되는 Q/W/E만 사용하고, 궁극기와 순수 이동기는 보존한다.
+  for (const k of ['Q', 'W', 'E']) {
+    if (!ready(k)) continue;
+    const sh = aimShape(b, k);
+    let estimate = 0;
+    try { estimate = skillEst(b, k, m); } catch (_) {}
+    if (!sh || estimate <= 0) continue;
+    const inRange = sh.len ? d <= sh.len - E(8)
+      : sh.cone ? d <= sh.cone - E(8)
+      : sh.circle ? d <= sh.circle + E(20)
+      : sh.ring ? d <= sh.ring + E(20)
+      : sh.range ? d <= sh.range - E(8)
+      : sh.radius ? d <= sh.radius + E(20)
+      : false;
+    if (!inRange) continue;
+    if (castSkill(b, k, a, sh.point || sh.leap ? Math.min(1, dist(b, m) / E(sh.point || sh.leap)) : null) !== false) return true;
+  }
   return false;
 }
 
@@ -12287,6 +12305,18 @@ function aiFarmGeneric(b, near) {
     if (b.key === 'wei' && b.xcSwap) continue;
     const r = farmAim(b, k, aimShape(b, k), mins, extra);
     if (r.n >= need + (near ? 1 : 0) && castSkill(b, k, r.ang, r.frac) !== false) return true;
+  }
+  // 전용 파밍 목록에 없는 챔피언도 피해형 Q/W/E로 미니언 웨이브를 정리한다.
+  // 궁극기와 이동기는 제외하고, 실제로 맞힐 수 있는 2기 이상일 때만 사용해 낭비를 줄인다.
+  for (const k of ['Q', 'W', 'E']) {
+    if (!(b.rank[k] > 0) || b.cd[k] > 0 || (b.key === 'wei' && b.xcSwap)) continue;
+    if (list.some(v => v[0] === k)) continue;
+    const sh = aimShape(b, k);
+    let estimate = 0;
+    try { estimate = skillEst(b, k, mins[0]); } catch (_) {}
+    if (!sh || estimate <= 0) continue;
+    const r = farmAim(b, k, sh, mins);
+    if (r.n >= (near ? 3 : 2) && castSkill(b, k, r.ang, r.frac) !== false) return true;
   }
   return false;
 }
