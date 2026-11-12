@@ -3661,6 +3661,7 @@ function damage(src, tgt, amount, opts = {}) {
   amount = Math.max(1, Math.round(mitigate(tgt, amount, opts.type || 'physical', src)));
   let hpLoss = amount;
   if (tgt.shield > 0) { const a = Math.min(tgt.shield, hpLoss); tgt.shield -= a; hpLoss -= a; }   // 보호막 먼저
+  const geburaActualHpLoss = Math.min(hpLoss, Math.max(0, tgt.hp)); // 보호막·초과 피해를 제외한 실제 체력 피해
   tgt.hp -= hpLoss;
   // 롤랑 패시브: 적 챔피언의 스킬/기본 공격에 실제로 피격될 때만, 50초마다 보호막 발동
   if (tgt.key === 'roland' && isChamp(src) && src.team !== tgt.team && (opts.basic || opts.skill) && !opts.noProc && amount > 0 && time >= (tgt.rolandPassiveReadyAt || 0)) {
@@ -3690,9 +3691,17 @@ function damage(src, tgt, amount, opts = {}) {
   if (isChamp(src) && src.gdGuard && tgt.team !== src.team) gdLifeline(src, amount);   // 귀도 집행 유예: 지키는 아군 딜의 15% 회복
   if (isChamp(src) && src.alive) {                    // 흡혈
     const heal = amount * ((src.omni || 0) + (opts.basic ? src.ls || 0 : 0) + (src.vampT > 0 ? KY.R.vamp : 0)
-                          + (hasItem(src, 'mimicry') ? .12 * (1 - src.hp / src.maxHp) : 0))
-      + (src.key === 'gebura' && opts.geburaQWE ? hpLoss * (src.gbFormUntil > time ? .40 : .20) : 0);       // 미미크리
+                          + (hasItem(src, 'mimicry') ? .12 * (1 - src.hp / src.maxHp) : 0));       // 미미크리
     if (heal > 0) src.hp = Math.min(src.maxHp, src.hp + heal * (src.spBrand && time < src.spBrand.until ? .6 : 1));   // 불태우는 낙인: 회복 감소
+  }
+  // 게부라 Q·W·E 전용 흡혈: 실제 적 체력에 준 피해의 20%, 붉은안개 발현 중 40%
+  if (src && src.key === 'gebura' && src.alive && opts.geburaQWE && geburaActualHpLoss > 0) {
+    const rate = src.gbFormUntil > time ? .40 : .20;
+    const heal = Math.min(Math.max(0, src.maxHp - src.hp), geburaActualHpLoss * rate);
+    if (heal > 0) {
+      src.hp += heal;
+      text(src.x, src.y - src.r - E(28), '+' + Math.round(heal), '#ff7184', true, .72);
+    }
   }
   tgt.hitBy.set(src, time);
   if (src && src.key === 'naihwang' && (opts.basic || opts.skill) && !opts.noProc && !tgt.structure && tgt.hp > 0) {
