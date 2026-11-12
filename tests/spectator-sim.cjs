@@ -7,13 +7,15 @@ fs.mkdirSync(OUT, { recursive: true });
 
 function parseCard(card) {
   const small = card.querySelector('small')?.textContent || '';
-  const m = small.match(/Lv\s*(\d+)\s*[·|]\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)/);
+  const chunks = small.split('·');
+  const nums = (chunks[1] || '').trim().split('/').map(x => Number(x.trim()));
+  const level = Number((chunks[0] || '').replace('Lv', '').trim()) || null;
   return {
     name: card.querySelector('b')?.textContent?.trim() || 'unknown',
-    level: m ? Number(m[1]) : null,
-    kills: m ? Number(m[2]) : 0,
-    deaths: m ? Number(m[3]) : 0,
-    assists: m ? Number(m[4]) : 0,
+    level: level,
+    kills: nums[0] || 0,
+    deaths: nums[1] || 0,
+    assists: nums[2] || 0,
     dead: card.classList.contains('dead'),
     team: card.closest('.spt')?.classList.contains('blue') ? 'blue' : 'red'
   };
@@ -70,13 +72,15 @@ function parseCard(card) {
               const cards = [...document.querySelectorAll('#spec .spk')];
               const rows = cards.map(card => {
                 const small = card.querySelector('small')?.textContent || '';
-                const m = small.match(/Lv\s*(\d+)\s*[·|]\s*(\d+)\s*\\/\s*(\d+)\s*\\/\s*(\d+)/);
+                const chunks = small.split('·');
+  const nums = (chunks[1] || '').trim().split('/').map(x => Number(x.trim()));
+  const level = Number((chunks[0] || '').replace('Lv', '').trim()) || null;
                 return {
                   name: card.querySelector('b')?.textContent?.trim() || 'unknown',
-                  level: m ? Number(m[1]) : null,
-                  kills: m ? Number(m[2]) : 0,
-                  deaths: m ? Number(m[3]) : 0,
-                  assists: m ? Number(m[4]) : 0,
+                  level: level,
+                  kills: nums[0] || 0,
+                  deaths: nums[1] || 0,
+                  assists: nums[2] || 0,
                   dead: card.classList.contains('dead'),
                   team: card.closest('.spt')?.classList.contains('blue') ? 'blue' : 'red'
                 };
