@@ -4155,7 +4155,7 @@ function geburaTick(c,dt){
 function castGebura(c,key,ang,frac){
  const i=rk(c,key),cds={Q:[8,7.5,7,6.5],W:[16,15,14,13],E:[14,13,12,11],R:[100,85,70]},cd=cds[key][i]*hasteMul(c),red='#ff2947';
  if(key==='Q'){
-  if(ang==null)ang=autoAim(c,E(c.gbQStage===1?380:420));c.face=ang;const stage=(c.gbQStage>0&&time<c.gbQUntil)?c.gbQStage:0;
+  if(ang==null)ang=autoAim(c,E(c.gbQStage===1?380:420));c.face=ang;const stage=(c.gbQStage>0&&time<c.gbQUntil)?c.gbQStage:0;c.gbWeaponAnim={type:stage===1?'thrust':stage===2?'cross':'slash',start:time,dur:stage===1?.38:.46};
   if(stage===0){const len=E(280),hits=segHits(c,ang,len,E(82));for(const u of hits){if(isChamp(u))callForHelp(c,u);damage(c,u,58+i*24+c.ad*.68,{skill:true,color:red});}const sx=c.x,sy=c.y,tx=Math.max(E(35),Math.min(W-E(35),sx+Math.cos(ang)*len)),ty=Math.max(E(90),Math.min(H-E(90),sy+Math.sin(ang)*len));c.leap={gebura:true,type:'Q1',sx,sy,tx,ty,t:0,dur:.23};fx.push({type:'gbQ1',x:sx,y:sy,ang,r:len,t:0,life:.48});}
   else if(stage===1){const len=E(430),wid=E(58),hits=segHits(c,ang,len,wid);for(const u of hits){if(isChamp(u))callForHelp(c,u);damage(c,u,68+i*28+c.ad*.82,{skill:true,color:red});}fx.push({type:'gbQ2',x:c.x,y:c.y,ang,len,r:len,t:0,life:.42});}
   else{const len=E(255),wid=E(190),hits=segHits(c,ang,len,wid);for(const u of hits){if(isChamp(u))callForHelp(c,u);damage(c,u,78+i*30+c.ad*.9,{skill:true,color:red});}fx.push({type:'gbQ3',x:c.x,y:c.y,ang,r:len,t:0,life:.5});}
@@ -14366,8 +14366,11 @@ function drawGachiuAura(g,c){
 // 게부라: 짙은 적색의 육체와 근섬유 칼날, 두 개의 살아 있는 눈을 가진 대검
 function drawGeburaBody(g,c){
  const r=c.r,a=c.face||0,deep='#4b0712',red='#8d1022',flesh='#b52a3c',light='#e05a67',dark='#21050b';
- const swingK=c.swingT>0?Math.max(0,Math.min(1,1-c.swingT/.46)):0;
- const swingPose=swingK<.24?-.28*(swingK/.24):-.28+1.82*easeOut((swingK-.24)/.76);
+ const skillAnim=c.gbWeaponAnim&&time-c.gbWeaponAnim.start<c.gbWeaponAnim.dur?c.gbWeaponAnim:null;
+ const swingK=skillAnim?Math.max(0,Math.min(1,(time-skillAnim.start)/skillAnim.dur)):(c.swingT>0?Math.max(0,Math.min(1,1-c.swingT/.46)):0);
+ let swingPose=swingK<.24?-.28*(swingK/.24):-.28+1.82*easeOut((swingK-.24)/.76);
+ if(skillAnim&&skillAnim.type==='thrust'){const p=easeOut(Math.min(1,swingK/.58));swingPose=-.35+2.44*p;}
+ else if(skillAnim&&skillAnim.type==='cross'){const p=easeOut(swingK);swingPose=.9-1.9*p;}
  g.save();g.translate(c.x,c.y);g.rotate(a);
  // 몸통: 붉은 근육 섬유가 겹친 듯한 갑주 실루엣
  g.fillStyle=dark;g.strokeStyle='#a72b3d';g.lineWidth=E(2);
