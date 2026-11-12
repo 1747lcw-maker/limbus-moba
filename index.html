@@ -22769,8 +22769,9 @@ let cxDemoChamp = null, cxDemoRole = null;
 function cxDemo(k, key, fresh, role = null) {
   const fr = $('cxDemo'); if (!fr) return;
   if (!fresh && cxDemoChamp === k && fr.contentWindow && (k !== 'indigoElder' || role === cxDemoRole)) { fr.contentWindow.postMessage({demoSkill:key}, '*'); return; }
-  cxDemoChamp = k;
-  fr.srcdoc = PAGE_SRC.replace('<head>', `<head><script>window.DEMO=${JSON.stringify({champ:k, skill:key})}<\/script>`);
+  cxDemoChamp = k; cxDemoRole = role;
+  const payload = JSON.stringify({champ:k, skill:key, role:role || undefined});
+  fr.srcdoc = PAGE_SRC.replace('<head>', '<head><script>window.DEMO=' + payload + '<\\/script>');
 }
 function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; cxDemoRole = null; }
 
