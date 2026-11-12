@@ -22765,14 +22765,14 @@ function cxShowSkill(key, fresh) {
   cxDemo(cxChamp, key, fresh, cxChamp==='indigoElder'?cxIndigoRole:null);
 }
 // 시연: 같은 게임을 작은 iframe 안에서 '시연 모드'로 실행
-let cxDemoChamp = null;
+let cxDemoChamp = null, cxDemoRole = null;
 function cxDemo(k, key, fresh, role = null) {
   const fr = $('cxDemo'); if (!fr) return;
-  if (!fresh && cxDemoChamp === k && fr.contentWindow && (k !== 'indigoElder' || role === cxIndigoRole)) { fr.contentWindow.postMessage({demoSkill:key}, '*'); return; }
+  if (!fresh && cxDemoChamp === k && fr.contentWindow && (k !== 'indigoElder' || role === cxDemoRole)) { fr.contentWindow.postMessage({demoSkill:key}, '*'); return; }
   cxDemoChamp = k;
   fr.srcdoc = PAGE_SRC.replace('<head>', `<head><script>window.DEMO=${JSON.stringify({champ:k, skill:key})}<\/script>`);
 }
-function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; }
+function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; cxDemoRole = null; }
 
 $('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
