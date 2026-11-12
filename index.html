@@ -19622,6 +19622,16 @@ Object.assign(SKILL_ICON_DRAW, {
   }
  }
 });
+// 쪽빛노인 전용: 대호수의 쪽빛 파도와 작살을 모티브로 한 P/Q/W/E/R 아이콘
+SKILL_BG.indigoElder = ['#477d9d', '#081a2b'];
+Object.assign(SKILL_ICON_DRAW, { indigoElder: {
+ P:g=>{iconGlow(g,0,0,29,'rgba(86,174,220,.72)');g.strokeStyle='#b9e6f5';g.lineWidth=2.6;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();g.setLineDash([3,3]);g.strokeStyle='#5b9fc1';g.lineWidth=2;g.beginPath();g.arc(0,0,15,0,Math.PI*2);g.stroke();g.setLineDash([]);iconPoly(g,[[-5,-8],[1,-15],[8,-8],[6,4],[0,12],[-6,4]],'#18384b','#d8f4ff');iconCircle(g,0,0,3,'#dff8ff','#fff');for(let i=0;i<4;i++){const a=i*Math.PI/2+.35;iconLine(g,Math.cos(a)*24,Math.sin(a)*24,Math.cos(a)*31,Math.sin(a)*31,'#83cce8',2);}},
+ Q:g=>{iconGlow(g,0,0,30,'rgba(91,178,220,.8)');g.save();g.rotate(-.55);iconLine(g,-25,0,24,0,'#172c3a',8);iconLine(g,-25,0,24,0,'#c4dce5',3);iconPoly(g,[[16,-7],[29,0],[16,7],[19,0]],'#e9f8ff','#fff');iconLine(g,-17,-2,15,-2,'#76c8e8',1.8);g.restore();for(let i=0;i<4;i++){const y=-15+i*10;iconLine(g,-25,y,-17,y-4,'#8ed9f2',1.8);}},
+ W:g=>{iconGlow(g,0,0,31,'rgba(68,156,205,.78)');g.save();g.rotate(-.15);for(let i=-2;i<=2;i++){g.save();g.rotate(i*.24);iconLine(g,-19,1,20,-13,'#203b4b',6);iconLine(g,-19,1,20,-13,'#d0e8ef',2.2);iconPoly(g,[[15,-17],[27,-17],[21,-6],[17,-8]],'#8ac9df','#e8f8ff');g.restore();}g.restore();g.strokeStyle='rgba(116,205,235,.9)';g.lineWidth=2;g.beginPath();g.arc(0,8,23,.15,Math.PI-.15);g.stroke();},
+ E:g=>{iconGlow(g,0,0,32,'rgba(70,157,206,.8)');g.strokeStyle='#a9e2f3';g.lineWidth=3;g.beginPath();g.arc(0,0,25,-.3,Math.PI*1.65);g.stroke();g.strokeStyle='#5ba9ce';g.lineWidth=2;g.beginPath();g.arc(0,0,17,.2,Math.PI*1.8);g.stroke();for(let i=0;i<3;i++){const y=-11+i*11;g.beginPath();g.moveTo(-13,y);g.quadraticCurveTo(-6,y-7,0,y);g.quadraticCurveTo(7,y+7,14,y);g.stroke();}iconCircle(g,0,0,4,'#e4faff','#fff');},
+ R:g=>{iconGlow(g,0,0,34,'rgba(93,187,225,.9)');g.save();g.rotate(-.72);sSlash(g,-24,-3,24,3,'#142b3a',10);sSlash(g,-22,-3,26,3,'#d7edf5',3);g.restore();g.save();g.rotate(.72);sSlash(g,-24,-3,24,3,'#142b3a',10);sSlash(g,-22,-3,26,3,'#a9d8e8',3);g.restore();iconCircle(g,0,0,10,'#0b2638','#d9f5ff');iconPoly(g,[[-7,1],[0,-8],[7,1],[4,8],[-4,8]],'#4d8eae','#dff8ff');for(let i=0;i<8;i++){const a=i*Math.PI/4;iconLine(g,Math.cos(a)*25,Math.sin(a)*25,Math.cos(a)*32,Math.sin(a)*32,'#8edcf2',2.2);}}
+}});
+//
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
@@ -22030,13 +22040,6 @@ CODEX_SK.gachiu = {
 };
 
 const EXTRA_CODEX = {
-  indigoElder:{
-  P:g=>{iconGlow(g,0,0,29,'rgba(86,174,220,.72)');g.strokeStyle='#b9e6f5';g.lineWidth=2.6;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();g.setLineDash([3,3]);g.strokeStyle='#5b9fc1';g.lineWidth=2;g.beginPath();g.arc(0,0,15,0,Math.PI*2);g.stroke();g.setLineDash([]);iconPoly(g,[[-5,-8],[1,-15],[8,-8],[6,4],[0,12],[-6,4]],'#18384b','#d8f4ff');iconCircle(g,0,0,3,'#dff8ff','#fff');for(let i=0;i<4;i++){const a=i*Math.PI/2+.35;iconLine(g,Math.cos(a)*24,Math.sin(a)*24,Math.cos(a)*31,Math.sin(a)*31,'#83cce8',2);}},
-  Q:g=>{iconGlow(g,0,0,30,'rgba(91,178,220,.8)');g.save();g.rotate(-.55);iconLine(g,-25,0,24,0,'#172c3a',8);iconLine(g,-25,0,24,0,'#c4dce5',3);iconPoly(g,[[16,-7],[29,0],[16,7],[19,0]],'#e9f8ff','#fff');iconLine(g,-17,-2,15,-2,'#76c8e8',1.8);g.restore();for(let i=0;i<4;i++){const y=-15+i*10;iconLine(g,-25,y,-17,y-4,'#8ed9f2',1.8);}},
-  W:g=>{iconGlow(g,0,0,31,'rgba(68,156,205,.78)');g.save();g.rotate(-.15);for(let i=-2;i<=2;i++){const a=i*.24;g.save();g.rotate(a);iconLine(g,-19,1,20,-13,'#203b4b',6);iconLine(g,-19,1,20,-13,'#d0e8ef',2.2);iconPoly(g,[[15,-17],[27,-17],[21,-6],[17,-8]],'#8ac9df','#e8f8ff');g.restore();}g.restore();g.strokeStyle='rgba(116,205,235,.9)';g.lineWidth=2;g.beginPath();g.arc(0,8,23,.15,Math.PI-.15);g.stroke();},
-  E:g=>{iconGlow(g,0,0,32,'rgba(70,157,206,.8)');g.strokeStyle='#a9e2f3';g.lineWidth=3;g.beginPath();g.arc(0,0,25,-.3,Math.PI*1.65);g.stroke();g.strokeStyle='#5ba9ce';g.lineWidth=2;g.beginPath();g.arc(0,0,17,.2,Math.PI*1.8);g.stroke();for(let i=0;i<3;i++){const y=-11+i*11;g.beginPath();g.moveTo(-13,y);g.quadraticCurveTo(-6,y-7,0,y);g.quadraticCurveTo(7,y+7,14,y);g.stroke();}iconCircle(g,0,0,4,'#e4faff','#fff');},
-  R:g=>{iconGlow(g,0,0,34,'rgba(93,187,225,.9)');g.save();g.rotate(-.72);sSlash(g,-24,-3,24,3,'#142b3a',10);sSlash(g,-22,-3,26,3,'#d7edf5',3);g.restore();g.save();g.rotate(.72);sSlash(g,-24,-3,24,3,'#142b3a',10);sSlash(g,-22,-3,26,3,'#a9d8e8',3);g.restore();iconCircle(g,0,0,10,'#0b2638','#d9f5ff');iconPoly(g,[[-7,1],[0,-8],[7,1],[4,8],[-4,8]],'#4d8eae','#dff8ff');for(let i=0;i<8;i++){const a=i*Math.PI/4;iconLine(g,Math.cos(a)*25,Math.sin(a)*25,Math.cos(a)*32,Math.sin(a)*32,'#8edcf2',2.2);}}
- },
   roland:{
 P:{name:'어느 도서관의 사서',text:H=>'롤랑은 적의 공세를 읽고 반격의 틈을 노립니다. 기본 공격의 <b>치명타 확률이 2배</b>로 적용됩니다.<br>적 챔피언의 기본 공격 또는 스킬에 피해를 받으면 자신에게 <b>95 + 레벨당 9</b>의 보호막을 부여합니다. 보호막은 <b>2.5초</b> 동안 유지되며, 발동 후 <b>50초</b> 동안 다시 발동하지 않습니다. 적의 공격을 실제로 받아야 발동하며 단순히 이동하거나 공격을 피한 것으로는 발동하지 않습니다.'},
 Q:{name:'그건 그거고 이건 이거야',cd:[7,6.5,6,5.5],range:350,text:H=>'롤랑이 전방으로 무기를 길게 뻗어 <b>길이 350 · 폭 62</b>의 직선 경로를 꿰뚫습니다. 경로에 있는 적은 모두 <b>'+H.phys('55.2 / 86.25 / 117.3 / 148.35')+' '+H.ad(.897)+'</b>의 물리 피해를 받습니다(스킬 레벨 1 / 2 / 3 / 4 기준). 한 번의 찌르기이므로 야스오의 Q와 달리 <b>3번째 회오리 발사나 공중 띄우기는 없습니다</b>.<br>재사용 대기시간은 <b>7 / 6.5 / 6 / 5.5초</b>입니다. 뒤틀림 상태에서는 이 스킬로 적에게 실제로 입힌 피해의 <b>28%</b>만큼 체력을 회복합니다. 여러 적을 관통해 맞히면 각 적에게 준 피해가 회복량에 반영됩니다.'},
