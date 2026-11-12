@@ -19446,7 +19446,7 @@ function itemIconCanvas(id) {   // 배경(분류 색) + 그림을 한 번만 그
 }
 // ═════════════ 스킬 아이콘 (챔피언별 P/Q/W/E/R, 좌표계 -32..32) ═════════════
 const SKILL_BG = {dongrang:['#b07a28', '#1e1408'], ran:['#b8e641', '#1a220a'], effie:['#9aa8b8', '#141a22'], saude:['#5aa0c8', '#0c1a24'], xichun:['#c8202c', '#2a0608'], wei:['#3a3a42', '#0c0c0e'], bongdad:['#f39a2e', '#2a1606'], ricardo:['#7b3fa8', '#1e0c2c'], gubo:['#2c2a48', '#14101e'], dongbaek:['#d6a93e', '#2a1c08'], thoma:['#8a7b4c', '#1c1a0e'], guido:['#8f1d24', '#1e0608'], marten:['#4f6a34', '#121a0c'], alyssa:['#c03a1c', '#2a0806'], hohenheim:['#2e55b8', '#08102a'], gregor:['#5a3f22', '#1c140b'], rodion:['#4a3f55', '#16121a'], yisang:['#3a4a5a', '#0b0b10'], ishmael:['#8a4a1a', '#1e1008'],
-  ryoshu:['#7a141c', '#1a0406'], faust:['#6a5a78', '#1e1824'], donq:['#8a6a10', '#1e1804'], outis:['#1f5a34', '#08180e'], honglu:['#1f8f84', '#062422'], sinclair:['#5a6610', '#161a04'], heathcliff:['#4a2a6e', '#140a1e'], meursault:['#2a4a86', '#08101e'], yuri:['#8a2a3e', '#1e080e'], kromer:['#6a5a3a', '#14100c'], vergil:['#5a1a1a', '#0c0c10'], charon:['#3d5c58', '#0c1414'], vespa:['#d5aa16','#111318'], naihwang:['#8e2631','#16090d'], gachiu:['#a52c50','#100811'], indigoElder:['#477d9d','#081a2b']};
+  ryoshu:['#7a141c', '#1a0406'], faust:['#6a5a78', '#1e1824'], donq:['#8a6a10', '#1e1804'], outis:['#1f5a34', '#08180e'], honglu:['#1f8f84', '#062422'], sinclair:['#5a6610', '#161a04'], heathcliff:['#4a2a6e', '#140a1e'], meursault:['#2a4a86', '#08101e'], yuri:['#8a2a3e', '#1e080e'], kromer:['#6a5a3a', '#14100c'], vergil:['#5a1a1a', '#0c0c10'], charon:['#3d5c58', '#0c1414'], vespa:['#d5aa16','#111318'], naihwang:['#8e2631','#16090d'], gachiu:['#a52c50','#100811'], indigoElder:['#477d9d','#081a2b'], gebura:['#8f1025','#160309']};
 const SKILL_ICON_CACHE = {};
 const sArrow = (g, x1, y1, x2, y2, col, w) => { iconLine(g, x1, y1, x2, y2, col, w); const a = Math.atan2(y2 - y1, x2 - x1), h = w * 2.4; iconPoly(g, [[x2 + Math.cos(a) * h * .6, y2 + Math.sin(a) * h * .6], [x2 + Math.cos(a + 2.4) * h, y2 + Math.sin(a + 2.4) * h], [x2 + Math.cos(a - 2.4) * h, y2 + Math.sin(a - 2.4) * h]], col); };
 const sSlash = (g, x1, y1, x2, y2, col, w) => { g.fillStyle = col; const a = Math.atan2(y2 - y1, x2 - x1), nx = -Math.sin(a) * w, ny = Math.cos(a) * w, mx = (x1 + x2) / 2, my = (y1 + y2) / 2; g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo(mx + nx, my + ny, x2, y2); g.quadraticCurveTo(mx + nx * .2, my + ny * .2, x1, y1); g.fill(); };
@@ -19805,6 +19805,14 @@ Object.assign(SKILL_ICON_DRAW, { indigoElder: {
  R:g=>{iconGlow(g,0,0,34,'rgba(93,187,225,.9)');g.save();g.rotate(-.72);sSlash(g,-24,-3,24,3,'#142b3a',10);sSlash(g,-22,-3,26,3,'#d7edf5',3);g.restore();g.save();g.rotate(.72);sSlash(g,-24,-3,24,3,'#142b3a',10);sSlash(g,-22,-3,26,3,'#a9d8e8',3);g.restore();iconCircle(g,0,0,10,'#0b2638','#d9f5ff');iconPoly(g,[[-7,1],[0,-8],[7,1],[4,8],[-4,8]],'#4d8eae','#dff8ff');for(let i=0;i<8;i++){const a=i*Math.PI/4;iconLine(g,Math.cos(a)*25,Math.sin(a)*25,Math.cos(a)*32,Math.sin(a)*32,'#8edcf2',2.2);}}
 }});
 //
+SKILL_BG.gebura=['#8f1025','#160309'];
+Object.assign(SKILL_ICON_DRAW,{gebura:{
+ P:g=>{iconGlow(g,0,0,31,'rgba(255,20,52,.9)');g.strokeStyle='#ff8798';g.lineWidth=2.5;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();iconPoly(g,[[-15,-12],[-4,-19],[5,-11],[17,-15],[13,1],[4,18],[-7,14],[-17,4]],'#29050d','#f34a60');for(let i=0;i<4;i++)iconLine(g,-15+i*9,-5+i*3,-7+i*9,8-i*2,'#ffb4bf',2);},
+ Q:g=>{iconGlow(g,0,0,32,'rgba(255,20,52,.95)');g.save();g.rotate(-.55);sSlash(g,-26,-17,24,17,'#31030d',13);sSlash(g,-24,-15,26,19,'#ff304e',6);sSlash(g,-22,-13,28,21,'#ffd4da',2);g.restore();for(let i=0;i<5;i++){const a=-1.2+i*.48;iconLine(g,Math.cos(a)*19,Math.sin(a)*19,Math.cos(a)*31,Math.sin(a)*31,'#ff6479',2.5);}},
+ W:g=>{iconGlow(g,0,0,33,'rgba(255,20,52,.85)');g.strokeStyle='#ff3855';g.lineWidth=5;g.beginPath();g.arc(0,0,23,0,Math.PI*2);g.stroke();g.strokeStyle='#ffc0ca';g.lineWidth=2;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.stroke();for(let i=0;i<8;i++){const a=i*Math.PI/4;iconLine(g,Math.cos(a)*17,Math.sin(a)*17,Math.cos(a)*31,Math.sin(a)*31,'#ff7487',2.5);}},
+ E:g=>{iconGlow(g,0,0,33,'rgba(255,20,52,.95)');sArrow(g,-26,16,22,-13,'#ff304e',7);sSlash(g,-22,21,28,-17,'#ffb2bf',4);for(let i=0;i<6;i++){const a=-.9+i*.3;iconLine(g,Math.cos(a)*20,Math.sin(a)*20,Math.cos(a)*32,Math.sin(a)*32,'#ff6479',2);}},
+ R:g=>{iconGlow(g,0,0,35,'rgba(255,10,38,1)');iconCircle(g,0,0,18,'#08090d','#c21e39');iconPoly(g,[[-14,-13],[-7,-28],[0,-20],[8,-29],[17,-12],[12,16],[0,27],[-13,14]],'#17191f','#ff334f');iconLine(g,-9,-5,9,-5,'#ff1e42',3);for(let i=0;i<12;i++){const a=i*Math.PI/6;iconLine(g,Math.cos(a)*24,Math.sin(a)*24,Math.cos(a)*34,Math.sin(a)*34,'#ff536b',2.4);}}
+}});
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
@@ -20073,6 +20081,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   hohenheim: {coat:'#2e55b8', pants:'#141a26', hair:'#2a2420', skin:'#e8d6c6', eye:'#7fd8ff', fx:'bolt', line:'고만고만한 방식이지만, 가끔은 쓸모가 있군.'},
   charon:    {coat:'#26393a', pants:'#1a2626', hair:'#e9edf0', skin:'#b8babc', eye:'#f6f1e6', fx:'bus', line:'부릉부릉. 카론과 메피는 멈추지 않아.'},
   indigoElder:{coat:'#526b80',pants:'#182633',hair:'#d6e0e8',skin:'#d9d4ca',eye:'#9edcff',fx:'chain',line:'대호수의 규칙은 끝나지 않는다. 다음 포경을 준비하라.'},
+  gebura:{coat:'#17060b',pants:'#09090d',hair:'#19080d',skin:'#9f2939',eye:'#ff1738',fx:'flame',smoke:true,line:'분노는 아직 끝나지 않았다.'},
 };
 let mvp = null, mvpRun = false;
 function mvpOpen(c, dev) {
@@ -20478,6 +20487,8 @@ const MVP_ACT = {
   liuEn:A=>{const a=A.a,k=mE(mClamp(a/.65,0,1));return{back:g=>{g.save();g.globalCompositeOperation='lighter';for(let i=0;i<9;i++){const q=i*.7+a*2,x=A.x+Math.cos(q)*A.Rb*(1+k),y=A.floor-A.Rb*1.3+Math.sin(q)*A.Rb*.8;g.fillStyle=i%2?'rgba(255,95,35,.85)':'rgba(255,210,105,.9)';g.beginPath();g.arc(x,y,A.Rb*(.06+.04*Math.sin(a*8+i)),0,7);g.fill();}g.restore();},front:g=>{g.save();g.strokeStyle='#ff9a45';g.lineWidth=A.Rb*.18;g.lineCap='round';g.beginPath();g.moveTo(A.x-A.Rb*.4,A.floor-A.Rb*2.4);g.quadraticCurveTo(A.x+A.Rb*2,A.floor-A.Rb*2.8,A.x+A.Rb*1.4,A.floor-A.Rb*.7);g.stroke();g.restore();}};},
   naihwang:A=>{const a=A.a,k=mE(mClamp(a/.6,0,1));return{back:g=>{g.save();g.globalCompositeOperation='lighter';g.strokeStyle='#ff5548';g.lineWidth=A.Rb*.055;for(let i=0;i<6;i++){const q=i*Math.PI/3+a*1.5;g.beginPath();g.moveTo(A.x,A.floor-A.Rb*1.5);g.lineTo(A.x+Math.cos(q)*A.Rb*(1.5+2*k),A.floor-A.Rb*1.5+Math.sin(q)*A.Rb*(1.2+2*k));g.stroke();}g.restore();},front:g=>{g.save();g.translate(A.x+A.Rb*.7,A.floor-A.Rb*1.6);g.rotate(-.8+Math.sin(a*12)*.12);g.strokeStyle='#f4d0b8';g.lineWidth=A.Rb*.12;g.beginPath();g.moveTo(-A.Rb,A.Rb);g.lineTo(A.Rb*1.2,-A.Rb);g.stroke();g.restore();}};},
   blueReverb:A=>{const a=A.a,k=mE(mClamp(a/.7,0,1));return{back:g=>{g.save();g.globalCompositeOperation='lighter';for(let i=0;i<6;i++){g.strokeStyle=i%2?'rgba(70,170,255,.65)':'rgba(220,245,255,.85)';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(A.x,A.floor-A.Rb*1.2,A.Rb*(.6+i*.42)*k,A.Rb*(.25+i*.17)*k,0,0,7);g.stroke();}g.restore();},front:g=>{g.save();g.strokeStyle='#a9eaff';g.lineWidth=A.Rb*.09;g.beginPath();g.moveTo(A.x-A.Rb*1.5,A.floor-A.Rb*2.2);g.lineTo(A.x+A.Rb*1.5,A.floor-A.Rb*.8);g.stroke();g.restore();}};},
+  gebura:A=>{const a=A.a,R=A.Rb,k=mClamp(a/1.15,0,1),flash=Math.max(0,1-Math.abs(a-1.15)*3);return {back:g=>{g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.9;for(let i=0;i<7;i++){const q=a*1.5+i*Math.PI*2/7,d=R*(1.3+i*.22);g.strokeStyle=i%2?'rgba(255,30,58,.72)':'rgba(150,5,30,.8)';g.lineWidth=R*(.025+i*.003);g.beginPath();g.ellipse(A.x+Math.cos(q)*d,A.floor-R*1.2+Math.sin(q)*d*.28,R*(1.1+k*.5),R*.16,q,0,Math.PI*2);g.stroke();}for(let i=0;i<26;i++){const q=i*.71+a*2.8,d=R*(1.4+(i%6)*.36);g.fillStyle=i%3?'#ff2947':'#ffc1ca';g.globalAlpha=.4+.4*Math.sin(a*5+i);g.beginPath();g.arc(A.x+Math.cos(q)*d,A.floor-R*1.35+Math.sin(q)*d*.55,R*(.018+i%3*.004),0,7);g.fill();}if(flash>0){g.globalAlpha=flash*.5;const gr=g.createRadialGradient(A.x,A.floor-R,0,A.x,A.floor-R,R*3);gr.addColorStop(0,'rgba(255,240,242,.9)');gr.addColorStop(1,'rgba(255,10,45,0)');g.fillStyle=gr;g.fillRect(A.x-R*3,A.floor-R*4,R*6,R*6);}g.restore();},front:g=>{g.save();g.globalCompositeOperation='lighter';g.globalAlpha=Math.min(1,a*1.4);g.translate(A.x,A.floor-R*1.4);g.strokeStyle='#ff2849';g.shadowColor='#ff1738';g.shadowBlur=R*.35;g.lineWidth=R*.12;g.beginPath();g.moveTo(-R*.9,-R*.8);g.lineTo(R*.9,R*.8);g.stroke();g.strokeStyle='#ffe2e6';g.lineWidth=R*.035;g.beginPath();g.moveTo(-R*.9,-R*.8);g.lineTo(R*.9,R*.8);g.stroke();g.restore();}};}
+
 
 };
 function mvpXcToken(g, M, ch, x, floorY, Rb, face, alpha = 1) {                      // 승리 연출: 두 번째 사람을 같은 방식으로 그림
@@ -22213,6 +22224,14 @@ CODEX_SK.gachiu = {
 };
 
 const EXTRA_CODEX = {
+  gebura:{
+P:{name:'분노',text:H=>'게부라가 적 챔피언에게 피해를 주거나 적 챔피언에게 피해를 받으면 <b>분노가 2</b>씩 쌓입니다. 분노가 <b>20</b>에 도달하면 8초 동안 주는 피해가 <b>20%</b>, 이동 속도가 <b>10%</b> 증가합니다. 8초가 지나면 분노는 0으로 초기화됩니다. 붉은안개 변신 중에는 분노가 20 아래로 내려가지 않고 최대 30까지 쌓입니다.'},
+Q:{name:'종베기 · 찌르기 · 횡베기',cd:[8,7.5,7,6.5],range:430,text:H=>'세 번 이어지는 검술입니다. <b>1타 종베기</b>는 트린다미어 E처럼 전방으로 돌진하며 검을 내리그어 경로의 적을 벱니다. <b>2타 찌르기</b>는 요네 Q처럼 직선으로 검을 찔러 관통 피해를 줍니다. <b>3타 횡베기</b>는 요네 W처럼 넓은 부채꼴을 가로로 베어냅니다. 첫 타격 후 4초 안에 다음 타격을 이어갈 수 있으며, 세 번째 타격 뒤 재사용 대기시간이 시작됩니다.'},
+W:{name:'기합',cd:[16,15,14,13],range:340,text:H=>'게부라가 약 1초 동안 기합을 모읍니다. 차징하는 동안 게부라를 중심으로 붉은 원형 오라가 점점 넓어집니다. 차징이 끝나면 원 안의 적을 <b>1.2초 동안 도발</b>해 게부라를 공격하도록 만듭니다.'},
+E:{name:'최강 돌진',cd:[14,13,12,11],range:650,text:H=>'이렐리아 Q처럼 사거리 안의 적에게 빠르게 돌진합니다. 적중 시 현재 분노 × <b>(15 + 레벨 × 1.2)</b>의 고정 피해를 주고, 분노 × <b>(10 + 레벨 × 0.8)</b>만큼 체력을 회복합니다. 분노가 높고 레벨이 오를수록 피해와 회복량이 커집니다.'},
+R:{name:'E.G.O 발현::붉은안개',cd:[100,85,70],text:H=>'<b>분노 20 이상일 때만</b> 사용할 수 있습니다. 발동 후 3초의 변신 준비 시간이 지나면 검정색 기계식 갑옷을 두른 <b>붉은안개</b>로 변신합니다. 변신은 10초 동안 유지되며, 변신 중 모든 군중 제어 효과에 면역이고 기본 공격과 모든 스킬 피해량이 2배가 됩니다. 분노 최대치는 30, 최소치는 20으로 고정됩니다.<br><br><b>첫 번째 재사용 · 대절단 세로:</b> 가렌의 궁극기처럼 적 한 명을 향해 강력한 수직 참격을 내려찍습니다.<br><b>두 번째 재사용 · 대절단 가로:</b> 요네 W 강화판처럼 오른쪽에서 왼쪽으로 넓은 범위를 가르는 광역 참격을 발사합니다. 두 재사용 스킬은 붉은안개 상태에서만 사용할 수 있으며, 변신이 끝나면 사용할 수 없습니다. 변신 종료 시 분노는 0이 됩니다.'}
+};
+
   roland:{
 P:{name:'어느 도서관의 사서',text:H=>'롤랑은 적의 공세를 읽고 반격의 틈을 노립니다. 기본 공격의 <b>치명타 확률이 2배</b>로 적용됩니다.<br>적 챔피언의 기본 공격 또는 스킬에 피해를 받으면 자신에게 <b>95 + 레벨당 9</b>의 보호막을 부여합니다. 보호막은 <b>2.5초</b> 동안 유지되며, 발동 후 <b>50초</b> 동안 다시 발동하지 않습니다. 적의 공격을 실제로 받아야 발동하며 단순히 이동하거나 공격을 피한 것으로는 발동하지 않습니다.'},
 Q:{name:'그건 그거고 이건 이거야',cd:[7,6.5,6,5.5],range:350,text:H=>'롤랑이 전방으로 무기를 길게 뻗어 <b>길이 350 · 폭 62</b>의 직선 경로를 꿰뚫습니다. 경로에 있는 적은 모두 <b>'+H.phys('55.2 / 86.25 / 117.3 / 148.35')+' '+H.ad(.897)+'</b>의 물리 피해를 받습니다(스킬 레벨 1 / 2 / 3 / 4 기준). 한 번의 찌르기이므로 야스오의 Q와 달리 <b>3번째 회오리 발사나 공중 띄우기는 없습니다</b>.<br>재사용 대기시간은 <b>7 / 6.5 / 6 / 5.5초</b>입니다. 뒤틀림 상태에서는 이 스킬로 적에게 실제로 입힌 피해의 <b>28%</b>만큼 체력을 회복합니다. 여러 적을 관통해 맞히면 각 적에게 준 피해가 회복량에 반영됩니다.'},
@@ -22588,7 +22607,7 @@ function cxStatRows(k, form = cxIndigoRole) {
 function cxTabsHtml(k, key) {                                            // 스킬 탭 (가시춘과 웨이: 두 줄)
   const row = (ik, pre) => `<div class="cx-tabs" role="tablist">${['P', 'Q', 'W', 'E', 'R'].map(s => { const u = cxIcon(ik, s), id = pre + s;
     return `<button type="button" role="tab" data-sk="${id}" aria-selected="${id === key}">${u ? `<img src="${u}" alt="">` : ''}<span>${s === 'P' ? '패시브' : s}</span></button>`; }).join('')}</div>`;
-  if (k !== 'xichun') return row(k, '');
+  if (k !== 'xichun') return row(k, '') + (CX_COMBO[k] && CX_COMBO[k].length ? `<div class="cx-tabs cx-combo-tab" role="tablist"><button type="button" role="tab" data-sk="C0" aria-selected="${key[0] === 'C'}"><span>콤보</span><b>연계 시연</b></button></div>` : '');
   return `<div class="cx-tlbl">가시춘</div>${row('xichun', '')}<div class="cx-tlbl">웨이</div>${row('wei', 'w')}`;
 }
 function cxDetail(k, key = 'P', roleOverride = null) {
@@ -22622,6 +22641,7 @@ const cbYiW = () => {                                                 // 이상:
   const ms = mirrors.filter(m => m.owner === P && Math.hypot(m.x - P.x, m.y - P.y) < R).sort((a, b) => Math.hypot(b.x - P.x, b.y - P.y) - Math.hypot(a.x - P.x, a.y - P.y));
   const m = ms[0]; if (m) castSkill(P, 'W', Math.atan2(m.y - P.y, m.x - P.x), Math.min(1, Math.hypot(m.x - P.x, m.y - P.y) / R));
 };
+  gebura:[{name:'붉은안개의 사냥',sum:'기합으로 적의 발을 묶은 뒤 3단 검술과 최강 돌진으로 분노를 활용하고, 붉은안개로 각성해 대절단 두 번으로 마무리하는 게부라의 암살 콤보예요.',steps:[['W','적이 접근해 오거나 도주 경로에 들어왔을 때 기합을 차징해 원 안의 적을 도발합니다.'],['Q','종베기로 거리를 좁히고, 이어 찌르기와 횡베기까지 연결해 큰 검기 피해를 줍니다.'],['E','분노가 쌓인 상태에서 최강 돌진으로 적을 추격합니다. 분노 비례 고정 피해와 체력 회복을 동시에 얻습니다.'],['R','분노가 20에 도달하면 E.G.O 발현을 시작합니다. 3초 동안 변신 준비를 마치고 붉은안개로 각성합니다.'],['R','대절단 세로로 핵심 적 한 명을 강하게 베어냅니다.'],['R','대절단 가로를 재사용해 주변 적까지 휩쓸며 전투를 마무리합니다.']],chain:(A,S)=>[S.k('W'),S.k('Q'),S.k('Q'),S.k('Q'),S.k('E'),S.k('R'),S.k('R'),S.k('R')]}],
 const CX_COMBO = {
   gregor:[{name:'바퀴 황제의 행진',
     sum:'변신으로 모든 스킬을 키운 뒤, 길어진 기절로 붙잡고 최대 체력 비례 피해로 표식을 터뜨리는 그레고르의 기본 한타 연계예요.',
