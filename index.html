@@ -1870,7 +1870,12 @@ function resetGame() {
 
 const invulnerable = u => u.protectors && u.protectors.length > 0 &&
   (u.protectAny ? u.protectors.every(p => p.alive) : u.protectors.some(p => p.alive));
-const targetable = u => u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && !(u.key === 'roland' && u.rolandFurioso) && !(u.structure && invulnerable(u));   // hidden: 료슈 Q·R 중 무적
+// FURIOSO 무적은 실제 연속 참격 진행 중에만 유효. 마지막 타격 이후 남은 상태 객체는 무적 판정에서 제외한다.
+const furiosoActive = u => !!(u && u.alive && (
+  (u.key === 'roland' && u.rolandFurioso && u.rolandFurioso.target && u.rolandFurioso.target.alive && u.rolandFurioso.index < 9) ||
+  (u.key === 'liuEn' && u.liuFurioso && u.liuFurioso.target && u.liuFurioso.target.alive && u.liuFurioso.index < 9)
+));
+const targetable = u => u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && furiosoActive(u) === false ? (u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && !(u.structure && invulnerable(u))) : false;
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const edge = (a, b) => dist(a, b) - a.r - b.r;
 const isMinion = u => u.kind === 'melee' || u.kind === 'ranged';
@@ -3587,7 +3592,7 @@ function damage(src, tgt, amount, opts = {}) {
   if(src&&src.ieSupportUntil>time)amount*=1.10;
   if(tgt&&tgt.ieSupportUntil>time)amount*=.92;
   if(tgt&&tgt.key==='naihwang'&&tgt.nhEGuardUntil>time&&src&&src.team!==tgt.team)amount*=.85;
-  if(tgt&&src&&src.team!==tgt.team&&((tgt.key==='liuEn'&&tgt.liuFurioso)||(tgt.key==='roland'&&tgt.rolandFurioso)))return; // FURIOSO 진행 중 무적
+  if(tgt&&src&&src.team!==tgt.team&&furiosoActive(tgt))return; // FURIOSO 연속 참격 진행 중에만 무적
   if (!targetable(tgt) || tgt.ward) return;
   // 초반 라인전 보호: 저레벨 챔피언은 미니언에게 받는 피해가 감소 (레벨 1~4: 30/22/14/8%)
   if (isMinion(src) && isChamp(tgt)) amount *= tgt.level <= 1 ? 0.70 : tgt.level === 2 ? 0.78 : tgt.level === 3 ? 0.86 : tgt.level === 4 ? 0.92 : 1;
