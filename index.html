@@ -3624,7 +3624,7 @@ function damage(src, tgt, amount, opts = {}) {
   if(src&&src.brTempoUntil>time)amount*=1+(src.brTempoDmg||.08);
   if(src&&src.key==='vespa'&&src.vespaFuryUntil>time)amount*=1.15;
   if(src&&src.key==='gachiu'&&opts.basic&&!opts.noGachiuR&&src.gachiuRUntil>time)amount*=5;
-  if(src&&src.key==='gebura'&&src.gbFormUntil>time)amount*=2;else if(src&&src.key==='gebura'&&src.gbRageUntil>time)amount*=1.2;
+  if(src&&src.key==='gebura'&&src.gbFormUntil>time)amount*=1.8;else if(src&&src.key==='gebura'&&src.gbRageUntil>time)amount*=1.2;
   if (src && src.vgGaze > time) amount *= 1 + KVG.P.dmgUp;                                  // 붉은시선 개안
   if (src && src.spGasT > time) amount *= 1 - SPELLS.gas.weak;
   if(isChamp(src)&&src.key==='liuEn'&&tgt.liuOrderBy===src)amount*=1.2;                               // 착란 가스: 주는 피해 감소
