@@ -1,0 +1,38 @@
+name: Spectator AI simulation
+on:
+  push:
+    paths:
+      - "index.html"
+      - "tests/**"
+      - ".github/workflows/spectator-sim.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start local game server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/limbus-http.log 2>&1 &
+          echo $! > /tmp/limbus-http.pid
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+      - name: Run 5 AI spectator matches
+        run: node tests/spectator-sim.cjs
+      - name: Upload simulation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: limbus-spectator-simulation
+          path: simulation-results/
+          if-no-files-found: warn
