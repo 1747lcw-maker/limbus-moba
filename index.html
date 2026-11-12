@@ -1736,6 +1736,12 @@ function recalcStats(c) {
   c.omni = bv('omni'); c.ls = bv('ls'); c.crit = bv('crit');
   c.speed = st.speed * (1 + bv('ms') + (gr ? .2 : 0) + (((hasItem(c, 'smile') && c.soulN >= 15) || (hasItem(c, 'galaxy') && c.starN >= 15)) ? .08 : 0));
   if (c.key === 'alyssa') c.maxHp += c.ap;                              // 작열하는 홍염살: 주문력 1당 체력 1
+  if (c.key === 'indigoElder') {
+    // 쪽빛 노인은 모든 포지션에서 원거리 공격을 유지하고, 선택 라인에 따라 전투 역할만 전환한다.
+    if (c.role === 'top' || c.role === 'jungle' || c.role === 'mid') { c.maxHp *= 1.22; c.armor += 14; c.mr += 14; c.ad *= .92; c.as *= .94; c.regen += 0.35; c.indigoForm = 'tank'; }
+    else if (c.role === 'support') { c.maxHp *= 1.10; c.armor += 7; c.mr += 7; c.ad *= .95; c.indigoForm = 'support'; }
+    else { c.ad *= 1.12; c.as *= 1.10; c.indigoForm = 'ranged'; }
+  }
   if (gr) { c.maxHp *= 1.15; c.as *= 1.3; }
   if (oldMax) c.hp += Math.max(0, c.maxHp - oldMax);
   c.hp = Math.min(c.hp, c.maxHp);
@@ -12518,7 +12524,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','mid'], liuEn:['top','jungle'], callisto:['top','mid']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = []) {                            // 자리마다: 1·2·3순위 챔피언 중 가중치로 추첨 → 없으면 아무나 (한 팀 안 중복 없음)
   const used = new Set(taken), out = [];
@@ -13733,34 +13739,36 @@ function drawLiuOrderBadge(g,c){
 function drawIndigoElderBody(g,c){
   const r=c.r,a=c.face||0, recoil=c.swingT>0?Math.sin(Math.min(1,c.swingT/.22)*Math.PI)*E(5):0;
   g.save();g.translate(c.x,c.y);g.rotate(a);g.translate(-recoil,0);
-  // 낡은 회청색 외투와 어깨의 두꺼운 가죽 보호대
+  // 낡은 회청색 외투와 어깨 보호대
   g.fillStyle='#34414e';g.strokeStyle='#aebdca';g.lineWidth=E(2);
   g.beginPath();g.moveTo(-r*.72,-r*.48);g.lineTo(-r*.42,-r*1.02);g.lineTo(r*.46,-r*.88);g.lineTo(r*.82,-r*.24);g.lineTo(r*.62,r*.92);g.lineTo(-r*.65,r*.9);g.lineTo(-r*.92,r*.12);g.closePath();g.fill();g.stroke();
   g.fillStyle='#718395';g.beginPath();g.moveTo(-r*.38,-r*.8);g.lineTo(r*.08,-r*.93);g.lineTo(r*.34,-r*.52);g.lineTo(-r*.18,-r*.28);g.closePath();g.fill();
   g.strokeStyle='#c3d2df';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.55,r*.35);g.lineTo(r*.42,r*.35);g.stroke();
-  // 사람이 직접 어깨에 메고 조준하는 초대형 석궁: 중앙 개머리판과 손으로 당기는 시위
-  g.save();g.translate(r*.12,-r*.04);
-  g.shadowColor='#9bb9d0';g.shadowBlur=E(8);
-  // 긴 몸체와 작살 레일
-  g.fillStyle='#303a45';g.strokeStyle='#c0cbd4';g.lineWidth=E(2.5);
-  g.beginPath();g.moveTo(-r*1.65,-r*.24);g.lineTo(r*2.45,-r*.24);g.lineTo(r*2.72,0);g.lineTo(r*2.45,r*.24);g.lineTo(-r*1.65,r*.24);g.closePath();g.fill();g.stroke();
-  g.fillStyle='#8796a4';g.fillRect(-r*1.2,-r*.09,r*3.45,r*.18);
-  g.fillStyle='#202a34';g.beginPath();g.moveTo(-r*1.6,-r*.22);g.lineTo(-r*2.15,-r*.38);g.lineTo(-r*2.32,-r*.12);g.lineTo(-r*2.1,r*.35);g.lineTo(-r*1.55,r*.25);g.closePath();g.fill();g.stroke();
-  // 거대한 양쪽 활대: 포탑처럼 고정된 구조물이 아닌 휴대형 석궁의 활
-  g.strokeStyle='#26333f';g.lineWidth=E(10);g.lineCap='round';g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,-r*1.15,-r*1.95,-r*1.38);g.stroke();
-  g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,r*1.15,-r*1.95,r*1.38);g.stroke();
-  g.strokeStyle='#aebdca';g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,-r*1.15,-r*1.95,-r*1.38);g.stroke();g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,r*1.15,-r*1.95,r*1.38);g.stroke();
-  // 팽팽한 시위와 중앙 장전 장치
-  g.strokeStyle='#dce6ed';g.lineWidth=E(1.8);g.beginPath();g.moveTo(-r*1.95,-r*1.38);g.lineTo(-r*.18,0);g.lineTo(-r*1.95,r*1.38);g.stroke();
-  g.fillStyle='#536575';g.strokeStyle='#d2e0e9';g.lineWidth=E(1.5);g.fillRect(-r*.48,-r*.35,r*.55,r*.7);g.strokeRect(-r*.48,-r*.35,r*.55,r*.7);
-  // 장전된 굵고 긴 작살, 화살촉 대신 넓은 강철 촉
-  g.fillStyle='#d6e0e7';g.strokeStyle='#526779';g.lineWidth=E(1.2);
-  g.beginPath();g.moveTo(r*3.35,0);g.lineTo(r*2.85,-r*.2);g.lineTo(r*2.94,0);g.lineTo(r*2.85,r*.2);g.closePath();g.fill();g.stroke();
-  g.strokeStyle='#d9e4eb';g.lineWidth=E(4);g.beginPath();g.moveTo(r*.1,0);g.lineTo(r*3.02,0);g.stroke();
-  g.strokeStyle='#7398b5';g.lineWidth=E(2);g.beginPath();g.moveTo(r*.25,-r*.11);g.lineTo(r*2.82,-r*.11);g.stroke();
-  // 손잡이와 장전 레버
-  g.fillStyle='#18232e';g.strokeStyle='#9baebd';g.lineWidth=E(1.5);g.beginPath();g.moveTo(-r*.55,r*.18);g.lineTo(-r*.18,r*.18);g.lineTo(-r*.02,r*.82);g.lineTo(-r*.42,r*.82);g.closePath();g.fill();g.stroke();
+  // 휴대형 초대형 석궁: 개머리판은 뒤(-X), 활대·시위와 작살 촉은 조준 방향(+X)
+  g.save();g.translate(r*.12,-r*.04);g.shadowColor='#9bb9d0';g.shadowBlur=E(8);
+  // 개머리판과 총몸
+  g.fillStyle='#202a34';g.strokeStyle='#c0cbd4';g.lineWidth=E(2.5);
+  g.beginPath();g.moveTo(-r*2.25,-r*.32);g.lineTo(-r*1.55,-r*.22);g.lineTo(-r*1.45,r*.22);g.lineTo(-r*2.12,r*.36);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#303a45';g.beginPath();g.moveTo(-r*1.58,-r*.23);g.lineTo(r*2.55,-r*.23);g.lineTo(r*2.78,0);g.lineTo(r*2.55,r*.23);g.lineTo(-r*1.58,r*.23);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#8796a4';g.fillRect(-r*1.12,-r*.085,r*3.55,r*.17);
+  // 활대는 석궁의 앞쪽(적을 향하는 +X)에 크게 펼쳐짐
+  g.strokeStyle='#26333f';g.lineWidth=E(11);g.lineCap='round';
+  g.beginPath();g.moveTo(r*1.15,0);g.quadraticCurveTo(r*1.75,-r*1.12,r*2.48,-r*1.34);g.stroke();
+  g.beginPath();g.moveTo(r*1.15,0);g.quadraticCurveTo(r*1.75,r*1.12,r*2.48,r*1.34);g.stroke();
+  g.strokeStyle='#b8c8d4';g.lineWidth=E(3);
+  g.beginPath();g.moveTo(r*1.15,0);g.quadraticCurveTo(r*1.75,-r*1.12,r*2.48,-r*1.34);g.stroke();
+  g.beginPath();g.moveTo(r*1.15,0);g.quadraticCurveTo(r*1.75,r*1.12,r*2.48,r*1.34);g.stroke();
+  // 활대 끝을 잇는 시위: 조준 방향 앞쪽에 위치
+  g.strokeStyle='#e1ebf1';g.lineWidth=E(2);g.beginPath();g.moveTo(r*2.48,-r*1.34);g.lineTo(r*1.15,0);g.lineTo(r*2.48,r*1.34);g.stroke();
+  // 중앙 장전 장치와 아래 손잡이
+  g.fillStyle='#536575';g.strokeStyle='#d2e0e9';g.lineWidth=E(1.5);g.fillRect(-r*.28,-r*.34,r*.62,r*.68);g.strokeRect(-r*.28,-r*.34,r*.62,r*.68);
+  g.fillStyle='#18232e';g.beginPath();g.moveTo(-r*.55,r*.18);g.lineTo(-r*.18,r*.18);g.lineTo(-r*.02,r*.82);g.lineTo(-r*.42,r*.82);g.closePath();g.fill();g.stroke();
   g.strokeStyle='#9eb2c2';g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.95,r*.05);g.lineTo(-r*.72,r*.72);g.stroke();
+  // 굵은 작살은 석궁 앞 레일을 따라 적을 향해 장전
+  g.strokeStyle='#d9e4eb';g.lineWidth=E(4);g.beginPath();g.moveTo(r*.05,0);g.lineTo(r*3.12,0);g.stroke();
+  g.strokeStyle='#7398b5';g.lineWidth=E(2);g.beginPath();g.moveTo(r*.25,-r*.11);g.lineTo(r*2.9,-r*.11);g.stroke();
+  g.fillStyle='#d6e0e7';g.strokeStyle='#526779';g.lineWidth=E(1.2);
+  g.beginPath();g.moveTo(r*3.48,0);g.lineTo(r*2.96,-r*.2);g.lineTo(r*3.06,0);g.lineTo(r*2.96,r*.2);g.closePath();g.fill();g.stroke();
   g.shadowBlur=0;g.restore();g.restore();
 }
 function drawChamp(g, c) {
@@ -22279,10 +22287,10 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리'], liuEn:['전사'], callisto:['전사'],
+  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
-const cxClassHtml = k => (CX_CLASS[k] || []).map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join('');
+const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터'] : role === 'bottom' ? ['원거리'] : ['탱커']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
 const cxCol = k => {
   if (k === 'roland') return '#090a0d';
   if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
@@ -22365,7 +22373,7 @@ function cxDetail(k, key = 'P') {
     <div class="cx-detail">
       <div class="cx-left">
         <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
-          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}</small></div></div></div>
+          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+(chosenRole === 'support' ? '서포터 형태' : chosenRole === 'bottom' ? '원딜 형태' : '탱커 형태') : ''}</small></div></div></div>
         <details class="cx-stats" open><summary>기초 스탯 개요</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
         </details>
