@@ -20937,7 +20937,9 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape' && boardOpen) openBoard(false);
 });
 
-resetGame();
+// 초기 전투 상태 생성이 실패해도 아래 UI 이벤트 등록까지 중단되지 않도록 보호
+try { resetGame(); }
+catch (err) { window.__initialResetError = err; console.error('[초기 게임 상태 생성 오류]', err); }
 let last = performance.now();
 try {                                                                   // 멀티 방장: 탭이 뒤로 가도 게임이 멈추지 않게 (워커 타이머는 덜 느려짐)
   const wk = new Worker(URL.createObjectURL(new Blob(['setInterval(() => postMessage(0), 33)'], {type:'text/javascript'})));
