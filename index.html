@@ -22414,7 +22414,7 @@ function cxDetail(k, key = 'P', roleOverride = null) {
     <div class="cx-detail">
       <div class="cx-left">
         <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
-          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+(chosenRole === 'support' ? '서포터·원거리 형태' : chosenRole === 'bottom' ? '원딜·원거리 형태' : '탱커·원거리 형태') : ''}</small></div></div></div>
+          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, k === 'indigoElder' ? (cxIndigoRole === 'support' ? 'support' : cxIndigoRole === 'ranged' ? 'bottom' : 'top') : chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+({tank:'탱커·원거리 형태',ranged:'원딜·원거리 형태',support:'서포터·원거리 형태'}[cxIndigoRole] || '탱커·원거리 형태') : ''}</small></div></div></div>
         ${k === 'indigoElder' ? `<div class="cx-form-picks" role="tablist" aria-label="쪽빛노인 전투 형태"><button type="button" data-ie-form="tank" aria-pressed="${cxIndigoRole==='tank'}">탱커 형태 <small>탑·정글·미드</small></button><button type="button" data-ie-form="ranged" aria-pressed="${cxIndigoRole==='ranged'}">원딜 형태 <small>바텀</small></button><button type="button" data-ie-form="support" aria-pressed="${cxIndigoRole==='support'}">서포터 형태 <small>서포터</small></button></div>` : ''}
         <details class="cx-stats" open><summary>기초 스탯 개요${k === 'indigoElder' ? ' · ' + ({tank:'탱커 보정 적용',ranged:'원딜 보정 적용',support:'서포터 보정 적용'}[cxIndigoRole] || '탱커 보정 적용') : ''}</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
@@ -22762,7 +22762,7 @@ function cxShowCombo(i, fresh) {                                      // 콤보 
     <p class="cx-text">${esc(cb.sum)}</p>
     <ol class="cx-cbsteps">${cb.steps.map(s => `<li>${chip(s[0])}<span>${esc(s[1])}</span></li>`).join('')}</ol>`;
   $('cxCap').textContent = `${STATS[cxChamp].name} 콤보 「${cb.name}」 시연 · 실제 게임 엔진으로 반복 재생 (13레벨, 아이템 없음 · 허수아비 적)`;
-  cxDemo(cxChamp, 'C' + i, fresh);
+  cxDemo(cxChamp, 'C' + i, fresh, cxChamp === 'indigoElder' ? cxIndigoRole : null);
 }
 function cxShowSkill(key, fresh) {
   if (key && key[0] === 'C') return cxShowCombo(+key.slice(1) || 0, fresh);
