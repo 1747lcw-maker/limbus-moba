@@ -3758,7 +3758,8 @@ function damage(src, tgt, amount, opts = {}) {
   if (src && (src.bpOwner || src.key === 'bongdad')) bpOnHitBy(src, tgt, amount);   // 봉이 아빠: 봉이 피해 25% 회복 · 열기
   if (tgt.hp <= 0 && tgt.alive) kill(tgt, src);
   if (opts.alW && src && src.key === 'alyssa') alWHit(src, tgt);   // 알리사: 홍염살 강화 평타
-  mtOnDamage(src, tgt, preMit, opts);                                // 마튼: 요정 표식 추가 고정 피해 · 휩쓸기 쿨 감소
+  mtOnDamage(src, tgt, preMit, opts);
+  return amount; // 실제 방어력·피해 증감 적용 후 피해량을 반환해 쪽빛 노인 평타 출혈에 사용                                // 마튼: 요정 표식 추가 고정 피해 · 휩쓸기 쿨 감소
 }
 
 // ═════════════ 적중 피드백 (모든 챔피언 공통) ═════════════
@@ -3962,7 +3963,7 @@ function basicAttack(c, t) {
   }
   if(c.key==='liuEn')liuWeaponRoll(c);
 
-  if(c.key==='indigoElder'&&!t.structure){if(time<(c.ieReturnUntil||0))return;const ieCrit=rollCrit(c);c.swingCrit=ieCrit;const hitDmg=c.ad*(c.ieAtkStage===1?1.18:1)*(ieCrit?critMult(c):1);c.ieAtkStage=c.ieAtkStage||0;if(c.ieAtkStage===0){damage(c,t,hitDmg,{basic:true,crit:ieCrit,color:'#a9cce0'});c.ieAtkStage=1;c.ieHarpoon={tgt:t,until:time+5,damage:hitDmg};t.ieHarpoonBy=c;t.ieHarpoonUntil=time+5;fx.push({type:'ieShot',x:c.x,y:c.y,ang:c.face,len:dist(c,t),t:0,life:.35,wide:false});fx.push({type:'ieHit',x:t.x,y:t.y,ang:c.face,r:t.r*1.6,t:0,life:.35});}else{damage(c,t,hitDmg,{basic:true,crit:ieCrit,color:'#a9cce0'});indigoApplyBleed(c,t,hitDmg*.05,3);fx.push({type:'ieBlood',x:t.x,y:t.y,r:t.r*1.4,t:0,life:.65});c.ieHarpoon=null;c.ieAtkStage=0;c.ieReturnUntil=time+.38;t.ieHarpoonBy=null;t.ieHarpoonUntil=0;fx.push({type:'ieRecall',x:t.x,y:t.y,x2:c.x,y2:c.y,t:0,life:.38});}return;}
+  if(c.key==='indigoElder'&&!t.structure){if(time<(c.ieReturnUntil||0))return;const ieCrit=rollCrit(c);c.swingCrit=ieCrit;const hitDmg=c.ad*(c.ieAtkStage===1?1.18:1)*(ieCrit?critMult(c):1);c.ieAtkStage=c.ieAtkStage||0;if(c.ieAtkStage===0){damage(c,t,hitDmg,{basic:true,crit:ieCrit,color:'#a9cce0'});c.ieAtkStage=1;c.ieHarpoon={tgt:t,until:time+5,damage:hitDmg};t.ieHarpoonBy=c;t.ieHarpoonUntil=time+5;fx.push({type:'ieShot',x:c.x,y:c.y,ang:c.face,len:dist(c,t),t:0,life:.35,wide:false});fx.push({type:'ieHit',x:t.x,y:t.y,ang:c.face,r:t.r*1.6,t:0,life:.35});}else{const dealt=damage(c,t,hitDmg,{basic:true,crit:ieCrit,color:'#a9cce0'});indigoApplyBleed(c,t,dealt??hitDmg,4);fx.push({type:'ieBlood',x:t.x,y:t.y,r:t.r*1.4,t:0,life:.65});c.ieHarpoon=null;c.ieAtkStage=0;c.ieReturnUntil=time+.38;t.ieHarpoonBy=null;t.ieHarpoonUntil=0;fx.push({type:'ieRecall',x:t.x,y:t.y,x2:c.x,y2:c.y,t:0,life:.38});}return;}
   let dmg = c.ad * (c.key==='indigoElder'&&c.ieDamageUntil>time?1.10:1) * (c.key==='liuEn' ? (c.liuWeaponMul||1) : 1) * (c.key==='naihwang' ? 1.42 * (c.nhShotTiger?2:1) : 1) * (c.key==='roland' ? 1.3 : 1);
   const crit = rollCrit(c);
   c.swingCrit = crit;
