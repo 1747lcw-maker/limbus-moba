@@ -19307,7 +19307,8 @@ function drawStatPanel(g) {
     ['치명타', Math.round(critChance(c) * 100) + '%'], ['치명 피해', Math.round(critMult(c) * 100) + '%'],
     ['체력', `${Math.ceil(c.hp)}/${Math.round(c.maxHp)}`], ['이속', Math.round(c.speed * (speedMul(c) || 1))],
   ];
-  const ph = 5 * 14 + 6;
+  const ammoHud = c.key === 'naihwang';
+  const ph = 5 * 14 + 6 + (ammoHud ? 30 : 0);
   g.fillStyle = 'rgba(8,14,11,.72)'; g.beginPath(); g.roundRect(x - 3, y - 3, mw + 6, ph, 6); g.fill();
   g.font = '600 11px system-ui,sans-serif'; g.textBaseline = 'top';
   rows.forEach(([k, v], i) => {
@@ -19315,6 +19316,20 @@ function drawStatPanel(g) {
     g.textAlign = 'left'; g.fillStyle = '#8fa39a'; g.fillText(k, cx, cy);
     g.textAlign = 'right'; g.fillStyle = '#e8efe6'; g.fillText(v, cx + mw / 2 - 10, cy);
   });
+  // 뇌횡 탄종 HUD: 현재 장전된 탄종과 남은 탄약을 항상 명확히 표시
+  if (ammoHud) {
+    const tiger = c.nhMag === 'tiger', ammo = Math.max(0, Number(c.nhAmmo) || 0), maxAmmo = tiger ? 9 : 12;
+    const by = y + 73, bx = x + 4, bw = mw - 8, bh = 24;
+    const col = tiger ? '#ff5548' : '#e5c36a';
+    g.fillStyle = tiger ? 'rgba(91,18,20,.88)' : 'rgba(78,63,25,.82)';
+    g.beginPath(); g.roundRect(bx, by, bw, bh, 5); g.fill();
+    g.strokeStyle = col; g.lineWidth = 1.2; g.stroke();
+    g.font = '800 11px system-ui,sans-serif'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = col;
+    g.fillText(tiger ? '맹호탄' : '기본 총알', bx + 7, by + 9);
+    g.textAlign = 'right'; g.fillStyle = '#fff3df'; g.fillText(`${ammo} / ${maxAmmo}발`, bx + bw - 7, by + 9);
+    g.fillStyle = 'rgba(0,0,0,.42)'; g.beginPath(); g.roundRect(bx + 7, by + 16, bw - 14, 4, 2); g.fill();
+    g.fillStyle = col; g.beginPath(); g.roundRect(bx + 7, by + 16, (bw - 14) * Math.min(1, ammo / maxAmmo), 4, 2); g.fill();
+  }
   // 아이템 칸
   const iy = y + ph + 2, sz = Math.min(26, (mw - 5 * 4) / 6);
   for (let i = 0; i < MAX_SLOTS; i++) {
