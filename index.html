@@ -12159,7 +12159,7 @@ function aiCombo(b, p) {
     const use = (key, frac) => castSkill(b,key,a,frac);
     if (form && b.gbRStage===0 && d<E(560) && use('R',Math.min(1,d/E(560)))) return true;
     if (form && b.gbRStage===1 && d<E(520) && use('R',Math.min(1,d/E(520)))) return true;
-    if (!form && (b.gbRage||0)>=20 && b.gbTransformUntil<=time && ready('R') && d<E(560) &&
+    if (!form && (b.gbRage||0)>=20 && !(b.gbTransformUntil>time) && ready('R') && d<E(560) &&
         use('R',Math.min(1,d/E(560)))) return true;
     if (b.gbQStage>0 && time<b.gbQUntil && ready('Q') && d<E(430) &&
         use('Q',Math.min(1,d/E(430)))) return true;
