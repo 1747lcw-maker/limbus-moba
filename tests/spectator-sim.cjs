@@ -194,6 +194,7 @@ function parseCard(card) {
       consoleErrors: report.matches.reduce((n, m) => n + (m.errors?.filter(e => e.type === 'console').length || 0), 0)
     };
     fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2));
+    console.log('FINAL_SIMULATION_SUMMARY ' + JSON.stringify({summary:report.summary,championRoleTotals:report.championRoleTotals,championTotals:report.championTotals}));
     await browser.close();
   }
 })().catch(err => {
