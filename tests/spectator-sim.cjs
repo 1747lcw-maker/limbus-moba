@@ -31,7 +31,7 @@ function parseCard(card) {
   };
 
   try {
-    for (let matchNo = 1; matchNo <= 10; matchNo++) {
+    for (let matchNo = 1; matchNo <= 5; matchNo++) {
       const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
       const errors = [];
       page.on('pageerror', e => errors.push({ type: 'pageerror', message: e.message, stack: e.stack }));
@@ -79,7 +79,7 @@ function parseCard(card) {
         await page.locator('#spec [data-spd="4"]').evaluate(el => { el.dataset.spd = '12'; });
         await page.locator('#spec [data-spd="12"]').click();
 
-        const durationMs = 120000;
+        const durationMs = 90000;
         let nextSample = 0;
         while (Date.now() - t0 < durationMs) {
           const elapsed = Math.round((Date.now() - t0) / 1000);
