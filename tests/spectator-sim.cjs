@@ -70,7 +70,7 @@ function parseCard(card) {
               const cards = [...document.querySelectorAll('#spec .spk')];
               const rows = cards.map(card => {
                 const small = card.querySelector('small')?.textContent || '';
-                const m = small.match(/Lv\\s*(\\d+)\\s*[·|]\\s*(\\d+)\\s*\\/\\s*(\\d+)\\s*\\/\\s*(\\d+)/);
+                const m = small.match(/Lv\s*(\d+)\s*[·|]\s*(\d+)\s*\\/\s*(\d+)\s*\\/\s*(\d+)/);
                 return {
                   name: card.querySelector('b')?.textContent?.trim() || 'unknown',
                   level: m ? Number(m[1]) : null,
