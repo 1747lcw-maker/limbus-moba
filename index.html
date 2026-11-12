@@ -12532,7 +12532,7 @@ function pickForRoles(roles, taken = []) {                            // 자리�
   for (const r of roles) {
     const pool = AI_CHAMP_POOL.filter(k => !used.has(k));
     let k = null;
-    const cand = pool.map(x => { const t = (ROLE_PREF[x] || []).indexOf(r); return {x, w:t >= 0 ? ROLE_W[t] || 0 : 0}; }).filter(o => o.w > 0);
+    const cand = pool.map(x => { const t = (ROLE_PREF[x] || []).indexOf(r); return {x, w:x === 'indigoElder' ? 1 : t >= 0 ? ROLE_W[t] || 0 : 0}; }).filter(o => o.w > 0);
     let roll = Math.random() * cand.reduce((a, o) => a + o.w, 0);
     for (const o of cand) { roll -= o.w; if (roll <= 0) { k = o.x; break; } }
     if (!k && cand.length) k = cand[cand.length - 1].x;
