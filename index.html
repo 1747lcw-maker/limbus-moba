@@ -22377,11 +22377,19 @@ function cxSpellsHtml() {
 }
 function cxStatRows(k) {
   const st = STATS[k], L = MAX_LEVEL - 1, f = v => cxFmt(Math.round(v * 100) / 100);
+  // 도감에도 쪽빛 노인의 선택 전투 형태별 실제 기본 스탯 보정치를 반영한다.
+  let hp = [...st.hp], regen = [...st.regen], ad = [...st.ad], armor = [...st.armor], mr = [...st.mr], asMul = 1;
+  if (k === 'indigoElder') {
+    const form = cxIndigoRole || 'tank';
+    if (form === 'tank') { hp = hp.map(v => v * 1.35); regen[0] += 0.35; ad = ad.map(v => v * 0.82); armor[0] += 14; mr[0] += 14; asMul = 0.90; }
+    else if (form === 'support') { hp = hp.map(v => v * 1.10); ad = ad.map(v => v * 0.95); armor[0] += 7; mr[0] += 7; }
+    else { ad = ad.map(v => v * 1.12); asMul = 1.10; }
+  }
   const row = (n, a, grow, lv15, unit = '') => `<tr><th>${n}</th><td>${a}${unit}</td><td>${grow}</td><td>${lv15}${unit}</td></tr>`;
   const lin = (n, arr, unit = '') => row(n, f(arr[0]), '+' + f(arr[1]), f(arr[0] + arr[1] * L), unit);
-  return lin('체력', st.hp) + lin('체력 재생', st.regen, '/초') + lin('공격력', st.ad) + (st.ap ? lin('주문력', st.ap) : '') +
-    lin('방어력', st.armor) + lin('마법 저항력', st.mr) +
-    row('공격 속도', f(st.as[0]), '+' + f(st.as[1] * 100) + '%', f(st.as[0] * (1 + st.as[1] * L))) +
+  return lin('체력', hp) + lin('체력 재생', regen, '/초') + lin('공격력', ad) + (st.ap ? lin('주문력', st.ap) : '') +
+    lin('방어력', armor) + lin('마법 저항력', mr) +
+    row('공격 속도', f(st.as[0] * asMul), '+' + f(st.as[1] * 100) + '%', f(st.as[0] * (1 + st.as[1] * L) * asMul)) +
     row('사거리', st.range, '—', st.range) + row('이동 속도', st.speed, '—', st.speed);
 }
 function cxTabsHtml(k, key) {                                            // 스킬 탭 (가시춘과 웨이: 두 줄)
