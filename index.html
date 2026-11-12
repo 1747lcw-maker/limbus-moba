@@ -1686,7 +1686,7 @@ const DUEL = {solo:false, on:false, round:0, freeze:false, deaths:{}, t0:0, sent
 function duelEnterArena() { for (const w of DUEL_WALLS) if (!walls.includes(w)) walls.push(w); }
 function duelExitArena() { for (const w of DUEL_WALLS) { const i = walls.indexOf(w); if (i >= 0) walls.splice(i, 1); } }
                                                     // 멀티: 픽창에서 정한 구성 (resetGame이 읽음)
-const colTeam = () => spectating ? 'blue' : player.team;              // 관전: 블루=파랑 / 레드=빨강 고정
+const colTeam = () => player.team;                                  // 관전도 선택한 챔피언의 실제 팀을 기준으로 색상 판정
 let sprite = null, chosenChamp = 'gregor', started = false, shots = [], mirrors = [], feathers = [], harpoons = [];
 let aiDraftBans = [], aiDraftLineup = null;
 
@@ -13427,7 +13427,7 @@ function updateView(dt) {                                               // 카�
   $('gold').textContent = Math.floor(player.gold) + ' G';
   $('cs').textContent = player.cs;
   $('kd').textContent = player.k + '/' + player.d;
-  const teamK = t => champs().reduce((n, c) => n + (c.team === t ? c.k : 0), 0), myT = spectating ? 'blue' : player.team;
+  const teamK = t => champs().reduce((n, c) => n + (c.team === t ? c.k : 0), 0), myT = player.team;
   $('scMe').textContent = teamK(myT); $('scEn').textContent = teamK(myT === 'blue' ? 'red' : 'blue');
   if (spectating && (specT -= dt) <= 0) { specT = .2; specUpdate(); }
   $('lv').textContent = player.level;
@@ -13937,7 +13937,7 @@ function drawChamp(g, c) {
   drawStatus(g, c);
   if(c.liuOrderBy&&c.liuOrderBy.alive&&c.liuOrderBy.team!==c.team)drawLiuOrderBadge(g,c);
   if(c.silenceUntil>time){g.save();g.strokeStyle='rgba(185,205,230,.95)';g.lineWidth=E(3);g.setLineDash([E(4),E(4)]);g.beginPath();g.arc(c.x,c.y,c.r+E(17),0,7);g.stroke();g.setLineDash([]);g.restore();}
-  const y = champHpBar(g, c, E(90), E(10), isP ? '#5bd46a' : c.team === colTeam() ? '#4aa3ff' : '#ff5a5f');
+  const y = champHpBar(g, c, E(90), E(10), isP && !spectating ? '#5bd46a' : c.team === 'blue' ? '#4aa3ff' : '#ff5a5f');
   const bx = c.x - E(45) - E(20), bs = E(18);      // 레벨 뱃지
   g.fillStyle = '#0b0f14'; g.fillRect(bx, y - E(4), bs, bs);
   g.fillStyle = '#e8efe6'; g.font = `800 ${E(13)}px system-ui,sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -19151,7 +19151,7 @@ function render() {
     const gr = ctx.createRadialGradient(vw / 2, vh / 2, Math.min(vw, vh) * .35, vw / 2, vh / 2, Math.max(vw, vh) * .7);
     gr.addColorStop(0, 'rgba(160,0,20,0)'); gr.addColorStop(1, `rgba(160,0,20,${a})`); ctx.fillStyle = gr; ctx.fillRect(0, 0, vw, vh);
   }
-  if (!player.alive && !gameOver) {
+  if (!spectating && !player.alive && !gameOver) {
     ctx.fillStyle = 'rgba(40,40,50,.45)'; ctx.fillRect(0, 0, vw, vh);
     ctx.fillStyle = '#fff'; ctx.font = '700 22px system-ui,sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(`부활까지 ${Math.ceil(player.respawnT)}초`, vw / 2, vh / 2);
