@@ -1875,7 +1875,7 @@ const furiosoActive = u => !!(u && u.alive && (
   (u.key === 'roland' && u.rolandFurioso && u.rolandFurioso.target && u.rolandFurioso.target.alive && u.rolandFurioso.index < 9) ||
   (u.key === 'liuEn' && u.liuFurioso && u.liuFurioso.target && u.liuFurioso.target.alive && u.liuFurioso.index < 9)
 ));
-const targetable = u => u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && furiosoActive(u) === false ? (u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && !(u.structure && invulnerable(u))) : false;
+const targetable = u => u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && !furiosoActive(u) && !(u.structure && invulnerable(u));   // hidden: 료슈 Q·R 중 무적
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const edge = (a, b) => dist(a, b) - a.r - b.r;
 const isMinion = u => u.kind === 'melee' || u.kind === 'ranged';
