@@ -1170,6 +1170,8 @@ const STATS = {
            hp:[650, 122], regen:[1.8, 0.16], ad:[62, 3.5], armor:[35, 5.0], mr:[33, 2.8], as:[0.67, 0.026]},
   callisto: {name:'칼리스토', r:30, range:100, speed:300, acquire:265,
            hp:[640, 120], regen:[1.7, 0.15], ad:[65, 3.8], armor:[34, 5.0], mr:[33, 2.8], as:[0.66, 0.025]},
+  gebura: {name:'게부라', r:31, range:100, speed:320, acquire:285,
+           hp:[610, 112], regen:[1.55, 0.14], ad:[70, 4.4], armor:[29, 4.6], mr:[29, 2.6], as:[0.70, 0.032]},
   bot:    {name:'훈련용 봇', r:30, range:70, speed:270, acquire:400,
            hp:[600, 95], regen:[1.6, 0.14], ad:[58, 3.6], armor:[32, 4.2], mr:[32, 1.9], as:[0.68, 0.025]},
   // 미니언은 웨이브마다 조금씩 강해짐 (hpWave, dmgWave)
@@ -2036,6 +2038,7 @@ const CHAMP_UI = {
   indigoElder:{names:{Q:'작살 쏘기',W:'갈고리 작살 쏘기',E:'여긴 대호수의 한가운데야',R:'고래 사냥 -포경-'},cast:{},desc:{Q:'강력한 작살을 직선으로 발사합니다. 탱커는 적중 피해만큼 회복, 원거리 딜러는 피해량만큼 4초 출혈, 서포터는 2초간 이동 속도 15% 감소를 부여합니다.',W:'애쉬 W처럼 부채꼴로 작살을 발사합니다. 탱커는 최대 체력 10% 출혈, 원거리 딜러는 3초간 이동 속도·피해량 10% 증가, 서포터는 1초 속박을 얻습니다.',E:'4.5초간 넓은 바다 영역을 펼쳐 적의 시야를 차단합니다. 서포터 형태는 영역 내 아군 공격력 10%, 방어력 8% 증가.',R:'지연 후 X자 영역을 처형합니다. 체력 30% 이하 적은 처형되며 성공하면 아군에게 각각 300골드를 지급하고 재사용할 수 있습니다.'}},
   liuEn:{names:{Q:'파도 소리가 밀려오는 구나',W:'결말은 보지않는 편이 좋겠구나',E:'오늘 동화책은 이것으로',R:'네프. 준비 완료. Furioso replica'},cast:{},desc:{Q:'요네의 W처럼 전방을 크게 휩쓸어 마법 피해를 입히고 보호막을 얻습니다.',W:'90% 확률로 낫, 10% 확률로 손도끼를 꺼내 적에게 돌진합니다.',E:'나피리의 E처럼 돌진해 주변 적에게 피해를 주고 침묵시킵니다.',R:'준비 후 재시전하면 대상에게 9연속 돌진 참격을 가합니다.'}},
   callisto:{names:{Q:'월광 베기', W:'연속 돌진', E:'그림자 보법', R:'월식 참격'},cast:{},desc:{Q:'달빛을 머금은 검격으로 전방의 적을 벱니다.',W:'연속 참격을 넓게 펼쳐 적을 둔화시킵니다.',E:'그림자 보법으로 전투 리듬을 끌어올려 잠시 공격력이 상승합니다.',R:'월식의 힘을 폭발시켜 지정한 지점에 광역 피해와 둔화를 줍니다.'}},
+  gebura:{names:{Q:'미정',W:'미정',E:'미정',R:'미정'},cast:{},desc:{Q:'게부라의 Q 스킬은 추후 설정됩니다.',W:'게부라의 W 스킬은 추후 설정됩니다.',E:'게부라의 E 스킬은 추후 설정됩니다.',R:'게부라의 R 스킬은 추후 설정됩니다.'}},
 
   gregor: {names:{Q:'꿰뚫기', W:'심장', E:'내장파기', R:'어느 날'},
            cast:{Q:'꿰뚫기', W:"'심장을 노려야지, 아들.'", R:'어느 날 갑자기'}},
@@ -12614,7 +12617,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = []) {                            // 자리마다: 1·2·3순위 챔피언 중 가중치로 추첨 → 없으면 아무나 (한 팀 안 중복 없음)
   const used = new Set(taken), out = [];
@@ -12631,8 +12634,8 @@ function pickForRoles(roles, taken = []) {                            // 자리�
   }
   return out;
 }
-const CHAMP_POOL = ['gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto'];
-const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
+const CHAMP_POOL = ['gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura'];
+const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear','gebura']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
 const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // 미구현 캐릭터는 AI 선택 후보에서 제외, 플레이어는 직접 선택 가능
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
 const enemiesOf = b => champs().filter(c => c.team !== b.team && (!c.alive || seenBy(b.team, c)));   // 시야에 보이는 적만 (죽은 적은 알 수 있음)
@@ -13947,6 +13950,7 @@ function drawChamp(g, c) {
   if (c.gachiuAuraUntil > time) drawGachiuAura(g,c);
   if (c.key === 'vespa') drawVespaBody(g,c);
   if (c.key === 'naihwang') drawNaihwangBody(g,c);
+  if (c.key === 'gebura') drawGeburaBody(g,c);
   if (c.key === 'indigoElder') drawIndigoElderBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
   if (c.key === 'ryoshu') drawRyoshuBody(g, c);
@@ -14322,6 +14326,48 @@ function drawGachiuAura(g,c){
  g.globalAlpha=.22*p;g.fillStyle='#fff';g.beginPath();g.arc(0,0,r*1.15,0,Math.PI*2);g.fill();g.restore();
 }
 // 뇌횡: 어두운 적색 실루엣, 붉은 중절모와 시가, 총알 약실·부스터가 결합된 천퇴성도
+// 게부라: 짙은 적색의 육체와 근섬유 칼날, 두 개의 살아 있는 눈을 가진 대검
+function drawGeburaBody(g,c){
+ const r=c.r,a=c.face||0,deep='#4b0712',red='#8d1022',flesh='#b52a3c',light='#e05a67',dark='#21050b';
+ g.save();g.translate(c.x,c.y);g.rotate(a);
+ // 몸통: 붉은 근육 섬유가 겹친 듯한 갑주 실루엣
+ g.fillStyle=dark;g.strokeStyle='#a72b3d';g.lineWidth=E(2);
+ g.beginPath();g.moveTo(-r*.7,-r*.5);g.quadraticCurveTo(-r*.25,-r*1.02,r*.35,-r*.76);g.lineTo(r*.72,-r*.28);g.lineTo(r*.58,r*.65);g.lineTo(0,r*1.02);g.lineTo(-r*.62,r*.62);g.closePath();g.fill();g.stroke();
+ g.fillStyle=red;g.beginPath();g.ellipse(-r*.12,r*.02,r*.48,r*.68,-.12,0,Math.PI*2);g.fill();
+ g.strokeStyle=flesh;g.lineWidth=E(2.3);
+ for(let i=0;i<5;i++){const x=-r*.38+i*r*.17;g.beginPath();g.moveTo(x,-r*.48);g.quadraticCurveTo(x-r*.12,0,x+r*.04,r*.58);g.stroke();}
+ // 얼굴과 붉은 눈빛
+ g.fillStyle='#27060c';g.beginPath();g.ellipse(r*.08,-r*.58,r*.35,r*.31,0,0,7);g.fill();
+ g.fillStyle='#e84b5c';g.beginPath();g.ellipse(r*.2,-r*.56,r*.12,r*.07,0,0,7);g.fill();
+ // 손잡이와 가드
+ g.strokeStyle='#17060a';g.lineWidth=E(7);g.lineCap='round';g.beginPath();g.moveTo(r*.35,r*.38);g.lineTo(r*.9,r*.7);g.stroke();
+ g.strokeStyle='#c04a58';g.lineWidth=E(3);g.beginPath();g.moveTo(r*.32,r*.28);g.lineTo(r*.72,r*.55);g.stroke();
+ g.strokeStyle='#30050c';g.lineWidth=E(5);g.beginPath();g.moveTo(r*.55,r*.45);g.lineTo(r*1.05,r*.05);g.stroke();
+ // 거대한 유기체 대검: 근육 다발처럼 울퉁불퉁한 붉은 칼날
+ g.save();g.translate(r*.78,r*.28);g.rotate(-.52);
+ g.shadowColor='#d51c37';g.shadowBlur=E(13);
+ g.fillStyle=deep;g.strokeStyle='#e04455';g.lineWidth=E(2.2);
+ g.beginPath();g.moveTo(-r*.12,-r*.22);g.bezierCurveTo(r*.18,-r*.72,r*.12,-r*2.05,r*.62,-r*2.72);g.bezierCurveTo(r*.95,-r*2.05,r*.8,-r*.7,r*.42,r*.08);g.bezierCurveTo(r*.18,r*.3,-r*.02,r*.16,-r*.12,-r*.22);g.closePath();g.fill();g.stroke();
+ // 칼 표면의 근섬유 결
+ g.strokeStyle=flesh;g.lineWidth=E(3);g.lineCap='round';
+ for(let i=0;i<6;i++){const x=r*(.05+i*.095);g.beginPath();g.moveTo(x,-r*.35);g.bezierCurveTo(x-r*.18,-r*.95,x+r*.18,-r*1.65,x+r*.05,-r*2.38);g.stroke();}
+ g.strokeStyle=light;g.lineWidth=E(1.3);g.beginPath();g.moveTo(r*.48,-r*.42);g.quadraticCurveTo(r*.66,-r*1.5,r*.64,-r*2.45);g.stroke();
+ // 큰 눈알 하나와 그 위의 작은 눈알 하나
+ g.fillStyle='#f2d9d8';g.strokeStyle='#3a0710';g.lineWidth=E(2.5);
+ g.beginPath();g.ellipse(r*.43,-r*1.25,r*.27,r*.34,-.15,0,Math.PI*2);g.fill();g.stroke();
+ g.fillStyle='#a90d25';g.beginPath();g.arc(r*.48,-r*1.25,r*.145,0,Math.PI*2);g.fill();
+ g.fillStyle='#090408';g.beginPath();g.arc(r*.5,-r*1.25,r*.075,0,Math.PI*2);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.arc(r*.45,-r*1.32,E(3),0,Math.PI*2);g.fill();
+ g.fillStyle='#e8cece';g.strokeStyle='#3a0710';g.lineWidth=E(1.8);
+ g.beginPath();g.ellipse(r*.57,-r*1.82,r*.15,r*.19,-.15,0,Math.PI*2);g.fill();g.stroke();
+ g.fillStyle='#bd1730';g.beginPath();g.arc(r*.6,-r*1.82,r*.075,0,Math.PI*2);g.fill();
+ g.fillStyle='#080307';g.beginPath();g.arc(r*.62,-r*1.82,r*.04,0,Math.PI*2);g.fill();
+ g.shadowBlur=0;g.restore();
+ // 칼자루를 쥔 손
+ g.fillStyle='#b52a3c';g.strokeStyle='#25050b';g.lineWidth=E(1.5);g.beginPath();g.arc(r*.52,r*.34,r*.17,0,7);g.fill();g.stroke();
+ g.restore();
+}
+
 function drawNaihwangBody(g,c){
  nhInit(c);const r=c.r,a=c.face||0,red='#54131b',redHi='#8e2631',black='#171316',steel='#9da4ad',bright='#d6d9dc',brass='#b58a45';
  const swingK=c.key==='naihwang'&&c.swingT>0?Math.max(0,Math.min(1,1-c.swingT/.52)):0;
@@ -20777,7 +20823,7 @@ $('shopBtn').addEventListener('click', () => openShop(!shopOpen));
 addEventListener('keydown', e => { if (spectating || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; if (e.key.toLowerCase() === 'p') openShop(!shopOpen); if (e.key === 'Escape' && shopOpen) openShop(false); });
 
 // ═════════════ 점수판 (탭) ═════════════
-const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', bot:'#7a3438'};
+const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#710d1b', bot:'#7a3438'};
 const TEAM_SIZE = 5;
 let boardOpen = false, boardT = 0;
 function openBoard(on) {
