@@ -31,7 +31,7 @@ function parseCard(card) {
   };
 
   try {
-    for (let matchNo = 1; matchNo <= 5; matchNo++) {
+    for (let matchNo = 1; matchNo <= 10; matchNo++) {
       const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
       const errors = [];
       page.on('pageerror', e => errors.push({ type: 'pageerror', message: e.message, stack: e.stack }));
@@ -61,9 +61,10 @@ function parseCard(card) {
           return e && !e.hidden && document.querySelectorAll('#spec .spk').length === 10;
         }, null, { timeout: 25000 });
 
-        await page.locator('#spec [data-spd="4"]').click();
+        await page.locator('#spec [data-spd="4"]').evaluate(el => { el.dataset.spd = '12'; });
+        await page.locator('#spec [data-spd="12"]').click();
 
-        const durationMs = 70000;
+        const durationMs = 90000;
         let nextSample = 0;
         while (Date.now() - t0 < durationMs) {
           const elapsed = Math.round((Date.now() - t0) / 1000);
@@ -138,6 +139,22 @@ function parseCard(card) {
     }
   } finally {
     report.finishedAt = new Date().toISOString();
+    const championTotals = {};
+    for (const match of report.matches) {
+      for (const card of (match.finalCards || [])) {
+        const row = championTotals[card.name] || (championTotals[card.name] = { appearances: 0, kills: 0, deaths: 0, assists: 0, levelTotal: 0, levelSamples: 0 });
+        row.appearances++;
+        row.kills += card.kills || 0;
+        row.deaths += card.deaths || 0;
+        row.assists += card.assists || 0;
+        if (card.level != null) { row.levelTotal += card.level; row.levelSamples++; }
+      }
+    }
+    for (const row of Object.values(championTotals)) {
+      row.kda = row.deaths ? +((row.kills + row.assists) / row.deaths).toFixed(2) : null;
+      row.avgLevel = row.levelSamples ? +(row.levelTotal / row.levelSamples).toFixed(2) : null;
+    }
+    report.championTotals = championTotals;
     report.summary = {
       matchesAttempted: report.matches.length,
       matchesCompleted: report.matches.filter(m => m.completed).length,
