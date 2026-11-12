@@ -382,6 +382,7 @@
   .cx-stats th,.cx-stats td{padding:3px 6px;text-align:right;border-top:1px solid #2e2016}
   .cx-stats th:first-child{text-align:left;color:#a89378;font-weight:500}
   .cx-stats thead th{color:#a89378;font-weight:600;border-top:0}
+  .cx-form-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:8px;background:#1d140d;border:1px solid #4a3120;border-radius:11px}.cx-form-picks button{min-width:0;border:1px solid #5b4936;border-radius:9px;background:#120d09;color:#f0e1c9;padding:9px 5px;font:800 12px system-ui;cursor:pointer}.cx-form-picks button[aria-pressed="true"]{border-color:#82cce9;background:linear-gradient(145deg,rgba(57,133,170,.32),rgba(20,34,42,.9));box-shadow:inset 0 0 0 1px #82cce9}.cx-form-picks small{display:block;margin-top:3px;color:#a89378;font-size:10px;font-weight:600}
   .cx-tabs{display:flex;gap:6px}
   .cx-tlbl{font:800 12px system-ui,sans-serif;color:#d8c2a0;margin:8px 2px 4px}
   .cx-tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:10px;background:#1d140d;border:1.5px solid #4a3120;color:#a89378;font:700 11px system-ui,sans-serif;cursor:pointer}
@@ -22344,7 +22345,7 @@ const cxIcon = (k, key) => {
   const cv = skillIconCanvas(k, key);
   try { return cv ? cv.toDataURL() : ''; } catch { return ''; }
 };
-let cxChamp = null, cxKey = 'P';
+let cxChamp = null, cxKey = 'P', cxIndigoRole = 'tank';
 
 function openMenu(on) { $('menu').hidden = !on; }
 $('mVicDev').addEventListener('click', () => mvpOpen('gregor', true));
@@ -22389,8 +22390,8 @@ function cxTabsHtml(k, key) {                                            // 스�
   if (k !== 'xichun') return row(k, '');
   return `<div class="cx-tlbl">가시춘</div>${row('xichun', '')}<div class="cx-tlbl">웨이</div>${row('wei', 'w')}`;
 }
-function cxDetail(k, key = 'P') {
-  cxChamp = k; cxKey = key; cxCbMode = false; $('cxCombo').hidden = true;
+function cxDetail(k, key = 'P', roleOverride = null) {
+  cxChamp = k; if(k==='indigoElder') cxIndigoRole = roleOverride || (chosenRole==='support'?'support':chosenRole==='bottom'?'ranged':'tank'); cxKey = key; cxCbMode = false; $('cxCombo').hidden = true;
   const sk = CODEX_SK[k] || {};
   $('cxTitle').textContent = '도감 · ' + STATS[k].name; $('cxBack').textContent = '← 목록';
   $('cxBody').innerHTML = `
@@ -22398,6 +22399,7 @@ function cxDetail(k, key = 'P') {
       <div class="cx-left">
         <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
           <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+(chosenRole === 'support' ? '서포터·원거리 형태' : chosenRole === 'bottom' ? '원딜·원거리 형태' : '탱커·원거리 형태') : ''}</small></div></div></div>
+        ${k === 'indigoElder' ? `<div class="cx-form-picks" role="tablist" aria-label="쪽빛노인 전투 형태"><button type="button" data-ie-form="tank" aria-pressed="${cxIndigoRole==='tank'}">탱커 형태 <small>탑·정글·미드</small></button><button type="button" data-ie-form="ranged" aria-pressed="${cxIndigoRole==='ranged'}">원딜 형태 <small>바텀</small></button><button type="button" data-ie-form="support" aria-pressed="${cxIndigoRole==='support'}">서포터 형태 <small>서포터</small></button></div>` : ''}
         <details class="cx-stats" open><summary>기초 스탯 개요</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
         </details>
@@ -22749,7 +22751,8 @@ function cxShowSkill(key, fresh) {
   if (key && key[0] === 'C') return cxShowCombo(+key.slice(1) || 0, fresh);
   cxKey = key;
   const isW = cxChamp === 'xichun' && key[0] === 'w', bk = isW ? key.slice(1) : key;   // 가시춘과 웨이: w로 시작하면 웨이의 스킬
-  const sk = ((isW ? CODEX_SK.wei : CODEX_SK[cxChamp]) || {})[bk] || ((EXTRA_CODEX[cxChamp] || {})[bk]) || {name:'', text:() => '설명 준비 중'};
+  let sk = ((isW ? CODEX_SK.wei : CODEX_SK[cxChamp]) || {})[bk] || ((EXTRA_CODEX[cxChamp] || {})[bk]) || {name:'', text:() => '설명 준비 중'};
+  if(cxChamp==='indigoElder') { const F={tank:{P:'30초마다 가장 가까운 적 2명에게 대호수 표식을 부여합니다. 표식 규칙은 30초마다 무작위로 교체됩니다. Q 적중 시 이동 속도 30% 감소, W 적중 시 보유 골드 10% 약탈, E 영역에 들어오면 2.5초 속박이 적용됩니다.',Q:'강력한 작살을 직선으로 발사합니다. 적중한 적에게 준 피해량만큼 쪽빛노인의 체력을 회복합니다.',W:'날카로운 작살을 부채꼴로 발사합니다. 적중한 적에게 쪽빛노인의 최대 체력 10%에 해당하는 출혈 피해를 4초에 걸쳐 입힙니다.',E:'쪽빛노인을 중심으로 넓은 바다 영역을 펼칩니다. 영역 안 아군은 투명해지고 적은 시야를 차단당합니다.',R:'파이크처럼 지연 후 X자 영역을 타격합니다. 체력 30% 이하 적을 처형하며, 성공하면 아군에게 각각 300골드를 지급하고 재사용할 수 있습니다.'},ranged:{P:'30초마다 가장 가까운 적 2명에게 대호수 표식을 부여합니다. 표식 규칙은 30초마다 무작위로 교체됩니다. Q 적중 시 이동 속도 30% 감소, W 적중 시 보유 골드 10% 약탈, E 영역에 들어오면 2.5초 속박이 적용됩니다.',Q:'강력한 작살을 직선으로 발사합니다. 적중한 적에게 준 피해량만큼의 출혈 피해를 4초에 걸쳐 입힙니다.',W:'날카로운 작살을 부채꼴로 발사합니다. 적중 시 쪽빛노인의 이동 속도와 피해량이 3초 동안 10% 증가합니다.',E:'쪽빛노인을 중심으로 넓은 바다 영역을 펼칩니다. 영역 안 아군은 투명해지고 적은 시야를 차단당합니다.',R:'파이크처럼 지연 후 X자 영역을 타격합니다. 체력 30% 이하 적을 처형하며, 성공하면 아군에게 각각 300골드를 지급하고 재사용할 수 있습니다.'},support:{P:'30초마다 가장 가까운 적 2명에게 대호수 표식을 부여합니다. 표식 규칙은 30초마다 무작위로 교체됩니다. Q 적중 시 이동 속도 30% 감소, W 적중 시 보유 골드 10% 약탈, E 영역에 들어오면 2.5초 속박이 적용됩니다.',Q:'강력한 작살을 직선으로 발사합니다. 적중한 적의 이동 속도를 2초 동안 15% 감소시킵니다.',W:'날카로운 작살을 부채꼴로 발사합니다. 적중한 적에게 피해를 주고 1초 동안 속박합니다.',E:'쪽빛노인을 중심으로 넓은 바다 영역을 펼칩니다. 영역 안 아군은 투명해지고 적은 시야를 차단당합니다. 아군의 공격력이 10%, 물리·마법 방어력이 8% 증가합니다.',R:'파이크처럼 지연 후 X자 영역을 타격합니다. 체력 30% 이하 적을 처형하며, 성공하면 아군에게 각각 300골드를 지급하고 재사용할 수 있습니다.'}}; const names={P:'대호수의 규칙',Q:'작살 쏘기',W:'갈고리 작살 쏘기',E:'여긴 대호수의 한가운데야',R:'고래 사냥 -포경-'}; sk={...sk,name:names[bk]||sk.name,text:()=>F[cxIndigoRole][bk]||''}; }
   for (const b of document.querySelectorAll('.cx-tabs [data-sk]')) b.setAttribute('aria-selected', b.dataset.sk === key);
   const meta = [];
   if (sk.cd !== undefined) meta.push(`<span>재사용 대기시간 <b>${CX_H.r(sk.cd, '초')}</b></span>`);
@@ -22758,14 +22761,14 @@ function cxShowSkill(key, fresh) {
   $('cxSkill').innerHTML = `<h3><span class="cx-key">${bk === 'P' ? '패시브' : bk}</span>${esc(sk.name)}</h3>
     ${meta.length ? `<div class="cx-meta">${meta.join('')}</div>` : ''}<div class="cx-text">${body}</div>
     ${bk !== 'P' ? `<p class="cx-note">${bk === 'R' ? '궁극기 수치는 1 / 2 / 3랭크 순서입니다 (레벨 ' + R_LEVELS.join('·') + '에 배움).' : '수치는 1 / 2 / 3 / 4랭크 순서입니다.'}</p>` : ''}`;
-  $('cxCap').textContent = `${cxChamp === 'xichun' ? (isW ? '웨이' : '가시춘') : STATS[cxChamp].name} ${bk === 'P' ? '패시브' : bk} 시연 · 실제 게임 엔진으로 반복 재생 (13레벨, 아이템 없음 · 허수아비 적)`;
-  cxDemo(cxChamp, key, fresh);
+  $('cxCap').textContent = `${cxChamp === 'xichun' ? (isW ? '웨이' : '가시춘') : STATS[cxChamp].name} ${cxChamp==='indigoElder' ? ({tank:'탱커 형태',ranged:'원딜 형태',support:'서포터 형태'}[cxIndigoRole]+' · ') : ''}${bk === 'P' ? '패시브' : bk} 시연 영상 · 실제 게임 엔진으로 반복 재생 (13레벨, 아이템 없음 · 허수아비 적)`;
+  cxDemo(cxChamp, key, fresh, cxChamp==='indigoElder'?cxIndigoRole:null);
 }
 // 시연: 같은 게임을 작은 iframe 안에서 '시연 모드'로 실행
 let cxDemoChamp = null;
-function cxDemo(k, key, fresh) {
+function cxDemo(k, key, fresh, role = null) {
   const fr = $('cxDemo'); if (!fr) return;
-  if (!fresh && cxDemoChamp === k && fr.contentWindow) { fr.contentWindow.postMessage({demoSkill:key}, '*'); return; }
+  if (!fresh && cxDemoChamp === k && fr.contentWindow && (k !== 'indigoElder' || role === cxIndigoRole)) { fr.contentWindow.postMessage({demoSkill:key}, '*'); return; }
   cxDemoChamp = k;
   fr.srcdoc = PAGE_SRC.replace('<head>', `<head><script>window.DEMO=${JSON.stringify({champ:k, skill:key})}<\/script>`);
 }
@@ -22871,6 +22874,7 @@ $('codex').addEventListener('click', e => {
   if (e.target.closest('#cxCombo')) { cxComboView(); $('cxBody').scrollTop = 0; return; }
   const cbI = e.target.closest('[data-cb]'); if (cbI) { const [ck, ci] = cbI.dataset.cb.split(':'); cxPlayCombo(ck, +ci); return; }
   const c = e.target.closest('[data-cx]'); if (c) { cxDetail(c.dataset.cx); $('cxBody').scrollTop = 0; return; }
+  const form = e.target.closest('[data-ie-form]'); if(form && cxChamp==='indigoElder'){cxDetail('indigoElder',cxKey,form.dataset.ieForm);$('cxBody').scrollTop=0;return;}
   const s = e.target.closest('[data-sk]'); if (s && cxChamp) cxShowSkill(s.dataset.sk, false);
 });
 $('selHome').addEventListener('click', () => { $('select').hidden = true; openMenu(true); });
@@ -22880,7 +22884,7 @@ const DEMO_Y = H - 220, DEMO_X = 1950;
 const demo = {t:0, n:0, acts:[], len:3, i:0, dum:[], ally:null};
 function demoInit() {
   document.body.classList.add('demo');
-  chosenChamp = DEMO.champ; chosenRole = 'mid';
+  chosenChamp = DEMO.champ; chosenRole = DEMO.champ==='indigoElder' ? (DEMO.role==='support'?'support':DEMO.role==='ranged'?'bottom':'top') : 'mid';
   resetGame(); started = true;
   $('menu').hidden = true; $('select').hidden = true;
   nextWave = 1e12;
