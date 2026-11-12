@@ -12154,6 +12154,20 @@ function inLine(c, ang, len, wid, t) {
 // 교전 중 스킬 사용 (챔피언별 콤보). 쓴 게 있으면 true
 function aiCombo(b, p) {
   const d = edge(b, p), ready = k => b.rank[k] > 0 && b.cd[k] <= 0, hpP = p.hp / p.maxHp, hpB = b.hp / b.maxHp;
+  if (b.key === 'gebura') {
+    const a = Math.atan2(p.y-b.y,p.x-b.x), form = b.gbFormUntil > time;
+    const use = (key, frac) => castSkill(b,key,a,frac);
+    if (form && b.gbRStage===0 && d<E(560) && use('R',Math.min(1,d/E(560)))) return true;
+    if (form && b.gbRStage===1 && d<E(520) && use('R',Math.min(1,d/E(520)))) return true;
+    if (!form && (b.gbRage||0)>=20 && b.gbTransformUntil<=time && ready('R') && d<E(560) &&
+        use('R',Math.min(1,d/E(560)))) return true;
+    if (b.gbQStage>0 && time<b.gbQUntil && ready('Q') && d<E(430) &&
+        use('Q',Math.min(1,d/E(430)))) return true;
+    if (ready('Q') && d<E(470) && use('Q',Math.min(1,d/E(280)))) return true;
+    if (ready('W') && !b.gbW && d<E(190) && use('W',null)) return true;
+    if (ready('E') && d>E(180) && d<E(650) && use('E',Math.min(1,d/E(650)))) return true;
+    return false;
+  }
   if (b.key === 'roland') {
     const form = b.rolandFormUntil > time;
     const ang = Math.atan2(p.y - b.y, p.x - b.x);
@@ -13163,30 +13177,27 @@ function updateBot(b, dt) {
   }
   const stance = b.stance || 'farm';
 
-  // 게부라 AI: 전투 중 Q 3단 연계, 근접 W, 추격 E, 분노 20 이상 R 변신을 적극 사용
-  if (b.key === 'gebura' && p.alive && pd < E(720) && seenBy(b.team,p) && b.thinkT <= 0 && stance !== 'retreat') {
-    const a=Math.atan2(p.y-b.y,p.x-b.x);
-    if ((b.gbRage||0)>=20 && !(b.gbFormUntil>time) && !(b.gbTransformUntil>time) && b.cd.R<=0) {
-      b.thinkT=.55; castSkillCore(b,'R',a,Math.min(1,pd/E(560))); moveChamp(b,0,0,dt); return;
-    }
-    if (b.gbFormUntil>time && b.gbRStage===0 && pd<E(560)) {
-      b.thinkT=.65; castSkillCore(b,'R',a,Math.min(1,pd/E(560))); moveChamp(b,0,0,dt); return;
-    }
-    if (b.gbFormUntil>time && b.gbRStage===1) {
-      b.thinkT=.65; castSkillCore(b,'R',a,Math.min(1,pd/E(520))); moveChamp(b,0,0,dt); return;
-    }
-    if (b.gbQStage>0 && time<b.gbQUntil && b.cd.Q<=0) {
-      b.thinkT=.38; castSkillCore(b,'Q',a,Math.min(1,pd/E(430))); moveChamp(b,0,0,dt); return;
-    }
-    if (pd<E(470) && b.cd.Q<=0) {
-      b.thinkT=.42; castSkillCore(b,'Q',a,Math.min(1,pd/E(280))); moveChamp(b,0,0,dt); return;
-    }
-    if (pd<E(190) && !b.gbW && b.cd.W<=0) {
-      b.thinkT=.7; castSkillCore(b,'W',a,null); moveChamp(b,0,0,dt); return;
-    }
-    if (pd>E(180) && pd<E(650) && b.cd.E<=0) {
-      b.thinkT=.75; castSkillCore(b,'E',a,Math.min(1,pd/E(650))); moveChamp(b,0,0,dt); return;
-    }
+  // 게부라 AI: 시전 성공 여부를 확인하고, 후퇴 중에도 근접 자위 스킬은 사용
+  if (b.key === 'gebura' && p.alive && pd < E(720) && seenBy(b.team,p) && b.thinkT <= 0 &&
+      (stance !== 'retreat' || pd < E(220))) {
+    const a = Math.atan2(p.y-b.y,p.x-b.x);
+    const geburaCast = (key, frac, wait) => {
+      if (!castSkill(b,key,a,frac)) return false;
+      b.thinkT = wait; moveChamp(b,0,0,dt); return true;
+    };
+    if ((b.gbRage||0)>=20 && !(b.gbFormUntil>time) && !(b.gbTransformUntil>time) && b.cd.R<=0 &&
+        geburaCast('R',Math.min(1,pd/E(560)),.55)) return;
+    if (b.gbFormUntil>time && b.gbRStage===0 && pd<E(560) &&
+        geburaCast('R',Math.min(1,pd/E(560)),.65)) return;
+    if (b.gbFormUntil>time && b.gbRStage===1 && pd<E(520) &&
+        geburaCast('R',Math.min(1,pd/E(520)),.65)) return;
+    if (b.gbQStage>0 && time<b.gbQUntil && b.cd.Q<=0 &&
+        geburaCast('Q',Math.min(1,pd/E(430)),.38)) return;
+    if (pd<E(470) && b.cd.Q<=0 &&
+        geburaCast('Q',Math.min(1,pd/E(280)),.42)) return;
+    if (pd<E(190) && !b.gbW && b.cd.W<=0 && geburaCast('W',null,.7)) return;
+    if (stance !== 'retreat' && pd>E(180) && pd<E(650) && b.cd.E<=0 &&
+        geburaCast('E',Math.min(1,pd/E(650)),.75)) return;
   }
 
   // ── 후퇴: 포탑 쪽으로. 몰리면 이동기, 그래도 붙으면 돌아서서 반격
