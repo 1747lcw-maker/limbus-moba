@@ -4223,7 +4223,7 @@ function castExtraSkill(c,key,ang,frac){
   }
   const n = rk(c, key), cds = {Q:[7,6.5,6,5.5],W:[13,12,11,10],E:[15,14,13,12],R:[95,80,65]};
   const cd = cds[key][n] * hasteMul(c);
-  const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#b52c36',indigoElder:'#70d7d0',liuEn:'#85858f',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
+  const ranged = !!c.st.ranged, color = ({roland:'#d8c6ff',blueReverb:'#79aaff',purpleTear:'#b58cff',vespa:'#ffcf72',naihwang:'#ffe45c',gachiu:'#b52c36',indigoElder:'#9ebbd2',liuEn:'#85858f',callisto:'#d7e5ff'})[c.key] || '#d8c6ff';
   if (key === 'Q' || key === 'W') {
     const len = E(key === 'Q' ? (ranged ? 520 : 350) : (ranged ? 600 : 420));
     const wid = E(key === 'Q' ? 66 : 90);
@@ -13730,6 +13730,39 @@ function drawLiuOrderBadge(g,c){
  g.fillStyle='#eaf9ff';g.font=`900 ${E(11)}px system-ui`;g.textAlign='center';g.fillText('지령 대상',0,-r*1.65);g.restore();
 }
 
+function drawIndigoElderBody(g,c){
+  const r=c.r,a=c.face||0, recoil=c.swingT>0?Math.sin(Math.min(1,c.swingT/.22)*Math.PI)*E(5):0;
+  g.save();g.translate(c.x,c.y);g.rotate(a);g.translate(-recoil,0);
+  // 낡은 회청색 외투와 어깨의 두꺼운 가죽 보호대
+  g.fillStyle='#34414e';g.strokeStyle='#aebdca';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.72,-r*.48);g.lineTo(-r*.42,-r*1.02);g.lineTo(r*.46,-r*.88);g.lineTo(r*.82,-r*.24);g.lineTo(r*.62,r*.92);g.lineTo(-r*.65,r*.9);g.lineTo(-r*.92,r*.12);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#718395';g.beginPath();g.moveTo(-r*.38,-r*.8);g.lineTo(r*.08,-r*.93);g.lineTo(r*.34,-r*.52);g.lineTo(-r*.18,-r*.28);g.closePath();g.fill();
+  g.strokeStyle='#c3d2df';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.55,r*.35);g.lineTo(r*.42,r*.35);g.stroke();
+  // 사람이 직접 어깨에 메고 조준하는 초대형 석궁: 중앙 개머리판과 손으로 당기는 시위
+  g.save();g.translate(r*.12,-r*.04);
+  g.shadowColor='#9bb9d0';g.shadowBlur=E(8);
+  // 긴 몸체와 작살 레일
+  g.fillStyle='#303a45';g.strokeStyle='#c0cbd4';g.lineWidth=E(2.5);
+  g.beginPath();g.moveTo(-r*1.65,-r*.24);g.lineTo(r*2.45,-r*.24);g.lineTo(r*2.72,0);g.lineTo(r*2.45,r*.24);g.lineTo(-r*1.65,r*.24);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#8796a4';g.fillRect(-r*1.2,-r*.09,r*3.45,r*.18);
+  g.fillStyle='#202a34';g.beginPath();g.moveTo(-r*1.6,-r*.22);g.lineTo(-r*2.15,-r*.38);g.lineTo(-r*2.32,-r*.12);g.lineTo(-r*2.1,r*.35);g.lineTo(-r*1.55,r*.25);g.closePath();g.fill();g.stroke();
+  // 거대한 양쪽 활대: 포탑처럼 고정된 구조물이 아닌 휴대형 석궁의 활
+  g.strokeStyle='#26333f';g.lineWidth=E(10);g.lineCap='round';g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,-r*1.15,-r*1.95,-r*1.38);g.stroke();
+  g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,r*1.15,-r*1.95,r*1.38);g.stroke();
+  g.strokeStyle='#aebdca';g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,-r*1.15,-r*1.95,-r*1.38);g.stroke();g.beginPath();g.moveTo(-r*.18,0);g.quadraticCurveTo(-r*.7,r*1.15,-r*1.95,r*1.38);g.stroke();
+  // 팽팽한 시위와 중앙 장전 장치
+  g.strokeStyle='#dce6ed';g.lineWidth=E(1.8);g.beginPath();g.moveTo(-r*1.95,-r*1.38);g.lineTo(-r*.18,0);g.lineTo(-r*1.95,r*1.38);g.stroke();
+  g.fillStyle='#536575';g.strokeStyle='#d2e0e9';g.lineWidth=E(1.5);g.fillRect(-r*.48,-r*.35,r*.55,r*.7);g.strokeRect(-r*.48,-r*.35,r*.55,r*.7);
+  // 장전된 굵고 긴 작살, 화살촉 대신 넓은 강철 촉
+  g.fillStyle='#d6e0e7';g.strokeStyle='#526779';g.lineWidth=E(1.2);
+  g.beginPath();g.moveTo(r*3.35,0);g.lineTo(r*2.85,-r*.2);g.lineTo(r*2.94,0);g.lineTo(r*2.85,r*.2);g.closePath();g.fill();g.stroke();
+  g.strokeStyle='#d9e4eb';g.lineWidth=E(4);g.beginPath();g.moveTo(r*.1,0);g.lineTo(r*3.02,0);g.stroke();
+  g.strokeStyle='#7398b5';g.lineWidth=E(2);g.beginPath();g.moveTo(r*.25,-r*.11);g.lineTo(r*2.82,-r*.11);g.stroke();
+  // 손잡이와 장전 레버
+  g.fillStyle='#18232e';g.strokeStyle='#9baebd';g.lineWidth=E(1.5);g.beginPath();g.moveTo(-r*.55,r*.18);g.lineTo(-r*.18,r*.18);g.lineTo(-r*.02,r*.82);g.lineTo(-r*.42,r*.82);g.closePath();g.fill();g.stroke();
+  g.strokeStyle='#9eb2c2';g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.95,r*.05);g.lineTo(-r*.72,r*.72);g.stroke();
+  g.shadowBlur=0;g.restore();g.restore();
+}
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
   const isP = c === player;
@@ -13775,7 +13808,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -13798,6 +13831,7 @@ function drawChamp(g, c) {
   if (c.gachiuAuraUntil > time) drawGachiuAura(g,c);
   if (c.key === 'vespa') drawVespaBody(g,c);
   if (c.key === 'naihwang') drawNaihwangBody(g,c);
+  if (c.key === 'indigoElder') drawIndigoElderBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
   if (c.key === 'ryoshu') drawRyoshuBody(g, c);
   if (c.key === 'faust') drawFaustBody(g, c);
@@ -22253,6 +22287,7 @@ const cxCol = k => {
   if (k === 'roland') return '#090a0d';
   if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
   if (k === 'liuEn') return '#41464f';
+  if (k === 'indigoElder') return 'linear-gradient(135deg, #414b56 0%, #7f91a2 48%, #c5d3df 50%, #536c82 100%)';
   if (k === 'gachiu') return '#d12b9a';
   if (k === 'vespa') return '#d5aa16';
   if (k === 'naihwang') return '#5a1720';
