@@ -12213,7 +12213,7 @@ function inLine(c, ang, len, wid, t) {
 // 교전 중 스킬 사용 (챔피언별 콤보). 쓴 게 있으면 true
 function aiCombo(b, p) {
   const d = edge(b, p), ready = k => b.rank[k] > 0 && b.cd[k] <= 0, hpP = p.hp / p.maxHp, hpB = b.hp / b.maxHp;
-  if (b.key === 'binah') { const a=Math.atan2(p.y-b.y,p.x-b.x),readyK=k=>b.rank[k]>0&&b.cd[k]<=0; if(readyK('R')&&(p.bnFairy||0)>=40){castSkill(b,'R',a);return true;} if(readyK('Q')&&(p.bnFairy||0)>=3&&d<E(510)){castSkill(b,'Q',a);return true;} if(readyK('W')&&(p.bnFairy||0)>=6&&d<E(500)){castSkill(b,'W',a);return true;} if(readyK('E')&&(p.bnFairy||0)>=6&&d<E(600)){castSkill(b,'E',a);return true;} return false; }
+  if (b.key === 'binah') { const a=Math.atan2(p.y-b.y,p.x-b.x),readyK=k=>b.rank[k]>0&&b.cd[k]<=0; if(readyK('R')&&(p.bnFairy||0)>=40){castSkill(b,'R',a);return true;} if(readyK('Q')&&(p.bnFairy||0)>=3&&d<E(430)){castSkill(b,'Q',a);return true;} if(readyK('W')&&(p.bnFairy||0)>=6&&d<E(500)){castSkill(b,'W',a);return true;} if(readyK('E')&&(p.bnFairy||0)>=6&&d<E(600)){castSkill(b,'E',a);return true;} return false; }
   if (b.key === 'gebura') {
     const a = Math.atan2(p.y-b.y,p.x-b.x), form = b.gbFormUntil > time;
     const use = (key, frac) => castSkill(b,key,a,frac);
