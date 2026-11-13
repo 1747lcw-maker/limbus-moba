@@ -3615,6 +3615,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (!targetable(tgt) || tgt.ward) return;
   // 초반 라인전 보호: 저레벨 챔피언은 미니언에게 받는 피해가 감소 (레벨 1~4: 30/22/14/8%)
   if (isMinion(src) && isChamp(tgt)) amount *= tgt.level <= 1 ? 0.70 : tgt.level === 2 ? 0.78 : tgt.level === 3 ? 0.86 : tgt.level === 4 ? 0.92 : 1;
+  if (tgt.kind==='bnCoordinator'&&src&&src.team!==tgt.team)amount*=.30; // 조율자: 받는 모든 피해 70% 감소
   if (tgt.sdInvT > time && src && src.team !== tgt.team) { sdDodge(tgt); return; }
   if (src && src.team !== tgt.team && (src.dlInvT > time || tgt.dlInvT > time)) dlOnDamage(src, tgt);   // 동랑: 피해를 주고받으면 은신 해제
   if (tgt.efE && src && src.team !== tgt.team && opts.skill && !opts.efDone && src.x !== undefined && Math.hypot(src.x - tgt.x, src.y - tgt.y) > E(KEF.E.far)) { const k = efBlock(tgt, src.x, src.y); if (!k) return; amount *= k; }   // 에피 진격: 멀리서 날아온 스킬   // 소드 회피: 무적
@@ -4288,7 +4289,7 @@ function binahCoordinatorTick(u,dt){
  if(!t){const d=dist(u,c);if(d>E(100)){u.face=Math.atan2(c.y-u.y,c.x-u.x);u.x+=Math.cos(u.face)*E(210)*dt;u.y+=Math.sin(u.face)*E(210)*dt;}return;}
  const d=edge(u,t);u.face=Math.atan2(t.y-u.y,t.x-u.x);
  if(d>E(34)){const sp=E(315);u.x+=Math.cos(u.face)*sp*dt;u.y+=Math.sin(u.face)*sp*dt;}
- else if(u.atkT<=0){u.atkT=1.05;u.swingT=.2;damage(c,t,u.ad,{basic:true,color:'#d9b52c'});fx.push({type:'bnShock',x:t.x,y:t.y,r:Math.max(t.r,u.r)*1.2,t:0,life:.28});}
+ else if(u.atkT<=0){u.atkT=1.05;u.swingT=.2;const dealt=damage(c,t,u.ad*1.1,{basic:true,color:'#d9b52c'});if(dealt>0){const healed=Math.min(dealt,Math.max(0,c.maxHp-c.hp));c.hp+=healed;if(healed>0)text(c.x,c.y-c.r-E(28),'+'+Math.round(healed),'#d9b52c',true,.7);if(!t.bnBleeds)t.bnBleeds=[];t.bnBleeds.push({src:c,dps:dealt/3,tick:.5,ticks:6});}fx.push({type:'bnShock',x:t.x,y:t.y,r:Math.max(t.r,u.r)*1.2,t:0,life:.28});}
 }
 function binahTick(c,dt){if(!c||c.key!=='binah'||!c.alive)return;if(c.bnRUntil>time&&time>=(c.bnRNext||0)){c.bnRNext=time+.32;const targets=[...new Set(units.filter(u=>u.alive&&u.kind==='bnCoordinator'&&u.bnOwner===c&&u.target&&u.target.alive&&isChamp(u.target)&&u.target.team!==c.team).map(u=>u.target))];for(const t of targets){fx.push({type:'bnCrow',x:t.x,y:t.y,r:t.r*1.7,ang:Math.atan2(t.y-c.y,t.x-c.x),t:0,life:.42});if(t.hp/t.maxHp<.15){damage(c,t,t.hp*2,{skill:true,type:'physical',color:'#18151c'});}else damage(c,t,26+c.ap*.22,{skill:true,type:'physical',color:'#18151c'});}}if(c.bnRUntil>0&&time>=c.bnRUntil){c.bnRUntil=0;c.bnRNext=0;}}
 function castExtraSkill(c,key,ang,frac){
@@ -13536,6 +13537,7 @@ function update(dt) {
   if ((visT -= dt) <= 0) { visT = .08; visTeam ^= 1; visionUpdate(visTeam ? player.team : (player.team === 'blue' ? 'red' : 'blue')); }   // 두 팀을 번갈아 (팀마다 0.16초)
   for (const u of units) {
     if (!u.alive) continue;
+    if(u.bnBleeds&&u.bnBleeds.length){for(const b of u.bnBleeds){b.tick-=dt;while(b.tick<=0&&b.ticks>0&&u.alive){b.tick+=.5;b.ticks--;damage(b.src,u,b.dps*.5,{type:'true',noProc:true,noStack:true,noBinahStack:true,color:'#d9b52c'});}}u.bnBleeds=u.bnBleeds.filter(b=>b.ticks>0&&u.alive);}
     if (u.mark && time >= u.mark.until) u.mark = null;
     if (u.flashT > 0) u.flashT -= dt;
     if (u.joltT > 0) u.joltT -= dt;
@@ -20374,6 +20376,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   charon:    {coat:'#26393a', pants:'#1a2626', hair:'#e9edf0', skin:'#b8babc', eye:'#f6f1e6', fx:'bus', line:'부릉부릉. 카론과 메피는 멈추지 않아.'},
   indigoElder:{coat:'#526b80',pants:'#182633',hair:'#d6e0e8',skin:'#d9d4ca',eye:'#9edcff',fx:'chain',line:'대호수의 규칙은 끝나지 않는다. 다음 포경을 준비하라.'},
   gebura:{coat:'#17060b',pants:'#09090d',hair:'#19080d',skin:'#9f2939',eye:'#ff1738',fx:'flame',smoke:true,line:'분노는 아직 끝나지 않았다.'},
+  binah:{coat:'#09090d',pants:'#050508',hair:'#08080d',skin:'#17151b',eye:'#f2cf62',fx:'raven',smoke:true,line:'조율은 끝났습니다. 이제 침묵하시지요.'},
 };
 let mvp = null, mvpRun = false;
 function mvpOpen(c, dev) {
@@ -20392,7 +20395,7 @@ function mvpClose() {
   if (!wasDev) { $('over').hidden = false; }
 }
 function mvpSpawn() {                                                                       // 등장 연출 입자
-  const M = mvp, L = MVP_LOOK[M.key], P = M.parts, n = {roach:140, coin:70, feather:80, drop:90, ink:7, shard:70, spark:90, tracer:12, petal:90, flame:90, bolt:9, chain:40, apple:40, nail:70, eye:36, bus:1}[L.fx] || 60;
+  const M = mvp, L = MVP_LOOK[M.key], P = M.parts, n = {roach:140, coin:70, feather:80, drop:90, ink:7, shard:70, spark:90, tracer:12, petal:90, flame:90, bolt:9, chain:40, apple:40, nail:70, eye:36, bus:1, raven:100}[L.fx] || 60;
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2, side = Math.random() < .5 ? -1 : 1;
     P.push({i, a, side, r0:1.2 + Math.random() * .6, ra:.18 + Math.random() * .22, sp:.6 + Math.random() * .9, ph:Math.random() * 7, s:.6 + Math.random() * .7, delay:Math.random() * .35});
@@ -20453,6 +20456,8 @@ function drawMvpScene(g, W2, H2, M) {
       if (line) g.fillText(line, x0, yy); }
     g.restore();
   }
+  if (M.key === 'binah') {const k=Math.min(1,Math.max(0,(t-1.1)/1.2)),rr=S*(.12+k*.48);g.save();g.globalCompositeOperation='lighter';g.strokeStyle=`rgba(218,180,75,${.75*(1-k*.35)})`;g.lineWidth=2.2;for(let q=0;q<3;q++){g.beginPath();g.ellipse(cx,H2*.52,rr*(1+q*.22),rr*(.42+q*.1),0,t*.25+q*2.1,t*.25+q*2.1+Math.PI*1.55);g.stroke();}g.fillStyle='#09090d';g.beginPath();g.moveTo(cx-S*.28,H2*.57);g.quadraticCurveTo(cx-S*.48,H2*.25,cx-S*.12,H2*.34);g.quadraticCurveTo(cx,H2*.18,cx+S*.12,H2*.34);g.quadraticCurveTo(cx+S*.48,H2*.25,cx+S*.28,H2*.57);g.quadraticCurveTo(cx,H2*.72,cx-S*.28,H2*.57);g.fill();g.strokeStyle='#d9b52c';g.lineWidth=3;g.stroke();for(const q of [-1,1]){g.fillStyle='#f2cf62';g.shadowColor='#f2cf62';g.shadowBlur=18;g.beginPath();g.ellipse(cx+q*S*.075,H2*.46,S*.018,S*.009,0,0,7);g.fill();}g.restore();}
+  if (L.fx === 'raven') {for(const p of M.parts){const life=t-p.delay;if(life<0)continue;const k=Math.min(1,life/1.2),a=p.a+life*p.sp*p.side*1.5,r=W2*.32*(1-k)+S*.22*k,x=cx+Math.cos(a)*r,y=H2*.47+Math.sin(a)*r*.62;g.save();g.translate(x,y);g.rotate(a+Math.PI/2);g.globalAlpha=Math.max(0,1-k*.65);g.fillStyle=p.i%2?'#08080d':'#d9b52c';g.beginPath();g.moveTo(-S*.045,0);g.quadraticCurveTo(-S*.01,-S*.035,S*.045,-S*.06);g.quadraticCurveTo(S*.01,S*.01,-S*.045,0);g.fill();g.strokeStyle='#d9b52c';g.lineWidth=1;g.stroke();g.restore();}}
   if (M.key === 'vergil') mvpVergilBreak(g, W2, H2, M);
   if (t > 3 && !M.dev) { g.globalAlpha = .55 + .45 * Math.sin(performance.now() / 280); g.fillStyle = '#fff'; g.font = '700 14px system-ui,sans-serif'; g.textAlign = 'center'; g.fillText('화면을 눌러 결과 보기', W2 / 2, H2 * .96); g.globalAlpha = 1; }
 }
@@ -20941,6 +20946,7 @@ function mvpIntro(g, W2, H2, cx, cy, S, M, L) {                                 
   if (t > 2.6) return;
   const gather = Math.min(1, Math.max(0, (t - .2) / .7)), scatter = Math.max(0, (t - 1.5) / .9), R = Math.max(W2, H2) * .75;
   g.save();
+  if (L.fx === 'raven') {for(let i=0;i<36;i++){const a=Math.random()*Math.PI*2;P.push({i,a,side:Math.random()<.5?-1:1,r0:1.2+Math.random()*.5,ra:.2+Math.random()*.25,sp:.7+Math.random()*.8,ph:Math.random()*7,s:.8+Math.random()*.8,delay:Math.random()*.35});}}
   if (L.fx === 'bus') {                                                                   // 카론: 버스가 화면을 가로질러 감
     const k = Math.min(1, t / 1.4), x = -W2 * .4 + k * W2 * 1.8, y = cy + S * .1;
     g.save(); g.translate(x, y); const bw = S * 1.2, bh = S * .5;
@@ -22948,6 +22954,7 @@ const cbYiW = () => {                                                 // 이상:
   const m = ms[0]; if (m) castSkill(P, 'W', Math.atan2(m.y - P.y, m.x - P.x), Math.min(1, Math.hypot(m.x - P.x, m.y - P.y) / R));
 };
 const CX_COMBO = {
+  binah:[{name:'검은 까마귀의 조율',sum:'조율자를 소환해 적을 추격하게 하고, Q·E로 적을 묶은 뒤 조율자의 연속 공격으로 피해와 회복, 출혈을 누적하는 비나의 소환수 연계예요.',steps:[['R','조율자 둘을 소환해 적 챔피언을 각각 추적하게 합니다. 조율자는 공격할 때마다 피해량만큼 비나를 회복시키고, 같은 피해량의 출혈을 3초에 걸쳐 남깁니다.'],['Q','단일 기둥을 쓰러뜨려 조율자가 공격할 적을 둔화·속박합니다.'],['E','넓은 황금 파도를 보내 여러 적에게 진동을 쌓고 조율자의 공격 기회를 만듭니다.'],['W','조율자의 공격 대상과 거리를 조절하며 안전한 위치에서 지원합니다.'],['R','조율자가 지정한 적을 황금 까마귀의 추가 타격으로 마무리합니다.']],chain:(A,S)=>[S.k('R'),S.k('Q'),S.k('E'),S.k('W'),S.k('R')]}],
   gebura:[{name:'붉은안개의 사냥',sum:'기합으로 적의 발을 묶은 뒤 3단 검술과 최강 돌진으로 분노를 활용하고, 붉은안개로 각성해 대절단 두 번으로 마무리하는 게부라의 암살 콤보예요.',steps:[['W','적이 접근해 오거나 도주 경로에 들어왔을 때 기합을 차징해 원 안의 적을 도발합니다.'],['Q','종베기로 거리를 좁히고, 이어 찌르기와 횡베기까지 연결해 큰 검기 피해를 줍니다.'],['E','분노가 쌓인 상태에서 최강 돌진으로 적을 추격합니다. 분노 비례 고정 피해와 체력 회복을 동시에 얻습니다.'],['R','분노가 20에 도달하면 E.G.O 발현을 시작합니다. 3초 동안 변신 준비를 마치고 붉은안개로 각성합니다.'],['R','대절단 세로로 핵심 적 한 명을 강하게 베어냅니다.'],['R','대절단 가로를 재사용해 주변 적까지 휩쓸며 전투를 마무리합니다.']],chain:(A,S)=>[S.k('W'),S.k('Q'),S.k('Q'),S.k('Q'),S.k('E'),S.k('R'),S.k('R'),S.k('R')]}],
   gregor:[{name:'바퀴 황제의 행진',
     sum:'변신으로 모든 스킬을 키운 뒤, 길어진 기절로 붙잡고 최대 체력 비례 피해로 표식을 터뜨리는 그레고르의 기본 한타 연계예요.',
