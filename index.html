@@ -14329,8 +14329,9 @@ function drawMathiasBody(g,c){
   if(c.maGuardUntil>time){
     const k=Math.min(1,Math.max(0,1-(c.maGuardUntil-time)/KRI.W.charge));
     g.save();g.globalAlpha=.25+.45*k;g.fillStyle='#ff7a24';g.beginPath();g.arc(0,0,r*(1.1+.15*k+.05*Math.sin(time*34)),0,7);g.fill();g.restore();
-    g.fillStyle='#d94b18';g.strokeStyle='#ffb05a';g.lineWidth=E(2.5);g.beginPath();
-    g.arc(-r*.72,-r*.12,r*.23,0,7);g.fill();g.stroke();
+    const fx=-r*(.6+.3*k)+Math.cos(1.4)*r*.4,fy=Math.sin(1.4)*r*.4;
+    g.strokeStyle='#a93c1b';g.lineWidth=E(7);g.lineCap='round';g.beginPath();g.moveTo(-r*.2,r*.22);g.lineTo(fx,fy);g.stroke();
+    riFist(g,fx,fy,E(8+3*k),'#ff7a24',true);
     g.strokeStyle='#ffb04a';g.lineWidth=E(3);g.beginPath();g.arc(0,0,r+E(9),-Math.PI/2,-Math.PI/2+Math.PI*2*k);g.stroke();
   }
   // 레바테인은 궁극기 연속 참격 중에만 꺼내 든다. 평소 Q/W/E는 발차기 전투 자세.
