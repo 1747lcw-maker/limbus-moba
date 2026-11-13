@@ -1868,7 +1868,7 @@ function resetGame() {
   heroes = [player];
   const allyRoles = ROLES.filter(r => r !== chosenRole), allyKeys = pickForRoles(allyRoles, [chosenChamp]);   // 선호 라인대로
   allyRoles.forEach((r, i) => heroes.push(spawn('blue', allyKeys[i], r)));
-  const enemyKeys = pickForRoles(ROLES, [chosenChamp, ...allyKeys]); // 양 팀 전체 챔피언 중복 방지
+  const enemyKeys = pickForRoles(ROLES, [chosenChamp, ...allyKeys], []); // 중복은 양 팀 전체에서 방지하되 연계 픽 보정은 적 팀 내부에만 적용
   ROLES.forEach((r, i) => { const c = spawn('red', enemyKeys[i], r); if (!spectating) c.name += ' (적)'; heroes.push(c); });
   }
   bots = heroes.filter(c => c !== player);
@@ -2504,7 +2504,7 @@ function aiDraftAdvance(){
   $('adGridNote').textContent='AI가 팀 조합과 포지션을 고려해 선택합니다';$('adGrid').innerHTML='';
   $('adSub').textContent=`${ROLE_NAME[role]} 후보들을 비교하고 팀 시너지를 검토하고 있습니다…`;
   aiDraftTimer=setTimeout(()=>{
-    const key=pickForRoles([role],[...d.used])[0]||AI_CHAMP_POOL.find(k=>!d.used.has(k));
+    const key=pickForRoles([role],[...d.used],d[a.team].map(x=>x.key))[0]||AI_CHAMP_POOL.find(k=>!d.used.has(k));
     d.used.add(key);d[a.team].push({role,key});aiDraftSfx('pick');d.step++;aiDraftRender();aiDraftTimer=setTimeout(aiDraftAdvance,850);
   },2400+Math.random()*1200);
 }
@@ -2530,7 +2530,7 @@ function aiDraftSkip(){
       const taken=new Set(d[team].map(x=>x.role));
       const role=ROLES.find(r=>!taken.has(r));
       if(!role)continue;
-      const key=pickForRoles([role],[...d.used])[0]||AI_CHAMP_POOL.find(k=>!d.used.has(k));
+      const key=pickForRoles([role],[...d.used],d[team].map(x=>x.key))[0]||AI_CHAMP_POOL.find(k=>!d.used.has(k));
       if(!key)continue;
       d.used.add(key);d[team].push({role,key});
     }
@@ -12915,19 +12915,19 @@ const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
   alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
-function pickForRoles(roles, taken = []) {                            // 자리마다 선호 라인 가중치로 추첨, 리카르도·마티아스 연계 픽 보정
-  const used = new Set(taken), out = [];
+function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 제한과 팀 내부 연계 픽 판단을 분리
+  const used = new Set(taken), partnerUsed = new Set(partnerTaken), out = [];
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   for (const r of roles) {
     const pool = AI_CHAMP_POOL.filter(k => !used.has(k));
-    const hasRicardo = used.has('ricardo'), hasMathias = used.has('mathias');
+    const hasRicardo = partnerUsed.has('ricardo'), hasMathias = partnerUsed.has('mathias');
     const partner = hasRicardo && !hasMathias ? 'mathias' : hasMathias && !hasRicardo ? 'ricardo' : null;
     let k = null;
     const cand = pool.map(x => {
       const t = (ROLE_PREF[x] || []).indexOf(r);
       const base = x === 'indigoElder' ? 1 : t >= 0 ? ROLE_W[t] || 0 : 0;
       // 한 명이 이미 팀에 있으면 다른 한 명의 해당 포지션 후보 가중치를 8배로 높인다.
-      return {x, w:base * (x === partner ? 8 : 1)};
+      return {x, w:base * (x === partner ? 10 : 1)};
     }).filter(o => o.w > 0);
     let roll = Math.random() * cand.reduce((a, o) => a + o.w, 0);
     for (const o of cand) { roll -= o.w; if (roll <= 0) { k = o.x; break; } }
