@@ -12920,13 +12920,13 @@ function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   for (const r of roles) {
     const pool = AI_CHAMP_POOL.filter(k => !used.has(k));
-    const hasRicardo = partnerUsed.has('ricardo'), hasMathias = partnerUsed.has('mathias');
+    const hasRicardo = partnerUsed.has('ricardo') || out.includes('ricardo'), hasMathias = partnerUsed.has('mathias') || out.includes('mathias');
     const partner = hasRicardo && !hasMathias ? 'mathias' : hasMathias && !hasRicardo ? 'ricardo' : null;
     let k = null;
     const cand = pool.map(x => {
       const t = (ROLE_PREF[x] || []).indexOf(r);
       const base = x === 'indigoElder' ? 1 : t >= 0 ? ROLE_W[t] || 0 : 0;
-      // 한 명이 이미 팀에 있으면 다른 한 명의 해당 포지션 후보 가중치를 8배로 높인다.
+      // 한 명이 이미 팀에 있으면 다른 한 명의 해당 포지션 후보 가중치를 10배로 높인다.
       return {x, w:base * (x === partner ? 10 : 1)};
     }).filter(o => o.w > 0);
     let roll = Math.random() * cand.reduce((a, o) => a + o.w, 0);
