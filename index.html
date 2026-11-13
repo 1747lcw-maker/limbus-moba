@@ -21668,7 +21668,7 @@ function dBanInit(r) {                                                          
 // ── 화면 전환: 암전 → 바꾸기 → 밝아짐 ──
 function fadeTo(on, ms) { const f = document.getElementById('fade'); if (!f) return; f.style.transition = `opacity ${ms}ms ease`; f.style.opacity = on ? '1' : '0'; f.style.pointerEvents = on ? 'auto' : 'none'; }
 function fadeSwap(fn, out = 280, inn = 420) { fadeTo(true, out); setTimeout(() => { try { fn(); } catch (e) { console.warn(e); } requestAnimationFrame(() => requestAnimationFrame(() => fadeTo(false, inn))); }, out); }
-const FADE_SEL = '#mVsAi,#mSpec,#mMulti,#mDuel,#mCodex,#mVicDev,#again,#selHome,#cxBack,.sel-card[data-champ],#mpBack,[data-mp="dsolo"]';
+const FADE_SEL = '#mVsAi,#mSpec,#mMulti,#mDuel,#mCodex,#mVicDev,#again,#selHome,#cxBack,.sel-card[data-champ],#mpBack,[data-mp="dsolo"],[data-mp="daivai"]';
 // 메뉴 클릭은 개별 버튼 핸들러만 처리합니다. 전역 클릭 가로채기는 사용하지 않습니다.
 function duelPlayerRec(slot) { return {name:mpName(), slot, spells:chosenSpells.slice(), rune:chosenRune, perks:pagePerks(chosenPage), joined:MP.net.now()}; }
 async function duelCreate(pub) {
@@ -21789,10 +21789,11 @@ function duelStartRound(room) {
   const d = room.d, [H, G] = dHG(room), meBlue = MP_SRV || H === MP.net.uid;
   const mk = u => { const p = room.players[u] || {}, k = d.pick[u]; return {role:'mid', key:k, spells:Array.isArray(p.spells) && p.spells.length === 2 ? p.spells : defaultSpells('mid', k), rune:RUNES[p.rune] ? p.rune : defaultRune('mid', k), perks:Array.isArray(p.perks) ? p.perks : null, name:p.name || '상대', uid:u}; };
   const blue = [mk(H)], red = [mk(G)];
+  if (room.aiVsAi) { blue[0].name = '블루 AI'; red[0].name = '레드 AI'; }
   mpLineup = {blue, red, me:'mid', fresh:true, duel:true};
   chosenChamp = (meBlue ? blue : red)[0].key; chosenRole = 'mid';
   resetGame(); started = true;
-  for (const c of heroes) { const L = c.team === 'blue' ? blue[0] : red[0]; c.name = L.name; c.mpUid = room.solo && L.uid === 'ai' ? null : L.uid; giveSpells(c, L.spells); applyPage(c, L.rune, L.perks); recalcStats(c); }
+  for (const c of heroes) { const L = c.team === 'blue' ? blue[0] : red[0]; c.name = L.name; c.mpUid = room.aiVsAi || room.solo && L.uid === 'ai' ? null : L.uid; giveSpells(c, L.spells); applyPage(c, L.rune, L.perks); recalcStats(c); }
   DUEL.solo = !!room.solo;
   if (!meBlue) { const me = heroes.find(h => h.team === 'red'); if (me) player = me; }
   duelSetup();
@@ -21801,6 +21802,7 @@ function duelStartRound(room) {
   MPS.remote = {}; MPS.hostAt = 0; MPS.lags = []; MPS.interp = MP_INTERP; MPS.encN = 0; MPS.cdn.clear(); MPS.dnObjs.clear(); MPS.seq = 0; MPS.lostT = 0; MPS.resyncAt = 0;
   MPS.N.clear(); MPS.last.clear(); MPS.lastColl = {}; MPS.lastG = {}; MPS.nid = 0; MPS.gotFull = false; MPS.myNid = 0; MPS.sendT = 0; MPS.rxT = performance.now();
   if (room.solo) { mpRole = null; bots = heroes.filter(h => h.team === 'red'); }
+  if (room.aiVsAi) { spectating = true; specSpeed = 1; specCamera.free = false; specCamera.zoom = 1; player = heroes.find(h => h.team === 'blue') || heroes[0]; bots = heroes.filter(h => h !== player); $('spec').hidden = true; }
   else if (MP.host) { mpRole = 'host'; bots = []; for (const L of Object.values(MPS.links)) { L.synced = false; L.pend = null; } }
   else { mpRole = 'guest'; MP.waitT = performance.now(); }
   announce(`${d.round}라운드 시작!`, '#ffd66b');
@@ -21849,7 +21851,7 @@ function duelShowResult(room) {
   setTimeout(() => { if (MP.room && MP.room.state === 'result') fadeSwap(() => { duelPause(); MP.view = 'dresult'; $('mp').hidden = false; mpRender(); }, 420, 450); }, 1500);
 }
 function duelPause() { started = false; shake.mag = 0; document.body.classList.remove('duel'); }
-function duelCleanup() { DUEL.solo = false; DUEL.on = false; DUEL.freeze = false; DUEL.startedRound = 0; DUEL.resultShown = 0; duelExitArena(); document.body.classList.remove('duel'); if (mpLineup && mpLineup.duel) { mpLineup = null; started = false; mpRole = null; } }
+function duelCleanup() { spectating = false; specSpeed = 1; specCamera.free = false; DUEL.solo = false; DUEL.on = false; DUEL.freeze = false; DUEL.startedRound = 0; DUEL.resultShown = 0; duelExitArena(); document.body.classList.remove('duel'); if (mpLineup && mpLineup.duel) { mpLineup = null; started = false; mpRole = null; } }
 function duelFinish(room) {
   const d = room.d || {}, w = d.winner;
   if (DUEL.finished || !w) return; DUEL.finished = true;
@@ -21898,7 +21900,8 @@ function duelRender() {
       <div class="mp-acts">
         <button type="button" class="mn-btn main" data-mp="dquick" ${v === 'dfind' ? 'disabled' : ''}><b>${v === 'dfind' ? '상대를 찾는 중…' : '매칭 시작'}</b><span>기다리는 상대가 있으면 바로 붙고, 없으면 새로 기다립니다</span></button>
         <button type="button" class="mn-btn" data-mp="dcreate"><b>친구와 쏠전</b><span>방 코드를 친구에게 알려 주세요</span></button>
-        <button type="button" class="mn-btn" data-mp="dsolo"><b>AI와 떠보기</b><span>연습 · 테스트용 · 인터넷 없이 AI와 똑같은 규칙으로</span></button>
+        <button type="button" class="mn-btn" data-mp="dsolo"><b>AI와 떠보기</b><span>내가 직접 조작하며 AI와 대결</span></button>
+        <button type="button" class="mn-btn" data-mp="daivai"><b>AI끼리 1대1 관전</b><span>블루 AI와 레드 AI가 쏠전 규칙으로 자동 대결</span></button>
         <div class="mp-join"><input id="mpCodeIn" maxlength="4" placeholder="코드 4자리" autocomplete="off" autocapitalize="characters"><button type="button" data-mp="djoin">입장</button></div>
       </div>
       ${mpSrvBox()}
@@ -21952,6 +21955,7 @@ function duelClick(e, act, run) {                                               
   if (act === 'dquick') { run(duelQuick); return true; }
   if (act === 'dcreate') { run(() => duelCreate(false)); return true; }
   if (act === 'dsolo') { run(duelSolo); return true; }
+  if (act === 'daivai') { run(duelAIVsAI); return true; }
   if (act === 'djoin') { run(() => duelJoin($('mpCodeIn').value)); return true; }
   if (act === 'dleave') { DUEL.finished = false; mpLeave(''); return true; }
   const b = e.target.closest('[data-dban]'); if (b) { run(() => duelBan(b.dataset.dban)); return true; }
@@ -22011,6 +22015,13 @@ async function duelSolo() {
   if (!MP.net || MP.net.kind !== 'solo') { MP.realNet = MP.net; MP.net = netSolo(); }
   const N = MP.net;
   await N.set('rooms/SOLO', {mode:'duel', solo:true, host:'me', state:'lobby', pub:false, created:N.now(), players:{me:duelPlayerRec(0), ai:{name:'AI', slot:1, ai:true}}});
+  mpEnter('SOLO', true);
+}
+async function duelAIVsAI() {
+  if (!MP.net || MP.net.kind !== 'solo') { MP.realNet = MP.net; MP.net = netSolo(); }
+  const N = MP.net;
+  spectating = true; specSpeed = 1;
+  await N.set('rooms/SOLO', {mode:'duel', solo:true, aiVsAi:true, host:'me', state:'lobby', pub:false, created:N.now(), players:{me:{name:'블루 AI',slot:0,spells:defaultSpells('mid','gregor'),rune:defaultRune('mid','gregor')}, ai:{name:'레드 AI',slot:1,ai:true}}});
   mpEnter('SOLO', true);
 }
 function duelBot(b, dt) {                                                         // 결투장 AI: 상대만 보고 싸움 (라인 · 귀환 없음)
