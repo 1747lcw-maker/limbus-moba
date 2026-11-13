@@ -4531,6 +4531,8 @@ function castMathias(c,key,ang,frac){
   }else if(key==='W'){
     c.maGuardUntil=time+.75;c.ccImmuneUntil=Math.max(c.ccImmuneUntil||0,time+.75);
     c.maGuardAng=c.face;c.maAbsorbed=0;c.maKickUntil=0;
+    // W 반격 피해는 시전 시점의 잃은 체력 60%를 고정 피해로 저장
+    c.maWTrueDamage=Math.max(0,(c.maxHp-c.hp)*.60);
     c.cd.W=[16,14,12,10,8][Math.max(0,(c.rank.W||1)-1)]||16;
     mathiasFx(c,'maWRect',c.x,c.y,c.face,E(225),.75,'#ff9b24');
   }else if(key==='E'){
@@ -4574,11 +4576,12 @@ function mathiasTick(c,dt){
       return along>=-u.r&&along<=E(205)+u.r&&cross<=E(118)+u.r;
     })());
     for(const u of hits){
-      damage(c,u,58+c.ad*.58+absorbed*.28+(c.maRage||0)*.35,{skill:true,type:'physical',color:'#ff7338'});
+      damage(c,u,c.maWTrueDamage||0,{skill:true,type:'true',color:'#ff7338',big:true});
       u.slowT=Math.max(u.slowT||0,.45);
       mathiasFx(c,'hitspark',u.x,u.y,ang,E(20),.28,'#ffb04a');
       mathiasFx(c,'maBurst',u.x,u.y,ang,E(26),.38,'#ff8b3d');
     }
+    c.maWTrueDamage=0;
     mathiasFx(c,'maWKick',c.x+dx*E(105),c.y+dy*E(105),ang,E(205),.52,'#ff8b3d');
   }
   if(c.maR&&c.maR.left>0&&time>=c.maR.next){
