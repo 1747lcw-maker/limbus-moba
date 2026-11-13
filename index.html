@@ -12375,18 +12375,22 @@ function inLine(c, ang, len, wid, t) {
 function aiCombo(b, p) {
   const d = edge(b, p), ready = k => b.rank[k] > 0 && b.cd[k] <= 0, hpP = p.hp / p.maxHp, hpB = b.hp / b.maxHp;
   if (b.key === 'mathias') {
-    // W는 저체력 역전용 방어기: 체력이 크게 빠지고 근접 위협 또는 최근 피격이 있을 때만 사용
-    const nearThreat = enemiesOf(b).some(e => e.alive && targetable(e) && dist(e,b) < E(360));
-    const recentlyHit = (b.lastDmgT ?? 99) < 1.15;
-    if (ready('W') && hpB <= .34 && (nearThreat || recentlyHit)) {
-      const threat = enemiesOf(b).filter(e => e.alive && targetable(e)).sort((x,y)=>dist(b,x)-dist(b,y))[0];
+    // Q 2타는 자체 재사용 창(2.2초) 안에 쿨다운이 남아 있어도 사용 가능
+    const readyQ = b.rank.Q > 0 && (b.cd.Q <= 0 || (b.maQStage === 1 && time < (b.maQUntil || 0)));
+    // W는 저체력 역전용 방어기: 체력이 크게 빠지고 근접 위협 또는 최근 피격이 있을 때 사용
+    const threats = enemiesOf(b).filter(e => e.alive && targetable(e));
+    const threat = threats.slice().sort((x,y)=>dist(b,x)-dist(b,y))[0];
+    const nearThreat = threats.some(e => dist(e,b) < E(420));
+    const recentlyHit = (b.lastDmgT ?? 99) < 1.5;
+    if (ready('W') && hpB <= .38 && (nearThreat || recentlyHit)) {
       const wa = threat ? Math.atan2(threat.y-b.y,threat.x-b.x) : b.face;
       castSkill(b,'W',wa); return true;
     }
     const a=Math.atan2(p.y-b.y,p.x-b.x);
-    if (ready('E') && d > E(115) && d < E(520)) { castSkill(b,'E',a); return true; }
-    if (ready('Q') && d < E(330)) { castSkill(b,'Q',a); return true; }
-    if (ready('R') && d < E(390) && (hpP < .72 || hpB > .42)) { castSkill(b,'R',a); return true; }
+    // 궁극기는 교전 중 체력 상황 또는 적이 여럿일 때 사용
+    if (ready('R') && d < E(430) && (hpP < .78 || hpB > .35 || threats.filter(e=>dist(e,b)<E(430)).length>=2)) { castSkill(b,'R',a); return true; }
+    if (ready('E') && d > E(105) && d < E(560)) { castSkill(b,'E',a); return true; }
+    if (readyQ && d < E(360)) { castSkill(b,'Q',a); return true; }
     return false;
   }
   if (b.key === 'binah') { const a=Math.atan2(p.y-b.y,p.x-b.x),readyK=k=>b.rank[k]>0&&b.cd[k]<=0; if(readyK('R')&&d<E(900)&&units.some(u=>u.alive&&isChamp(u)&&u.team!==b.team&&(u.bnFairy||0)>=40)){castSkill(b,'R',a);return true;} if(readyK('Q')&&d<E(430)){castSkill(b,'Q',a);return true;} if(readyK('W')&&d<E(500)){castSkill(b,'W',a);return true;} if(readyK('E')&&d<E(600)){castSkill(b,'E',a);return true;} return false; }
@@ -13109,6 +13113,18 @@ function focusEnemy(b) {
 // 견제용 스킬 (궁·도주기는 아껴 둠)
 function aiPoke(b, p) {
   const d = edge(b, p), ready = k => b.rank[k] > 0 && b.cd[k] <= 0;
+  if (b.key === 'mathias') {
+    const hpB = b.hp / b.maxHp, a = Math.atan2(p.y-b.y,p.x-b.x);
+    const readyQ = b.rank.Q > 0 && (b.cd.Q <= 0 || (b.maQStage === 1 && time < (b.maQUntil || 0)));
+    const foes = enemiesOf(b).filter(e => e.alive && targetable(e));
+    const threat = foes.slice().sort((x,y)=>dist(b,x)-dist(b,y))[0];
+    if (ready('W') && hpB <= .38 && (foes.some(e=>dist(e,b)<E(420)) || (b.lastDmgT??99)<1.5)) {
+      castSkill(b,'W',threat?Math.atan2(threat.y-b.y,threat.x-b.x):b.face); return true;
+    }
+    if (ready('E') && d > E(105) && d < E(560)) { castSkill(b,'E',a); return true; }
+    if (readyQ && d < E(360)) { castSkill(b,'Q',a); return true; }
+    return false;
+  }
   if (b.key === 'honglu' && ready('Q') && d < hlRange(b, KH.Q.range)) { const q = {x:p.x + (p.vx || 0) * .35, y:p.y + (p.vy || 0) * .35}; castSkill(b, 'Q', Math.atan2(q.y - b.y, q.x - b.x), Math.min(1, Math.hypot(q.x - b.x, q.y - b.y) / hlRange(b, KH.Q.range))); return true; }
   if (b.key === 'gregor' && ready('Q') && d < E(QV(b).len) - E(15)) { castSkill(b, 'Q', aimAt(b, p, CAST.Q)); return true; }
   if (b.key === 'rodion' && ready('Q') && rodQMode(b) !== 'circle' && d < rodShape(b, 'Q').len - E(15)) { castSkill(b, 'Q', aimAt(b, p, .25)); return true; }
