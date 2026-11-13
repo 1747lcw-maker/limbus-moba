@@ -1176,7 +1176,7 @@ const STATS = {
            hp:[640, 120], regen:[1.7, 0.15], ad:[65, 3.8], armor:[34, 5.0], mr:[33, 2.8], as:[0.66, 0.025]},
   gebura: {name:'게부라', r:31, range:100, speed:320, acquire:285,
            hp:[610, 112], regen:[1.55, 0.14], ad:[70, 4.4], armor:[29, 4.6], mr:[29, 2.6], as:[0.70, 0.032]},
-  binah: {name:'비나', r:29, range:440, speed:285, acquire:490, ranged:true, ap:[28,7], hp:[590,112], regen:[1.55,.14], ad:[48,2.8], armor:[27,4.8], mr:[34,3.0], as:[.72,.028]},
+  binah: {name:'비나', r:29, range:440, speed:285, acquire:490, ranged:true, ap:[28,7], hp:[590,112], regen:[1.55,.14], ad:[48,2.8], armor:[27,4.8], mr:[34,3.0], as:[.864,.0336]},
   bot:    {name:'훈련용 봇', r:30, range:70, speed:270, acquire:400,
            hp:[600, 95], regen:[1.6, 0.14], ad:[58, 3.6], armor:[32, 4.2], mr:[32, 1.9], as:[0.68, 0.025]},
   // 미니언은 웨이브마다 조금씩 강해짐 (hpWave, dmgWave)
@@ -1905,7 +1905,7 @@ function EV(c) {
   return {cd:K.E.cd[i], hits:K.E.hits, window:K.E.window, as:K.E.as[i], pct:K.E.pct[i] + (R ? R.pctAdd : 0),
           slow:R ? R.slow : K.E.slow, slowDur:K.E.slowDur};
 }
-const speedMul = u => (u.stunT > 0 || u.rootT > time ? 0 : 1) * (u.scSnowT > time ? 1 + KS.P.snowMs : 1) * (u.alFlyT > time ? 1 + KAL.E.ms[u.alFlyI || 0] : 1) * spellMs(u) * yuMarkMs(u) * krMs(u) * dbMs(u) * gbMs(u) * riMs(u) * xcMs(u) * sdMs(u) * efGuardMs(u) * rnMs(u) * perkMs(u) * dlMs(u) * vgMs(u) * chMs(u) * (u.krEggBuff && u.key === 'sinclair' ? 1 + KKR.egg.ms : 1) * (u.fMsT > time ? 1 + KF.W.ms : 1) * (u.outisMsT > time ? 1 + KO.P.ms * (u.outisMsT - time) / KO.P.msDur : 1) * (u.scMsT > time ? 1.6 : 1) * (u.key === 'gebura' && u.gbRageUntil > time ? 1.1 : 1) * (u.scGuard ? .5 : 1) * (u.hlMsT > time ? 1 + KH.E.ms * Math.min(1, (u.hlMsT - time) / KH.E.fade) : 1) * (u.slowT > 0 && !(u.key === 'ryoshu' && u.ryoRT > time) ? 1 - u.slowAmt * (u.key === 'ishmael' && u.iStackT > time ? 1 - u.iStacks * KI.P.slowRes : 1) : 1) *
+const speedMul = u => (u.stunT > 0 || u.rootT > time ? 0 : 1) * (u.bnFairy>=50 ? .7 : u.bnFairy>=40 ? .9 : 1) * (u.scSnowT > time ? 1 + KS.P.snowMs : 1) * (u.alFlyT > time ? 1 + KAL.E.ms[u.alFlyI || 0] : 1) * spellMs(u) * yuMarkMs(u) * krMs(u) * dbMs(u) * gbMs(u) * riMs(u) * xcMs(u) * sdMs(u) * efGuardMs(u) * rnMs(u) * perkMs(u) * dlMs(u) * vgMs(u) * chMs(u) * (u.krEggBuff && u.key === 'sinclair' ? 1 + KKR.egg.ms : 1) * (u.fMsT > time ? 1 + KF.W.ms : 1) * (u.outisMsT > time ? 1 + KO.P.ms * (u.outisMsT - time) / KO.P.msDur : 1) * (u.scMsT > time ? 1.6 : 1) * (u.key === 'gebura' && u.gbRageUntil > time ? 1.1 : 1) * (u.scGuard ? .5 : 1) * (u.hlMsT > time ? 1 + KH.E.ms * Math.min(1, (u.hlMsT - time) / KH.E.fade) : 1) * (u.slowT > 0 && !(u.key === 'ryoshu' && u.ryoRT > time) ? 1 - u.slowAmt * (u.key === 'ishmael' && u.iStackT > time ? 1 - u.iStacks * KI.P.slowRes : 1) : 1) *
   (u.hasteT > 0 ? 1 + K.P.haste * (u.hasteT / K.P.hasteDur) : 1) * (u.wT > 0 ? 1 + KR.W.ms : 1) * (u.key === 'ryoshu' && u.ryoRT > time ? 1 + KRY.R.ms[rk(u, 'R')] : 1) *
   (u.homingT > time ? 1.4 : 1) * (u.pinkT > time ? 1.25 : 1) * (u.key==='naihwang'&&u.nhQMoveUntil>time?1.15:1) * (u.key==='naihwang'&&u.nhRMoveUntil>time?1.2:1) * (u.key==='naihwang'&&u.nhReloadMoveUntil>time?1.1:1) * stemSlow(u) * itemMs(u);
 const stemSlow = u => isChamp(u) && heroes.some(c => c.alive && c.team !== u.team && hasItem(c, 'stem') && dist(c, u) < E(300)) ? .9 : 1;   // 녹색줄기
@@ -3593,7 +3593,7 @@ function mitigate(tgt, amount, type, src) {
     if (tgt.shred && time < tgt.shred.until) res *= 1 - 0.04 * tgt.shred.n;     // 벌목
     if (src && src.iceT > 0) res *= 1 - KR.R.pen;                                // 로쟈 얼음 할버드
     if (src && src.gbPen) res *= 1 - KGB.R.pen;                                   // 구보 흉탄: 방어력 관통
-    if(tgt.bnFairy>=30)res*=.9;
+    if(tgt.bnFairy>=50)res*=.8;else if(tgt.bnFairy>=30)res*=.9;
     if (res > 0) res = Math.max(0, res - ((src && src.leth) || 0));
   }
   return amount * (res >= 0 ? 100 / (100 + res) : 2 - 100 / (100 - res));
@@ -3682,7 +3682,7 @@ function damage(src, tgt, amount, opts = {}) {
     fx.push({type:'rlAwaken',x:tgt.x,y:tgt.y,r:tgt.r*1.65,t:0,life:.62});
     if (tgt === player) text(tgt.x,tgt.y-tgt.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.8);
   }
-  if(src&&src.key==='binah'&&isChamp(tgt)&&src.team!==tgt.team&&!opts.noBinahStack){tgt.bnFairy=Math.min(50,(tgt.bnFairy||0)+1);tgt.bnFairyLast=time;tgt.bnFairyDecayAt=0;}
+  if(src&&src.key==='binah'&&isChamp(tgt)&&src.team!==tgt.team&&!opts.noBinahStack){tgt.bnFairy=Math.min(50,(tgt.bnFairy||0)+2);tgt.bnFairyLast=time;tgt.bnFairyDecayAt=0;}
   if(src&&tgt.bnFairy>0&&src.team!==tgt.team&&isChamp(src)){const loss=tgt.bnFairy/Math.max(50,src.ad||50);amount*=Math.max(.15,1-loss);}
   if (tgt.key === 'ricardo' && src && src.team !== tgt.team) riGrudge(tgt, amount);   // 리카르도: 원한
   if (opts.basic && isChamp(src) && isMinion(tgt) && tgt.hp > 0 && tgt.hp <= csExecHp(tgt)) {   // 막타 보조: 체력이 일정 이하인 미니언은 평타만 맞혀도 처치
@@ -4298,10 +4298,10 @@ function castExtraSkill(c,key,ang,frac){
   const foes=()=>units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u));
   const stack=u=>{binahDecay(u);return u.bnFairy||0;};
   const spend=(u,k)=>{if(stack(u)<k)return false;u.bnFairy-=k;u.bnFairyLast=time;u.bnFairyDecayAt=0;return true;};
-  if(key==='Q'){const strike=(u,a)=>{const dx=u.x-c.x,dy=u.y-c.y,ca=Math.cos(a),sa=Math.sin(a),along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca),start=E(78),end=E(408),half=E(24);return along+u.r>=start&&along-u.r<=end&&side<=half+u.r;};const eligible=foes().filter(u=>stack(u)>=3);const aimed=ang==null?eligible.filter(u=>dist(c,u)<=E(408)+u.r).sort((a,b)=>dist(c,a)-dist(c,b))[0]:null;if(ang==null&&!aimed)return;const a=ang==null?Math.atan2(aimed.y-c.y,aimed.x-c.x):ang,hits=eligible.filter(u=>strike(u,a));if(!hits.length)return;c.cd.Q=c.cdMax.Q=cd*hasteMul(c);c.face=a;for(const u of hits){if(!spend(u,3))continue;damage(c,u,85+n*30+c.ap*.75,{skill:true,type:'magic',color:'#17151b'});u.stunT=Math.max(u.stunT||0,.8);}fx.push({type:'bnQFall',x:c.x+Math.cos(a)*E(78),y:c.y+Math.sin(a)*E(78),ang:a,len:E(330),wid:E(48),t:0,life:.82});sfxPlay('boom',c.x,c.y,1.1,.8);return;}
-  if(key==='W'){const a=ang==null?autoAim(c,E(500)):ang,t=foes().filter(u=>Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-a),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-a)))<.35).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(!t||!foes().some(u=>stack(u)>=6)||!spend(t,6))return;c.face=a;c.cd.W=c.cdMax.W=cd*hasteMul(c);const dx=t.x-c.x,dy=t.y-c.y,d=Math.hypot(dx,dy)||1;t.x+=dx/d*E(170);t.y+=dy/d*E(170);damage(c,t,65+n*25+c.ap*.55,{skill:true,type:'magic',color:gold});fx.push({type:'bnShock',x:t.x,y:t.y,r:t.r*2,t:0,life:.55});return;}
-  if(key==='E'){const a=ang==null?autoAim(c,E(1400)):ang;const waveLen=E(1400),waveWid=E(280);if(!foes().some(u=>stack(u)>=6))return;c.face=a;c.cd.E=c.cdMax.E=cd*hasteMul(c);const ca=Math.cos(a),sa=Math.sin(a);for(const u of foes()){const dx=u.x-c.x,dy=u.y-c.y,along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca);if(along>=0&&along<=waveLen&&side<=waveWid/2+u.r&&stack(u)>=6&&spend(u,6)){damage(c,u,70+n*28+c.ap*.65,{skill:true,type:'magic',color:'#17151b'});u.blindT=Math.max(u.blindT||0,time+2);}}fx.push({type:'bnWave',x:c.x,y:c.y,ang:a,len:waveLen,wid:waveWid,t:0,life:2.4});return;}
-  if(key==='R'){if(!foes().some(u=>stack(u)>=40))return;c.cd.R=c.cdMax.R=cd*hasteMul(c);c.bnRUntil=time+8;c.bnRNext=time;for(const u of units)if(u.kind==='bnCoordinator'&&u.bnOwner===c)u.alive=false;binahSpawnCoordinator(c,0);binahSpawnCoordinator(c,1);fx.push({type:'bnAwaken',x:c.x,y:c.y,r:c.r*3,t:0,life:1});text(c.x,c.y-c.r-E(48),'조율자의 권능',gold,true,1);return;}return;
+  if(key==='Q'){const strike=(u,a)=>{const dx=u.x-c.x,dy=u.y-c.y,ca=Math.cos(a),sa=Math.sin(a),along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca),start=E(78),end=E(408),half=E(24);return along+u.r>=start&&along-u.r<=end&&side<=half+u.r;};const eligible=foes().filter(u=>stack(u)>=3);const aimed=ang==null?eligible.filter(u=>dist(c,u)<=E(408)+u.r).sort((a,b)=>dist(c,a)-dist(c,b))[0]:null;if(ang==null&&!aimed)return;const a=ang==null?Math.atan2(aimed.y-c.y,aimed.x-c.x):ang,hits=eligible.filter(u=>strike(u,a));if(!hits.length)return;c.cd.Q=c.cdMax.Q=cd*hasteMul(c);c.face=a;for(const u of hits){damage(c,u,85+n*30+c.ap*.75,{skill:true,type:'magic',color:'#17151b'});u.stunT=Math.max(u.stunT||0,.8);}fx.push({type:'bnQFall',x:c.x+Math.cos(a)*E(78),y:c.y+Math.sin(a)*E(78),ang:a,len:E(330),wid:E(48),t:0,life:.82});sfxPlay('boom',c.x,c.y,1.1,.8);return;}
+  if(key==='W'){const a=ang==null?autoAim(c,E(500)):ang,t=foes().filter(u=>Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-a),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-a)))<.35).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(!t||stack(t)<6)return;c.face=a;c.cd.W=c.cdMax.W=cd*hasteMul(c);const dx=t.x-c.x,dy=t.y-c.y,d=Math.hypot(dx,dy)||1;t.x+=dx/d*E(170);t.y+=dy/d*E(170);damage(c,t,65+n*25+c.ap*.55,{skill:true,type:'magic',color:gold});fx.push({type:'bnShock',x:t.x,y:t.y,r:t.r*2,t:0,life:.55});return;}
+  if(key==='E'){const a=ang==null?autoAim(c,E(1400)):ang;const waveLen=E(1400),waveWid=E(280);if(!foes().some(u=>stack(u)>=6))return;c.face=a;c.cd.E=c.cdMax.E=cd*hasteMul(c);const ca=Math.cos(a),sa=Math.sin(a);for(const u of foes()){const dx=u.x-c.x,dy=u.y-c.y,along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca);if(along>=0&&along<=waveLen&&side<=waveWid/2+u.r&&stack(u)>=6){damage(c,u,70+n*28+c.ap*.65,{skill:true,type:'magic',color:'#17151b'});u.blindT=Math.max(u.blindT||0,time+2);}}fx.push({type:'bnWave',x:c.x,y:c.y,ang:a,len:waveLen,wid:waveWid,t:0,life:2.4});return;}
+  if(key==='R'){if(!foes().some(u=>stack(u)>=40))return;for(const u of units)if(u.alive&&u.team!==c.team){u.bnFairy=0;u.bnFairyLast=time;u.bnFairyDecayAt=0;}c.cd.R=c.cdMax.R=cd*hasteMul(c);c.bnRUntil=time+8;c.bnRNext=time;for(const u of units)if(u.kind==='bnCoordinator'&&u.bnOwner===c)u.alive=false;binahSpawnCoordinator(c,0);binahSpawnCoordinator(c,1);fx.push({type:'bnAwaken',x:c.x,y:c.y,r:c.r*3,t:0,life:1});text(c.x,c.y-c.r-E(48),'조율자의 권능',gold,true,1);return;}return;
  }
  if(c.key==='blueReverb'){
   const n=rk(c,key),cds={Q:[7,6.5,6,5.5],W:[15,14,13,12],E:[12,11,10,9],R:[105,90,75]},cd=cds[key][n]*hasteMul(c),blue='#62baff';
@@ -22529,7 +22529,7 @@ CODEX_SK.gachiu = {
 
 const EXTRA_CODEX = {
   binah:{
-P:{name:'요정',text:H=>'비나가 평타 또는 스킬로 적 챔피언에게 피해를 주면 요정 스택이 1 증가합니다(최대 50). 요정 1개당 공격력과 주문력이 각각 1 감소하며, 30개 이상이면 방어력이 10% 감소합니다. 요정이 30개 이상일 때 마지막 비나 공격 이후 6초 동안 추가 공격이 없으면 1초마다 2개씩 감소합니다. 비나가 다시 공격하면 감소 대기 시간이 초기화됩니다.'},
+P:{name:'요정',text:H=>'비나가 평타 또는 스킬로 적 챔피언에게 피해를 주면 요정 스택이 2 증가합니다(최대 50). 요정 1개당 공격력과 주문력이 각각 1 감소합니다. 30개 이상이면 방어력이 10%, 50개이면 총 20% 감소합니다. 40개 이상이면 이동 속도가 10%, 50개이면 30% 감소합니다. 요정이 30개 이상일 때 마지막 비나 공격 이후 6초 동안 추가 공격이 없으면 1초마다 2개씩 감소합니다. Q·W·E 스킬은 요정 스택을 소모하지 않으며, 궁극기 사용 시 모든 적의 요정 스택이 0으로 초기화됩니다.'},
 Q:{name:'기둥',cd:[9,8.5,8,7.5],range:408,text:H=>'사거리 안의 적 중 요정이 3개 이상인 적이 있으면 발동할 수 있습니다. 각 적의 요정 3개를 소모해 검은 기둥을 낙하시켜 피해를 주고 0.8초 기절시킵니다.'},
 W:{name:'충격파',cd:[14,13,12,11],range:500,text:H=>'적 중 요정이 6개 이상인 대상이 있으면 발동할 수 있습니다. 조준한 적의 요정 6개를 소모해 충격파를 일으키고 뒤로 밀어냅니다.'},
 E:{name:'검은 파도',cd:[18,17,16,15],range:620,text:H=>'적 중 요정이 6개 이상인 대상이 있으면 발동할 수 있습니다. 비나의 등 뒤에서 검은 파도가 조준 방향으로 이동하며, 경로의 적에게 피해를 주고 2초 동안 시야를 차단합니다. 적중한 적마다 요정 6개를 소모합니다.'},
