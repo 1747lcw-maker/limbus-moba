@@ -18276,6 +18276,20 @@ function drawRicardoBody(g, c) {
   }
 }
 function drawRicardoWorld(g) {
+  // 마티아스 W 차징 예고: 리카르도 W와 동일한 직사각형 범위 표시, 색상만 주황색
+  for (const c of heroes) {
+    if (c.key !== 'mathias' || !c.maGuardUntil || time >= c.maGuardUntil || !c.alive) continue;
+    if (c.team !== player.team && !seenBy(player.team, c)) continue;
+    const elapsed = Math.max(0, KRI.W.charge - (c.maGuardUntil - time));
+    const k = Math.min(1, elapsed / KRI.W.charge);
+    const L = E(KRI.W.len), wd = E(KRI.W.wid), cw = E(KRI.W.core);
+    g.save(); g.translate(c.x, c.y); g.rotate(c.maGuardAng ?? c.face);
+    g.fillStyle = `rgba(255,116,35,${.12 + .14 * k})`; g.fillRect(0, -wd / 2, L, wd);
+    g.fillStyle = 'rgba(255,116,35,.25)'; g.fillRect(0, -wd / 2, L * k, wd);
+    g.strokeStyle = 'rgba(255,151,66,.9)'; g.lineWidth = E(2.5); g.strokeRect(0, -wd / 2, L, wd);
+    g.fillStyle = `rgba(255,225,185,${.25 + .45 * k})`; g.fillRect(0, -cw / 2, L, cw);
+    g.restore();
+  }
   for (const c of heroes) {                                                              // 원한의 일격 예고 (모두에게 보임)
     const W = c.riW; if (!W || !c.alive || (c.team !== player.team && !seenBy(player.team, c))) continue;
     const k = Math.min(1, (time - W.t0) / KRI.W.charge), L = E(KRI.W.len), wd = E(KRI.W.wid), cw = E(KRI.W.core);
