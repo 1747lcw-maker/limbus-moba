@@ -4297,7 +4297,7 @@ function castExtraSkill(c,key,ang,frac){
   const foes=()=>units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u));
   const stack=u=>{binahDecay(u);return u.bnFairy||0;};
   const spend=(u,k)=>{if(stack(u)<k)return false;u.bnFairy-=k;u.bnFairyLast=time;u.bnFairyDecayAt=0;return true;};
-  if(key==='Q'){const hits=foes().filter(u=>dist(c,u)<E(510)+u.r);if(!hits.some(u=>stack(u)>=3))return;c.cd.Q=c.cdMax.Q=cd*hasteMul(c);for(const u of hits){if(!spend(u,3))continue;damage(c,u,85+n*30+c.ap*.75,{skill:true,type:'magic',color:'#17151b'});u.stunT=Math.max(u.stunT||0,.8);fx.push({type:'bnQRect',x:u.x,y:u.y,ang:Math.atan2(u.y-c.y,u.x-c.x),len:E(205),wid:E(142),t:0,life:.72});}sfxPlay('boom',c.x,c.y,1.1,.8);return;}
+  if(key==='Q'){const hits=foes().filter(u=>dist(c,u)<E(510)+u.r);if(!hits.some(u=>stack(u)>=3))return;c.cd.Q=c.cdMax.Q=cd*hasteMul(c);const aimed=ang==null?hits.filter(u=>stack(u)>=3).sort((a,b)=>dist(c,a)-dist(c,b))[0]:null,a=ang==null?Math.atan2(aimed.y-c.y,aimed.x-c.x):ang;c.face=a;for(const u of hits){if(!spend(u,3))continue;damage(c,u,85+n*30+c.ap*.75,{skill:true,type:'magic',color:'#17151b'});u.stunT=Math.max(u.stunT||0,.8);}fx.push({type:'bnQFall',x:c.x+Math.cos(a)*E(78),y:c.y+Math.sin(a)*E(78),ang:a,len:E(330),wid:E(48),t:0,life:.82});sfxPlay('boom',c.x,c.y,1.1,.8);return;}
   if(key==='W'){const a=ang==null?autoAim(c,E(500)):ang,t=foes().filter(u=>Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-a),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-a)))<.35).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(!t||!foes().some(u=>stack(u)>=6)||!spend(t,6))return;c.face=a;c.cd.W=c.cdMax.W=cd*hasteMul(c);const dx=t.x-c.x,dy=t.y-c.y,d=Math.hypot(dx,dy)||1;t.x+=dx/d*E(170);t.y+=dy/d*E(170);damage(c,t,65+n*25+c.ap*.55,{skill:true,type:'magic',color:gold});fx.push({type:'bnShock',x:t.x,y:t.y,r:t.r*2,t:0,life:.55});return;}
   if(key==='E'){const a=ang==null?autoAim(c,E(1400)):ang;const waveLen=E(1400),waveWid=E(280);if(!foes().some(u=>stack(u)>=6))return;c.face=a;c.cd.E=c.cdMax.E=cd*hasteMul(c);const ca=Math.cos(a),sa=Math.sin(a);for(const u of foes()){const dx=u.x-c.x,dy=u.y-c.y,along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca);if(along>=0&&along<=waveLen&&side<=waveWid/2+u.r&&stack(u)>=6&&spend(u,6)){damage(c,u,70+n*28+c.ap*.65,{skill:true,type:'magic',color:'#17151b'});u.blindT=Math.max(u.blindT||0,time+2);}}fx.push({type:'bnWave',x:c.x,y:c.y,ang:a,len:waveLen,wid:waveWid,t:0,life:2.4});return;}
   if(key==='R'){if(!foes().some(u=>stack(u)>=40))return;c.cd.R=c.cdMax.R=cd*hasteMul(c);c.bnRUntil=time+8;c.bnRNext=time;for(const u of units)if(u.kind==='bnCoordinator'&&u.bnOwner===c)u.alive=false;binahSpawnCoordinator(c,0);binahSpawnCoordinator(c,1);fx.push({type:'bnAwaken',x:c.x,y:c.y,r:c.r*3,t:0,life:1});text(c.x,c.y-c.r-E(48),'조율자의 권능',gold,true,1);return;}return;
@@ -19029,12 +19029,14 @@ function drawBinahFx(g,f,k){
     g.strokeStyle=gold;g.lineWidth=E(6)*(1-k);g.beginPath();g.arc(0,0,f.r*(.7+k*2),0,Math.PI*2);g.stroke();
     g.strokeStyle=pale;g.lineWidth=E(2);g.beginPath();g.arc(0,0,f.r*(.45+k*1.55),0,Math.PI*2);g.stroke();
     for(let i=0;i<12;i++){const a=i*Math.PI/6+k*.7,r=f.r*(.5+k*1.5);g.fillStyle=i%2?ink:gold;g.beginPath();g.moveTo(Math.cos(a)*r,Math.sin(a)*r);g.lineTo(Math.cos(a+.12)*(r+E(22)),Math.sin(a+.12)*(r+E(22)));g.lineTo(Math.cos(a-.12)*(r+E(22)),Math.sin(a-.12)*(r+E(22)));g.closePath();g.fill();}
-  }else if(f.type==='bnQRect'){
-    g.rotate(f.ang||0);const L=(f.len||E(205))*(.72+.28*k),W=(f.wid||E(142))*(.72+.28*k);
-    g.shadowColor=gold;g.shadowBlur=E(22);g.fillStyle='rgba(7,7,13,.88)';g.strokeStyle=gold;g.lineWidth=E(5)*(1-k*.45);
-    g.beginPath();g.moveTo(-L*.5,-W*.5);g.lineTo(L*.5,-W*.5);g.lineTo(L*.5,W*.5);g.lineTo(-L*.5,W*.5);g.closePath();g.fill();g.stroke();
-    g.strokeStyle=pale;g.lineWidth=E(2);g.beginPath();g.moveTo(-L*.38,0);g.lineTo(L*.38,0);g.stroke();
-    g.strokeStyle=gold;g.lineWidth=E(3);for(let j=-1;j<=1;j+=2){g.beginPath();g.moveTo(-L*.5,j*W*.5);g.lineTo(-L*.35,j*W*.34);g.lineTo(L*.5,j*W*.5);g.stroke();}
+  }else if(f.type==='bnQFall'){
+    const L=(f.len||E(330))*(.22+.78*Math.min(1,k*1.35)),W=f.wid||E(48),fall=Math.min(1,k*1.45);
+    g.rotate((f.ang||0)-Math.PI*.5*(1-fall));
+    g.shadowColor=gold;g.shadowBlur=E(26);g.fillStyle='rgba(5,5,11,.96)';g.strokeStyle=gold;g.lineWidth=E(5)*(1-k*.35);
+    g.beginPath();g.moveTo(0,-W*.5);g.lineTo(L-E(14),-W*.42);g.lineTo(L,W*.0);g.lineTo(L-E(14),W*.42);g.lineTo(0,W*.5);g.closePath();g.fill();g.stroke();
+    g.strokeStyle=pale;g.lineWidth=E(3);g.beginPath();g.moveTo(E(8),0);g.lineTo(L-E(18),0);g.stroke();
+    g.strokeStyle=gold;g.lineWidth=E(4);for(let x of [.28,.62]){g.beginPath();g.moveTo(L*x,-W*.4);g.lineTo(L*x+E(7),0);g.lineTo(L*x,W*.4);g.stroke();}
+    g.fillStyle=pale;g.beginPath();g.arc(L,0,E(5)*(1-k*.35),0,Math.PI*2);g.fill();
   }else if(f.type==='bnWave'){
     g.rotate(f.ang||0);const L=(f.len||E(1400))*(.12+.88*k),W=f.wid||E(280),front=L;
     g.shadowColor=gold;g.shadowBlur=E(24);
