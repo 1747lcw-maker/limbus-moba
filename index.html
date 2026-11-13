@@ -6837,7 +6837,9 @@ function updateSpells(dt) {
   for (const c of heroes) if (c.spCd) { const sd = dt * (c.rune === 'hokma' ? 1 + RUNES.hokma.spell : 1) * perkSpell(c); c.spCd.D = Math.max(0, c.spCd.D - sd); c.spCd.F = Math.max(0, c.spCd.F - sd); }
   for (const u of units) {
     const b = u.spBrand; if (!b) continue;
-    if (!u.alive || time >= b.until) { u.spBrand = null; continue; }
+    if (!u.alive) { u.spBrand = null; continue; }
+    if (furiosoActive(u)) { b.until += dt; continue; }
+    if (time >= b.until) { u.spBrand = null; continue; }
     u.revealT = Math.max(u.revealT || 0, time + .2);               // 낙인: 위치가 드러남
     if ((b.tick -= dt) <= 0) { b.tick = .5; damage(b.src, u, b.per, {type:'true', noProc:true, noStack:true, noBleed:true, color:'#ff8a3c'}); }
   }
@@ -7531,6 +7533,7 @@ function updateKromer(dt) {                                               // 못
   for (const u of heroes) {                                               // 못: 움직인 만큼 출혈
     const N = u.krNails; if (!N) continue;
     if (!u.alive || N.until <= time) { u.krNails = null; continue; }
+    if (furiosoActive(u)) { N.until += dt; N.lx = u.x; N.ly = u.y; continue; }
     const d = Math.hypot(u.x - N.lx, u.y - N.ly); N.lx = u.x; N.ly = u.y;
     if (d > E(200)) continue;                                              // 순간이동 등은 제외
     N.acc += d;
