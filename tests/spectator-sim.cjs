@@ -79,7 +79,7 @@ function parseCard(card) {
         await page.locator('#spec [data-spd="4"]').evaluate(el => { el.dataset.spd = '12'; });
         await page.locator('#spec [data-spd="12"]').click();
 
-        const durationMs = 90000;
+        const durationMs = 180000; // 3분 제한으로 승패 확정 여부와 후반 밸런스까지 관찰
         let nextSample = 0;
         while (Date.now() - t0 < durationMs) {
           const elapsed = Math.round((Date.now() - t0) / 1000);
