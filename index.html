@@ -19399,6 +19399,20 @@ function drawMathiasFx(g,f,k){
     g.strokeStyle='#ff7a24';g.lineWidth=w;g.beginPath();g.arc(0,0,L*.78,-1.12,.92);g.stroke();
     g.strokeStyle='#fff0a0';g.lineWidth=E(5)*(1-k);g.beginPath();g.arc(0,0,L*.78,-1.0,.8);g.stroke();
     for(let i=0;i<9;i++){const a=-1.05+i*.24,rr=L*(.55+(i%3)*.12);g.fillStyle=i%2?'#ffb13b':'#fff0a0';g.beginPath();g.arc(Math.cos(a)*rr,Math.sin(a)*rr,E(4)*(1-k),0,7);g.fill();}
+  }else if(f.type==='maWPunch'){
+    // W 타격: 마티아스 중심 원형 파동 대신 리카르도 W처럼 전방으로 뻗는 주황색 충격파
+    const L=f.r*(.35+.65*Math.min(1,k*2.2)),w=(f.wid||E(145))*(1.1)*(1-k*.4);
+    const gr=g.createLinearGradient(0,0,L,0);
+    gr.addColorStop(0,`rgba(255,106,35,${.75*(1-k)})`);
+    gr.addColorStop(1,'rgba(192,48,20,0)');
+    g.fillStyle=gr;g.beginPath();g.moveTo(0,-w*.3);g.lineTo(L,-w/2);g.lineTo(L,w/2);g.lineTo(0,w*.3);g.closePath();g.fill();
+    g.fillStyle=`rgba(255,220,175,${.95*(1-k)})`;g.fillRect(0,-E(KRI.W.core)*.35*(1-k),L,E(KRI.W.core)*.7*(1-k));
+    g.strokeStyle=`rgba(255,190,135,${1-k})`;g.lineWidth=E(3);
+    for(let i=0;i<4;i++){const x=L*(.25+i*.2);g.beginPath();g.arc(x-E(30),0,w*(.25+i*.07),-.9,.9);g.stroke();}
+  }else if(f.type==='maWCore'){
+    // 중앙 적중 강조는 원형 파동 없이 짧은 섬광으로 표시
+    g.globalCompositeOperation='lighter';g.strokeStyle=`rgba(255,220,155,${(1-k)*.9})`;g.lineWidth=E(4)*(1-k)+E(1);
+    g.beginPath();g.moveTo(-f.r*.65,0);g.lineTo(f.r*.65,0);g.moveTo(0,-f.r*.65);g.lineTo(0,f.r*.65);g.stroke();
   }else if(f.type==='maKick'||f.type==='maStomp'){
     const L=f.r*(.55+.45*(1-k));g.shadowColor=f.col||'#ff8b35';g.shadowBlur=E(18);
     g.strokeStyle=f.type==='maStomp'?'#39f5df':'#ff9b32';g.lineWidth=E(15)*(1-k*.5);g.beginPath();
