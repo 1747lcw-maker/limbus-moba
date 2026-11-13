@@ -3593,6 +3593,7 @@ function mitigate(tgt, amount, type, src) {
     if (tgt.shred && time < tgt.shred.until) res *= 1 - 0.04 * tgt.shred.n;     // 벌목
     if (src && src.iceT > 0) res *= 1 - KR.R.pen;                                // 로쟈 얼음 할버드
     if (src && src.gbPen) res *= 1 - KGB.R.pen;                                   // 구보 흉탄: 방어력 관통
+    if(tgt.bnFairy>=30)res*=.9;
     if (res > 0) res = Math.max(0, res - ((src && src.leth) || 0));
   }
   return amount * (res >= 0 ? 100 / (100 + res) : 2 - 100 / (100 - res));
@@ -3681,6 +3682,7 @@ function damage(src, tgt, amount, opts = {}) {
     if (tgt === player) text(tgt.x,tgt.y-tgt.r-E(30),'어느 도서관의 사서','#dbe5ff',true,.8);
   }
   if(src&&src.key==='binah'&&isChamp(tgt)&&src.team!==tgt.team&&!opts.noBinahStack){tgt.bnFairy=Math.min(50,(tgt.bnFairy||0)+1);tgt.bnFairyLast=time;tgt.bnFairyDecayAt=0;}
+  if(src&&tgt.bnFairy>0&&src.team!==tgt.team&&isChamp(src)){const loss=tgt.bnFairy/Math.max(50,src.ad||50);amount*=Math.max(.15,1-loss);}
   if (tgt.key === 'ricardo' && src && src.team !== tgt.team) riGrudge(tgt, amount);   // 리카르도: 원한
   if (opts.basic && isChamp(src) && isMinion(tgt) && tgt.hp > 0 && tgt.hp <= csExecHp(tgt)) {   // 막타 보조: 체력이 일정 이하인 미니언은 평타만 맞혀도 처치
     tgt.hp = 0; fx.push({type:'pop', x:tgt.x, y:tgt.y, r:tgt.r * 1.2, color:'#ffe29a', t:0, life:.25});
@@ -14025,6 +14027,8 @@ function drawIndigoElderBody(g,c){
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
   const isP = c === player;
+  binahDecay(c);
+  if((c.bnFairy||0)>0){g.save();g.globalAlpha=1;g.font=`bold ${Math.max(11,E(13))}px sans-serif`;g.textAlign='center';g.lineWidth=3;g.strokeStyle='#11100d';g.fillStyle='#f2d45a';const label='요정 '+c.bnFairy;g.strokeText(label,c.x,c.y-c.r-E(30));g.fillText(label,c.x,c.y-c.r-E(30));g.restore();}
   g.globalAlpha = dlInv(c) ? .38 : isP && c.inBush ? 0.5 : 1;   // 동랑 은신: 우리 편에게만 흐릿하게 보임
   const lift = airLift(c, E(44)) + hcLift(c) + riLift(c) + (c.dlHop || 0) * E(70) + (c.leap ? Math.sin(Math.PI * Math.min(1, c.leap.t / c.leap.dur)) * E(80) : 0), shd = Math.max(.35, 1 - lift / E(44) * .45);          // 공중에 뜸: 뜰수록 그림자 작아짐
   g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(c.x, c.y + E(10), c.r * shd, c.r * .6 * shd, 0, 0, 7); g.fill();
