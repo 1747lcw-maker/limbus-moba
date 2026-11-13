@@ -14114,11 +14114,16 @@ function drawMathiasBody(g,c){
   g.fillStyle='rgba(111,65,168,.94)';g.strokeStyle='#28202f';g.lineWidth=E(3);
   for(const x of [-r*.12,r*.3]){g.beginPath();g.roundRect(x-r*.15,-r*.61,r*.3,r*.17,E(4));g.fill();g.stroke();}
   g.strokeStyle='#332640';g.lineWidth=E(3);g.beginPath();g.moveTo(r*.02,-r*.53);g.lineTo(r*.17,-r*.53);g.moveTo(-r*.28,-r*.53);g.lineTo(-r*.42,-r*.48);g.moveTo(r*.45,-r*.53);g.lineTo(r*.58,-r*.48);g.stroke();
+  // 레바테인: 넓고 긴 직사각형 대검. 붉은 검신에 주황색 화염빛 포인트
   g.save();g.translate(r*.45,r*.34);g.rotate(-.22+swing*.48);
-  g.fillStyle='#17131e';g.strokeStyle='#9b83bc';g.lineWidth=E(2.5);
-  g.beginPath();g.moveTo(-r*.12,-r*.18);g.lineTo(r*2.1,-r*.18);g.lineTo(r*2.1,r*.18);g.lineTo(-r*.12,r*.18);g.closePath();g.fill();g.stroke();
-  g.fillStyle=steel;g.fillRect(r*.12,-r*.105,r*1.82,r*.21);
-  g.fillStyle=purple;g.fillRect(r*.72,-r*.045,r*.92,r*.09);
+  g.shadowColor='#ff4b20';g.shadowBlur=E(9);
+  g.fillStyle='#a91525';g.strokeStyle='#ff6a2b';g.lineWidth=E(2.8);
+  g.beginPath();g.moveTo(-r*.12,-r*.2);g.lineTo(r*2.1,-r*.2);g.lineTo(r*2.1,r*.2);g.lineTo(-r*.12,r*.2);g.closePath();g.fill();g.stroke();
+  g.shadowBlur=0;
+  g.fillStyle='#e52d24';g.fillRect(r*.08,-r*.145,r*1.92,r*.29);
+  g.fillStyle='#ff8a28';g.fillRect(r*.34,-r*.075,r*1.62,r*.15);
+  g.fillStyle='#ffc05a';g.fillRect(r*.52,-r*.025,r*1.28,r*.05);
+  g.strokeStyle='#ffb044';g.lineWidth=E(1.5);g.beginPath();g.moveTo(r*.12,-r*.16);g.lineTo(r*2.02,-r*.16);g.stroke();
   g.fillStyle=deep;g.fillRect(-r*.22,-r*.28,r*.18,r*.56);
   g.fillStyle='#c9b7e3';g.fillRect(-r*.34,-r*.08,r*.42,r*.16);
   g.restore();
