@@ -4298,10 +4298,10 @@ function castExtraSkill(c,key,ang,frac){
   const foes=()=>units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u));
   const stack=u=>{binahDecay(u);return u.bnFairy||0;};
   const spend=(u,k)=>{if(stack(u)<k)return false;u.bnFairy-=k;u.bnFairyLast=time;u.bnFairyDecayAt=0;return true;};
-  if(key==='Q'){const strike=(u,a)=>{const dx=u.x-c.x,dy=u.y-c.y,ca=Math.cos(a),sa=Math.sin(a),along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca),start=E(78),end=E(408),half=E(24);return along+u.r>=start&&along-u.r<=end&&side<=half+u.r;};const eligible=foes().filter(u=>stack(u)>=3);const aimed=ang==null?eligible.filter(u=>dist(c,u)<=E(408)+u.r).sort((a,b)=>dist(c,a)-dist(c,b))[0]:null;if(ang==null&&!aimed)return;const a=ang==null?Math.atan2(aimed.y-c.y,aimed.x-c.x):ang,hits=eligible.filter(u=>strike(u,a));if(!hits.length)return;c.cd.Q=c.cdMax.Q=cd*hasteMul(c);c.face=a;for(const u of hits){damage(c,u,85+n*30+c.ap*.75,{skill:true,type:'magic',color:'#17151b'});u.stunT=Math.max(u.stunT||0,.8);}fx.push({type:'bnQFall',x:c.x+Math.cos(a)*E(78),y:c.y+Math.sin(a)*E(78),ang:a,len:E(330),wid:E(48),t:0,life:.82});sfxPlay('boom',c.x,c.y,1.1,.8);return;}
-  if(key==='W'){const a=ang==null?autoAim(c,E(500)):ang,t=foes().filter(u=>Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-a),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-a)))<.35).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(!t||stack(t)<6)return;c.face=a;c.cd.W=c.cdMax.W=cd*hasteMul(c);const dx=t.x-c.x,dy=t.y-c.y,d=Math.hypot(dx,dy)||1;t.x+=dx/d*E(170);t.y+=dy/d*E(170);damage(c,t,65+n*25+c.ap*.55,{skill:true,type:'magic',color:gold});fx.push({type:'bnShock',x:t.x,y:t.y,r:t.r*2,t:0,life:.55});return;}
-  if(key==='E'){const a=ang==null?autoAim(c,E(1400)):ang;const waveLen=E(1400),waveWid=E(280);if(!foes().some(u=>stack(u)>=6))return;c.face=a;c.cd.E=c.cdMax.E=cd*hasteMul(c);const ca=Math.cos(a),sa=Math.sin(a);for(const u of foes()){const dx=u.x-c.x,dy=u.y-c.y,along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca);if(along>=0&&along<=waveLen&&side<=waveWid/2+u.r&&stack(u)>=6){damage(c,u,70+n*28+c.ap*.65,{skill:true,type:'magic',color:'#17151b'});u.blindT=Math.max(u.blindT||0,time+2);}}fx.push({type:'bnWave',x:c.x,y:c.y,ang:a,len:waveLen,wid:waveWid,t:0,life:2.4});return;}
-  if(key==='R'){if(!foes().some(u=>stack(u)>=40))return;for(const u of units)if(u.alive&&u.team!==c.team){u.bnFairy=0;u.bnFairyLast=time;u.bnFairyDecayAt=0;}c.cd.R=c.cdMax.R=cd*hasteMul(c);c.bnRUntil=time+8;c.bnRNext=time;for(const u of units)if(u.kind==='bnCoordinator'&&u.bnOwner===c)u.alive=false;binahSpawnCoordinator(c,0);binahSpawnCoordinator(c,1);fx.push({type:'bnAwaken',x:c.x,y:c.y,r:c.r*3,t:0,life:1});text(c.x,c.y-c.r-E(48),'조율자의 권능',gold,true,1);return;}return;
+  if(key==='Q'){const strike=(u,a)=>{const dx=u.x-c.x,dy=u.y-c.y,ca=Math.cos(a),sa=Math.sin(a),along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca),start=E(78),end=E(408),half=E(24);return along+u.r>=start&&along-u.r<=end&&side<=half+u.r;};const eligible=foes();const aimed=ang==null?eligible.filter(u=>dist(c,u)<=E(408)+u.r).sort((a,b)=>dist(c,a)-dist(c,b))[0]:null;if(ang==null&&!aimed)return;const a=ang==null?Math.atan2(aimed.y-c.y,aimed.x-c.x):ang,hits=eligible.filter(u=>strike(u,a));if(!hits.length)return;c.cd.Q=c.cdMax.Q=cd*hasteMul(c);c.face=a;for(const u of hits){damage(c,u,85+n*30+c.ap*.75,{skill:true,type:'magic',color:'#17151b'});u.stunT=Math.max(u.stunT||0,.8);}fx.push({type:'bnQFall',x:c.x+Math.cos(a)*E(78),y:c.y+Math.sin(a)*E(78),ang:a,len:E(330),wid:E(48),t:0,life:.82});sfxPlay('boom',c.x,c.y,1.1,.8);return;}
+  if(key==='W'){const a=ang==null?autoAim(c,E(500)):ang,t=foes().filter(u=>Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-a),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-a)))<.35).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(!t)return;c.face=a;c.cd.W=c.cdMax.W=cd*hasteMul(c);const dx=t.x-c.x,dy=t.y-c.y,d=Math.hypot(dx,dy)||1;t.x+=dx/d*E(170);t.y+=dy/d*E(170);damage(c,t,65+n*25+c.ap*.55,{skill:true,type:'magic',color:gold});fx.push({type:'bnShock',x:t.x,y:t.y,r:t.r*2,t:0,life:.55});return;}
+  if(key==='E'){const a=ang==null?autoAim(c,E(1400)):ang;const waveLen=E(1400),waveWid=E(280);/* E는 요정 스택 없이 사용 가능 */c.face=a;c.cd.E=c.cdMax.E=cd*hasteMul(c);const ca=Math.cos(a),sa=Math.sin(a);for(const u of foes()){const dx=u.x-c.x,dy=u.y-c.y,along=dx*ca+dy*sa,side=Math.abs(-dx*sa+dy*ca);if(along>=0&&along<=waveLen&&side<=waveWid/2+u.r){damage(c,u,70+n*28+c.ap*.65,{skill:true,type:'magic',color:'#17151b'});u.blindT=Math.max(u.blindT||0,time+2);}}fx.push({type:'bnWave',x:c.x,y:c.y,ang:a,len:waveLen,wid:waveWid,t:0,life:2.4});return;}
+  if(key==='R'){/* R도 요정 스택 없이 발동 */for(const u of units)if(u.alive&&u.team!==c.team){u.bnFairy=0;u.bnFairyLast=time;u.bnFairyDecayAt=0;}c.cd.R=c.cdMax.R=cd*hasteMul(c);c.bnRUntil=time+8;c.bnRNext=time;for(const u of units)if(u.kind==='bnCoordinator'&&u.bnOwner===c)u.alive=false;binahSpawnCoordinator(c,0);binahSpawnCoordinator(c,1);fx.push({type:'bnAwaken',x:c.x,y:c.y,r:c.r*3,t:0,life:1});text(c.x,c.y-c.r-E(48),'조율자의 권능',gold,true,1);return;}return;
  }
  if(c.key==='blueReverb'){
   const n=rk(c,key),cds={Q:[7,6.5,6,5.5],W:[15,14,13,12],E:[12,11,10,9],R:[105,90,75]},cd=cds[key][n]*hasteMul(c),blue='#62baff';
@@ -6247,6 +6247,7 @@ function updateHeathBleed(dt) {                                     // 출혈 �
     if (u.hcSlowAt && time >= u.hcSlowAt) { u.hcSlowAt = 0; if (u.alive) { u.slowT = Math.max(u.slowT || 0, KHC.E.slowDur); u.slowAmt = Math.max(u.slowT > KHC.E.slowDur ? u.slowAmt : 0, KHC.E.slow); } }
     const b = u.hcBleed; if (!b) continue;
     if (!u.alive || time >= b.until) { u.hcBleed = null; continue; }
+    if (furiosoActive(u)) continue;
     if ((b.tick -= dt) > 0) continue;
     b.tick = KHC.P.tick;
     const s = b.src, per = hcLv(KHC.P.dps, s.level);
@@ -12214,7 +12215,7 @@ function inLine(c, ang, len, wid, t) {
 // 교전 중 스킬 사용 (챔피언별 콤보). 쓴 게 있으면 true
 function aiCombo(b, p) {
   const d = edge(b, p), ready = k => b.rank[k] > 0 && b.cd[k] <= 0, hpP = p.hp / p.maxHp, hpB = b.hp / b.maxHp;
-  if (b.key === 'binah') { const a=Math.atan2(p.y-b.y,p.x-b.x),readyK=k=>b.rank[k]>0&&b.cd[k]<=0; if(readyK('R')&&(p.bnFairy||0)>=40){castSkill(b,'R',a);return true;} if(readyK('Q')&&(p.bnFairy||0)>=3&&d<E(430)){castSkill(b,'Q',a);return true;} if(readyK('W')&&(p.bnFairy||0)>=6&&d<E(500)){castSkill(b,'W',a);return true;} if(readyK('E')&&(p.bnFairy||0)>=6&&d<E(600)){castSkill(b,'E',a);return true;} return false; }
+  if (b.key === 'binah') { const a=Math.atan2(p.y-b.y,p.x-b.x),readyK=k=>b.rank[k]>0&&b.cd[k]<=0; if(readyK('R')&&d<E(900)){castSkill(b,'R',a);return true;} if(readyK('Q')&&d<E(430)){castSkill(b,'Q',a);return true;} if(readyK('W')&&d<E(500)){castSkill(b,'W',a);return true;} if(readyK('E')&&d<E(600)){castSkill(b,'E',a);return true;} return false; }
   if (b.key === 'gebura') {
     const a = Math.atan2(p.y-b.y,p.x-b.x), form = b.gbFormUntil > time;
     const use = (key, frac) => castSkill(b,key,a,frac);
@@ -12798,11 +12799,15 @@ function aiJungle(b, hpB) {
   const own = JG_ROUTE.map(id => camps.find(c => c.id === id + '_' + b.team)).filter(Boolean);
   const up = cp => cp.respawnAt === null && cp.mobs.some(m => m.alive);
   const low = cp => cp.mobs.filter(m => m.alive).sort((x, y) => x.hp - y.hp)[0];
-  // 첫 정글 동선: 이미 처치했거나 재생성 대기 중인 캠프를 붙잡고 기다리지 않고 다음 캠프로 이동
+  // 캠프가 처음 생성되기 전에는 정글을 돈 것으로 오인하지 않고 캠프 쪽에서 대기
+  const cleared = own.filter(cp => cp.mobs.length > 0 && !cp.mobs.some(m => m.alive) && cp.respawnAt !== null).length;
+  if (!b.fullClear && cleared >= 4) { b.fullClear = true; b.gankCd = time + 1; }
   if (!b.fullClear) {
-    const cp = own.find(c => up(c));
+    const cp = own.find(up);
     if (cp) return {unit:low(cp)};
-    b.fullClear = true; b.gankCd = 0;
+    const pending = own.filter(cp => cp.respawnAt !== null).sort((a,b) => a.respawnAt - b.respawnAt)[0];
+    if (pending) return {x:pending.x,y:pending.y};
+    return null;
   }
   // 갱 중이면 유지하되, 대상이 사라지거나 위험해지면 빠르게 포기
   if (b.gank) {
@@ -12814,24 +12819,23 @@ function aiJungle(b, hpB) {
       b.gank=null;b.gankCd=time+8;
     } else return {unit:t,gank:true};
   }
-  // 아군 라이너가 교전 중이거나 적이 낮은 체력이라면 캠프보다 갱킹을 우선
-  if(time>=(b.gankCd||0)&&hpB>.35){
+  // 실제 교전 중인 아군이 있거나 적 체력이 35% 이하일 때만 갱킹
+  if(time>=(b.gankCd||0)&&hpB>.55){
     let best=null,bs=Infinity;
     for(const e of enemiesOf(b)){
       if(!e.alive||e.role==='jungle'||e.recalling||!seenBy(b.team,e))continue;
-      const ally=alliesOf(b).find(a=>a.alive&&a.role===e.role&&dist(a,e)<E(1150));
-      const allyFighting=alliesOf(b).some(a=>a.alive&&dist(a,e)<E(850)&&((a.lastDmgT??99)<2||(e.lastDmgT??99)<2));
+      const allyFighting=alliesOf(b).some(a=>a.alive&&dist(a,e)<E(850)&&((a.lastDmgT??99)<1.25||(e.lastDmgT??99)<1.25));
+      const critical=e.hp/e.maxHp<=.35;
+      if(!allyFighting&&!critical)continue;
       if(dangerFor(b,e)&&dist(b,e)>E(550))continue;
-      const score=e.hp/e.maxHp-(ally?.30:0)-(allyFighting?.22:0)+dist(b,e)/E(7000);
+      const score=e.hp/e.maxHp-(allyFighting?.22:0)+dist(b,e)/E(7000);
       if(score<bs){bs=score;best=e;}
     }
-    if(best&&bs<.95){b.gank={t:best,until:time+13};return{unit:best,gank:true};}
+    if(best&&bs<1.05){b.gank={t:best,until:time+10};return{unit:best,gank:true};}
   }
-  // 현재 살아 있는 자기 캠프만 선택
   let cp=null,cd=Infinity;
-  for(const c of own)if(up(c)){const d=dist(c,b);if(d<cd){cd=d;cp=c;}}
+  for(const camp of own)if(up(camp)){const d=dist(camp,b);if(d<cd){cd=d;cp=camp;}}
   if(cp)return{unit:low(cp)};
-  // 재생성 대기 중에는 캠프 앞에서 정지하지 않고 라인·아군 쪽 운영으로 복귀
   return null;
 }
 
@@ -13537,7 +13541,7 @@ function update(dt) {
   if ((visT -= dt) <= 0) { visT = .08; visTeam ^= 1; visionUpdate(visTeam ? player.team : (player.team === 'blue' ? 'red' : 'blue')); }   // 두 팀을 번갈아 (팀마다 0.16초)
   for (const u of units) {
     if (!u.alive) continue;
-    if(u.bnBleeds&&u.bnBleeds.length){for(const b of u.bnBleeds){b.tick-=dt;while(b.tick<=0&&b.ticks>0&&u.alive){b.tick+=.5;b.ticks--;damage(b.src,u,b.dps*.5,{type:'true',noProc:true,noStack:true,noBinahStack:true,color:'#d9b52c'});}}u.bnBleeds=u.bnBleeds.filter(b=>b.ticks>0&&u.alive);}
+    if(u.bnBleeds&&u.bnBleeds.length&&!furiosoActive(u)){for(const b of u.bnBleeds){b.tick-=dt;while(b.tick<=0&&b.ticks>0&&u.alive){b.tick+=.5;b.ticks--;damage(b.src,u,b.dps*.5,{type:'true',noProc:true,noStack:true,noBinahStack:true,color:'#d9b52c'});}}u.bnBleeds=u.bnBleeds.filter(b=>b.ticks>0&&u.alive);}
     if (u.mark && time >= u.mark.until) u.mark = null;
     if (u.flashT > 0) u.flashT -= dt;
     if (u.joltT > 0) u.joltT -= dt;
@@ -13547,12 +13551,12 @@ function update(dt) {
       u.x += (u.pull.x - u.x) * k; u.y += (u.pull.y - u.y) * k;
       u.pull.t -= dt; if (u.pull.t <= 0) u.pull = null;
     }
-    if (u.burn) {                                    // 피의 갈증 화상
+    if (u.burn && !furiosoActive(u)) {                // 피의 갈증 화상: Furioso 무적 중 남은 시간 보존
       if (time >= u.burn.until) u.burn = null;
       else if ((u.burn.tick -= dt) <= 0) { u.burn.tick = .5; damage(u.burn.src, u, u.burn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff6a4a'}); if (!u.alive) continue; }
     }
-    if(u.ieBleed){const b=u.ieBleed;if(time>=b.until||!b.src||!b.src.alive)u.ieBleed=null;else{b.acc+=dt;if(b.acc>=.25){b.acc-=.25;const amt=b.total*(.25/b.duration);damage(b.src,u,amt,{type:'true',noProc:true,noStack:true,color:'#ff3454'});b.left=Math.max(0,b.left-.25);}}}
-    if (u.nhBurn) {                                  // 뇌횡: 맹호의 화염
+    if(u.ieBleed&&!furiosoActive(u)){const b=u.ieBleed;if(time>=b.until||!b.src||!b.src.alive)u.ieBleed=null;else{b.acc+=dt;if(b.acc>=.25){b.acc-=.25;const amt=b.total*(.25/b.duration);damage(b.src,u,amt,{type:'true',noProc:true,noStack:true,color:'#ff3454'});b.left=Math.max(0,b.left-.25);}}}
+    if (u.nhBurn && !furiosoActive(u)) {               // 뇌횡: 맹호의 화염 (Furioso 무적 중 남은 시간 보존)
       if (time >= u.nhBurn.until) u.nhBurn = null;
       else if ((u.nhBurn.tick -= dt) <= 0) { u.nhBurn.tick = .5; damage(u.nhBurn.src, u, u.nhBurn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff7438'}); if (!u.alive) continue; }
     }
