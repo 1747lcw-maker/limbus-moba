@@ -3741,8 +3741,8 @@ function damage(src, tgt, amount, opts = {}) {
     if (ours && tgt.team !== player.team && (src === player || onScreen(tgt))) {        // 나·아군이 준 피해: 종류별 색
       const col = opts.crit ? DMG_COL.crit : DMG_COL[opts.type || 'physical'];
       if (opts.acc && dmgAcc(src, tgt, amount, col, opts.crit, src === player)) { }          // 연타 · 지속 피해: 한 숫자에 합산
-      else text(tx, tgt.y - tgt.r, opts.crit ? amount + '!' : String(amount), col, src === player && (opts.big || opts.crit));
-    } else if (tgt === player) { if (!opts.acc || !dmgAcc(src, tgt, amount, '#ff8a8a', false, false)) text(tx, tgt.y - tgt.r, String(amount), '#ff8a8a', opts.big); juice.hurt = Math.min(1, juice.hurt + amount / tgt.maxHp * 5); }   // 내가 받은 피해
+      else text(tx, tgt.y - tgt.r, opts.crit ? Math.round(amount) + '!' : String(Math.round(amount)), col, src === player && (opts.big || opts.crit));
+    } else if (tgt === player) { if (!opts.acc || !dmgAcc(src, tgt, amount, '#ff8a8a', false, false)) text(tx, tgt.y - tgt.r, String(Math.round(amount)), '#ff8a8a', opts.big); juice.hurt = Math.min(1, juice.hurt + amount / tgt.maxHp * 5); }   // 내가 받은 피해
   }
   // 전장 압도: 표식이 있는 동안 준 피해 누적
   if (tgt.mark && tgt.mark.by === src && !opts.fromPassive) {
@@ -14026,6 +14026,33 @@ function drawIndigoElderBody(g,c){
   g.beginPath();g.moveTo(r*3.48,0);g.lineTo(r*2.96,-r*.2);g.lineTo(r*3.06,0);g.lineTo(r*2.96,r*.2);g.closePath();g.fill();g.stroke();
   g.shadowBlur=0;g.restore();g.restore();
 }
+function drawBinahBody(g,c){
+  const r=c.r, x=c.x, y=c.y, a=c.face||0, pulse=.5+.5*Math.sin(time*3.2);
+  g.save();g.translate(x,y);g.rotate(a);
+  // 길게 늘어진 흑요석 깃털 망토
+  g.fillStyle='#090a10';g.strokeStyle='#34313a';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.42,-r*.52);g.quadraticCurveTo(-r*1.9,-r*.5,-r*2.05,r*.8);g.quadraticCurveTo(-r*1.1,r*1.45,-r*.1,r*.95);g.lineTo(r*.18,r*.42);g.closePath();g.fill();g.stroke();
+  for(let i=0;i<7;i++){const yy=-r*.45+i*r*.2, xx=-r*(.55+i*.035);
+    g.beginPath();g.moveTo(xx,yy);g.quadraticCurveTo(xx-r*.62,yy+r*.28,xx-r*.95,yy+r*.78);g.quadraticCurveTo(xx-r*.38,yy+r*.6,xx+r*.12,yy+r*.18);g.closePath();
+    g.fillStyle=i%2?'#15151e':'#08090e';g.fill();g.strokeStyle='#4a4140';g.lineWidth=E(1);g.stroke();
+    g.strokeStyle='rgba(218,181,67,.72)';g.beginPath();g.moveTo(xx-r*.05,yy+r*.04);g.lineTo(xx-r*.62,yy+r*.55);g.stroke();
+  }
+  // 황금빛 어깨 장식과 가슴의 봉인 문양
+  g.fillStyle='#17151c';g.strokeStyle='#d9b52c';g.lineWidth=E(2.2);
+  g.beginPath();g.moveTo(-r*.55,-r*.58);g.lineTo(-r*.08,-r*.9);g.lineTo(r*.48,-r*.55);g.lineTo(r*.35,-r*.1);g.lineTo(-r*.35,-r*.1);g.closePath();g.fill();g.stroke();
+  g.beginPath();g.moveTo(0,-r*.34);g.lineTo(r*.17,r*.05);g.lineTo(0,r*.45);g.lineTo(-r*.17,r*.05);g.closePath();g.stroke();
+  // 얼굴을 감싼 검은 후드와 황금 눈빛
+  g.fillStyle='#08090d';g.beginPath();g.ellipse(0,-r*.18,r*.42,r*.53,0,0,Math.PI*2);g.fill();
+  g.fillStyle='#b7a58b';g.beginPath();g.ellipse(r*.02,-r*.13,r*.23,r*.31,0,0,Math.PI*2);g.fill();
+  g.fillStyle='#111018';g.beginPath();g.moveTo(-r*.34,-r*.35);g.lineTo(0,-r*.82);g.lineTo(r*.36,-r*.35);g.lineTo(r*.24,-r*.03);g.lineTo(-r*.25,-r*.03);g.closePath();g.fill();
+  g.strokeStyle='#d9b52c';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.22,-r*.22);g.lineTo(-r*.04,-r*.18);g.moveTo(r*.08,-r*.18);g.lineTo(r*.25,-r*.22);g.stroke();
+  g.fillStyle='#f4d65e';g.shadowColor='#e6bf3d';g.shadowBlur=E(7+5*pulse);
+  g.beginPath();g.ellipse(-r*.13,-r*.2,r*.045,r*.025,0,0,7);g.ellipse(r*.15,-r*.2,r*.045,r*.025,0,0,7);g.fill();g.shadowBlur=0;
+  // 깃털 끝의 금빛 반사
+  g.strokeStyle='rgba(239,202,91,'+(.45+.35*pulse)+')';g.lineWidth=E(1.4);
+  g.beginPath();g.moveTo(-r*.8,r*.55);g.quadraticCurveTo(-r*1.2,r*.85,-r*1.72,r*.92);g.moveTo(-r*.48,r*.72);g.quadraticCurveTo(-r*.8,r*1.02,-r*1.25,r*1.12);g.stroke();
+  g.restore();
+}
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
   const isP = c === player;
@@ -14073,7 +14100,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'gebura' ? '#410812' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'binah' ? '#111018' : c.key === 'gebura' ? '#410812' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -14086,6 +14113,7 @@ function drawChamp(g, c) {
     g.drawImage(sprite, c.x - w / 2, c.y - h / 2, w, h);
     g.restore();
   }
+  if (c.key === 'binah') drawBinahBody(g,c);
   if (c.flashT > 0) { g.fillStyle = `rgba(255,255,255,${Math.min(1, c.flashT / .1) * .85})`; g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.fill(); }
   if (!window.__mvpDraw) { g.strokeStyle = c.flashT > 0 ? '#ffffff' : sideCol(c); g.lineWidth = E(5); g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.stroke(); }
   if (c.key === 'roland') drawRolandBody(g,c);
@@ -23274,6 +23302,8 @@ function demoReset() {
   const fixState = c => { c.alive = true; c.hp = c.maxHp; c.stunT = 0; c.slowT = 0; c.airT = 0; c.cast = null; c.dash = null; c.blink = null; c.leap = null; c.pull = null;
     c.target = null; c.shield = 0; c.burn = null; c.mark = null; c.hidden = false; c.vx = c.vy = 0; c.rootT = 0; c.tauntT = 0; c.respawnT = 0; };
   for (const c of [P, d1, d2, demo.ally]) fixState(c);
+  // 비나 도감 시연 전용: 훈련용 적에게 요정 스택을 미리 부여해 자원 조건 없이 모든 스킬 시연
+  if (P.key === 'binah') for (const u of [d1, d2]) { u.bnFairy = 50; u.bnFairyLast = time; u.bnFairyDecayAt = 0; }
   P.x = far ? DEMO_X - 330 : DEMO_X - 70; P.y = DEMO_Y; P.face = 0;
   d1.x = DEMO_X + 30; d1.y = DEMO_Y - 8; d2.x = DEMO_X + 85; d2.y = DEMO_Y + 38; d1.face = d2.face = Math.PI;
   demo.ally.x = P.x - 50; demo.ally.y = DEMO_Y - 60;
