@@ -3624,6 +3624,7 @@ function damage(src, tgt, amount, opts = {}) {
   if(src&&src.ieSupportUntil>time)amount*=1.10;
   if(tgt&&tgt.ieSupportUntil>time)amount*=.92;
   // 게부라 R 발현 준비 3초 동안 모든 피해 90% 감소
+  if(tgt&&tgt.key==='mathias'&&tgt.hp>0&&tgt.maxHp>0&&(opts.type==='physical'||opts.type==='magic'))amount*=1-Math.min(.22,(1-tgt.hp/tgt.maxHp)*.22);
   if(tgt&&tgt.key==='mathias'&&tgt.maGuardUntil>time&&src&&src.team!==tgt.team&&src.x!==undefined){const a=Math.atan2(src.y-tgt.y,src.x-tgt.x),da=Math.abs(Math.atan2(Math.sin(a-(tgt.maGuardAng||0)),Math.cos(a-(tgt.maGuardAng||0))));if(da<Math.PI*.55){tgt.maAbsorbed=(tgt.maAbsorbed||0)+amount;tgt.maRage=Math.min(100,(tgt.maRage||0)+Math.max(1,amount*.035));return;}}
   if(tgt&&tgt.key==='gebura'&&tgt.gbTransformUntil>time)amount*=.10;
   if(tgt&&tgt.key==='naihwang'&&tgt.nhEGuardUntil>time&&src&&src.team!==tgt.team)amount*=.85;
@@ -4484,7 +4485,7 @@ function castMathias(c,key,ang,frac){
     for(const u of hits){damage(c,u,55+c.ad*.9,{skill:true,color:'#ff6a32'});u.pull={x:c.x-dx*E(55),y:c.y-dy*E(55),t:.22};u.stunT=Math.max(u.stunT||0,.45);}
     c.maRage=Math.min(100,rage+hits.length*12+8);c.cd.E=12;fx.push({type:'pop',x:c.x,y:c.y,r:E(115),color:'#ff7a38',t:0,life:.3});
   }else if(key==='R'){c.maBladeStacks=Math.min(4,blade+1);c.cd.R=[120,100,80][Math.max(0,(c.rank.R||1)-1)]||120;c.maR={left:5,next:time,ang:c.face};}
-  if(c.maRage>=100&&key!=='W'&&key!=='R'){c.shield=Math.max(c.shield||0,c.maxHp*.28);c.shieldT=3;c.hasteT=Math.max(c.hasteT||0,3);c.maRage=0;}
+  if(c.maRage>=100){c.shield=Math.max(c.shield||0,c.maxHp*.28);c.shieldT=3;c.hasteT=Math.max(c.hasteT||0,3);c.maRage=0;}
   if(c===player)text(c.x,c.y-c.r-E(35),skillNames(c)[key],'#ff8a42',true,.85);
   return true;
 }
@@ -14180,6 +14181,8 @@ function drawMathiasBody(g,c){
   g.fillStyle=purple;g.beginPath();g.moveTo(-r*.72,-r*.42);g.lineTo(-r*.42,-r*.68);g.lineTo(-r*.24,-r*.3);g.lineTo(-r*.55,-r*.18);g.closePath();g.fill();
   g.fillStyle='#d8d5df';g.beginPath();g.arc(r*.38,r*.43,r*.13,0,7);g.fill();
   g.restore();
+  const rage=Math.max(0,Math.min(100,c.maRage||0)), bx=c.x-r*1.05, by=c.y+r*1.12, bw=r*2.1;
+  g.fillStyle='rgba(15,10,16,.85)';g.fillRect(bx,by,bw,E(5));g.fillStyle=rage>=100?'#ffb14a':'#e45a35';g.fillRect(bx,by,bw*rage/100,E(5));g.strokeStyle='#f4d5bd';g.lineWidth=E(1);g.strokeRect(bx,by,bw,E(5));
 }
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
