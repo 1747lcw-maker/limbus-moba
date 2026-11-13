@@ -1182,6 +1182,8 @@ const STATS = {
            hp:[640, 120], regen:[1.7, 0.15], ad:[65, 3.8], armor:[34, 5.0], mr:[33, 2.8], as:[0.66, 0.025]},
   gebura: {name:'게부라', r:31, range:100, speed:320, acquire:285,
            hp:[610, 112], regen:[1.55, 0.14], ad:[70, 4.4], armor:[29, 4.6], mr:[29, 2.6], as:[0.70, 0.032]},
+  mathias: {name:'마티아스', r:34, range:105, speed:280, acquire:255,
+            hp:[820, 148], regen:[2.25, 0.21], ad:[62, 3.5], armor:[45, 6.2], mr:[40, 3.5], as:[0.62, 0.022]},
   binah: {name:'비나', r:29, range:440, speed:285, acquire:490, ranged:true, ap:[28,7], hp:[590,112], regen:[1.55,.14], ad:[48,2.8], armor:[27,4.8], mr:[34,3.0], as:[.864,.0336]},
   bot:    {name:'훈련용 봇', r:30, range:70, speed:270, acquire:400,
            hp:[600, 95], regen:[1.6, 0.14], ad:[58, 3.6], armor:[32, 4.2], mr:[32, 1.9], as:[0.68, 0.025]},
@@ -12745,7 +12747,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = []) {                            // 자리마다: 1·2·3순위 챔피언 중 가중치로 추첨 → 없으면 아무나 (한 팀 안 중복 없음)
   const used = new Set(taken), out = [];
@@ -12762,8 +12764,8 @@ function pickForRoles(roles, taken = []) {                            // 자리�
   }
   return out;
 }
-const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura'];
-const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
+const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias'];
+const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear','mathias']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
 const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // 미구현 캐릭터는 AI 선택 후보에서 제외, 플레이어는 직접 선택 가능
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
 const enemiesOf = b => champs().filter(c => c.team !== b.team && (!c.alive || seenBy(b.team, c)));   // 시야에 보이는 적만 (죽은 적은 알 수 있음)
@@ -14097,6 +14099,33 @@ function drawBinahBody(g,c){
   g.beginPath();g.moveTo(-r*.8,r*.55);g.quadraticCurveTo(-r*1.2,r*.85,-r*1.72,r*.92);g.moveTo(-r*.48,r*.72);g.quadraticCurveTo(-r*.8,r*1.02,-r*1.25,r*1.12);g.stroke();
   g.restore();
 }
+function drawMathiasBody(g,c){
+  const r=c.r,a=c.face||0,swing=c.swingT>0?Math.sin(Math.min(1,c.swingT/.24)*Math.PI):0;
+  const white='#f4f2f8',purple='#875ac5',deep='#332344',steel='#dfe2eb';
+  g.save();g.translate(c.x,c.y);g.rotate(a);
+  g.fillStyle='#282331';g.beginPath();g.ellipse(0,r*.22,r*.9,r*.7,0,0,7);g.fill();
+  g.fillStyle=white;g.strokeStyle='#b9b1c9';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.72,-r*.48);g.lineTo(-r*.42,-r*.98);g.lineTo(r*.38,-r*.96);g.lineTo(r*.78,-r*.42);g.lineTo(r*.62,r*.88);g.lineTo(r*.18,r*.98);g.lineTo(-r*.62,r*.82);g.closePath();g.fill();g.stroke();
+  g.fillStyle=purple;g.beginPath();g.moveTo(-r*.2,-r*.78);g.lineTo(r*.12,-r*.68);g.lineTo(r*.3,r*.82);g.lineTo(r*.02,r*.92);g.closePath();g.fill();
+  g.strokeStyle='#9b7acb';g.lineWidth=E(3);g.beginPath();g.moveTo(-r*.52,r*.12);g.lineTo(r*.48,r*.12);g.stroke();
+  g.fillStyle='#e8cdbd';g.beginPath();g.ellipse(r*.12,-r*.55,r*.38,r*.39,0,0,7);g.fill();
+  g.fillStyle='#f8f7fb';g.strokeStyle='#d4cede';g.lineWidth=E(1.5);
+  g.beginPath();g.moveTo(-r*.35,-r*.54);g.quadraticCurveTo(-r*.52,-r*1.18,r*.12,-r*1.12);g.quadraticCurveTo(r*.65,-r*1.08,r*.55,-r*.48);g.lineTo(r*.38,-r*.4);g.lineTo(r*.3,-r*.64);g.quadraticCurveTo(0,-r*.48,-r*.25,-r*.62);g.lineTo(-r*.3,-r*.38);g.closePath();g.fill();g.stroke();
+  g.fillStyle='rgba(111,65,168,.94)';g.strokeStyle='#28202f';g.lineWidth=E(3);
+  for(const x of [-r*.12,r*.3]){g.beginPath();g.roundRect(x-r*.15,-r*.61,r*.3,r*.17,E(4));g.fill();g.stroke();}
+  g.strokeStyle='#332640';g.lineWidth=E(3);g.beginPath();g.moveTo(r*.02,-r*.53);g.lineTo(r*.17,-r*.53);g.moveTo(-r*.28,-r*.53);g.lineTo(-r*.42,-r*.48);g.moveTo(r*.45,-r*.53);g.lineTo(r*.58,-r*.48);g.stroke();
+  g.save();g.translate(r*.45,r*.34);g.rotate(-.22+swing*.48);
+  g.fillStyle='#17131e';g.strokeStyle='#9b83bc';g.lineWidth=E(2.5);
+  g.beginPath();g.moveTo(-r*.12,-r*.18);g.lineTo(r*2.1,-r*.18);g.lineTo(r*2.1,r*.18);g.lineTo(-r*.12,r*.18);g.closePath();g.fill();g.stroke();
+  g.fillStyle=steel;g.fillRect(r*.12,-r*.105,r*1.82,r*.21);
+  g.fillStyle=purple;g.fillRect(r*.72,-r*.045,r*.92,r*.09);
+  g.fillStyle=deep;g.fillRect(-r*.22,-r*.28,r*.18,r*.56);
+  g.fillStyle='#c9b7e3';g.fillRect(-r*.34,-r*.08,r*.42,r*.16);
+  g.restore();
+  g.fillStyle=purple;g.beginPath();g.moveTo(-r*.72,-r*.42);g.lineTo(-r*.42,-r*.68);g.lineTo(-r*.24,-r*.3);g.lineTo(-r*.55,-r*.18);g.closePath();g.fill();
+  g.fillStyle='#d8d5df';g.beginPath();g.arc(r*.38,r*.43,r*.13,0,7);g.fill();
+  g.restore();
+}
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
   const isP = c === player;
@@ -14169,6 +14198,7 @@ function drawChamp(g, c) {
   if (c.key === 'vespa') drawVespaBody(g,c);
   if (c.key === 'naihwang') drawNaihwangBody(g,c);
   if (c.key === 'gebura') { drawGeburaBody(g,c); if(c.gbFormUntil>time)drawGeburaEgoArmor(g,c); if(c.gbFormUntil>time)drawGeburaAura(g,c); if(c.gbW)drawGeburaCharge(g,c); drawGeburaRageGauge(g,c); }
+  if (c.key === 'mathias') drawMathiasBody(g,c);
   if (c.key === 'indigoElder') drawIndigoElderBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
   if (c.key === 'ryoshu') drawRyoshuBody(g, c);
@@ -20393,6 +20423,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   charon:    {coat:'#26393a', pants:'#1a2626', hair:'#e9edf0', skin:'#b8babc', eye:'#f6f1e6', fx:'bus', line:'부릉부릉. 카론과 메피는 멈추지 않아.'},
   indigoElder:{coat:'#526b80',pants:'#182633',hair:'#d6e0e8',skin:'#d9d4ca',eye:'#9edcff',fx:'chain',line:'대호수의 규칙은 끝나지 않는다. 다음 포경을 준비하라.'},
   gebura:{coat:'#17060b',pants:'#09090d',hair:'#19080d',skin:'#9f2939',eye:'#ff1738',fx:'flame',smoke:true,line:'분노는 아직 끝나지 않았다.'},
+  mathias:{coat:'#f0eef5',pants:'#292333',hair:'#f5f3fa',skin:'#e8cdbd',eye:'#a879e8',fx:'arcane',line:'레바테인의 무게를 견딜 수 있겠나?'},
   binah:{coat:'#09090d',pants:'#050508',hair:'#08080d',skin:'#17151b',eye:'#f2cf62',fx:'raven',smoke:true,line:'조율은 끝났습니다. 이제 침묵하시지요.'},
 };
 let mvp = null, mvpRun = false;
@@ -21189,7 +21220,7 @@ $('shopBtn').addEventListener('click', () => openShop(!shopOpen));
 addEventListener('keydown', e => { if (spectating || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; if (e.key.toLowerCase() === 'p') openShop(!shopOpen); if (e.key === 'Escape' && shopOpen) openShop(false); });
 
 // ═════════════ 점수판 (탭) ═════════════
-const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', bot:'#7a3438'};
+const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', mathias:'#f1eff8', bot:'#7a3438'};
 const TEAM_SIZE = 5;
 let boardOpen = false, boardT = 0;
 function openBoard(on) {
@@ -22868,7 +22899,7 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'],
+  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
@@ -22881,6 +22912,7 @@ const cxCol = k => {
   if (k === 'vespa') return '#d5aa16';
   if (k === 'naihwang') return '#5a1720';
   if (k === 'gebura') return '#8b0018';
+  if (k === 'mathias') return 'linear-gradient(135deg, #f7f7fb 0%, #ffffff 56%, #8d69c8 57%, #55318d 100%)';
   if (k === 'xichun') return 'linear-gradient(90deg, #c8202c 50%, #26262c 50%)';
   const el = document.querySelector(`.sel-card[data-champ="${k}"] .sel-token`);
   return el ? el.style.background : '#777';
