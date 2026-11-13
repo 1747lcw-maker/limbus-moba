@@ -12354,7 +12354,7 @@ function aiCombo(b, p) {
   if (b.key === 'mathias') {
     // W는 저체력 역전용 방어기: 체력이 크게 빠지고 근접 위협 또는 최근 피격이 있을 때만 사용
     const nearThreat = enemiesOf(b).some(e => e.alive && targetable(e) && dist(e,b) < E(360));
-    const recentlyHit = time - (b.lastDmgT ?? -99) < 1.15;
+    const recentlyHit = (b.lastDmgT ?? 99) < 1.15;
     if (ready('W') && hpB <= .34 && (nearThreat || recentlyHit)) {
       const threat = enemiesOf(b).filter(e => e.alive && targetable(e)).sort((x,y)=>dist(b,x)-dist(b,y))[0];
       const wa = threat ? Math.atan2(threat.y-b.y,threat.x-b.x) : b.face;
