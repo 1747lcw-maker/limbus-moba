@@ -4478,7 +4478,7 @@ function castMathias(c,key,ang,frac){
   if(key==='Q'){
     if(c.maQStage===1&&time<(c.maQUntil||0)){const hits=segHits(c,c.face,E(300),E(88));for(const u of hits){damage(c,u,42+c.ad*.72+rage*.7,{skill:true,color:'#ff7438'});u.slowT=Math.max(u.slowT||0,.8);u.slowAmt=Math.max(u.slowAmt||0,.22);if(rage>=100)knockup(u,.45);}c.maQStage=0;c.maQUntil=0;c.cd.Q=8;fx.push({type:'pop',x:c.x,y:c.y,r:E(150),color:'#ff7b32',t:0,life:.32});}
     else{const hits=segHits(c,c.face,E(250),E(72));for(const u of hits){damage(c,u,35+c.ad*.55,{skill:true,color:'#ff9b48'});u.slowT=Math.max(u.slowT||0,.45);u.slowAmt=Math.max(u.slowAmt||0,.16);}c.maQStage=1;c.maQUntil=time+2.2;c.cd.Q=2.2;}
-  }else if(key==='W'){c.maGuardUntil=time+.75;c.maGuardAng=c.face;c.maAbsorbed=0;c.cd.W=[16,14,12,10,8][Math.max(0,(c.rank.W||1)-1)]||16;}
+  }else if(key==='W'){c.maGuardUntil=time+.75;c.ccImmuneUntil=Math.max(c.ccImmuneUntil||0,time+.75);c.maGuardAng=c.face;c.maAbsorbed=0;c.cd.W=[16,14,12,10,8][Math.max(0,(c.rank.W||1)-1)]||16;}
   else if(key==='E'){
     const dx=Math.cos(c.face),dy=Math.sin(c.face),x0=c.x,y0=c.y;c.x=Math.max(45,Math.min(W-45,c.x+dx*E(175)));c.y=Math.max(75,Math.min(H-75,c.y+dy*E(175)));
     const hits=units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&Math.hypot((u.x-x0)*dy-(u.y-y0)*dx,(u.y-y0)*dy+(u.x-x0)*dx)<E(95)&&((u.x-x0)*dx+(u.y-y0)*dy)>0&&((u.x-x0)*dx+(u.y-y0)*dy)<E(230));
@@ -4777,7 +4777,7 @@ function rollCrit(c) {
 }
 function addStack(c, n = 1) { if (c.key === 'rodion') c.pStacks = Math.min(KR.P.max, c.pStacks + n); }
 function knockup(u, t) {
-  if (!u.alive || u.structure) return;
+  if (!u.alive || u.structure || (u.key==='mathias'&&u.maGuardUntil>time)) return;
   if (!(u.airT > 0)) { u.airUp = 0; fx.push({type:'puff', x:u.x, y:u.y + u.r * .6, r:u.r, t:0, life:.35}); }   // 새로 뜰 때만 발밑 먼지
   u.airT = Math.max(u.airT || 0, t); u.stunT = Math.max(u.stunT, u.airT);
   if (u.cast && !u.cast.unstoppable) u.cast = null;
