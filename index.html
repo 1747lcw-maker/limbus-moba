@@ -2651,6 +2651,23 @@ function sfxSynth(ctx) {
   });
   zap('zap1', .2, 16, 110, .5); zap('zap2', .24, 13, 140, .45); zap('zap3', .18, 18, 95, .55);
   zap('zapBig', .6, 4.5, 70, .62);
+  mk('maFlame', 1.05, (t, st) => {                                      // 마티아스 R: 화염방사기의 묵직한 연소·분사음
+    const env = Math.min(1, t / .018) * Math.exp(-t * 1.25);
+    const cutoff = 1050 + 650 * Math.sin(t * 8) + 420 * Math.sin(t * 21);
+    const roar = lp(st, noise(), cutoff) * 2.5;
+    const low = Math.sin(2 * Math.PI * (76 + 9 * Math.sin(t * 13)) * t) * .48
+      + Math.sin(2 * Math.PI * 118 * t) * .16;
+    const hiss = hp(st, noise(), 520) * .22;
+    const pulse = .82 + .12 * Math.sin(2 * Math.PI * 11 * t) + .06 * Math.sin(2 * Math.PI * 19 * t);
+    return (roar + low + hiss) * env * pulse;
+  });
+  mk('maFlameHit', .38, (t, st) => {                                   // 마티아스 R 타격: 불꽃이 확 터지는 저음 충격 + 뜨거운 바람
+    const blast = lp(st, noise(), 2100) * Math.exp(-t * 17) * 2.3;
+    const body = Math.sin(2 * Math.PI * (108 - 58 * Math.min(1, t / .3)) * t) * Math.exp(-t * 13) * 1.05;
+    const air = lp(st, hp(st, noise(), 850), 3600) * Math.exp(-t * 8) * .9;
+    const snap = hp(st, noise(), 1800) * Math.exp(-t * 42) * .45;
+    return (blast + body + air + snap) * Math.min(1, t / .0018);
+  });
   mk('shotgun', .36, (t, st) => {                                      // 산탄총: 짧고 넓게 터지는 화약 폭발 + 저음 충격 + 탄피/기계음
     const blast = lp(st, noise(), 5200) * Math.exp(-t * 25) * 2.4;
     const body = Math.sin(2 * Math.PI * (92 - 48 * Math.min(1, t / .2)) * t) * Math.exp(-t * 18) * 1.15;
@@ -2710,6 +2727,8 @@ const SFX_GROUP = {                                                    // 묶음
   rumble:{c:['rumble'], v:.8, gap:1, p:0},
   zap:{c:['zap1', 'zap2', 'zap3'], v:.3, gap:.05, p:.1},                // 아래부터 직접 합성한 소리
   zapBig:{c:['zapBig'], v:.42, gap:.12, p:.06},
+  flame:{c:['maFlame'], v:.62, gap:.72, p:.025},
+  flameHit:{c:['maFlameHit'], v:.48, gap:.16, p:.04},
   charge:{c:['charge'], v:.16, gap:.1, p:0},
   whiff:{c:['whiff1', 'whiff2'], v:.24, gap:.07, p:.1},
   pop:{c:['pop'], v:.2, gap:.05, p:.25},
@@ -2739,7 +2758,9 @@ for (const [g, list] of Object.entries({
   perfect:'vgPerfect',
   snap:'gbSnap',
   gore:'tmGore tmFeast',
-  crackle:'dbPop maRSlash maRFire',
+  crackle:'dbPop',
+  flame:'maRFire',
+  flameHit:'maRSlash',
   pop:'dbCamellia dbBloom gbErase gbTrapSet',
   chime:'tmMend gdOath tmCleanse itCleanse riTattoo',
   boom3:'dbBurst gbNova',
