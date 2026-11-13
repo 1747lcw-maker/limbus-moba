@@ -4290,7 +4290,7 @@ function binahCoordinatorTick(u,dt){
  if(d>E(34)){const sp=E(315);u.x+=Math.cos(u.face)*sp*dt;u.y+=Math.sin(u.face)*sp*dt;}
  else if(u.atkT<=0){u.atkT=1.05;u.swingT=.2;damage(c,t,u.ad,{basic:true,color:'#d9b52c'});fx.push({type:'bnShock',x:t.x,y:t.y,r:Math.max(t.r,u.r)*1.2,t:0,life:.28});}
 }
-function binahTick(c,dt){if(!c||c.key!=='binah'||!c.alive)return;if(c.bnRUntil>time&&time>=(c.bnRNext||0)){c.bnRNext=time+.32;for(let i=0;i<2;i++){const t=units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u)&&dist(c,u)<E(900)).sort((a,b)=>dist(c,a)-dist(c,b))[i];if(!t)continue;fx.push({type:'bnCrow',x:t.x,y:t.y,r:t.r*1.7,ang:Math.atan2(t.y-c.y,t.x-c.x),t:0,life:.42});if(t.hp/t.maxHp<.15){damage(c,t,t.hp*2,{skill:true,type:'physical',color:'#18151c'});}else damage(c,t,26+c.ap*.22,{skill:true,type:'physical',color:'#18151c'});}}if(c.bnRUntil>0&&time>=c.bnRUntil){c.bnRUntil=0;c.bnRNext=0;}}
+function binahTick(c,dt){if(!c||c.key!=='binah'||!c.alive)return;if(c.bnRUntil>time&&time>=(c.bnRNext||0)){c.bnRNext=time+.32;const targets=[...new Set(units.filter(u=>u.alive&&u.kind==='bnCoordinator'&&u.bnOwner===c&&u.target&&u.target.alive&&isChamp(u.target)&&u.target.team!==c.team).map(u=>u.target))];for(const t of targets){fx.push({type:'bnCrow',x:t.x,y:t.y,r:t.r*1.7,ang:Math.atan2(t.y-c.y,t.x-c.x),t:0,life:.42});if(t.hp/t.maxHp<.15){damage(c,t,t.hp*2,{skill:true,type:'physical',color:'#18151c'});}else damage(c,t,26+c.ap*.22,{skill:true,type:'physical',color:'#18151c'});}}if(c.bnRUntil>0&&time>=c.bnRUntil){c.bnRUntil=0;c.bnRNext=0;}}
 function castExtraSkill(c,key,ang,frac){
  if(c.key==='binah'){
   const n=rk(c,key),cds={Q:[9,8.5,8,7.5],W:[14,13,12,11],E:[18,17,16,15],R:[110,95,80]},cd=cds[key][n],gold='#d9b52c';
