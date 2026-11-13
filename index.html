@@ -4593,6 +4593,8 @@ function mathiasTick(c,dt){
       mathiasFx(c,'hitspark',u.x,u.y,a,E(18),.25,'#ff7135');
     }
     mathiasFx(c,'maRSlash',c.x+dx*E(150),c.y+dy*E(150),a,E(210),.48,'#ff4b18');
+    // R의 각 연속 타격마다 화염방사기 분사음을 직접 재생한다. 타격 간격(.8초)에 맞춰 반복 허용.
+    sfxPlay('flame',c.x+dx*E(150),c.y+dy*E(150),1.15);
     c.maR.left--;c.maR.next=time+.8;if(!c.maR.left)c.maR=null;
   }
   for(const ally of champs())if(ally.key==='ricardo'&&ally.team===c.team&&dist(c,ally)<E(230)&&time>=(c.maFamilyReady||0)){
