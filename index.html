@@ -4487,6 +4487,7 @@ function castMathias(c,key,ang,frac){
   c.face=ang??c.face;
   const dx=Math.cos(c.face),dy=Math.sin(c.face);
   if(key==='Q'){
+    c.maKickUntil=time+.42;
     // 적을 향해 짧게 파고든 뒤 발차기: 1·2타 모두 접근 보정
     if(seek&&c.maQStage!==1){
       const gap=dist(c,seek),step=Math.min(E(95),Math.max(0,gap-E(145)));
@@ -4508,11 +4509,11 @@ function castMathias(c,key,ang,frac){
     mathiasFx(c,'pop',c.x+dx*E(135),c.y+dy*E(135),c.face,E(120),.38,'#ff9b48');
   }else if(key==='W'){
     c.maGuardUntil=time+.75;c.ccImmuneUntil=Math.max(c.ccImmuneUntil||0,time+.75);
-    c.maGuardAng=c.face;c.maAbsorbed=0;
+    c.maGuardAng=c.face;c.maAbsorbed=0;c.maKickUntil=0;
     c.cd.W=[16,14,12,10,8][Math.max(0,(c.rank.W||1)-1)]||16;
     mathiasFx(c,'maWRect',c.x,c.y,c.face,E(225),.75,'#ff9b24');
   }else if(key==='E'){
-    const x0=c.x,y0=c.y;
+    const x0=c.x,y0=c.y;c.maStompUntil=time+.55;
     const gap=seek?dist(c,seek):E(175);
     const dash=Math.min(E(320),Math.max(E(175),seek?gap-E(55):E(175)));
     c.x=Math.max(45,Math.min(W-45,c.x+dx*dash));
@@ -4545,7 +4546,7 @@ function mathiasTick(c,dt){
   if(!c.alive)return;
   if(c.maGuardUntil>0&&time>=c.maGuardUntil){
     const absorbed=c.maAbsorbed||0,ang=c.maGuardAng||c.face,dx=Math.cos(ang),dy=Math.sin(ang);
-    c.maGuardUntil=0;
+    c.maGuardUntil=0;c.maKickUntil=time+.42;
     // 방어 성공 여부와 관계없이 전방 걷어차기 반격은 발생. 흡수량은 추가 피해로 전환.
     const hits=units.filter(u=>u!==c&&u.team!==c.team&&u.alive&&targetable(u)&&!u.structure&&!u.ward&&(()=>{
       const rx=u.x-c.x,ry=u.y-c.y,along=rx*dx+ry*dy,cross=Math.abs(rx*dy-ry*dx);
