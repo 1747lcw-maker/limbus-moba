@@ -2833,7 +2833,7 @@ $('snd').addEventListener('click', () => sfxToggle(!SFX.on)); sfxToggle(SFX.on);
 
 function resize() {
   const mobileRender = matchMedia('(pointer: coarse)').matches || innerWidth <= 760;
-  dpr = Math.min(devicePixelRatio || 1, mobileRender ? 1 : 1.5);   // 모바일은 렌더 해상도를 낮춰 GPU 부하와 발열 감소
+  dpr = mobileRender ? 1 : (devicePixelRatio || 1); // 모바일만 저해상도 렌더링, PC는 기기의 기본 픽셀 밀도 사용
   vw = innerWidth; vh = innerHeight;
   cvs.width = vw * dpr; cvs.height = vh * dpr;
   baseZoom = Math.max(vh / 720, vw / 1600) * S * VIEW_K; zoom = baseZoom * zoomMul;
@@ -21053,7 +21053,7 @@ try { resetGame(); }
 catch (err) { window.__initialResetError = err; console.error('[초기 게임 상태 생성 오류]', err); }
 let last = performance.now(), lastRender = 0;
 const mobileRender = matchMedia('(pointer: coarse)').matches || innerWidth <= 760;
-const renderInterval = mobileRender ? 1000 / 30 : 0; // 모바일은 그리기만 30fps로 제한하고 시뮬레이션 업데이트는 유지
+const renderInterval = mobileRender ? 1000 / 30 : 0; // 모바일만 30fps 제한, PC는 프레임 제한 없음
 try {                                                                   // 멀티 방장: 탭이 뒤로 가도 게임이 멈추지 않게 (워커 타이머는 덜 느려짐)
   const wk = new Worker(URL.createObjectURL(new Blob(['setInterval(() => postMessage(0), 33)'], {type:'text/javascript'})));
   let hl = performance.now();
