@@ -3994,6 +3994,7 @@ function basicAttack(c, t) {
   if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(c.nhInstinctUntil>time?1.3:1.08, c.as * 1.38 * (c.nhInstinctUntil>time?1.2:1))); // 묵직한 한 방: 공격 속도 상한
   c.swingT = c.key === 'naihwang' ? .52 : c.key === 'gebura' ? .46 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
+  if(c.key==='binah')fx.push({type:'bnBolt',x:c.x,y:c.y,ang:c.face,len:Math.max(E(70),dist(c,t)),t:0,life:.24});
   if (c.key === 'naihwang') sfxPlay('shotgun', c.x, c.y, 1.25, .96); // 짧고 묵직한 산탄총 발사음
   if(c.key==='liuEn')fx.push({type:'lySlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(38),t.r*1.5),t:0,life:.48,weapon:c.liuWeapon||0});
   if(c.key==='blueReverb')fx.push({type:'brSlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(48),t.r*1.9),t:0,life:.42});
@@ -18149,16 +18150,23 @@ function drawBongdadBody(g, c) {
 function drawBinahCoordinator(g,u){
  const r=u.r,p=.5+.5*Math.sin(time*10+u.bnSlot),fade=Math.max(0,Math.min(1,(u.bnUntil-time)/.45));
  g.save();g.globalAlpha=fade;g.translate(u.x,u.y);g.rotate(u.face||0);
- g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(0,r*.55,r*1.2,r*.42,0,0,Math.PI*2);g.fill();
- g.shadowColor='#d9b52c';g.shadowBlur=E(15);
- g.fillStyle='#08090e';g.strokeStyle='#d9b52c';g.lineWidth=E(2);
- g.beginPath();g.ellipse(0,0,r*.9,r*.43,0,0,Math.PI*2);g.fill();g.stroke();
- g.beginPath();g.moveTo(r*.35,-r*.1);g.lineTo(r*1.15,-r*.25);g.lineTo(r*.72,r*.17);g.closePath();g.fill();g.stroke();
- g.fillStyle='#f4d65e';g.beginPath();g.moveTo(r*.98,-r*.22);g.lineTo(r*1.42,-r*.12);g.lineTo(r*.98,-r*.02);g.closePath();g.fill();
- for(const side of [-1,1]){g.fillStyle='#14131a';g.strokeStyle='#b99835';g.beginPath();g.moveTo(-r*.2,0);g.quadraticCurveTo(-r*.75,side*r*(1.1+p*.45),-r*1.45,side*r*.68);g.quadraticCurveTo(-r*.9,side*r*.25,-r*.3,side*r*.18);g.closePath();g.fill();g.stroke();}
- g.fillStyle='#fff0a8';g.beginPath();g.arc(r*.48,-r*.13,E(2.5),0,Math.PI*2);g.fill();
- g.strokeStyle='rgba(255,225,125,.8)';g.lineWidth=E(1.5);g.beginPath();g.arc(0,0,r*1.55,0,Math.PI*2);g.stroke();g.restore();
- const w=E(34),x=u.x-w/2,y=u.y-r-E(11);g.fillStyle='#09090d';g.fillRect(x-1,y-1,w+2,E(5));g.fillStyle='#d9b52c';g.fillRect(x,y,w*Math.max(0,u.hp/u.maxHp),E(3));
+ g.fillStyle='rgba(0,0,0,.32)';g.beginPath();g.ellipse(0,r*.82,r*1.15,r*.3,0,0,Math.PI*2);g.fill();
+ g.shadowColor='#d9b52c';g.shadowBlur=E(17);g.fillStyle='#07070c';g.strokeStyle='#d9b52c';g.lineWidth=E(2);
+ // Humanoid torso wrapped in a ragged crow-feather mantle
+ g.beginPath();g.moveTo(-r*.38,-r*.05);g.quadraticCurveTo(-r*.55,r*.25,-r*.82,r*1.05);g.lineTo(r*.78,r*1.05);g.quadraticCurveTo(r*.52,r*.22,r*.35,-r*.05);g.closePath();g.fill();g.stroke();
+ // Long, tapered feathered shoulders and cloak edges
+ for(const side of [-1,1]){
+  g.beginPath();g.moveTo(side*r*.28,r*.08);g.quadraticCurveTo(side*r*1.05,r*.05,side*r*(1.28+p*.12),r*.78);g.quadraticCurveTo(side*r*.55,r*.68,side*r*.32,r*.48);g.closePath();g.fill();g.stroke();
+  g.strokeStyle='#b99835';g.lineWidth=E(1.2);for(let j=0;j<3;j++){g.beginPath();g.moveTo(side*r*(.43+j*.12),r*(.35+j*.12));g.lineTo(side*r*(.9+j*.1),r*(.72+j*.08));g.stroke();}g.strokeStyle='#d9b52c';
+ }
+ // Crow head, hooked beak and unmistakable glowing golden eyes
+ g.beginPath();g.ellipse(0,-r*.36,r*.42,r*.48,0,0,Math.PI*2);g.fill();g.stroke();
+ g.beginPath();g.moveTo(r*.2,-r*.42);g.lineTo(r*.86,-r*.29);g.lineTo(r*.28,-r*.12);g.closePath();g.fill();g.stroke();
+ g.fillStyle='#f8dc69';g.shadowColor='#ffe58a';g.shadowBlur=E(12);
+ g.beginPath();g.ellipse(r*.12,-r*.43,E(3.6),E(2.3),0,0,Math.PI*2);g.fill();
+ g.fillStyle='#09090e';g.beginPath();g.arc(r*.12,-r*.43,E(1.1),0,Math.PI*2);g.fill();
+ g.restore();
+ const w=E(34),x=u.x-w/2,y=u.y-r-E(13);g.fillStyle='#09090d';g.fillRect(x-1,y-1,w+2,E(5));g.fillStyle='#d9b52c';g.fillRect(x,y,w*Math.max(0,u.hp/u.maxHp),E(3));
 }
 function drawBongy(g, u) {                                                              // 봉이 유닛
   const c = u.bpOwner, inv = u.bpInvT > time;
@@ -19008,15 +19016,22 @@ function drawBinahFx(g,f,k){
     g.strokeStyle=gold;g.lineWidth=E(4)*(1-k*.5);g.beginPath();g.moveTo(0,-h-E(18));g.lineTo(0,E(10));g.stroke();
     g.strokeStyle=pale;g.lineWidth=E(2);g.beginPath();g.arc(0,0,f.r*(.8+k*1.8),0,Math.PI*2);g.stroke();
     for(let i=0;i<4;i++){g.save();g.rotate(i*Math.PI/2+k*1.5);g.fillStyle=gold;g.fillRect(-E(3),-f.r*(1.1+k),E(6),E(18));g.restore();}
+  }else if(f.type==='bnBolt'){
+    g.rotate(f.ang||0);const L=(f.len||E(200))*(.35+.65*k),w=E(13)*(1-k*.35);
+    g.shadowColor=gold;g.shadowBlur=E(17);
+    g.fillStyle=ink;g.strokeStyle=gold;g.lineWidth=E(3);
+    g.beginPath();g.moveTo(-E(8),-w*.42);g.lineTo(L,-w*.16);g.lineTo(L+E(12),0);g.lineTo(L,w*.16);g.lineTo(-E(8),w*.42);g.closePath();g.fill();g.stroke();
+    g.strokeStyle=pale;g.lineWidth=E(1.5);g.beginPath();g.moveTo(0,0);g.lineTo(L,0);g.stroke();
   }else if(f.type==='bnShock'){
     g.strokeStyle=gold;g.lineWidth=E(6)*(1-k);g.beginPath();g.arc(0,0,f.r*(.7+k*2),0,Math.PI*2);g.stroke();
     g.strokeStyle=pale;g.lineWidth=E(2);g.beginPath();g.arc(0,0,f.r*(.45+k*1.55),0,Math.PI*2);g.stroke();
     for(let i=0;i<12;i++){const a=i*Math.PI/6+k*.7,r=f.r*(.5+k*1.5);g.fillStyle=i%2?ink:gold;g.beginPath();g.moveTo(Math.cos(a)*r,Math.sin(a)*r);g.lineTo(Math.cos(a+.12)*(r+E(22)),Math.sin(a+.12)*(r+E(22)));g.lineTo(Math.cos(a-.12)*(r+E(22)),Math.sin(a-.12)*(r+E(22)));g.closePath();g.fill();}
   }else if(f.type==='bnWave'){
     g.rotate(f.ang||0);const L=f.len||E(620),reach=L*(.18+.82*k);
-    g.shadowColor=gold;g.shadowBlur=E(18);g.strokeStyle=gold;g.lineWidth=E(22)*(1-k*.45);
+    g.shadowColor=gold;g.shadowBlur=E(18);g.strokeStyle=gold;g.lineWidth=E(26)*(1-k*.45);
     g.beginPath();g.moveTo(-E(34),-E(25));g.bezierCurveTo(reach*.28,-E(105),reach*.7,-E(95),reach,E(4));g.stroke();
-    g.strokeStyle=pale;g.lineWidth=E(5);g.beginPath();g.moveTo(-E(20),-E(8));g.quadraticCurveTo(reach*.55,-E(48),reach,E(4));g.stroke();
+    g.strokeStyle=ink;g.lineWidth=E(17)*(1-k*.45);g.beginPath();g.moveTo(-E(34),-E(25));g.bezierCurveTo(reach*.28,-E(105),reach*.7,-E(95),reach,E(4));g.stroke();
+    g.strokeStyle=pale;g.lineWidth=E(3);g.beginPath();g.moveTo(-E(20),-E(8));g.quadraticCurveTo(reach*.55,-E(48),reach,E(4));g.stroke();
     for(let i=0;i<7;i++){const x=reach*(i+1)/8;g.fillStyle=i%2?gold:pale;g.beginPath();g.arc(x,-E(35)*Math.sin(i*.7+k*2),E(3+4*e),0,Math.PI*2);g.fill();}
   }else if(f.type==='bnAwaken'){
     const R=f.r*(1+k*3.2);g.shadowColor=gold;g.shadowBlur=E(24);
