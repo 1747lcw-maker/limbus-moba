@@ -1884,10 +1884,12 @@ function resetGame() {
 const invulnerable = u => u.protectors && u.protectors.length > 0 &&
   (u.protectAny ? u.protectors.every(p => p.alive) : u.protectors.some(p => p.alive));
 // FURIOSO 무적은 실제 연속 참격 진행 중에만 유효. 마지막 타격 이후 남은 상태 객체는 무적 판정에서 제외한다.
-const furiosoActive = u => !!(u && u.alive && (
-  (u.key === 'roland' && u.rolandFurioso && u.rolandFurioso.target && u.rolandFurioso.target.alive && u.rolandFurioso.index < 9) ||
-  (u.key === 'liuEn' && u.liuFurioso && u.liuFurioso.target && u.liuFurioso.target.alive && u.liuFurioso.index < 9)
-));
+const furiosoActive = u => {
+  if (!u || !u.alive) return false;
+  const F = u.key === 'roland' ? u.rolandFurioso : u.key === 'liuEn' ? u.liuFurioso : null;
+  // 연속 참격 상태는 최대 6.4초까지만 유효하며, 기한이 지난 잔여 객체는 무적을 부여하지 않는다.
+  return !!(F && F.target && F.target.alive && F.index < 9 && F.expiresAt > time);
+};
 const targetable = u => u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && !furiosoActive(u) && !(u.structure && invulnerable(u));   // hidden: 료슈 Q·R 중 무적
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const edge = (a, b) => dist(a, b) - a.r - b.r;
@@ -4346,7 +4348,7 @@ function castExtraSkill(c,key,ang,frac){
 
  if(c.key==='liuEn'){
   const n=rk(c,key),cds={Q:[8,7.5,7,6.5],W:[14,13,12,11],E:[16,15,14,13],R:[85,70,55]},cd=cds[key][n]*hasteMul(c);
-  if(key==='R'&&c.liuFormUntil>time&&c.liuFuriosoReady&&!c.liuFurioso){const target=liuNearest(c,E(600),true);if(!target)return;c.liuFuriosoReady=false;target.stunT=Math.max(target.stunT||0,6.5);target.cast=null;target.dash=null;c.liuFurioso={target,index:0,nextAt:time,rank:n,damage:(48+n*16+c.ap*.42)*1.2};fx.push({type:'lyAwaken',x:target.x,y:target.y,r:target.r*2.6,t:0,life:1});text(target.x,target.y,'FURIOSO REPLICA','#e1e8f5',true,1.25);sfxPlay('ult',target.x,target.y,1.35);return;}
+  if(key==='R'&&c.liuFormUntil>time&&c.liuFuriosoReady&&!c.liuFurioso){const target=liuNearest(c,E(600),true);if(!target)return;c.liuFuriosoReady=false;target.stunT=Math.max(target.stunT||0,6.5);target.cast=null;target.dash=null;c.liuFurioso={target,index:0,nextAt:time,expiresAt:time+6.4,rank:n,damage:(48+n*16+c.ap*.42)*1.2};fx.push({type:'lyAwaken',x:target.x,y:target.y,r:target.r*2.6,t:0,life:1});text(target.x,target.y,'FURIOSO REPLICA','#e1e8f5',true,1.25);sfxPlay('ult',target.x,target.y,1.35);return;}
   liuWeaponRoll(c,key==='W'?(Math.random()<.9?8:0):null);c.liuCdrUsed=false;
   if(key==='Q'){if(ang===null)ang=autoAim(c,E(350));c.face=ang;c.cd.Q=c.cdMax.Q=cd;const len=E(350),wid=E(105),hits=segHits(c,ang,len,wid);let count=0;fx.push({type:'lyWave',x:c.x,y:c.y,ang,len,wid,t:0,life:.7});for(const u of hits){if(isChamp(u))callForHelp(c,u);liuDamage(c,u,55+n*27+c.ap*.68,'Q');if(isChamp(u))count++;}if(count){c.shield=Math.max(c.shield||0,38+n*13+c.ap*.42+count*13);c.shieldT=1.8;}sfxPlay('swing',c.x,c.y,1.1,.82);text(c.x,c.y-c.r-E(38),skillNames(c).Q,'#c8d6e9',true,.85);return;}
   if(key==='W'){if(ang===null)ang=autoAim(c,E(590));c.face=ang;const target=liuNearest(c,E(620)),sx=c.x,sy=c.y;let tx=c.x+Math.cos(ang)*E(430),ty=c.y+Math.sin(ang)*E(430);if(target){const dx=target.x-c.x,dy=target.y-c.y,d=Math.hypot(dx,dy)||1;tx=target.x-dx/d*(c.r+target.r+E(8));ty=target.y-dy/d*(c.r+target.r+E(8));}c.x=Math.max(E(25),Math.min(W-E(25),tx));c.y=Math.max(E(25),Math.min(H-E(25),ty));c.cd.W=c.cdMax.W=cd;const len=Math.hypot(c.x-sx,c.y-sy);fx.push({type:'lyDash',x:(sx+c.x)/2,y:(sy+c.y)/2,ang,len:len+E(100),t:0,life:.68});for(const u of units)if(u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&dist(u,c)<E(135)+u.r){if(isChamp(u))callForHelp(c,u);liuDamage(c,u,75+n*32+c.ap*.72,'W');}fx.push({type:'lyBurst',x:c.x,y:c.y,r:E(150),t:0,life:.62});sfxPlay('swing',c.x,c.y,1.2,.72);text(c.x,c.y-c.r-E(38),skillNames(c).W,'#c8d6e9',true,.85);return;}
@@ -4388,7 +4390,7 @@ function castExtraSkill(c,key,ang,frac){
       if(!target)return;
       c.rolandFuriosoReady=false; // 뒤틀림 한 번당 FURIOSO는 한 번만 사용
       target.stunT=Math.max(target.stunT||0,6.25);target.cast=null;target.dash=null;
-      c.rolandFurioso={target,index:0,nextAt:time,rank:n,damage:(42+n*12+c.ad*.38)*1.15};
+      c.rolandFurioso={target,index:0,nextAt:time,expiresAt:time+6.4,rank:n,damage:(42+n*12+c.ad*.38)*1.15};
       fx.push({type:'rlAwaken',x:target.x,y:target.y,r:target.r*2.1,t:0,life:.7});
       sfxPlay('ult',target.x,target.y,1.3);text(target.x,target.y,'FURIOSO','#dbe5ff',true,1.2);return;
     }
@@ -12002,7 +12004,7 @@ function champTimers(c, dt) {
   if (c.key === 'binah') binahTick(c, dt);
   if(c.key==='liuEn'){
     if(c.liuFuriDash){const D=c.liuFuriDash,k=Math.max(0,Math.min(1,(time-D.start)/D.duration)),e=1-Math.pow(1-k,3);c.x=D.sx+(D.tx-D.sx)*e;c.y=D.sy+(D.ty-D.sy)*e;if(k>=1)c.liuFuriDash=null;}
-    if(c.liuFurioso){const F=c.liuFurioso,T=F.target;if(!T||!T.alive||!c.alive){c.liuFurioso=null;c.liuFormUntil=0;c.liuFuriosoReady=false;}else if(time>=F.nextAt&&F.index<9){const i=F.index++,sx=c.x,sy=c.y,dx=T.x-c.x,dy=T.y-c.y,d=Math.hypot(dx,dy)||1,ang=Math.atan2(dy,dx),tx=T.x-dx/d*(c.r+T.r+E(5)),ty=T.y-dy/d*(c.r+T.r+E(5)),weapon=liuWeaponRoll(c);c.face=ang;c.liuFuriDash={sx,sy,tx,ty,start:time,duration:.22};T.stunT=Math.max(T.stunT||0,.72);T.cast=null;T.dash=null;damage(c,T,F.damage*(c.liuWeaponMul||1),{skill:true,type:'magic',color:'#d8dfeb'});fx.push({type:'lyFuri',x:T.x,y:T.y,ang,r:T.r,t:0,life:.62,weapon});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.4,t:0,life:.2});text(T.x,T.y-T.r-E(18),(i+1)+'/9','#e1e8f5',false,.4);sfxPlay('swing',T.x,T.y,.8,1.05+i*.025);F.nextAt+=.48;if(F.index>=9||!T.alive){c.liuFurioso=null;c.liuFormUntil=0;c.liuFuriosoReady=false;c.cd.R=c.cdMax.R=([100,85,70][F.rank])*hasteMul(c);sfxPlay('boom',T.x,T.y,1.2);text(T.x,T.y,'FURIOSO REPLICA','#e1e8f5',true,1.2);}}}
+    if(c.liuFurioso){const F=c.liuFurioso,T=F.target;if(!T||!T.alive||!c.alive||time>=F.expiresAt){c.liuFurioso=null;c.liuFormUntil=0;c.liuFuriosoReady=false;}else if(time>=F.nextAt&&F.index<9){const i=F.index++,sx=c.x,sy=c.y,dx=T.x-c.x,dy=T.y-c.y,d=Math.hypot(dx,dy)||1,ang=Math.atan2(dy,dx),tx=T.x-dx/d*(c.r+T.r+E(5)),ty=T.y-dy/d*(c.r+T.r+E(5)),weapon=liuWeaponRoll(c);c.face=ang;c.liuFuriDash={sx,sy,tx,ty,start:time,duration:.22};T.stunT=Math.max(T.stunT||0,.72);T.cast=null;T.dash=null;damage(c,T,F.damage*(c.liuWeaponMul||1),{skill:true,type:'magic',color:'#d8dfeb'});fx.push({type:'lyFuri',x:T.x,y:T.y,ang,r:T.r,t:0,life:.62,weapon});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.4,t:0,life:.2});text(T.x,T.y-T.r-E(18),(i+1)+'/9','#e1e8f5',false,.4);sfxPlay('swing',T.x,T.y,.8,1.05+i*.025);F.nextAt+=.48;if(F.index>=9||!T.alive){c.liuFurioso=null;c.liuFormUntil=0;c.liuFuriosoReady=false;c.cd.R=c.cdMax.R=([100,85,70][F.rank])*hasteMul(c);sfxPlay('boom',T.x,T.y,1.2);text(T.x,T.y,'FURIOSO REPLICA','#e1e8f5',true,1.2);}}}
     if(c.liuFormUntil>0&&time>=c.liuFormUntil&&!c.liuFurioso){c.liuFormUntil=0;c.liuFuriosoReady=false;}
     if(time>=(c.liuOrderNext||0)){for(const u of units)if(u.liuOrderBy===c)u.liuOrderBy=null;const target=liuNearest(c,E(1800),true);if(target){target.liuOrderBy=c;target.liuOrderUntil=time+10;fx.push({type:'lyMark',x:target.x,y:target.y,r:target.r*2.3,t:0,life:.9});}c.liuOrderNext=time+10;}
   }
@@ -12013,7 +12015,7 @@ function champTimers(c, dt) {
       if(k>=1)c.rolandFuriDash=null;
     }
     if(c.rolandFurioso){const F=c.rolandFurioso,T=F.target;
-      if(!T||!T.alive||!c.alive){c.rolandFurioso=null;c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;}
+      if(!T||!T.alive||!c.alive||time>=F.expiresAt){c.rolandFurioso=null;c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;}
       else if(time>=F.nextAt&&F.index<9){const i=F.index++,sx=c.x,sy=c.y,dx=T.x-c.x,dy=T.y-c.y,d=Math.hypot(dx,dy)||1,baseAng=Math.atan2(dy,dx),ang=baseAng+((i%3)-1)*.22,step=Math.max(0,d-c.r-T.r-5),tx=c.x+dx/d*step,ty=c.y+dy/d*step;c.face=baseAng;c.rolandFuriDash={sx,sy,tx,ty,start:time,duration:.24};fx.push({type:'rlDash',x:(sx+tx)/2,y:(sy+ty)/2,ang:baseAng,len:Math.hypot(tx-sx,ty-sy)+E(85),t:0,life:.48});T.stunT=Math.max(T.stunT||0,.78);T.cast=null;T.dash=null;damage(c,T,F.damage,{skill:true,color:'#dbe5ff'});fx.push({type:'rlFuri',x:T.x+(Math.random()-.5)*T.r*.35,y:T.y+(Math.random()-.5)*T.r*.35,ang,r:T.r,t:0,life:.62,weapon:i});fx.push({type:'hitflash',x:T.x,y:T.y,r:T.r*1.25,t:0,life:.18});text(T.x,T.y-T.r-E(18),String(i+1)+'/9','#dbe5ff',false,.35);sfxPlay('swing',T.x,T.y,.72,1.15+i*.025);F.nextAt+=.7;
         if(F.index>=9||!T.alive){c.rolandFurioso=null;c.rolandFormUntil=0;c.rolandMaskUntil=0;c.rolandFuriosoReady=false;c.cd.R=c.cdMax.R=([75,60,45][F.rank])*hasteMul(c);sfxPlay('boom',T.x,T.y,1.1);text(T.x,T.y,'FURIOSO','#dbe5ff',true,1.2);}
       }
