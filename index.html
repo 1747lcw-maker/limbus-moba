@@ -14385,6 +14385,34 @@ function drawChamp(g, c) {
     for (let i=0;i<10;i++) { const a=spin+i/10*Math.PI*2, rr=ar*(.92+.12*Math.sin(time*5+i)); g.save(); g.rotate(a); g.fillStyle=i%3===0?'#17130a':(i%2?'#fff4a8':'#ffd52e'); g.beginPath(); g.moveTo(rr,-E(3)); g.lineTo(rr+E(10),0); g.lineTo(rr,E(3)); g.closePath(); g.fill(); g.restore(); }
     g.shadowBlur=0; g.restore();
   }
+  if (c.key === 'mathias' && (c.maRage || 0) >= 50) { // 앙금 50 이상: 보랏빛으로 일렁이는 분노 오라
+    const power = Math.min(1, ((c.maRage || 0) - 50) / 50);
+    const pulse = .5 + .5 * Math.sin(time * 7.5);
+    const radius = c.r * (1.42 + pulse * .16);
+    g.save(); g.translate(c.x, c.y);
+    g.globalCompositeOperation = 'lighter';
+    g.globalAlpha = .5 + power * .28;
+    g.shadowColor = '#a34cff'; g.shadowBlur = E(25 + 12 * pulse);
+    g.fillStyle = `rgba(139,55,235,${.09 + .08 * pulse})`;
+    g.beginPath(); g.arc(0, 0, radius * 1.13, 0, Math.PI * 2); g.fill();
+    for (let j = 0; j < 3; j++) {
+      const phase = time * (1.8 + j * .42) + j * Math.PI * 2 / 3;
+      g.beginPath();
+      g.ellipse(0, 0, radius * (1 + j * .09), radius * (.72 + j * .08), phase, -.95, 1.45);
+      g.strokeStyle = j === 1 ? 'rgba(220,174,255,.9)' : 'rgba(151,74,255,.88)';
+      g.lineWidth = E(3.5 - j * .6); g.stroke();
+    }
+    for (let i = 0; i < 12; i++) {
+      const a = time * (1.25 + (i % 3) * .25) + i * Math.PI * 2 / 12;
+      const wobble = .82 + .18 * Math.sin(time * 5 + i * 1.7);
+      const rr = radius * wobble;
+      const x = Math.cos(a) * rr, y = Math.sin(a) * rr;
+      const sz = E(3 + (i % 3));
+      g.fillStyle = i % 3 === 0 ? '#efd5ff' : (i % 2 ? '#a34cff' : '#d18aff');
+      g.beginPath(); g.moveTo(x, y - sz * 1.8); g.quadraticCurveTo(x + sz * 1.8, y, x, y + sz * 1.8); g.quadraticCurveTo(x - sz * 1.8, y, x, y - sz * 1.8); g.fill();
+    }
+    g.shadowBlur = 0; g.globalCompositeOperation = 'source-over'; g.restore();
+  }
   if (c.iceT > 0) drawIceAura(g, c);
   if (c.vampT > 0) {                                                   // 이상 R 이후 흡혈: 회색 깃털 고리
     for (let i = 0; i < 6; i++) { const a = time * 1.2 + i / 6 * Math.PI * 2; feather(g, c.x + Math.cos(a) * c.r * 1.6, c.y + Math.sin(a) * c.r * 1.6, a + Math.PI / 2, E(10)); }
