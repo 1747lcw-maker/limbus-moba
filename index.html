@@ -12915,13 +12915,20 @@ const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
   alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
-function pickForRoles(roles, taken = []) {                            // 자리마다: 1·2·3순위 챔피언 중 가중치로 추첨 → 없으면 아무나 (한 팀 안 중복 없음)
+function pickForRoles(roles, taken = []) {                            // 자리마다 선호 라인 가중치로 추첨, 리카르도·마티아스 연계 픽 보정
   const used = new Set(taken), out = [];
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   for (const r of roles) {
     const pool = AI_CHAMP_POOL.filter(k => !used.has(k));
+    const hasRicardo = used.has('ricardo'), hasMathias = used.has('mathias');
+    const partner = hasRicardo && !hasMathias ? 'mathias' : hasMathias && !hasRicardo ? 'ricardo' : null;
     let k = null;
-    const cand = pool.map(x => { const t = (ROLE_PREF[x] || []).indexOf(r); return {x, w:x === 'indigoElder' ? 1 : t >= 0 ? ROLE_W[t] || 0 : 0}; }).filter(o => o.w > 0);
+    const cand = pool.map(x => {
+      const t = (ROLE_PREF[x] || []).indexOf(r);
+      const base = x === 'indigoElder' ? 1 : t >= 0 ? ROLE_W[t] || 0 : 0;
+      // 한 명이 이미 팀에 있으면 다른 한 명의 해당 포지션 후보 가중치를 8배로 높인다.
+      return {x, w:base * (x === partner ? 8 : 1)};
+    }).filter(o => o.w > 0);
     let roll = Math.random() * cand.reduce((a, o) => a + o.w, 0);
     for (const o of cand) { roll -= o.w; if (roll <= 0) { k = o.x; break; } }
     if (!k && cand.length) k = cand[cand.length - 1].x;
