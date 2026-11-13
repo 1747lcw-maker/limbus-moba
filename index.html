@@ -596,6 +596,7 @@
       <button type="button" id="mDuel" class="mn-btn"><b>쏠전 · 1대1</b><span>매칭 · 랜덤 5장 공개 → 라운드마다 벤 · 픽 · 먼저 2승</span><em>NEW</em></button>
       <button type="button" id="mVicDev" class="mn-btn"><b>승리 연출 보기</b><span>개발용 · 챔피언별 MVP 승리 연출 미리보기</span></button>
       <button type="button" id="mCodex" class="mn-btn"><b>도감</b><span>챔피언 기초 스탯 · 스킬 계수 · 시연 영상</span></button>
+      <button type="button" id="menuFs" class="mn-btn"><b>전체화면</b><span>화면을 넓게 사용하고 가로 화면으로 전환</span></button>
     </div>
   </div>
 </div>
@@ -2347,14 +2348,17 @@ function aimInfo() {
   return {ax, ay, range, best};
 }
 
-$('fs').addEventListener('click', async () => {
+async function toggleFullscreen() {
   try {
     if (!document.fullscreenElement) {
+      if (!document.documentElement.requestFullscreen) return;
       await document.documentElement.requestFullscreen();
       try { await screen.orientation.lock('landscape'); } catch {}
-    } else await document.exitFullscreen();
+    } else if (document.exitFullscreen) await document.exitFullscreen();
   } catch {}
-});
+}
+$('fs').addEventListener('click', toggleFullscreen);
+$('menuFs').addEventListener('click', toggleFullscreen);
 function renderSpellPick() {
   const icon = id => { try { return spellIconCanvas(id).toDataURL(); } catch { return ''; } };
   const banHtml = `<div class="ai-draft-bans"><b>AI 밴픽 · 금지 챔피언</b><div>${aiDraftBans.map(k => `<span>${esc(STATS[k].name)}</span>`).join('')}</div><small>양 팀 AI가 각각 2명씩 밴했습니다. 밴된 챔피언은 선택할 수 없습니다.</small></div>`;
@@ -2828,7 +2832,8 @@ function sfxToggle(on) {
 $('snd').addEventListener('click', () => sfxToggle(!SFX.on)); sfxToggle(SFX.on);
 
 function resize() {
-  dpr = Math.min(devicePixelRatio || 1, 1.5);                     // 최적화: 고해상도 화면에서 픽셀 수 줄임
+  const mobileRender = matchMedia('(pointer: coarse)').matches || innerWidth <= 760;
+  dpr = Math.min(devicePixelRatio || 1, mobileRender ? 1 : 1.5);   // 모바일은 렌더 해상도를 낮춰 GPU 부하와 발열 감소
   vw = innerWidth; vh = innerHeight;
   cvs.width = vw * dpr; cvs.height = vh * dpr;
   baseZoom = Math.max(vh / 720, vw / 1600) * S * VIEW_K; zoom = baseZoom * zoomMul;
@@ -19383,6 +19388,7 @@ function render() {
   ctxClean(ctx);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, vw, vh);
+  if (!started && !vic) return; // 메뉴·도감 화면에서는 전투 월드 렌더링 생략
   ctx.save();
   const sr = (Math.random() - .5) * shake.mag, sp = (Math.random() - .5) * shake.mag * .45;   // 맞은 방향으로 더 크게 흔들림
   const sx = Math.cos(juice.dir) * sr - Math.sin(juice.dir) * sp, sy = Math.sin(juice.dir) * sr + Math.cos(juice.dir) * sp;
@@ -21045,7 +21051,9 @@ addEventListener('keydown', e => {
 // 초기 전투 상태 생성이 실패해도 아래 UI 이벤트 등록까지 중단되지 않도록 보호
 try { resetGame(); }
 catch (err) { window.__initialResetError = err; console.error('[초기 게임 상태 생성 오류]', err); }
-let last = performance.now();
+let last = performance.now(), lastRender = 0;
+const mobileRender = matchMedia('(pointer: coarse)').matches || innerWidth <= 760;
+const renderInterval = mobileRender ? 1000 / 30 : 0; // 모바일은 그리기만 30fps로 제한하고 시뮬레이션 업데이트는 유지
 try {                                                                   // 멀티 방장: 탭이 뒤로 가도 게임이 멈추지 않게 (워커 타이머는 덜 느려짐)
   const wk = new Worker(URL.createObjectURL(new Blob(['setInterval(() => postMessage(0), 33)'], {type:'text/javascript'})));
   let hl = performance.now();
@@ -21062,7 +21070,10 @@ function loop(now) {
   if (MP_SRV) return;                                                   // 서버: 계산만 (그리기 · 소리 없음)
   if (vic) try { vicTick(dt); } catch (e) { errNote('victory', e); }
   try { sfxScan(); } catch (e) { errNote('sfx', e); }
-  try { render(); } catch (e) { gfxDirty = true; errNote('render', e); }
+  if (!renderInterval || now - lastRender >= renderInterval) {
+    lastRender = now;
+    try { render(); } catch (e) { gfxDirty = true; errNote('render', e); }
+  }
 }
 // ═════════════ 멀티플레이 1단계: 로비 · 픽창 · 로딩 (전용 서버) ═════════════
 const MP_PICK_SEC = 75, MP_ROOM_TTL = 30 * 60 * 1000;
