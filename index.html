@@ -4529,12 +4529,11 @@ function castMathias(c,key,ang,frac){
     mathiasFx(c,'maKick',c.x+dx*E(135),c.y+dy*E(135),c.face,E(second?230:190),.38,'#ff9b48');
     mathiasFx(c,'pop',c.x+dx*E(135),c.y+dy*E(135),c.face,E(120),.38,'#ff9b48');
   }else if(key==='W'){
-    c.maGuardUntil=time+.75;c.ccImmuneUntil=Math.max(c.ccImmuneUntil||0,time+.75);
+    c.maGuardUntil=time+KRI.W.charge;c.ccImmuneUntil=Math.max(c.ccImmuneUntil||0,time+KRI.W.charge);
     c.maGuardAng=c.face;c.maAbsorbed=0;c.maKickUntil=0;
-    // W 피해 기준은 시전 시점의 잃은 체력. 정중앙 적중은 100%, 가장자리는 60% 고정 피해
+    // 리카르도 W처럼 1초간 힘을 모은 뒤 직선 충격파. 정중앙 100%, 바깥쪽 60% 고정 피해
     c.maWTrueDamage=Math.max(0,c.maxHp-c.hp);
     c.cd.W=[16,14,12,10,8][Math.max(0,(c.rank.W||1)-1)]||16;
-    mathiasFx(c,'maWVow',c.x,c.y,c.face,E(225),.5,'#ff9b24');
   }else if(key==='E'){
     const x0=c.x,y0=c.y;c.maStompUntil=time+.55;
     const gap=seek?dist(c,seek):E(175);
@@ -14326,6 +14325,14 @@ function drawMathiasBody(g,c){
   g.fillStyle='rgba(111,65,168,.94)';g.strokeStyle='#28202f';g.lineWidth=E(3);
   for(const x of [-r*.12,r*.3]){g.beginPath();g.roundRect(x-r*.15,-r*.61,r*.3,r*.17,E(4));g.fill();g.stroke();}
   g.strokeStyle='#332640';g.lineWidth=E(3);g.beginPath();g.moveTo(r*.02,-r*.53);g.lineTo(r*.17,-r*.53);g.moveTo(-r*.28,-r*.53);g.lineTo(-r*.42,-r*.48);g.moveTo(r*.45,-r*.53);g.lineTo(r*.58,-r*.48);g.stroke();
+  // W 충전 자세: 리카르도처럼 몸 주위에 기운이 모이고 주먹을 뒤로 당기며 원형 게이지가 차오름
+  if(c.maGuardUntil>time){
+    const k=Math.min(1,Math.max(0,1-(c.maGuardUntil-time)/KRI.W.charge));
+    g.save();g.globalAlpha=.25+.45*k;g.fillStyle='#ff7a24';g.beginPath();g.arc(0,0,r*(1.1+.15*k+.05*Math.sin(time*34)),0,7);g.fill();g.restore();
+    g.fillStyle='#d94b18';g.strokeStyle='#ffb05a';g.lineWidth=E(2.5);g.beginPath();
+    g.arc(-r*.72,-r*.12,r*.23,0,7);g.fill();g.stroke();
+    g.strokeStyle='#ffb04a';g.lineWidth=E(3);g.beginPath();g.arc(0,0,r+E(9),-Math.PI/2,-Math.PI/2+Math.PI*2*k);g.stroke();
+  }
   // 레바테인은 궁극기 연속 참격 중에만 꺼내 든다. 평소 Q/W/E는 발차기 전투 자세.
   if(c.maR&&c.maR.left>0){
   g.save();g.translate(r*.45,r*.34);g.rotate(-.22+swing*.48);
@@ -18310,19 +18317,14 @@ function drawRicardoFx(g, f, k) {
     g.strokeStyle = `rgba(199,125,255,${a})`; g.lineWidth = E(7) * a + E(1); g.beginPath(); g.arc(f.x, f.y, f.r * (.3 + k * .7), 0, 7); g.stroke();
     g.strokeStyle = `rgba(240,232,250,${.8 * a})`; g.lineWidth = E(2.5);
     for (let i = 0; i < 10; i++) { const b = i / 10 * Math.PI * 2 + .2, r0 = f.r * (.25 + k * .4), r1 = f.r * (.45 + k * .55); g.beginPath(); g.moveTo(f.x + Math.cos(b) * r0, f.y + Math.sin(b) * r0); g.lineTo(f.x + Math.cos(b) * r1, f.y + Math.sin(b) * r1); g.stroke(); }
-  } else if (f.type === 'maWPunch') {                                                 // 마티아스 W: 리카르도 W와 동일한 직선 충격파, 주황색
+  } else if (f.type === 'maWPunch') {                                                 // 마티아스 W: 리카르도 원한의 일격과 동일한 타격 모션, 주황색
     g.save(); g.translate(f.x, f.y); g.rotate(f.ang);
-    const L=f.r*(.35+.65*Math.min(1,k*2.2)),w=E(KRI.W.wid)*(.6+.4*(1-k*.4));
-    const gr=g.createLinearGradient(0,0,L,0);gr.addColorStop(0,`rgba(255,145,45,${.82*a})`);gr.addColorStop(1,'rgba(230,75,20,0)');
+    const L=f.r*(.35+.65*Math.min(1,k*2.2)),w=f.wid*(1.1)*(1-k*.4);
+    const gr=g.createLinearGradient(0,0,L,0);gr.addColorStop(0,`rgba(255,106,35,${.75*a})`);gr.addColorStop(1,'rgba(192,48,20,0)');
     g.fillStyle=gr;g.beginPath();g.moveTo(0,-w*.3);g.lineTo(L,-w/2);g.lineTo(L,w/2);g.lineTo(0,w*.3);g.closePath();g.fill();
-    g.fillStyle=`rgba(255,220,155,${.95*a})`;g.fillRect(0,-E(KRI.W.core)*.35*a,L,E(KRI.W.core)*.7*a);
-    g.strokeStyle=`rgba(255,190,105,${a})`;g.lineWidth=E(3);
+    g.fillStyle=`rgba(255,220,175,${.95*a})`;g.fillRect(0,-f.core*.35*a,L,f.core*.7*a);
+    g.strokeStyle=`rgba(255,190,135,${a})`;g.lineWidth=E(3);
     for(let i=0;i<4;i++){const x=L*(.25+i*.2);g.beginPath();g.arc(x-E(30),0,w*(.25+i*.07),-.9,.9);g.stroke();}
-    g.restore();
-  } else if (f.type === 'maWVow' && o) {                                                 // W 시작: 리카르도와 같은 사슬 충전 모션, 주황색
-    g.save();g.globalAlpha=a;g.lineWidth=E(3);
-    const r=o.r+E(8)+E(30)*a,n=Math.max(8,Math.round(r/E(9)));
-    for(let i=0;i<n;i++){const b=k*3+i/n*Math.PI*2,px=o.x+Math.cos(b)*r,py=o.y+Math.sin(b)*r;g.strokeStyle=i%2?'#ffad55':'#ff6a24';g.beginPath();g.ellipse(px,py,r*Math.PI/n*.62,r*Math.PI/n*.34,b+(i%2?0:Math.PI/2),0,7);g.stroke();}
     g.restore();
   } else if (f.type === 'maWCore') {
     g.strokeStyle=`rgba(255,220,155,${a})`;g.lineWidth=E(5)*a+E(1);g.beginPath();g.arc(f.x,f.y,f.r*(1.1+k*.8),0,7);g.stroke();
