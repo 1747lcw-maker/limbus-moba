@@ -4472,28 +4472,111 @@ function indigoHit(c,u,key){if(!u||!u.alive||u.structure)return;const role=c.ind
 function castIndigoElder(c,key,ang,frac){const n=rk(c,key),cds={Q:[8,7.5,7,6.5],W:[13,12,11,10],E:[20,18,16,14],R:[100,90,80]};if(!c.alive||!c.rank[key]||c.cd[key]>0||c.stunT>0||c.cast||gameOver)return false;const cd=cds[key][n]*hasteMul(c),role=c.indigoForm||'ranged';if(key==='Q'||key==='W'){const len=E(key==='Q'?590:650),a=ang==null?autoAim(c,len):ang;c.face=a;const hits=key==='Q'?segHits(c,a,len,E(72)):[...new Set(Array.from({length:7},(_,i)=>segHits(c,a+(i-3)*.105,len,E(44))).flat())];for(const u of hits)indigoHit(c,u,key);fx.push({type:'ieShot',x:c.x,y:c.y,ang:a,len,t:0,life:.42,wide:key==='W'});c.cd[key]=c.cdMax[key]=cd;sfxPlay('shot',c.x,c.y,1.1,key==='W'?.78:1);return true;}if(key==='E'){c.cd.E=c.cdMax.E=cd;c.ieZone={until:time+4.5,role};fx.push({type:'ieWaveZone',owner:c,r:E(390),t:0,life:4.5});for(const u of units){if(!u.alive||u.structure||dist(c,u)>E(390)+u.r)continue;if(u.team!==c.team){u.blindT=Math.max(u.blindT||0,4.5);if(u.ieMarkedBy===c&&u.ieMarkUntil>time&&c.ieRule===2)u.rootT=Math.max(u.rootT||0,time+2.5);}else{u.ieMistUntil=time+4.5;u.ieMistTeam=c.team;if(role==='support'){u.ieSupportUntil=time+4.5;u.ieSupportOwner=c;}}}sfxPlay('wave',c.x,c.y,1.15);return true;}if(key==='R'){const range=E(680),a=ang==null?autoAim(c,range):ang,fr=Math.max(.08,Math.min(1,frac??.65)),px=c.x+Math.cos(a)*range*fr,py=c.y+Math.sin(a)*range*fr;const hit=units.filter(u=>u.alive&&u.team!==c.team&&!u.structure&&!u.ward&&targetable(u)&&Math.hypot(u.x-px,u.y-py)<E(112)+u.r);c.face=a;c.cd.R=c.cdMax.R=cd;c.ieRResolveAt=time+.62;c.ieRTargets=hit;c.ieRPoint={x:px,y:py};fx.push({type:'ieX',x:px,y:py,r:E(112),t:0,life:1.05});sfxPlay('ult',px,py,1.2);return true;}return false;}
 function indigoResolveUlt(c){const hit=c.ieRTargets||[];c.ieRTargets=null;c.ieRResolveAt=0;let executed=false;for(const u of hit){if(!u.alive||u.team===c.team)continue;if(u.hp/u.maxHp<=.30){damage(c,u,999999,{type:'true',skill:true,noProc:true,color:'#b8eaff'});executed=true;for(const a of heroes)if(a.team===c.team&&a!==c&&a.alive)a.gold=(a.gold||0)+300;text(u.x,u.y-u.r-E(40),'처형! 아군 +300 골드','#ffe28a',true,1);}else damage(c,u,105+rk(c,'R')*65+c.ad*.9,{skill:true,type:'physical',color:'#8edcff'});}if(executed){c.cd.R=0;c.cdMax.R=0;}}
 
+function mathiasNearestEnemy(c, maxRange=E(560)){
+  const valid=u=>u&&u!==c&&u.team!==c.team&&u.alive&&targetable(u)&&!u.structure&&!u.ward;
+  if(valid(c.target)&&dist(c,c.target)<=maxRange)return c.target;
+  return units.filter(valid).filter(u=>dist(c,u)<=maxRange).sort((a,b)=>dist(c,a)-dist(c,b))[0]||null;
+}
+function mathiasFx(c,type,x,y,ang,r,life,col){
+  fx.push({type,x,y,ang,r,life,col,color:col,t:0,owner:c});
+}
 function castMathias(c,key,ang,frac){
   const rage=c.maRage||0, blade=c.maBladeStacks||0;
+  const seek=(key==='Q'||key==='E')?mathiasNearestEnemy(c,E(560)):null;
+  if(seek){ang=Math.atan2(seek.y-c.y,seek.x-c.x);}
   c.face=ang??c.face;
+  const dx=Math.cos(c.face),dy=Math.sin(c.face);
   if(key==='Q'){
-    if(c.maQStage===1&&time<(c.maQUntil||0)){const hits=segHits(c,c.face,E(300),E(112));for(const u of hits){damage(c,u,42+c.ad*.72+rage*.7,{skill:true,type:'physical',color:'#ff7438'});u.slowT=Math.max(u.slowT||0,.8);u.slowAmt=Math.max(u.slowAmt||0,.22);if(rage>=100)knockup(u,.45);fx.push({type:'hitspark',x:u.x,y:u.y,ang:c.face,col:'#ff8a38',t:0,life:.22});}c.maQStage=0;c.maQUntil=0;c.cd.Q=8;fx.push({type:'pop',x:c.x+Math.cos(c.face)*E(145),y:c.y+Math.sin(c.face)*E(145),r:E(175),color:'#ff7b32',t:0,life:.42});}
-    else{const hits=segHits(c,c.face,E(250),E(96));for(const u of hits){damage(c,u,35+c.ad*.55,{skill:true,type:'physical',color:'#ff9b48'});u.slowT=Math.max(u.slowT||0,.45);u.slowAmt=Math.max(u.slowAmt||0,.16);fx.push({type:'hitspark',x:u.x,y:u.y,ang:c.face,col:'#ffb04a',t:0,life:.22});}c.maQStage=1;c.maQUntil=time+2.2;c.cd.Q=2.2;fx.push({type:'pop',x:c.x+Math.cos(c.face)*E(125),y:c.y+Math.sin(c.face)*E(125),r:E(115),color:'#ff9b48',t:0,life:.32});}
-  }else if(key==='W'){c.maGuardUntil=time+.75;c.ccImmuneUntil=Math.max(c.ccImmuneUntil||0,time+.75);c.maGuardAng=c.face;c.maAbsorbed=0;c.cd.W=[16,14,12,10,8][Math.max(0,(c.rank.W||1)-1)]||16;fx.push({type:'pop',x:c.x,y:c.y,r:E(105),color:'#ffb04a',t:0,life:.5});}
-  else if(key==='E'){
-    const dx=Math.cos(c.face),dy=Math.sin(c.face),x0=c.x,y0=c.y;c.x=Math.max(45,Math.min(W-45,c.x+dx*E(175)));c.y=Math.max(75,Math.min(H-75,c.y+dy*E(175)));
-    const hits=units.filter(u=>u.team!==c.team&&targetable(u)&&!u.structure&&((u.x-x0)*dx+(u.y-y0)*dy)>0&&((u.x-x0)*dx+(u.y-y0)*dy)<E(230)&&Math.abs((u.x-x0)*dy-(u.y-y0)*dx)<E(95)+u.r);
-    for(const u of hits){damage(c,u,55+c.ad*.9,{skill:true,type:'physical',color:'#ff6a32'});u.pull={x:c.x-dx*E(55),y:c.y-dy*E(55),t:.22};u.stunT=Math.max(u.stunT||0,.45);fx.push({type:'hitspark',x:u.x,y:u.y,ang:c.face,col:'#ff7135',t:0,life:.25});}
-    c.maRage=Math.min(100,rage+hits.length*12+8);c.cd.E=12;fx.push({type:'pop',x:x0,y:y0,r:E(105),color:'#ffb04a',t:0,life:.3});fx.push({type:'pop',x:c.x,y:c.y,r:E(145),color:'#ff642c',t:0,life:.42});
-  }else if(key==='R'){c.maBladeStacks=Math.min(4,blade+1);c.cd.R=[120,100,80][Math.max(0,(c.rank.R||1)-1)]||120;c.maR={left:5,next:time,ang:c.face};fx.push({type:'pop',x:c.x,y:c.y,r:E(175),color:'#ff6a2e',t:0,life:.55});}
+    // 적을 향해 짧게 파고든 뒤 검격: 1·2타 모두 접근 보정
+    if(seek&&c.maQStage!==1){
+      const gap=dist(c,seek),step=Math.min(E(95),Math.max(0,gap-E(145)));
+      if(step>0){c.x=Math.max(45,Math.min(W-45,c.x+dx*step));c.y=Math.max(75,Math.min(H-75,c.y+dy*step));}
+    }
+    const second=c.maQStage===1&&time<(c.maQUntil||0);
+    const len=second?E(320):E(270),wid=second?E(122):E(108);
+    const hits=units.filter(u=>u!==c&&u.team!==c.team&&u.alive&&targetable(u)&&!u.structure&&!u.ward&&(()=>{const rx=u.x-c.x,ry=u.y-c.y,along=rx*dx+ry*dy,cross=Math.abs(rx*dy-ry*dx);return along>=-u.r&&along<=len+u.r&&cross<=wid+u.r;})());
+    for(const u of hits){
+      damage(c,u,second?48+c.ad*.78+rage*.7:38+c.ad*.62,{skill:true,type:'physical',color:'#ff7438'});
+      u.slowT=Math.max(u.slowT||0,second?.9:.55);u.slowAmt=Math.max(u.slowAmt||0,second?.24:.16);
+      if(second&&rage>=100)knockup(u,.45);
+      mathiasFx(c,'hitspark',u.x,u.y,c.face,E(18),.28,'#ffb04a');
+      mathiasFx(c,'maBurst',u.x,u.y,c.face,E(24),.42,'#ff6a2d');
+    }
+    if(second){c.maQStage=0;c.maQUntil=0;c.cd.Q=8;}
+    else{c.maQStage=1;c.maQUntil=time+2.2;c.cd.Q=2.2;}
+    mathiasFx(c,'maSlash',c.x+dx*E(135),c.y+dy*E(135),c.face,E(second?230:190),.38,second?'#ff6a2d':'#ff9b48');
+    mathiasFx(c,'pop',c.x+dx*E(135),c.y+dy*E(135),c.face,E(120),.38,'#ff9b48');
+  }else if(key==='W'){
+    c.maGuardUntil=time+.75;c.ccImmuneUntil=Math.max(c.ccImmuneUntil||0,time+.75);
+    c.maGuardAng=c.face;c.maAbsorbed=0;
+    c.cd.W=[16,14,12,10,8][Math.max(0,(c.rank.W||1)-1)]||16;
+    mathiasFx(c,'maBurst',c.x,c.y,c.face,E(82),.5,'#ffb04a');
+  }else if(key==='E'){
+    const x0=c.x,y0=c.y;
+    const gap=seek?dist(c,seek):E(175);
+    const dash=Math.min(E(320),Math.max(E(175),seek?gap-E(55):E(175)));
+    c.x=Math.max(45,Math.min(W-45,c.x+dx*dash));
+    c.y=Math.max(75,Math.min(H-75,c.y+dy*dash));
+    const vx=c.x-x0,vy=c.y-y0,len=Math.hypot(vx,vy)||1,ux=vx/len,uy=vy/len;
+    const hits=units.filter(u=>u!==c&&u.team!==c.team&&u.alive&&targetable(u)&&!u.structure&&!u.ward&&(()=>{
+      const rx=u.x-x0,ry=u.y-y0,along=rx*ux+ry*uy,cross=Math.abs(rx*uy-ry*ux);
+      return along>=-u.r&&along<=len+u.r&&cross<=E(105)+u.r;
+    })());
+    for(const u of hits){
+      damage(c,u,68+c.ad*1.02+rage*.45,{skill:true,type:'physical',color:'#ff6a32'});
+      u.pull={x:c.x-dx*E(62),y:c.y-dy*E(62),t:.25};
+      u.stunT=Math.max(u.stunT||0,.5);
+      mathiasFx(c,'hitspark',u.x,u.y,c.face,E(22),.3,'#ff7135');
+      mathiasFx(c,'maBurst',u.x,u.y,c.face,E(30),.45,'#ff642c');
+    }
+    c.maRage=Math.min(100,rage+hits.length*12+8);c.cd.E=12;
+    mathiasFx(c,'maSlash',(x0+c.x)/2,(y0+c.y)/2,c.face,E(len*.62),.5,'#ff642c');
+    mathiasFx(c,'pop',c.x,c.y,c.face,E(145),.42,'#ff642c');
+  }else if(key==='R'){
+    c.maBladeStacks=Math.min(4,blade+1);c.cd.R=[120,100,80][Math.max(0,(c.rank.R||1)-1)]||120;
+    c.maR={left:5,next:time,ang:c.face};
+    mathiasFx(c,'maBurst',c.x,c.y,c.face,E(175),.58,'#ff6a2e');
+  }
   if(c.maRage>=100){c.shield=Math.max(c.shield||0,c.maxHp*.28);c.shieldT=3;c.hasteT=Math.max(c.hasteT||0,3);c.maRage=0;}
   if(c===player)text(c.x,c.y-c.r-E(35),skillNames(c)[key],'#ff8a42',true,.85);
   return true;
 }
 function mathiasTick(c,dt){
   if(!c.alive)return;
-  if(c.maGuardUntil>0&&time>=c.maGuardUntil){const a=c.maAbsorbed||0,ang=c.maGuardAng||c.face;c.maGuardUntil=0;if(a>0){const hits=segHits(c,ang,E(390),E(135));for(const u of hits)damage(c,u,35+c.ad*.45+a*.22+(c.maRage||0)*1.4,{skill:true,type:'true',color:'#ff7338'});fx.push({type:'pop',x:c.x,y:c.y,r:E(190),color:'#ff8b3d',t:0,life:.42});}}
-  if(c.maR&&c.maR.left>0&&time>=c.maR.next){const a=c.maR.ang+(5-c.maR.left-2)*.11;const hits=segHits(c,a,E(350),E(115));for(const u of hits){damage(c,u,28+c.ad*.42+(c.maRage||0)*.65,{skill:true,type:'physical',color:'#ff642c'});u.slowT=Math.max(u.slowT||0,1.1);u.slowAmt=Math.max(u.slowAmt||0,.12+(dist(c,u)/E(600))*.12);fx.push({type:'hitspark',x:u.x,y:u.y,ang:a,col:'#ff7135',t:0,life:.22});}fx.push({type:'pop',x:c.x+Math.cos(a)*E(150),y:c.y+Math.sin(a)*E(150),r:E(115),color:'#ff7135',t:0,life:.3});c.maR.left--;c.maR.next=time+.8;if(!c.maR.left)c.maR=null;}
-  for(const ally of champs())if(ally.key==='ricardo'&&ally.team===c.team&&dist(c,ally)<E(230)&&time>=(c.maFamilyReady||0)){if(ally.hp<ally.maxHp*.5&&c.hp>1){const pay=c.hp*.25;c.hp-=pay;ally.shield=Math.max(ally.shield||0,pay);ally.shieldT=3;c.maFamilyReady=time+90;}else if(c.hp<c.maxHp*.5&&ally.hp>1){const pay=ally.hp*.25;ally.hp-=pay;c.shield=Math.max(c.shield||0,pay);c.shieldT=3;c.maFamilyReady=time+90;}}
+  if(c.maGuardUntil>0&&time>=c.maGuardUntil){
+    const absorbed=c.maAbsorbed||0,ang=c.maGuardAng||c.face,dx=Math.cos(ang),dy=Math.sin(ang);
+    c.maGuardUntil=0;
+    // 방어 성공 여부와 관계없이 전방 걷어차기 반격은 발생. 흡수량은 추가 피해로 전환.
+    const hits=units.filter(u=>u!==c&&u.team!==c.team&&u.alive&&targetable(u)&&!u.structure&&!u.ward&&(()=>{
+      const rx=u.x-c.x,ry=u.y-c.y,along=rx*dx+ry*dy,cross=Math.abs(rx*dy-ry*dx);
+      return along>=-u.r&&along<=E(205)+u.r&&cross<=E(118)+u.r;
+    })());
+    for(const u of hits){
+      damage(c,u,58+c.ad*.58+absorbed*.28+(c.maRage||0)*.35,{skill:true,type:'physical',color:'#ff7338'});
+      u.slowT=Math.max(u.slowT||0,.45);
+      mathiasFx(c,'hitspark',u.x,u.y,ang,E(20),.28,'#ffb04a');
+      mathiasFx(c,'maBurst',u.x,u.y,ang,E(26),.38,'#ff8b3d');
+    }
+    mathiasFx(c,'maSlash',c.x+dx*E(105),c.y+dy*E(105),ang,E(170),.42,'#ff8b3d');
+  }
+  if(c.maR&&c.maR.left>0&&time>=c.maR.next){
+    const a=c.maR.ang+(5-c.maR.left-2)*.11,dx=Math.cos(a),dy=Math.sin(a);
+    const hits=units.filter(u=>u!==c&&u.team!==c.team&&u.alive&&targetable(u)&&!u.structure&&!u.ward&&(()=>{
+      const rx=u.x-c.x,ry=u.y-c.y,along=rx*dx+ry*dy,cross=Math.abs(rx*dy-ry*dx);
+      return along>=-u.r&&along<=E(350)+u.r&&cross<=E(115)+u.r;
+    })());
+    for(const u of hits){
+      damage(c,u,28+c.ad*.42+(c.maRage||0)*.65,{skill:true,type:'physical',color:'#ff642c'});
+      u.slowT=Math.max(u.slowT||0,1.1);u.slowAmt=Math.max(u.slowAmt||0,.12+(dist(c,u)/E(600))*.12);
+      mathiasFx(c,'hitspark',u.x,u.y,a,E(18),.25,'#ff7135');
+    }
+    mathiasFx(c,'maSlash',c.x+dx*E(150),c.y+dy*E(150),a,E(190),.36,'#ff7135');
+    c.maR.left--;c.maR.next=time+.8;if(!c.maR.left)c.maR=null;
+  }
+  for(const ally of champs())if(ally.key==='ricardo'&&ally.team===c.team&&dist(c,ally)<E(230)&&time>=(c.maFamilyReady||0)){
+    if(ally.hp<ally.maxHp*.5&&c.hp>1){const pay=c.hp*.25;c.hp-=pay;ally.shield=Math.max(ally.shield||0,pay);ally.shieldT=3;c.maFamilyReady=time+90;}
+    else if(c.hp<c.maxHp*.5&&ally.hp>1){const pay=ally.hp*.25;ally.hp-=pay;c.shield=Math.max(c.shield||0,pay);c.shieldT=3;c.maFamilyReady=time+90;}
+  }
 }
 function castSkillCore(c, key, ang, frac = null) {
   if(c.rolandFurioso||c.liuFurioso)return false; // 연속 궁극기 도중 다른 스킬 입력은 무시하고 상태 유지
@@ -19171,6 +19254,24 @@ function drawBinahFx(g,f,k){
   }
   g.restore();
 }
+function drawMathiasFx(g,f,k){
+  g.save();g.translate(f.x,f.y);g.rotate(f.ang||0);g.globalAlpha=1-k;
+  if(f.type==='maSlash'){
+    const L=f.r*(.55+.45*(1-k)),w=E(12)*(1-k*.45);
+    g.shadowColor=f.col||'#ff6a2d';g.shadowBlur=E(18);
+    g.fillStyle='#57111c';g.strokeStyle='#ff6a2d';g.lineWidth=E(3);
+    g.beginPath();g.moveTo(-L*.18,-w);g.lineTo(L,-w*.45);g.lineTo(L*1.08,0);g.lineTo(L,w*.45);g.lineTo(-L*.18,w);g.closePath();g.fill();g.stroke();
+    g.fillStyle='#ff9b32';g.fillRect(0,-w*.28,L*.92,w*.56);
+    g.strokeStyle='#ffe0a0';g.lineWidth=E(2);g.beginPath();g.moveTo(L*.08,0);g.lineTo(L*.9,0);g.stroke();
+  }else{
+    const e=1+k*1.8;
+    g.strokeStyle=f.col||'#ff8b35';g.lineWidth=E(5)*(1-k);
+    g.beginPath();g.arc(0,0,(f.r||E(24))*e,0,Math.PI*2);g.stroke();
+    g.strokeStyle='#ffd18a';g.lineWidth=E(2)*(1-k);
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;g.beginPath();g.moveTo(Math.cos(a)*f.r*.25,Math.sin(a)*f.r*.25);g.lineTo(Math.cos(a)*f.r*e,Math.sin(a)*f.r*e);g.stroke();}
+  }
+  g.restore();
+}
 function drawFx(g) {
   g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const f of fx) {
@@ -19179,6 +19280,7 @@ function drawFx(g) {
     const k = Math.max(0, f.t / f.life);
     if (!fxSeen(f)) continue;
     if (f.type === 'wardSet' || f.type === 'wardDie') { drawWardFx(g, f, k); continue; }
+    if(f.type.startsWith('ma')){drawMathiasFx(g,f,k);continue;}
     if(f.type.startsWith('gb')){drawGeburaFx(g,f,k);continue;}
     if(f.type.startsWith('ie')){drawIndigoFx(g,f,k);continue;}
     if(f.type.startsWith('nh')){drawNaihwangSkillFx(g,f,k);continue;}
@@ -22641,6 +22743,15 @@ CODEX_SK.gregor = {
   W: {name:"'심장을 노려야지, 아들.'", cd: K.W.cd, range: K.W.len, text: H => `${H.s(CAST.W)} 시전 후 전방으로 길게(길이 ${K.W.len}) 꿰뚫어 맞은 모든 적에게 ${H.phys(H.r(K.W.dmg) + ' ' + H.ad(K.W.ad))}를 줍니다.<br>살아남은 적은 ${H.s(K.W.stun)} 동안 ${H.b('기절')}하고 그레고르 앞으로 줄지어 끌려오며, 시전·귀환이 끊깁니다.<br>${H.b('바퀴 황제')}: 길이 ${K.W.R.len}·폭 ${K.W.R.wid}, 피해 ${H.p(K.W.R.mul)}, 기절 ${H.s(K.W.R.stun)}.`},
   E: {name:'내장파기', cd: K.E.cd, text: H => `즉시 기본 공격 대기 시간이 초기화되고, ${H.s(K.E.window)} 동안 다음 기본 공격 ${K.E.hits}회가 강화됩니다.<br>강화된 공격은 공격 속도가 ${H.rp(K.E.as)} 빨라지고, <span class="cx-hp">대상 최대 체력의 ${H.rp(K.E.pct)}</span>만큼 ${H.b('추가 물리 피해')}를 주며 ${H.s(K.E.slowDur)} 동안 ${H.p(K.E.slow)} 둔화시킵니다. (구조물 제외)<br>챔피언에게는 전장 압도 표식을 남깁니다.<br>${H.b('바퀴 황제')}: <span class="cx-hp">최대 체력 비례 피해 +${H.p(K.E.R.pctAdd)}</span>, 둔화 ${H.p(K.E.R.slow)}.`},
   R: {name:'어느 날 갑자기', cd: K.R.cd, text: H => `${H.s(K.R.cast)} 동안 끊기지 않는 변신 후 ${H.s(K.R.dur)} 동안 ${H.b('바퀴 황제')}가 됩니다.<br>변신 중 체력 +${H.r(K.R.hp)}, 공격력 +${H.r(K.R.ad)}(추가 공격력)을 얻고 몸집이 ${H.p(K.R.scale)}로 커지며, 전장 압도와 모든 기본 스킬이 강화됩니다.<br>변신 중에는 몸 주변(반경 ${K.R.auraR})으로 바퀴 떼가 들끓어 ${H.s(K.R.auraTick)}마다 주변 모든 적에게 ${H.phys(H.r(K.R.aura) + ' ' + H.ad(K.R.auraAd))}를 계속 입힙니다.<br>변신 중 적 챔피언 처치에 관여(처치·도움)하면 지속 시간이 ${H.s(K.R.extend)} 늘어납니다.`},
+};
+
+// 마티아스 · 전투 로직과 동기화된 도감 설명
+CODEX_SK.mathias = {
+  P:{name:'앙심 · 레바테인 · 가족은 서로 도우면서 사는 거란다',text:()=> '피해를 주거나 받을 때 앙심이 쌓이며, 앙심 1당 공격력과 스킬 피해가 0.2% 증가합니다. 앙심이 50을 초과하면 기본 공격에 출혈이 추가됩니다. 앙심 100에 도달하면 다음 스킬 사용 시 최대 체력의 28% 보호막과 3초 이동 속도 증가를 얻습니다. R 사용 시 레바테인 영구 중첩을 얻으며, 중첩당 모든 피해가 25% 증가합니다(최대 4중첩). 리카르도와 가까이 있을 때 한쪽의 체력이 50% 미만이면 90초마다 다른 쪽의 현재 체력 25%를 보호막으로 전달합니다.'},
+  Q:{name:'규칙 위반!',cd:'2.2초(재사용 창) / 8초',range:320,text:()=> '레바테인을 전방으로 내리쳐 직선 범위의 적에게 물리 피해를 줍니다. 적이 가까운 거리에 있으면 자동으로 짧게 접근하며 시전합니다. 첫 타격 후 2.2초 안에 재사용하면 더 넓고 강한 2차 참격을 가하고 둔화를 부여합니다. 앙심이 100일 때 2차 참격에 맞은 적은 공중에 뜹니다.'},
+  W:{name:'걷어차기',cd:'16~8초',range:205,text:()=> '0.75초 동안 전방을 향해 방어 자세를 취하고 군중 제어에 면역이 됩니다. 정면에서 받는 피해를 흡수하며, 자세가 끝나면 전방을 걷어차 적에게 물리 피해와 둔화를 줍니다. 흡수한 피해량이 많을수록 반격 피해가 증가합니다. 공격을 흡수하지 못했더라도 기본 반격 피해는 발생합니다.'},
+  E:{name:'짓밟기',cd:12,range:320,text:()=> '전방으로 최대 320 거리까지 돌진하며 이동 경로에 있는 적을 짓밟아 물리 피해를 줍니다. 적이 가까운 범위에 있으면 자동으로 방향을 맞춰 접근하고, 적중한 대상은 마티아스 쪽으로 끌려온 뒤 0.5초 기절합니다. 적중 여부와 관계없이 앙심을 얻습니다.'},
+  R:{name:'즉결 처형 스탬핑!',cd:'120 / 100 / 80초',text:()=> '레바테인을 해방해 5초 동안 0.8초 간격으로 전방을 연속 참격합니다. 각 참격은 물리 피해와 둔화를 부여합니다. 궁극기를 사용할 때마다 레바테인 중첩이 영구적으로 1 증가하며, 중첩당 모든 피해가 25% 증가합니다(최대 4중첩).'}
 };
 
 // 가치우 · 도감 설명은 전투 데이터(castGachiu / gachiuJaroTick)와 동기화
