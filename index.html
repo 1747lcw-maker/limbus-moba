@@ -12765,8 +12765,8 @@ function pickForRoles(roles, taken = []) {                            // 자리�
   return out;
 }
 const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias'];
-const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear','mathias']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
-const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // 미구현 캐릭터는 AI 선택 후보에서 제외, 플레이어는 직접 선택 가능
+const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
+const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // AI 선택 후보
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
 const enemiesOf = b => champs().filter(c => c.team !== b.team && (!c.alive || seenBy(b.team, c)));   // 시야에 보이는 적만 (죽은 적은 알 수 있음)
 const UNSEEN = {alive:false, unseen:true, respawnT:99, x:-1e5, y:-1e5, r:0, hp:1, maxHp:1, team:'none', st:{range:0, speed:0}, rank:{}, cd:{}, key:'none', vx:0, vy:0, speed:0};
@@ -12776,9 +12776,20 @@ function xpEligible(u, team) {                                      // 근처에
   return champs().filter(c => c.alive && c.team === team && dist(c, u) < XP_RANGE && segClear(c.x, c.y, u.x, u.y));
 }
 function pickKeys(taken, n) {
-  const pool = CHAMP_POOL.filter(k => !taken.includes(k));
-  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  return pool.slice(0, n);
+  const pool = AI_CHAMP_POOL.filter(k => !taken.includes(k));
+  const out = [];
+  // 자야-라칸처럼 리카르도와 마티아스는 한쪽이 팀에 선택되면 다른 쪽의 선택 확률을 높인다.
+  while (out.length < n && pool.length) {
+    const hasRicardo = taken.includes('ricardo') || out.includes('ricardo');
+    const hasMathias = taken.includes('mathias') || out.includes('mathias');
+    const partner = hasRicardo && !hasMathias ? 'mathias' : hasMathias && !hasRicardo ? 'ricardo' : null;
+    const weights = pool.map(k => k === partner ? 5 : 1);
+    const total = weights.reduce((a, b) => a + b, 0);
+    let roll = Math.random() * total, idx = 0;
+    for (; idx < pool.length - 1; idx++) { roll -= weights[idx]; if (roll < 0) break; }
+    out.push(pool.splice(idx, 1)[0]);
+  }
+  return out;
 }
 const SC_ASSASSIN = ['s_blade', 'smile', 'tears', 'bullet', 'scar'];   // 싱클레어 암살자 트리 (브루저 트리는 AI_BUILD)
 const aiBuildBase = b => b.key === 'sinclair' ? ((b.scTree ??= Math.random() < .5 ? 'assassin' : 'bruiser') === 'assassin' ? SC_ASSASSIN : AI_BUILD.sinclair) : (AI_BUILD[b.key] || BOT_BUILD);
