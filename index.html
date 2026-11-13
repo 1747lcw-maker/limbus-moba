@@ -21723,9 +21723,17 @@ function duelHostStep(r) {
   if (r.state === 'done') return;
   if (ps.length < 2) { upd({state:'done', 'd/winner':ps[0] || 'draw', 'd/forfeit':true}); return; }   // 상대가 나감: 남은 사람 승리
   const ban = d.ban || {}, pick = d.pick || {};
-  if (r.solo && G) {                                                             // AI 연습: 상대 AI가 잠시 고민하다 벤 · 픽
-    if (r.state === 'ban' && !ban[G] && now > d.phaseEnd - DUEL_T.ban * 1000 + 1600) { const pool = dArr(d.pool[H]).filter(k => !dArr((d.used || {})[H]).includes(k)); upd({[`d/ban/${G}`]:pool.length > 1 ? pool[Math.floor(Math.random() * pool.length)] : '-'}); return; }
-    if (r.state === 'pick' && !pick[G] && now > d.phaseEnd - DUEL_T.pick * 1000 + 2000) { const av = dAvail(r, G); upd({[`d/pick/${G}`]:av[Math.floor(Math.random() * av.length)]}); return; }
+  if (r.solo && G) {                                                             // AI 연습: 상대 AI가 고민하다 벤 · 픽, AI 대 AI는 양쪽 모두 자동 진행
+    const autoSides = r.aiVsAi ? [H, G] : [G];
+    const banSide = autoSides.find(u => !ban[u]);
+    if (r.state === 'ban' && banSide && now > d.phaseEnd - DUEL_T.ban * 1000 + 1600) {
+      const opp = banSide === H ? G : H, pool = dArr(d.pool[opp]).filter(k => !dArr((d.used || {})[opp]).includes(k));
+      upd({[`d/ban/${banSide}`]:pool.length > 1 ? pool[Math.floor(Math.random() * pool.length)] : '-'}); return;
+    }
+    const pickSide = autoSides.find(u => !pick[u]);
+    if (r.state === 'pick' && pickSide && now > d.phaseEnd - DUEL_T.pick * 1000 + 2000) {
+      const av = dAvail(r, pickSide); upd({[`d/pick/${pickSide}`]:av[Math.floor(Math.random() * av.length)]}); return;
+    }
   }
   if (r.state === 'reveal' && now >= d.phaseEnd) upd({state:'ban', 'd/ban':dBanInit(r), 'd/phaseEnd':now + DUEL_T.ban * 1000});
   else if (r.state === 'ban' && ((ban[H] && ban[G]) || now >= d.phaseEnd)) {
