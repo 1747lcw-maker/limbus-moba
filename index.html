@@ -4705,7 +4705,7 @@ function philipTick(c,dt){
  if(c.phFxAction&&time>=c.phFxAction.until)c.phFxAction=null;
  if(c.phTransformUntil>0&&time>=c.phTransformUntil){c.phTransformUntil=0;c.phInvulnUntil=0;if(c.phPendingEgo){c.phPendingEgo=false;sfxPlay('phTransformCrack',c.x,c.y,1.12,.88);c.phEgoUntil=time+20;c.cd.R=0;c.cdMax.R=95;c.hp=c.maxHp;c.phQStacks=0;c.phFireUntil=time+1.2;fx.push({type:'burst',x:c.x,y:c.y,r:c.r*3,t:0,life:.9,col:'#ff9c50'});text(c.x,c.y-c.r-E(52),'밀랍날개','#ffb36c',true,1.2);}}
  if(c.phEgoUntil>0&&time>=c.phEgoUntil){c.phEgoUntil=0;c.phAtkUntil=0;c.phDRUntil=0;c.phWingGuardUntil=0;c.phRCharge=null;c.phQStacks=0;c.phEgoUsed=false;fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2,t:0,life:.6,col:'#8B8580'});}
- if(c.phRCharge&&time>=c.phRCharge.until){const a=c.phRCharge.ang;c.phRCharge=null;c.phRRect=null;c.face=a;const hits=philipLineHits(c,a,E(1050),E(240)),count=hits.length;for(const u of hits){const d=philipSlash(c,u,160+c.ad*1.25);u.stunT=Math.max(u.stunT||0,1.5);philipBurn(c,u,d*count,'타오르는 일격');}const sx=c.x,sy=c.y;c.x=Math.max(E(25),Math.min(W-E(25),c.x+Math.cos(a)*E(850)));c.y=Math.max(E(25),Math.min(H-E(25),c.y+Math.sin(a)*E(850)));c.phDashTrail={sx,sy,ex:c.x,ey:c.y,until:time+.9,fire:true};c.phRDashUntil=time+.9;c.vx=0;c.vy=0;c.phFireUntil=time+1.2;philipFlameAction(c,'rBurst',a,.95,1.8);fx.push({type:'burst',x:c.x,y:c.y,r:E(260),t:0,life:.85,col:'#ff8b38'});}
+ if(c.phRCharge&&time>=c.phRCharge.until){const a=c.phRCharge.ang;c.phRCharge=null;c.phRRect=null;c.face=a;const hits=philipLineHits(c,a,E(1050),E(240)),count=hits.length;for(const u of hits){const d=philipSlash(c,u,160+c.ad*1.25);u.stunT=Math.max(u.stunT||0,1.5);philipBurn(c,u,d*count,'타오르는 일격');}const sx=c.x,sy=c.y;c.x=Math.max(E(25),Math.min(W-E(25),c.x+Math.cos(a)*E(850)));c.y=Math.max(E(25),Math.min(H-E(25),c.y+Math.sin(a)*E(850)));c.phDashTrail={sx,sy,ex:c.x,ey:c.y,until:time+.9,fire:true};c.vx=0;c.vy=0;c.phFireUntil=time+1.2;philipFlameAction(c,'rBurst',a,.95,1.8);fx.push({type:'burst',x:c.x,y:c.y,r:E(260),t:0,life:.85,col:'#ff8b38'});}
 }
 function castSkillCore(c, key, ang, frac = null) {
   if(c.rolandFurioso||c.liuFurioso)return false; // 연속 궁극기 도중 다른 스킬 입력은 무시하고 상태 유지
@@ -12357,7 +12357,7 @@ function respawnTick(c, dt) {
   }
 }
 function moveChamp(c, dx, dy, dt) {
-  if(c.key==='philip'&&(c.phRDashUntil||0)>time){dx=0;dy=0;c.vx=0;c.vy=0;} // 재사용 R 대시 연출 시간 동안 이동 불가
+  if(c.key==='philip'&&c.phRCharge&&time<c.phRCharge.until){dx=0;dy=0;c.vx=0;c.vy=0;} // 재사용 R 대기 시간 동안 이동 불가
   const k = 1 - Math.exp(-dt * 18), sp = E(c.speed) * speedMul(c) * (c.brTempoUntil>time ? 1+(c.brTempoMove||.10) : 1);
   if (c !== player || window.AUTOPLAY || spectating) [dx, dy] = steerAround(c, dx, dy);   // AI는 구조물을 돌아감
   c.vx += (dx * sp - c.vx) * k; c.vy += (dy * sp - c.vy) * k;
