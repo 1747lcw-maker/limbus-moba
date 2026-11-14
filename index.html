@@ -24249,7 +24249,7 @@ function musicSave(){ try{localStorage.setItem('limbusMusicSettings',JSON.string
 function musicApplyVolume(){
   const v=MUSIC.muted?0:MUSIC.volume;
   if(MUSIC.audio) MUSIC.audio.volume=v;
-  if(MUSIC.master && MUSIC.ctx) MUSIC.master.gain.setTargetAtTime(v*.22,MUSIC.ctx.currentTime,.04);
+  if(MUSIC.master && MUSIC.ctx) MUSIC.master.gain.setTargetAtTime(v*.85,MUSIC.ctx.currentTime,.04);
 }
 function musicSetVolume(v){
   MUSIC.volume=Math.max(0,Math.min(1,Number(v)||0));
@@ -24293,7 +24293,7 @@ function musicSynthStep(track){
   const roots=[0,5,3,7],root=cfg.root*Math.pow(2,roots[bar%4]/12);
   if(pos===0){
     musicTone(root,beat*3.7,'sine',.12,c.currentTime);
-    for(const semi of cfg.chord)musicTone(root*2*Math.pow(2/semi===0?0:semi/12),beat*3.5,'sine',.025,c.currentTime);
+    for(const semi of cfg.chord)musicTone(root*2*Math.pow(2,semi/12),beat*3.5,'sine',.025,c.currentTime);
   }
   const semi=cfg.scale[step%cfg.scale.length]+(bar%2?12:0);
   musicTone(root*2*Math.pow(2,semi/12),beat*.82,cfg.wave,track==='battle'?.045:.035,c.currentTime);
