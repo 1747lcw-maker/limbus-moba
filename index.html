@@ -3795,7 +3795,7 @@ function damage(src, tgt, amount, opts = {}) {
       fx.push({type:'pop', x:tgt.x, y:tgt.y, r:tgt.r * 1.3, color:'#e6c35c', t:0, life:.35});
     }
   }
-  if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { src.dmgDealt = (src.dmgDealt || 0) + geburaActualHpLoss + shieldLoss; tgt.dmgTaken = (tgt.dmgTaken || 0) + geburaActualHpLoss; }   // 통계: 보호막·초과 피해를 제외한 실제 체력 감소량
+  if (isChamp(src) && src.team !== tgt.team && (isChamp(tgt) || opts.damageOverTime)) { src.dmgDealt = (src.dmgDealt || 0) + geburaActualHpLoss + shieldLoss; if (isChamp(tgt)) tgt.dmgTaken = (tgt.dmgTaken || 0) + geburaActualHpLoss; }   // 통계: 챔피언 피해 및 화상·출혈 지속 피해 기록
   if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { if (time - (tgt.lastChampHitT ?? -99) > 5) tgt.fightT0 = time; tgt.lastChampHitT = time; }
   if (isChamp(src) && src.gdGuard && tgt.team !== src.team) gdLifeline(src, amount);   // 귀도 집행 유예: 지키는 아군 딜의 15% 회복
   if (isChamp(src) && src.alive) {                    // 흡혈
@@ -13965,8 +13965,8 @@ function update(dt) {
   if ((visT -= dt) <= 0) { visT = .08; visTeam ^= 1; visionUpdate(visTeam ? player.team : (player.team === 'blue' ? 'red' : 'blue')); }   // 두 팀을 번갈아 (팀마다 0.16초)
   for (const u of units) {
     if (!u.alive) continue;
-    if(u.phBurns&&u.phBurns.length){for(const b of u.phBurns){if(!b.src||!b.src.alive||time>=b.until){b.left=0;continue;}b.tick-=dt;if(b.tick<=0){b.tick+=.25;const d=Math.min(b.left,b.total/(Math.max(.25,b.duration||3)/.25));b.left-=d;if(d>0)damage(b.src,u,d,{type:'true',noProc:true,noStack:true,color:'#ff873f'});}}u.phBurns=u.phBurns.filter(b=>b.left>.01&&time<b.until&&u.alive);}
-    if(u.bnBleeds&&u.bnBleeds.length){for(const b of u.bnBleeds){b.tick-=dt;while(b.tick<=0&&b.ticks>0&&u.alive){b.tick+=.5;b.ticks--;damage(b.src,u,b.dps*.5,{type:'true',noProc:true,noStack:true,noBinahStack:true,color:'#d9b52c'});}}u.bnBleeds=u.bnBleeds.filter(b=>b.ticks>0&&u.alive);}
+    if(u.phBurns&&u.phBurns.length){for(const b of u.phBurns){if(!b.src||!b.src.alive||time>=b.until){b.left=0;continue;}b.tick-=dt;if(b.tick<=0){b.tick+=.25;const d=Math.min(b.left,b.total/(Math.max(.25,b.duration||3)/.25));b.left-=d;if(d>0)damage(b.src,u,d,{type:'true',noProc:true,noStack:true,damageOverTime:true,color:'#ff873f'});}}u.phBurns=u.phBurns.filter(b=>b.left>.01&&time<b.until&&u.alive);}
+    if(u.bnBleeds&&u.bnBleeds.length){for(const b of u.bnBleeds){b.tick-=dt;while(b.tick<=0&&b.ticks>0&&u.alive){b.tick+=.5;b.ticks--;damage(b.src,u,b.dps*.5,{type:'true',noProc:true,noStack:true,noBinahStack:true,damageOverTime:true,color:'#d9b52c'});}}u.bnBleeds=u.bnBleeds.filter(b=>b.ticks>0&&u.alive);}
     if (u.mark && time >= u.mark.until) u.mark = null;
     if (u.flashT > 0) u.flashT -= dt;
     if (u.joltT > 0) u.joltT -= dt;
@@ -13978,14 +13978,14 @@ function update(dt) {
     }
     if (u.burn) {                // 피의 갈증 화상: Furioso 무적 중 남은 시간 보존
       if (time >= u.burn.until) u.burn = null;
-      else if ((u.burn.tick -= dt) <= 0) { u.burn.tick = .5; damage(u.burn.src, u, u.burn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff6a4a'}); if (!u.alive) continue; }
+      else if ((u.burn.tick -= dt) <= 0) { u.burn.tick = .5; damage(u.burn.src, u, u.burn.dps * .5, {type:'true', noProc:true, noStack:true, damageOverTime:true, color:'#ff6a4a'}); if (!u.alive) continue; }
     }
-    if(u.ieBleed){const b=u.ieBleed;if(time>=b.until||!b.src||!b.src.alive)u.ieBleed=null;else{b.acc+=dt;if(b.acc>=.25){b.acc-=.25;const amt=b.total*(.25/b.duration);damage(b.src,u,amt,{type:'true',noProc:true,noStack:true,color:'#ff3454'});b.left=Math.max(0,b.left-.25);}}}
-    if(u.maBurn){if(time>=u.maBurn.until||!u.maBurn.src||!u.maBurn.src.alive)u.maBurn=null;else if((u.maBurn.tick-=dt)<=0){u.maBurn.tick=.5;damage(u.maBurn.src,u,u.maBurn.dps*.5,{type:'true',noProc:true,noStack:true,color:'#ff7135'});if(!u.alive)continue;}}
-    if(u.maBleed){if(time>=u.maBleed.until||!u.maBleed.src||!u.maBleed.src.alive)u.maBleed=null;else if((u.maBleed.tick-=dt)<=0){u.maBleed.tick=.5;damage(u.maBleed.src,u,u.maBleed.dps*.5,{type:'true',noProc:true,noStack:true,color:'#d83232'});if(!u.alive)continue;}}
+    if(u.ieBleed){const b=u.ieBleed;if(time>=b.until||!b.src||!b.src.alive)u.ieBleed=null;else{b.acc+=dt;if(b.acc>=.25){b.acc-=.25;const amt=b.total*(.25/b.duration);damage(b.src,u,amt,{type:'true',noProc:true,noStack:true,damageOverTime:true,color:'#ff3454'});b.left=Math.max(0,b.left-.25);}}}
+    if(u.maBurn){if(time>=u.maBurn.until||!u.maBurn.src||!u.maBurn.src.alive)u.maBurn=null;else if((u.maBurn.tick-=dt)<=0){u.maBurn.tick=.5;damage(u.maBurn.src,u,u.maBurn.dps*.5,{type:'true',noProc:true,noStack:true,damageOverTime:true,color:'#ff7135'});if(!u.alive)continue;}}
+    if(u.maBleed){if(time>=u.maBleed.until||!u.maBleed.src||!u.maBleed.src.alive)u.maBleed=null;else if((u.maBleed.tick-=dt)<=0){u.maBleed.tick=.5;damage(u.maBleed.src,u,u.maBleed.dps*.5,{type:'true',noProc:true,noStack:true,damageOverTime:true,color:'#d83232'});if(!u.alive)continue;}}
     if (u.nhBurn) {               // 뇌횡: 맹호의 화염 (Furioso 무적 중 남은 시간 보존)
       if (time >= u.nhBurn.until) u.nhBurn = null;
-      else if ((u.nhBurn.tick -= dt) <= 0) { u.nhBurn.tick = .5; damage(u.nhBurn.src, u, u.nhBurn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff7438'}); if (!u.alive) continue; }
+      else if ((u.nhBurn.tick -= dt) <= 0) { u.nhBurn.tick = .5; damage(u.nhBurn.src, u, u.nhBurn.dps * .5, {type:'true', noProc:true, noStack:true, damageOverTime:true, color:'#ff7438'}); if (!u.alive) continue; }
     }
     if (isMinion(u)) updateMinion(u, dt);
     else if (u.kind === 'siege' && u.alive) updateSiege(u, dt);
