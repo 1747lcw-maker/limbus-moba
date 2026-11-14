@@ -12516,8 +12516,9 @@ function aiCombo(b, p) {
   }
   if (b.key === 'philip') {
     const a = aimAt(b,p,.18), ego = (b.phEgoUntil||0) > time;
-    // 필립의 E.G.O는 체력 30% 이하에서만 발동한다. 변신 준비 중에는 다른 스킬을 낭비하지 않는다.
-    if (!ego && !(b.phTransformUntil>time) && !b.phEgoUsed && b.hp<=b.maxHp*.30 && ready('R')) {
+    // 체력 30% 이하라도 자동으로 궁을 낭비하지 않는다. 근접한 적의 즉각적인 위협이나 최근 집중 공격이 있을 때만 생존용으로 발동한다.
+    const immediateThreat = d < E(280) || (b.lastDmgT ?? 99) < 1.0;
+    if (!ego && !(b.phTransformUntil>time) && !b.phEgoUsed && b.hp<=b.maxHp*.30 && ready('R') && immediateThreat) {
       castSkill(b,'R',a); return true;
     }
     if (b.phTransformUntil>time) return false;
@@ -13395,23 +13396,7 @@ function teamPlan(team) {                                    // 12초마다 팀 
 }
 function aiMacro(b, hpB, p, pd) {                             // 반환: 이동할 지점 (없으면 평소 행동)
   if (hpB < .3) return null;
-  // 정글러도 아군 포탑 방어를 최우선한다. 포탑 주변에 적 챔피언·대규모 미니언 웨이브가 보이면 캠프 운영 중단.
-  if (b.role === 'jungle' && hpB > .22) {
-    let threatened=null, threatScore=0;
-    for(const t of units){
-      if(t.kind!=='turret'||!t.alive||t.team!==b.team)continue;
-      const foes=heroes.filter(e=>e.alive&&e.team!==b.team&&seenBy(b.team,e)&&dist(e,t)<E(1050));
-      const wave=units.filter(m=>isMinion(m)&&m.alive&&m.team!==b.team&&dist(m,t)<E(620));
-      const score=foes.length*3+Math.min(4,wave.length)+(1-t.hp/t.maxHp)*1.5;
-      if((foes.length||wave.length>=3)&&score>threatScore){threatScore=score;threatened={t,foes,wave};}
-    }
-    if(threatened){
-      const {t,foes,wave}=threatened;
-      const focus=foes.sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]||wave.sort((a,b)=>a.hp-b.hp)[0];
-      const away=focus?Math.atan2(focus.y-t.y,focus.x-t.x):0;
-      return{x:t.x+Math.cos(away)*E(190),y:t.y+Math.sin(away)*E(190),defend:true,target:focus,turret:t};
-    }
-  }
+  // 정글러는 일반적인 라인 포탑 압박만으로 캠프 동선을 이탈하지 않는다. 기지 핵심 방어는 아래 baseThreat에서만 예외 처리한다.
   const sg = units.find(u => u.kind === 'siege' && u.alive && u.team !== b.team && dist(u, b) < E(1600));   // 적 철거 거수: 잡으러 감
   if (sg && hpB > .4 && dist(sg, b) > E(500) && !(p.alive && pd < E(500))) return {x:sg.x, y:sg.y, defend:true};
   const th = baseThreat(b.team);
@@ -13429,8 +13414,8 @@ function aiMacro(b, hpB, p, pd) {                             // 반환: 이동�
     return null;
   }
   // 아군 구출: 우리 편이 수적으로 밀리며 물리면 멀리 있어도 합류 (2:2 맞싸움엔 안 감)
-  if (hpB > .4) {
-    const laning = time < 840 && b.role !== 'jungle';                          // 라인전: 라이너는 자기 라인 근처만 도우러 감
+  if (hpB > .4 && b.role !== 'jungle') {
+    const laning = time < 840;                          // 라인전: 라이너는 자기 라인 근처만 도우러 감
     let best = null, bd = laning ? E(1700) : E(4200);
     for (const a of heroes) {
       if (a === b || !a.alive || a.team !== b.team) continue;
@@ -13496,13 +13481,6 @@ function updateBot(b, dt) {
   const p = focusEnemy(b), hpB = b.hp / b.maxHp;
   b.thinkT = (b.thinkT || 0) - dt; b.stanceT = (b.stanceT || 0) - dt;
   const react = () => AI.react[0] + Math.random() * (AI.react[1] - AI.react[0]);
-  // 필립의 생존 궁극기는 교전 모드·대상 유무와 관계없이 체력 30% 이하에서 우선 발동한다.
-  if (b.key === 'philip' && hpB <= .30 && !(b.phEgoUntil > time) &&
-      !(b.phTransformUntil > time) && !b.phEgoUsed && b.rank.R > 0 && b.cd.R <= 0) {
-    const emergencyTarget = p && p.alive ? p : enemiesOf(b).filter(e => e.alive && seenBy(b.team,e)).sort((a,z)=>dist(b,a)-dist(b,z))[0];
-    const emergencyAngle = emergencyTarget ? Math.atan2(emergencyTarget.y-b.y,emergencyTarget.x-b.x) : (b.face || 0);
-    if (castSkill(b,'R',emergencyAngle)) { moveChamp(b,0,0,dt); return; }
-  }
   let dx = 0, dy = 0;
   const go = (x, y) => { const d = Math.hypot(x - b.x, y - b.y); if (d > E(20)) { const q = navStep(b, x, y), qd = Math.hypot(q.x - b.x, q.y - b.y) || 1; dx = (q.x - b.x) / qd; dy = (q.y - b.y) / qd; } return d; };
   const backOff = () => {                               // 상대 반대쪽 + 아군 포탑 쪽으로 물러남
