@@ -2663,6 +2663,19 @@ function sfxSynth(ctx) {
     const pulse = .82 + .12 * Math.sin(2 * Math.PI * 11 * t) + .06 * Math.sin(2 * Math.PI * 19 * t);
     return (roar + low + hiss) * env * pulse;
   });
+  mk('phFireSwing', .48, (t, st) => { // 필립 E.G.O: 불길을 가르는 검격
+    const env=Math.min(1,t/.012)*Math.exp(-t*7.2), n=hp(st,noise(),900+Math.sin(t*24)*420);
+    const rush=lp(st,noise(),2100)*1.4, low=Math.sin(2*Math.PI*(155-75*t)*t)*Math.exp(-t*10)*.32;
+    return (n*.65+rush*.7+low)*env;
+  });
+  mk('phDarkBell', 2.35, (t, st) => { // 필립 변신 대기: 어둡고 긴 금속 종 울림
+    const env=Math.exp(-t*1.65), fundamental=Math.sin(2*Math.PI*82.4*t)*Math.exp(-t*1.35);
+    const bell=Math.sin(2*Math.PI*164.8*t+Math.sin(t*2)*.08)*Math.exp(-t*1.9)*.72
+      +Math.sin(2*Math.PI*247.2*t)*Math.exp(-t*2.5)*.34
+      +Math.sin(2*Math.PI*329.6*t)*Math.exp(-t*3.2)*.16;
+    const metallic=hp(st,noise(),1450)*Math.exp(-t*9)*.07;
+    return (fundamental*.42+bell+metallic)*Math.min(1,t/.008)*env;
+  });
   mk('maFlameHit', .38, (t, st) => {                                   // 마티아스 R 타격: 불꽃이 확 터지는 저음 충격 + 뜨거운 바람
     const blast = lp(st, noise(), 2100) * Math.exp(-t * 17) * 2.3;
     const body = Math.sin(2 * Math.PI * (108 - 58 * Math.min(1, t / .3)) * t) * Math.exp(-t * 13) * 1.05;
@@ -2731,6 +2744,8 @@ const SFX_GROUP = {                                                    // 묶음
   zapBig:{c:['zapBig'], v:.42, gap:.12, p:.06},
   flame:{c:['maFlame'], v:.62, gap:.72, p:.025},
   flameHit:{c:['maFlameHit'], v:.48, gap:.16, p:.04},
+  phFireSwing:{c:['phFireSwing'],v:.52,gap:.075,p:.06},
+  phDarkBell:{c:['phDarkBell'],v:.62,gap:.5,p:0},
   charge:{c:['charge'], v:.16, gap:.1, p:0},
   whiff:{c:['whiff1', 'whiff2'], v:.24, gap:.07, p:.1},
   pop:{c:['pop'], v:.2, gap:.05, p:.25},
@@ -4048,6 +4063,7 @@ function basicAttack(c, t) {
   if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(c.nhInstinctUntil>time?1.3:1.08, c.as * 1.38 * (c.nhInstinctUntil>time?1.2:1))); // 묵직한 한 방: 공격 속도 상한
   c.swingT = c.key === 'naihwang' ? .52 : c.key === 'gebura' ? .46 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
+  if(c.key==='philip'&&c.phEgoUntil>time)sfxPlay('phFireSwing',c.x,c.y,.95,1.05);
   if(c.key==='binah')fx.push({type:'bnBolt',x:c.x,y:c.y,ang:c.face,len:Math.max(E(70),dist(c,t)),t:0,life:.24});
   if (c.key === 'naihwang') sfxPlay('shotgun', c.x, c.y, 1.25, .96); // 짧고 묵직한 산탄총 발사음
   if(c.key==='liuEn')fx.push({type:'lySlash',x:t.x,y:t.y,ang:c.face,r:Math.max(E(38),t.r*1.5),t:0,life:.48,weapon:c.liuWeapon||0});
@@ -4620,9 +4636,10 @@ function philipBurn(src,u,total,kind='화상'){if(!u||!u.alive||total<=0)return;
 function philipSlash(c,u,amount){if(!u||!u.alive)return 0;const before=u.hp;damage(c,u,amount,{skill:true,type:'physical',color:'#d8d2cb'});return Math.max(0,before-u.hp);}
 function castPhilip(c,key,ang){
  const ego=c.phEgoUntil>time,cds=ego?{Q:7,W:14,E:18,R:95}:{Q:5,W:12,E:15,R:180};
- if(key==='R'&&ego){if(c.phRCharge)return;const a=ang==null?autoAim(c,E(650)):ang;c.face=a;c.phRCharge={until:time+1.5,ang:a};c.phRRect={ang:a,until:time+1.5};c.cd.R=c.cdMax.R=cds.R;text(c.x,c.y-c.r-E(48),'타오르는 일격','#ff9a42',true,1);return;}
- if(key==='R'){if(c.hp>c.maxHp*.30||c.phEgoUsed)return;c.phEgoUsed=true;c.phTransformUntil=time+3;c.phInvulnUntil=time+3;c.phPendingEgo=true;c.cd.R=c.cdMax.R=180;c.vx=c.vy=0;c.dash=null;c.cast=null;cancelRecall(c);fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2.8,t:0,life:1,col:'#d28b58'});text(c.x,c.y-c.r-E(50),'불안정 개화 E.G.O','#e5a06b',true,1.15);return;}
+ if(key==='R'&&ego){if(c.phRCharge)return;sfxPlay('phFireSwing',c.x,c.y,1.15,.82);const a=ang==null?autoAim(c,E(650)):ang;c.face=a;c.phRCharge={until:time+1.5,ang:a};c.phRRect={ang:a,until:time+1.5};c.cd.R=c.cdMax.R=cds.R;text(c.x,c.y-c.r-E(48),'타오르는 일격','#ff9a42',true,1);return;}
+ if(key==='R'){if((!window.DEMO||window.DEMO.champ!=='philip')&&(c.hp>c.maxHp*.30||c.phEgoUsed))return;if(window.DEMO&&window.DEMO.champ==='philip')c.phEgoUsed=false;c.phEgoUsed=true;sfxPlay('phDarkBell',c.x,c.y,1.0,.9);c.phTransformUntil=time+3;c.phInvulnUntil=time+3;c.phPendingEgo=true;c.cd.R=c.cdMax.R=180;c.vx=c.vy=0;c.dash=null;c.cast=null;cancelRecall(c);fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2.8,t:0,life:1,col:'#d28b58'});text(c.x,c.y-c.r-E(50),'불안정 개화 E.G.O','#e5a06b',true,1.15);return;}
  if(ego){
+  if(key!=='R')sfxPlay('phFireSwing',c.x,c.y,.9,1);
   if(key==='Q'){const a=ang==null?autoAim(c,E(390)):ang;c.face=a;const hits=philipLineHits(c,a,E(410),E(58));if(hits.length)c.phQStacks=(c.phQStacks||0)+1;const third=c.phQStacks>=3;if(third)c.phQStacks=0;for(const u of hits){const d=philipSlash(c,u,72+c.ad*.85);if(third){u.stunT=Math.max(u.stunT||0,2);philipBurn(c,u,d,'서글픈 노을');}}c.cd.Q=c.cdMax.Q=cds.Q;c.phBladeGlowUntil=time+.45;c.phFireUntil=time+.7;return;}
   if(key==='W'){c.face=ang==null?c.face:ang;c.phWingGuardUntil=time+5;c.phWingGuardAng=c.face;c.cd.W=c.cdMax.W=cds.W;c.phWingFxUntil=time+5;text(c.x,c.y-c.r-E(42),'깃털 방패','#e6d4c2',true,.85);return;}
   if(key==='E'){c.phAtkUntil=time+4.5;c.phDRUntil=time+4.5;c.phDRAmount=.20;c.phHealUntil=time+4.5;c.hp=Math.min(c.maxHp,c.hp+Math.max(1,c.ad));c.cd.E=c.cdMax.E=cds.E;c.phFireUntil=time+4.5;c.phWingFxUntil=time+4.5;text(c.x,c.y-c.r-E(42),'슬퍼하고 있는 나를 위해','#ffb36c',true,.9);return;}
@@ -20589,6 +20606,14 @@ Object.assign(SKILL_ICON_DRAW,{mathias:{
  E:g=>{iconGlow(g,0,0,33,'rgba(45,240,215,.8)');g.strokeStyle='#47f2df';g.lineWidth=3;g.strokeRect(-25,-17,50,34);g.strokeStyle='#c2fff5';g.lineWidth=1.5;g.strokeRect(-20,-12,40,24);iconPoly(g,[[-8,-19],[8,-19],[5,2],[0,17],[-5,2]],'#f1edf7','#a88ac5');for(let i=0;i<4;i++)iconLine(g,-19+i*12,20,-12+i*12,26,'#48f4df',2);},
  R:g=>{iconGlow(g,0,0,35,'rgba(255,72,20,.95)');g.save();g.rotate(-.25);sSlash(g,-23,18,20,-21,'#34151b',11);sSlash(g,-21,16,22,-23,'#e5d8e9',4);g.restore();for(let j=0;j<4;j++){g.strokeStyle=['#8b170d','#ed3d12','#ff8127','#ffd36b'][j];g.lineWidth=5-j*.7;g.beginPath();g.arc(0,0,17+j*4,-1.05,.95);g.stroke();}for(let i=0;i<7;i++){const a=i*.9; sFlame(g,Math.cos(a)*23,Math.sin(a)*22,.55,'#ff6a18','#ffe08a');}}
 }});
+SKILL_BG.philip=['#b65b2b','#1b1116'];
+Object.assign(SKILL_ICON_DRAW,{philip:{
+ P:g=>{iconGlow(g,0,0,31,'rgba(232,142,82,.72)');g.strokeStyle='#e7d8c5';g.lineWidth=2.5;g.beginPath();g.arc(0,0,21,0,Math.PI*2);g.stroke();for(let i=0;i<5;i++){const a=-1.2+i*.6;iconLine(g,Math.cos(a)*8,Math.sin(a)*8,Math.cos(a)*27,Math.sin(a)*27,'#f3a66b',2.5);}iconCircle(g,0,0,6,'#fff0d7','#f1a16a');},
+ Q:g=>{iconGlow(g,0,0,31,'rgba(225,170,130,.65)');g.save();g.rotate(-.45);iconLine(g,-24,0,24,0,'#382b2b',9);iconLine(g,-18,0,25,0,'#eee3d5',3);iconPoly(g,[[17,-7],[29,0],[17,7]],'#f4e6d4','#fff5e8');g.restore();for(let i=0;i<4;i++)sSlash(g,-18+i*10,19,0+i*10,10,'#ff9b4b',2.5);},
+ W:g=>{iconGlow(g,0,0,32,'rgba(245,155,90,.7)');g.save();g.rotate(-.5);iconLine(g,-20,17,17,-17,'#3a2925',10);iconLine(g,-18,15,19,-19,'#f0e4d7',3);g.restore();for(let i=0;i<3;i++){const a=i*2.1;iconLine(g,Math.cos(a)*12,Math.sin(a)*12,Math.cos(a)*27,Math.sin(a)*27,'#ffb36c',2.5);}},
+ E:g=>{iconGlow(g,0,0,32,'rgba(255,180,110,.75)');iconCircle(g,0,0,18,'rgba(70,37,30,.8)','#f2d7c2');for(let i=0;i<8;i++){const a=i*Math.PI/4;sFlame(g,Math.cos(a)*20,Math.sin(a)*20,.48,'#e56c32','#ffe1a2');}iconCircle(g,0,0,7,'#f1d8c4','#fff4e6');},
+ R:g=>{iconGlow(g,0,0,36,'rgba(255,105,38,.95)');for(let i=0;i<8;i++){g.save();g.rotate(i*Math.PI/4);sFlame(g,0,-23,.9,'#b94a27','#ffe0a0');g.restore();}iconCircle(g,0,0,15,'#34232a','#f2d6c1');iconPoly(g,[[-9,-8],[0,-18],[9,-8],[6,10],[0,17],[-6,10]],'#8b4b39','#ffe4c4');}
+}});
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
@@ -20819,6 +20844,7 @@ function vicPickMvp() {
 
 // ── MVP 쇼케이스: 별도 화면에서 정면 모습 ──
 const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
+  philip:{coat:'#77736f',pants:'#28272a',hair:'#b8b3ad',skin:'#e8d2c3',eye:'#f5a45f',fx:'flame',smoke:true,line:'…이제, 끝났어.'},
   gregor:    {coat:'#5a3a20', pants:'#2a1c10', hair:'#3a2616', skin:'#e6c6a6', eye:'#ffb347', fx:'roach', smoke:true, line:'그럭저럭, 할 만한 싸움이었군.'},
   rodion:    {coat:'#c9a27a', pants:'#4a3426', hair:'#7a3a2a', skin:'#f0d2b6', eye:'#e8ecf4', fx:'coin', line:'이 로쟈님의 대활약~! 단테! 맛있는 거 준비해~'},
   yisang:    {coat:'#2a2a30', pants:'#15151a', hair:'#15151a', skin:'#eee6dc', eye:'#d8e0ee', fx:'feather', line:'지금이라면 날개를 펼칠 수 있을 것 같구려.'},
@@ -23031,6 +23057,13 @@ function mpHostCheckLeavers(room) {                                     // 게�
 // CODEX_BEGIN
 // ═════════════ 메인 메뉴 · 도감 · 스킬 시연 ═════════════
 const CODEX_SK = {};
+CODEX_SK.philip={
+ P:{name:'귀환',text:H=>'필립의 귀환 시간이 <b>1초</b>로 감소합니다. 이 효과는 <b>3분</b>의 재사용 대기시간을 가집니다.'},
+ Q:{name:'낙인',cd:[5,5,5,5],range:410,text:H=>'롱소드로 전방을 찔러 직선상의 적에게 물리 피해를 줍니다. 밀랍날개 상태에서는 세 번째 Q 적중 시 적을 <b>2초 기절</b>시키고 해당 타격 피해량에 비례한 <b>3초 화상</b>을 부여합니다.'},
+ W:{name:'의뢰 처리',cd:[12,12,12,12],range:650,text:H=>'가장 가까운 적에게 빠르게 돌진해 검으로 공격합니다. 밀랍날개 상태에서는 왼쪽 날개로 전방을 <b>5초</b> 동안 방어하며 받는 피해를 <b>75%</b> 감소시키고 공격자를 화상에 빠뜨립니다.'},
+ E:{name:'후회',cd:[15,15,15,15],text:H=>'기본 상태에서 <b>3초</b> 동안 공격력이 <b>20%</b> 증가하고 받는 피해가 <b>15%</b> 감소합니다. 밀랍날개 상태에서는 <b>4.5초</b> 동안 공격력이 <b>60%</b> 증가하고 이동 속도가 <b>5%</b> 증가하며 받는 피해가 <b>20%</b> 감소합니다. 발동 시 공격력만큼 체력을 회복합니다.'},
+ R:{name:'불안정 개화 E.G.O · 밀랍날개',cd:[180,180,180],text:H=>'실제 전투에서는 체력이 <b>30% 이하</b>이고 아직 E.G.O를 발현하지 않았을 때 사용할 수 있습니다. 발동 후 <b>3초</b> 동안 무적 상태로 변신을 준비하며, 완료 시 체력을 전부 회복하고 <b>20초</b> 동안 밀랍날개 형태가 됩니다. 변신 중 Q·W·E가 강화됩니다. 강화 R은 <b>1.5초</b> 준비 후 전방으로 돌진해 적을 기절시키고 적중한 적 수에 비례한 화상을 입힙니다.'}
+};
 CODEX_SK.gregor = {
   P: {name:'전장 압도', text: H => `꿰뚫기·'심장을 노려야지, 아들.'·강화된 내장파기 기본 공격이 적 챔피언을 맞히면 ${H.s(K.P.mark)} 동안 ${H.b('표식')}을 남깁니다. (대상마다 ${H.s(K.P.cdPerTarget)}에 한 번)<br>표식이 있는 동안 그레고르가 그 대상에게 준 피해가 대상 최대 체력의 ${H.p(K.P.need)}에 도달하면 표식이 터지며 ${H.phys(`${K.P.base} + ${K.P.perLv} × 레벨 + <span class="cx-hp">대상 최대 체력의 ${H.p(K.P.pct)}</span>`)}를 주고, ${H.s(K.P.hasteDur)} 동안 점점 줄어드는 이동 속도 +${H.p(K.P.haste)}를 얻습니다.<br>바퀴 황제 상태에서는 폭발 피해가 ${H.p(K.P.rMul)}가 됩니다.`},
   Q: {name:'꿰뚫기', cd: K.Q.cd, range: K.Q.len, text: H => `${H.s(CAST.Q)} 시전 후 전방 직선(길이 ${K.Q.len})을 찔러 맞은 모든 적에게 ${H.phys(H.r(K.Q.dmg) + ' ' + H.ad(K.Q.ad))}를 줍니다.<br>맞힌 챔피언 1명당 체력을 ${H.r(K.Q.heal)} ${H.ad(K.Q.healAd)} 회복합니다.<br>${H.b('바퀴 황제')}: 범위가 길이 ${K.Q.R.len}·폭 ${K.Q.R.wid}까지 늘어나고 피해·회복량이 ${H.p(K.Q.R.mul)}가 됩니다.`},
@@ -23485,6 +23518,7 @@ const cbYiW = () => {                                                 // 이상:
 };
 const CX_COMBO = {
   binah:[{name:'검은 까마귀의 조율',sum:'조율자를 소환해 적을 추격하게 하고, Q·E로 적을 묶은 뒤 조율자의 연속 공격으로 피해와 회복, 출혈을 누적하는 비나의 소환수 연계예요.',steps:[['R','조율자 둘을 소환해 적 챔피언을 각각 추적하게 합니다. 조율자는 공격할 때마다 피해량만큼 비나를 회복시키고, 같은 피해량의 출혈을 3초에 걸쳐 남깁니다.'],['Q','단일 기둥을 쓰러뜨려 조율자가 공격할 적을 둔화·속박합니다.'],['E','넓은 황금 파도를 보내 여러 적에게 진동을 쌓고 조율자의 공격 기회를 만듭니다.'],['W','조율자의 공격 대상과 거리를 조절하며 안전한 위치에서 지원합니다.'],['R','조율자가 지정한 적을 황금 까마귀의 추가 타격으로 마무리합니다.']],chain:(A,S)=>[S.k('R'),S.k('Q'),S.k('E'),S.k('W'),S.k('R')]}],
+  philip:[{name:'밀랍날개의 개화',sum:'체력이 위험해졌을 때 E.G.O를 발현해 밀랍날개 형태로 전환하고, 강화된 검격과 방어 능력으로 적을 압박한 뒤 타오르는 일격으로 전장을 가로질러 마무리하는 필립의 연계예요.',steps:[['R','체력이 30% 이하일 때 불안정 개화 E.G.O를 발동합니다. 3초 동안 무적 상태로 변신을 준비하고, 변신이 완료되면 체력을 전부 회복하며 20초 동안 밀랍날개 형태가 됩니다.'],['E','후회로 공격력을 60% 높이고 받는 피해를 20% 줄이며, 체력도 회복합니다.'],['평타','불꽃을 두른 롱소드로 적을 압박하고 화상을 누적합니다.'],['Q','낙인을 세 번 적중시켜 마지막 검격의 2초 기절과 3초 화상을 노립니다.'],['W','깃털 방패로 전방 공격을 막아내며 반격을 준비합니다.'],['R','타오르는 일격을 1.5초 준비한 뒤 긴 직선으로 돌진해 적을 기절시키고, 적중 수에 비례한 화상을 남깁니다.']],chain:(A,S)=>[S.k('R'),S.k('E'),S.atk(),S.k('Q'),S.k('Q'),S.k('Q'),S.k('W'),S.k('R')]}],
   gebura:[{name:'붉은안개의 사냥',sum:'기합으로 적의 발을 묶은 뒤 3단 검술과 최강 돌진으로 분노를 활용하고, 붉은안개로 각성해 대절단 두 번으로 마무리하는 게부라의 암살 콤보예요.',steps:[['W','적이 접근해 오거나 도주 경로에 들어왔을 때 기합을 차징해 원 안의 적을 도발합니다.'],['Q','종베기로 거리를 좁히고, 이어 찌르기와 횡베기까지 연결해 큰 검기 피해를 줍니다.'],['E','분노가 쌓인 상태에서 최강 돌진으로 적을 추격합니다. 분노 비례 고정 피해와 체력 회복을 동시에 얻습니다.'],['R','분노가 20에 도달하면 E.G.O 발현을 시작합니다. 3초 동안 변신 준비를 마치고 붉은안개로 각성합니다.'],['R','대절단 세로로 핵심 적 한 명을 강하게 베어냅니다.'],['R','대절단 가로를 재사용해 주변 적까지 휩쓸며 전투를 마무리합니다.']],chain:(A,S)=>[S.k('W'),S.k('Q'),S.k('Q'),S.k('Q'),S.k('E'),S.k('R'),S.k('R'),S.k('R')]}],
   gregor:[{name:'바퀴 황제의 행진',
     sum:'변신으로 모든 스킬을 키운 뒤, 길어진 기절로 붙잡고 최대 체력 비례 피해로 표식을 터뜨리는 그레고르의 기본 한타 연계예요.',
@@ -23954,6 +23988,7 @@ function demoReset() {
   for (const c of [P, d1, d2, demo.ally]) fixState(c);
   // 비나 도감 시연 전용: 훈련용 적에게 요정 스택을 미리 부여해 자원 조건 없이 모든 스킬 시연
   if (P.key === 'binah') for (const u of [d1, d2]) { u.bnFairy = 50; u.bnFairyLast = time; u.bnFairyDecayAt = 0; }
+  if(P.key==='philip'){P.hp=P.maxHp;P.phEgoUsed=false;P.phEgoUntil=0;P.phTransformUntil=0;P.phPendingEgo=false;P.phRCharge=null;P.phRRect=null;P.phQStacks=0;}
   P.x = far ? DEMO_X - 330 : DEMO_X - 70; P.y = DEMO_Y; P.face = 0;
   d1.x = DEMO_X + 30; d1.y = DEMO_Y - 8; d2.x = DEMO_X + 85; d2.y = DEMO_Y + 38; d1.face = d2.face = Math.PI;
   demo.ally.x = P.x - 50; demo.ally.y = DEMO_Y - 60;
@@ -23999,6 +24034,7 @@ function demoScript(champ, key) {
   const def = {P:{len:5, acts:[[.2, A.atk(true)], [.8, c('Q')], [2, c('W')], [3.2, c('E')]]},
                Q:{len:3, acts:[[.5, c('Q')]]}, W:{len:3.2, acts:[[.5, c('W')]]}, E:{len:3.2, acts:[[.5, c('E')]]}, R:{len:5, acts:[[.5, c('R')]]}};
   const S = {
+    philip:{P:{len:4,acts:[[.35,A.atk(true)],[1.25,c('Q')],[2.2,c('W')]]},Q:{len:3.5,acts:[[.35,c('Q')],[1.1,A.fn(()=>{player.cd.Q=0;})],[1.2,c('Q')]]},W:{len:3.5,acts:[[.35,c('W')]]},E:{len:4,acts:[[.35,c('E')],[1.2,A.atk(true)]]},R:{len:5.8,acts:[[.35,c('R')]]}},
     gregor:{E:{len:4, acts:[[.4, c('E')], [.5, A.atk(true)]]}, R:{len:6, acts:[[.4, c('R')], [1.6, c('Q')], [2.4, c('W')], [3.4, A.atk(true)]]}},
     rodion:{Q:{len:4, acts:[[.4, c('Q')], [1.2, A.cd0], [1.3, c('Q')], [2.2, A.cd0], [2.3, c('Q')]]},
             W:{len:5, acts:[[.2, A.fn(() => { player.pStacks = 3; })], [.3, c('W')], [1.6, A.cd0], [1.7, A.fn(() => { player.pStacks = 10; })], [1.8, c('W')], [2.6, A.fn(() => { if (rodTargetR(player)) castSkill(player, 'R', null); })]]}, E:{len:3.4, acts:[[.4, c('E')], [.55, c('Q')]]},
