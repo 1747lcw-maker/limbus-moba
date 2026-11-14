@@ -13409,7 +13409,7 @@ function aiMacro(b, hpB, p, pd) {                             // 반환: 이동�
       const {t,foes,wave}=threatened;
       const focus=foes.sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]||wave.sort((a,b)=>a.hp-b.hp)[0];
       const away=focus?Math.atan2(focus.y-t.y,focus.x-t.x):0;
-      return{x:t.x+Math.cos(away)*E(190),y:t.y+Math.sin(away)*E(190),defend:true};
+      return{x:t.x+Math.cos(away)*E(190),y:t.y+Math.sin(away)*E(190),defend:true,target:focus,turret:t};
     }
   }
   const sg = units.find(u => u.kind === 'siege' && u.alive && u.team !== b.team && dist(u, b) < E(1600));   // 적 철거 거수: 잡으러 감
@@ -13496,6 +13496,13 @@ function updateBot(b, dt) {
   const p = focusEnemy(b), hpB = b.hp / b.maxHp;
   b.thinkT = (b.thinkT || 0) - dt; b.stanceT = (b.stanceT || 0) - dt;
   const react = () => AI.react[0] + Math.random() * (AI.react[1] - AI.react[0]);
+  // 필립의 생존 궁극기는 교전 모드·대상 유무와 관계없이 체력 30% 이하에서 우선 발동한다.
+  if (b.key === 'philip' && hpB <= .30 && !(b.phEgoUntil > time) &&
+      !(b.phTransformUntil > time) && !b.phEgoUsed && b.rank.R > 0 && b.cd.R <= 0) {
+    const emergencyTarget = p && p.alive ? p : enemiesOf(b).filter(e => e.alive && seenBy(b.team,e)).sort((a,z)=>dist(b,a)-dist(b,z))[0];
+    const emergencyAngle = emergencyTarget ? Math.atan2(emergencyTarget.y-b.y,emergencyTarget.x-b.x) : (b.face || 0);
+    if (castSkill(b,'R',emergencyAngle)) { moveChamp(b,0,0,dt); return; }
+  }
   let dx = 0, dy = 0;
   const go = (x, y) => { const d = Math.hypot(x - b.x, y - b.y); if (d > E(20)) { const q = navStep(b, x, y), qd = Math.hypot(q.x - b.x, q.y - b.y) || 1; dx = (q.x - b.x) / qd; dy = (q.y - b.y) / qd; } return d; };
   const backOff = () => {                               // 상대 반대쪽 + 아군 포탑 쪽으로 물러남
@@ -13645,7 +13652,25 @@ function updateBot(b, dt) {
   }
 
   // ── 급한 운영 (기지 방어·아군 구출·철거 거수)은 오브젝트보다 먼저
-  if (macro && macro.defend && stance !== 'allin') { go(macro.x, macro.y); moveChamp(b, dx, dy, dt); return; }
+  if (macro && macro.defend && stance !== 'allin') {
+    const guardTarget = macro.target && macro.target.alive && targetable(macro.target) ? macro.target : null;
+    if (guardTarget) {
+      b.target = guardTarget;
+      const gd = edge(b,guardTarget);
+      if (isChamp(guardTarget) && gd < E(760) && b.thinkT <= 0) {
+        b.thinkT = react();
+        if (aiCombo(b,guardTarget)) { moveChamp(b,0,0,dt); return; }
+      } else if (isMinion(guardTarget) && gd < E(650) && b.thinkT <= 0) {
+        b.thinkT = .35;
+        if (aiFarmSkill(b,guardTarget)) { moveChamp(b,0,0,dt); return; }
+      }
+      if (gd > E(b.st.range)) go(guardTarget.x,guardTarget.y);
+      else if (b.atkT <= 0) basicAttack(b,guardTarget);
+    } else {
+      go(macro.x,macro.y);
+    }
+    moveChamp(b,dx,dy,dt); return;
+  }
 
   // ── 오브젝트 한타: 나오기 25초 전부터 둥지 앞 우리 쪽에 모임 → 적이 오면 싸우고, 이기면 오브젝트
   if (stance !== 'allin' && b.role !== 'jungle') {
