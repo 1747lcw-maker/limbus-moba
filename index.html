@@ -12342,6 +12342,7 @@ function updatePlayer(dt, ix, iy) {
 // ═════════════ 적 챔피언 AI ═════════════
 // 무작위로 배정된 챔피언을 조작: 스킬 배우기·아이템 구매·파밍(막타 우선)·교전 판단·콤보·스킬 피하기·후퇴·귀환
 const AI_BUILD = {
+  philip:['s_blade','goldrush','rage','tears','scar'],
   mathias:['s_shield','harvest','regret','frost','star'],
   gregor: ['s_blade', 'goldrush', 'logging', 'rage', 'penitence'],
   rodion: ['s_blade', 'lament', 'justitia', 'cobalt', 'mimicry'],
@@ -12375,7 +12376,7 @@ const AI_BUILD = {
   yuri: ['s_blade', 'lament', 'pink', 'cobalt', 'justitia'],
   yisang: ['s_ring', 'galaxy', 'fragment', 'dacapo', 'star'],
 };
-const AI_SKILL_ORDER = {mathias:['Q','W','E'],dongrang:['Q', 'E', 'W'], ran:['Q', 'E', 'W'], effie:['Q', 'W', 'E'], saude:['Q', 'W', 'E'], xichun:['Q', 'E', 'W'], wei:['Q', 'E', 'W'], bongdad:['Q', 'W', 'E'], ricardo:['Q', 'E', 'W'], gubo:['Q', 'E', 'W'], dongbaek:['Q', 'W', 'E'], thoma:['Q', 'W', 'E'], guido:['Q', 'W', 'E'], marten:['Q', 'E', 'W'], alyssa:['Q', 'W', 'E'], hohenheim:['Q', 'W', 'E'], gregor:['Q', 'W', 'E'], rodion:['Q', 'E', 'W'], yisang:['W', 'Q', 'E'], ishmael:['Q', 'E', 'W'], ryoshu:['Q', 'E', 'W'], faust:['Q', 'E', 'W'], donq:['Q', 'W', 'E'], outis:['Q', 'W', 'E'], honglu:['Q', 'W', 'E'], sinclair:['Q', 'W', 'E'], heathcliff:['Q', 'E', 'W'], meursault:['Q', 'E', 'W'], yuri:['E', 'W', 'Q'], kromer:['Q', 'E', 'W'], vergil:['Q', 'W', 'E'], charon:['Q', 'E', 'W'], roland:['Q','W','E'], blueReverb:['Q','W','E'], purpleTear:['Q','E','W'], vespa:['Q','W','E'], naihwang:['Q','W','E'], gachiu:['W','Q','E'], indigoElder:['Q','W','E'], liuEn:['Q','W','E'], callisto:['Q','E','W']};
+const AI_SKILL_ORDER = {philip:['Q','E','W'],mathias:['Q','W','E'],dongrang:['Q', 'E', 'W'], ran:['Q', 'E', 'W'], effie:['Q', 'W', 'E'], saude:['Q', 'W', 'E'], xichun:['Q', 'E', 'W'], wei:['Q', 'E', 'W'], bongdad:['Q', 'W', 'E'], ricardo:['Q', 'E', 'W'], gubo:['Q', 'E', 'W'], dongbaek:['Q', 'W', 'E'], thoma:['Q', 'W', 'E'], guido:['Q', 'W', 'E'], marten:['Q', 'E', 'W'], alyssa:['Q', 'W', 'E'], hohenheim:['Q', 'W', 'E'], gregor:['Q', 'W', 'E'], rodion:['Q', 'E', 'W'], yisang:['W', 'Q', 'E'], ishmael:['Q', 'E', 'W'], ryoshu:['Q', 'E', 'W'], faust:['Q', 'E', 'W'], donq:['Q', 'W', 'E'], outis:['Q', 'W', 'E'], honglu:['Q', 'W', 'E'], sinclair:['Q', 'W', 'E'], heathcliff:['Q', 'E', 'W'], meursault:['Q', 'E', 'W'], yuri:['E', 'W', 'Q'], kromer:['Q', 'E', 'W'], vergil:['Q', 'W', 'E'], charon:['Q', 'E', 'W'], roland:['Q','W','E'], blueReverb:['Q','W','E'], purpleTear:['Q','E','W'], vespa:['Q','W','E'], naihwang:['Q','W','E'], gachiu:['W','Q','E'], indigoElder:['Q','W','E'], liuEn:['Q','W','E'], callisto:['Q','E','W']};
 const AI = {react:[.1, .2], dodgeReact:[.09, .16], dodgeChance:.84, engage:650, lastHit:1.15}; // 숙련 AI: 빠르게 판단하고 회피하되 모든 공격을 피하지는 않음
 
 // ── 포탑 철거: 맞아 줄 챔피언(탱커)을 앞세워 포탑 어그로를 받게 하고 나머지가 같이 침 ──
@@ -12479,6 +12480,27 @@ function aiCombo(b, p) {
     if (ready('W') && d < E(430) && d > E(55)) { castSkill(b, 'W', ang); return true; }
     if (ready('Q') && d < E(350)) { castSkill(b, 'Q', ang); return true; }
     // 뒤틀림 상태에서 R을 바로 못 썼더라도 대상이 사거리 안으로 오면 다음 판단에서 사용
+    return false;
+  }
+  if (b.key === 'philip') {
+    const a = aimAt(b,p,.18), ego = (b.phEgoUntil||0) > time;
+    // 필립의 E.G.O는 체력 30% 이하에서만 발동한다. 변신 준비 중에는 다른 스킬을 낭비하지 않는다.
+    if (!ego && !(b.phTransformUntil>time) && !b.phEgoUsed && b.hp<=b.maxHp*.30 && ready('R')) {
+      castSkill(b,'R',a); return true;
+    }
+    if (b.phTransformUntil>time) return false;
+    if (ego) {
+      // 변신 직후 강화 E로 공격·방어 버프를 확보하고, 사거리별로 강화 스킬을 순환한다.
+      if (ready('E') && (b.phAtkUntil||0)<time+.8) { castSkill(b,'E',a); return true; }
+      if (ready('R') && !b.phRCharge && d>E(230) && d<E(1080)) { castSkill(b,'R',a); return true; }
+      if (ready('Q') && d<E(430)) { castSkill(b,'Q',a); return true; }
+      if (ready('W') && d<E(260) && (b.phWingGuardUntil||0)<time+.5) { castSkill(b,'W',a); return true; }
+      if (ready('E') && (b.phDRUntil||0)<time+.5) { castSkill(b,'E',a); return true; }
+    } else {
+      if (ready('W') && d<E(650) && d>E(70)) { castSkill(b,'W',a); return true; }
+      if (ready('Q') && d<E(400)) { castSkill(b,'Q',a); return true; }
+      if (ready('E') && d<E(220) && (b.phAtkUntil||0)<time+.5) { castSkill(b,'E',a); return true; }
+    }
     return false;
   }
   if (b.key === 'gregor') {
