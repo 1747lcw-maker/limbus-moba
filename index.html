@@ -23461,6 +23461,7 @@ const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
 const cxCol = k => {
   if (k === 'binah') return 'linear-gradient(135deg, #08090d 0%, #111217 46%, #b99627 50%, #f2cf62 100%)';
+  if (k === 'philip') return 'linear-gradient(132deg, transparent 0 24%, #d96a32 24.5%, #ffb36a 25%, transparent 25.8% 58%, #c95425 58.5%, #ff9a43 59%, transparent 59.8%), linear-gradient(135deg, #55545a 0%, #77736f 38%, #a49a91 68%, #625f60 100%)';
   if (k === 'roland') return '#090a0d';
   if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
   if (k === 'liuEn') return '#41464f';
