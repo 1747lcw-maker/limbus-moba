@@ -13473,7 +13473,7 @@ function updateBot(b, dt) {
     }
   }
   if ((b.spThinkT = (b.spThinkT || 0) - dt) <= 0) { b.spThinkT = .25; aiSpells(b, p, hpB, ev); aiActive(b, p, hpB); }   // 소환사 주문
-  if (aiBackdoor(b, dt)) return;                                      // 백도어 (불리할 때 가끔)
+  if (b.role !== 'jungle' && aiBackdoor(b, dt)) return;               // 정글러는 백도어보다 정글 루트 우선
 
   // ── 귀환
   const mobOnMe = units.find(m => isMonster(m) && m.alive && m.target === b);
@@ -13545,7 +13545,7 @@ function updateBot(b, dt) {
     else if (ev.score > .35 && !noChase) want = 'allin';
     else if (ev.score > -.2) want = 'trade';
   }
-  if (b.stance === 'allin' && want !== 'allin' && time < (b.commitUntil || 0) && !(hpB < .25 && ev.inDanger)) want = 'allin';
+  if (b.role !== 'jungle' && b.stance === 'allin' && want !== 'allin' && time < (b.commitUntil || 0) && !(hpB < .25 && ev.inDanger)) want = 'allin';
   const pUnder = p.alive && nearTurret(p.team, p, E(20));
   if (want === 'allin' && pUnder && (time < (b.noDiveT || 0) || !(ev.canKill && hpB > .5)) && !(planS0() && hpB > .45)) want = 'trade';   // 포탑 밑 적은 확실할 때만
   if (b.desperateT > time && p.alive && pd < E(700) && hpB > .15) want = 'allin';          // 기지 방어: 물러서지 않음
@@ -13650,7 +13650,7 @@ function updateBot(b, dt) {
   if (macro && stance !== 'allin') { go(macro.x, macro.y); if (!macro.defend && dangerFor(b, {x:b.x + dx * E(40), y:b.y + dy * E(40)})) dx = dy = 0; moveChamp(b, dx, dy, dt); return; }
 
   // ── 와드: 주변 수풀·길목에 우리 와드가 없으면 설치하러 감
-  if (stance === 'farm' && b.thinkT <= 0) { const wv = aiWard(b, hpB, pd); if (wv) { go(wv.x, wv.y); moveChamp(b, dx, dy, dt); return; } }
+  if (b.role !== 'jungle' && stance === 'farm' && b.thinkT <= 0) { const wv = aiWard(b, hpB, pd); if (wv) { go(wv.x, wv.y); moveChamp(b, dx, dy, dt); return; } }
 
   // ── 정글러
   if (b.role === 'jungle' && stance !== 'allin') {
