@@ -1899,14 +1899,14 @@ function resetGame() {
 
 const invulnerable = u => u.protectors && u.protectors.length > 0 &&
   (u.protectAny ? u.protectors.every(p => p.alive) : u.protectors.some(p => p.alive));
-// FURIOSO 무적은 실제 연속 참격 진행 중에만 유효. 마지막 타격 이후 남은 상태 객체는 무적 판정에서 제외한다.
+// FURIOSO 피해 감소는 실제 연속 참격 진행 중에만 유효.
 const furiosoActive = u => {
   if (!u || !u.alive) return false;
   const F = u.key === 'roland' ? u.rolandFurioso : u.key === 'liuEn' ? u.liuFurioso : null;
   // 연속 참격 상태는 최대 6.4초까지만 유효하며, 기한이 지난 잔여 객체는 무적을 부여하지 않는다.
   return !!(F && F.target && F.target.alive && F.index < 9 && F.expiresAt > time);
 };
-const targetable = u => u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && !furiosoActive(u) && !(u.structure && invulnerable(u));   // hidden: 료슈 Q·R 중 무적
+const targetable = u => u && u.alive && !u.hidden && !(u.hhZ && u.hhZ.t < KHH.P.unT) && !(u.key === 'alyssa' && alFlying(u)) && !(u.stasisT > time) && !u.ylRevive && !u.krUT && !u.vgUT && !u.riUT && !u.xcSwap && !(u.bpInvT > time) && !(u.structure && invulnerable(u));   // hidden: 료슈 Q·R 중 무적
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const edge = (a, b) => dist(a, b) - a.r - b.r;
 const isMinion = u => u.kind === 'melee' || u.kind === 'ranged';
@@ -3698,7 +3698,7 @@ function damage(src, tgt, amount, opts = {}) {
   if(tgt&&tgt.key==='mathias'&&tgt.maGuardUntil>time&&src&&src.team!==tgt.team&&src.x!==undefined){const a=Math.atan2(src.y-tgt.y,src.x-tgt.x),da=Math.abs(Math.atan2(Math.sin(a-(tgt.maGuardAng||0)),Math.cos(a-(tgt.maGuardAng||0))));if(da<Math.PI*.55){tgt.maAbsorbed=(tgt.maAbsorbed||0)+amount;tgt.maRage=Math.min(100,(tgt.maRage||0)+Math.max(1,amount*.035));return;}}
   if(tgt&&tgt.key==='gebura'&&tgt.gbTransformUntil>time)amount*=.10;
   if(tgt&&tgt.key==='naihwang'&&tgt.nhEGuardUntil>time&&src&&src.team!==tgt.team)amount*=.85;
-  if(tgt&&src&&src.team!==tgt.team&&furiosoActive(tgt))return; // FURIOSO 연속 참격 진행 중에만 무적
+  if(tgt&&src&&src.team!==tgt.team&&furiosoActive(tgt))amount*=.4; // FURIOSO 연속 참격 중 받는 피해 60% 감소
   if (!targetable(tgt) || tgt.ward) return;
   // 초반 라인전 보호: 저레벨 챔피언은 미니언에게 받는 피해가 감소 (레벨 1~4: 30/22/14/8%)
   if (isMinion(src) && isChamp(tgt)) amount *= tgt.level <= 1 ? 0.70 : tgt.level === 2 ? 0.78 : tgt.level === 3 ? 0.86 : tgt.level === 4 ? 0.92 : 1;
@@ -6510,7 +6510,6 @@ function updateHeathBleed(dt) {                                     // 출혈 �
     if (u.hcSlowAt && time >= u.hcSlowAt) { u.hcSlowAt = 0; if (u.alive) { u.slowT = Math.max(u.slowT || 0, KHC.E.slowDur); u.slowAmt = Math.max(u.slowT > KHC.E.slowDur ? u.slowAmt : 0, KHC.E.slow); } }
     const b = u.hcBleed; if (!b) continue;
     if (!u.alive || time >= b.until) { u.hcBleed = null; continue; }
-    if (furiosoActive(u)) continue;
     if ((b.tick -= dt) > 0) continue;
     b.tick = KHC.P.tick;
     const s = b.src, per = hcLv(KHC.P.dps, s.level);
@@ -7101,7 +7100,7 @@ function updateSpells(dt) {
   for (const u of units) {
     const b = u.spBrand; if (!b) continue;
     if (!u.alive) { u.spBrand = null; continue; }
-    if (furiosoActive(u)) { b.until += dt; continue; }
+    
     if (time >= b.until) { u.spBrand = null; continue; }
     u.revealT = Math.max(u.revealT || 0, time + .2);               // 낙인: 위치가 드러남
     if ((b.tick -= dt) <= 0) { b.tick = .5; damage(b.src, u, b.per, {type:'true', noProc:true, noStack:true, noBleed:true, color:'#ff8a3c'}); }
@@ -7796,7 +7795,7 @@ function updateKromer(dt) {                                               // 못
   for (const u of heroes) {                                               // 못: 움직인 만큼 출혈
     const N = u.krNails; if (!N) continue;
     if (!u.alive || N.until <= time) { u.krNails = null; continue; }
-    if (furiosoActive(u)) { N.until += dt; N.lx = u.x; N.ly = u.y; continue; }
+    
     const d = Math.hypot(u.x - N.lx, u.y - N.ly); N.lx = u.x; N.ly = u.y;
     if (d > E(200)) continue;                                              // 순간이동 등은 제외
     N.acc += d;
@@ -13954,7 +13953,7 @@ function update(dt) {
   for (const u of units) {
     if (!u.alive) continue;
     if(u.phBurns&&u.phBurns.length){for(const b of u.phBurns){if(!b.src||!b.src.alive||time>=b.until){b.left=0;continue;}b.tick-=dt;if(b.tick<=0){b.tick+=.25;const d=Math.min(b.left,b.total/12);b.left-=d;if(d>0)damage(b.src,u,d,{type:'true',noProc:true,noStack:true,color:'#ff873f'});}}u.phBurns=u.phBurns.filter(b=>b.left>.01&&time<b.until&&u.alive);}
-    if(u.bnBleeds&&u.bnBleeds.length&&!furiosoActive(u)){for(const b of u.bnBleeds){b.tick-=dt;while(b.tick<=0&&b.ticks>0&&u.alive){b.tick+=.5;b.ticks--;damage(b.src,u,b.dps*.5,{type:'true',noProc:true,noStack:true,noBinahStack:true,color:'#d9b52c'});}}u.bnBleeds=u.bnBleeds.filter(b=>b.ticks>0&&u.alive);}
+    if(u.bnBleeds&&u.bnBleeds.length){for(const b of u.bnBleeds){b.tick-=dt;while(b.tick<=0&&b.ticks>0&&u.alive){b.tick+=.5;b.ticks--;damage(b.src,u,b.dps*.5,{type:'true',noProc:true,noStack:true,noBinahStack:true,color:'#d9b52c'});}}u.bnBleeds=u.bnBleeds.filter(b=>b.ticks>0&&u.alive);}
     if (u.mark && time >= u.mark.until) u.mark = null;
     if (u.flashT > 0) u.flashT -= dt;
     if (u.joltT > 0) u.joltT -= dt;
@@ -13964,14 +13963,14 @@ function update(dt) {
       u.x += (u.pull.x - u.x) * k; u.y += (u.pull.y - u.y) * k;
       u.pull.t -= dt; if (u.pull.t <= 0) u.pull = null;
     }
-    if (u.burn && !furiosoActive(u)) {                // 피의 갈증 화상: Furioso 무적 중 남은 시간 보존
+    if (u.burn) {                // 피의 갈증 화상: Furioso 무적 중 남은 시간 보존
       if (time >= u.burn.until) u.burn = null;
       else if ((u.burn.tick -= dt) <= 0) { u.burn.tick = .5; damage(u.burn.src, u, u.burn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff6a4a'}); if (!u.alive) continue; }
     }
-    if(u.ieBleed&&!furiosoActive(u)){const b=u.ieBleed;if(time>=b.until||!b.src||!b.src.alive)u.ieBleed=null;else{b.acc+=dt;if(b.acc>=.25){b.acc-=.25;const amt=b.total*(.25/b.duration);damage(b.src,u,amt,{type:'true',noProc:true,noStack:true,color:'#ff3454'});b.left=Math.max(0,b.left-.25);}}}
-    if(u.maBurn&&!furiosoActive(u)){if(time>=u.maBurn.until||!u.maBurn.src||!u.maBurn.src.alive)u.maBurn=null;else if((u.maBurn.tick-=dt)<=0){u.maBurn.tick=.5;damage(u.maBurn.src,u,u.maBurn.dps*.5,{type:'true',noProc:true,noStack:true,color:'#ff7135'});if(!u.alive)continue;}}
-    if(u.maBleed&&!furiosoActive(u)){if(time>=u.maBleed.until||!u.maBleed.src||!u.maBleed.src.alive)u.maBleed=null;else if((u.maBleed.tick-=dt)<=0){u.maBleed.tick=.5;damage(u.maBleed.src,u,u.maBleed.dps*.5,{type:'true',noProc:true,noStack:true,color:'#d83232'});if(!u.alive)continue;}}
-    if (u.nhBurn && !furiosoActive(u)) {               // 뇌횡: 맹호의 화염 (Furioso 무적 중 남은 시간 보존)
+    if(u.ieBleed){const b=u.ieBleed;if(time>=b.until||!b.src||!b.src.alive)u.ieBleed=null;else{b.acc+=dt;if(b.acc>=.25){b.acc-=.25;const amt=b.total*(.25/b.duration);damage(b.src,u,amt,{type:'true',noProc:true,noStack:true,color:'#ff3454'});b.left=Math.max(0,b.left-.25);}}}
+    if(u.maBurn){if(time>=u.maBurn.until||!u.maBurn.src||!u.maBurn.src.alive)u.maBurn=null;else if((u.maBurn.tick-=dt)<=0){u.maBurn.tick=.5;damage(u.maBurn.src,u,u.maBurn.dps*.5,{type:'true',noProc:true,noStack:true,color:'#ff7135'});if(!u.alive)continue;}}
+    if(u.maBleed){if(time>=u.maBleed.until||!u.maBleed.src||!u.maBleed.src.alive)u.maBleed=null;else if((u.maBleed.tick-=dt)<=0){u.maBleed.tick=.5;damage(u.maBleed.src,u,u.maBleed.dps*.5,{type:'true',noProc:true,noStack:true,color:'#d83232'});if(!u.alive)continue;}}
+    if (u.nhBurn) {               // 뇌횡: 맹호의 화염 (Furioso 무적 중 남은 시간 보존)
       if (time >= u.nhBurn.until) u.nhBurn = null;
       else if ((u.nhBurn.tick -= dt) <= 0) { u.nhBurn.tick = .5; damage(u.nhBurn.src, u, u.nhBurn.dps * .5, {type:'true', noProc:true, noStack:true, color:'#ff7438'}); if (!u.alive) continue; }
     }
