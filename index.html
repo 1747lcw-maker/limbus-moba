@@ -2676,6 +2676,13 @@ function sfxSynth(ctx) {
     const metallic=hp(st,noise(),1450)*Math.exp(-t*9)*.07;
     return (fundamental*.42+bell+metallic)*Math.min(1,t/.008)*env;
   });
+  mk('phTransformCrack', .72, (t, st) => { // 필립 폼 체인지 완료: 날카롭게 갈라지는 '콰직!' 충격음
+    const snap=hp(st,noise(),2100)*Math.exp(-t*34)*1.65;
+    const splinter=hp(st,noise(),5200)*Math.exp(-Math.max(0,t-.018)*23)*(t<.018?.45:.72);
+    const body=Math.sin(2*Math.PI*(118-62*Math.min(1,t/.28))*t)*Math.exp(-t*11)*.9;
+    const debris=lp(st,noise(),1250)*Math.exp(-Math.max(0,t-.055)*17)*(t>.055?.42:0);
+    return (snap+splinter+body+debris)*Math.min(1,t/.0012);
+  });
   mk('maFlameHit', .38, (t, st) => {                                   // 마티아스 R 타격: 불꽃이 확 터지는 저음 충격 + 뜨거운 바람
     const blast = lp(st, noise(), 2100) * Math.exp(-t * 17) * 2.3;
     const body = Math.sin(2 * Math.PI * (108 - 58 * Math.min(1, t / .3)) * t) * Math.exp(-t * 13) * 1.05;
@@ -2746,6 +2753,7 @@ const SFX_GROUP = {                                                    // 묶음
   flameHit:{c:['maFlameHit'], v:.48, gap:.16, p:.04},
   phFireSwing:{c:['phFireSwing'],v:.52,gap:.075,p:.06},
   phDarkBell:{c:['phDarkBell'],v:.62,gap:.5,p:0},
+  phTransformCrack:{c:['phTransformCrack'],v:.78,gap:.12,p:.015},
   charge:{c:['charge'], v:.16, gap:.1, p:0},
   whiff:{c:['whiff1', 'whiff2'], v:.24, gap:.07, p:.1},
   pop:{c:['pop'], v:.2, gap:.05, p:.25},
@@ -4651,7 +4659,7 @@ function castPhilip(c,key,ang){
 }
 function philipTick(c,dt){
  if(!c.alive)return;
- if(c.phTransformUntil>0&&time>=c.phTransformUntil){c.phTransformUntil=0;c.phInvulnUntil=0;if(c.phPendingEgo){c.phPendingEgo=false;c.phEgoUntil=time+20;c.cd.R=0;c.cdMax.R=95;c.hp=c.maxHp;c.phQStacks=0;c.phFireUntil=time+1.2;fx.push({type:'burst',x:c.x,y:c.y,r:c.r*3,t:0,life:.9,col:'#ff9c50'});text(c.x,c.y-c.r-E(52),'밀랍날개','#ffb36c',true,1.2);}}
+ if(c.phTransformUntil>0&&time>=c.phTransformUntil){c.phTransformUntil=0;c.phInvulnUntil=0;if(c.phPendingEgo){c.phPendingEgo=false;sfxPlay('phTransformCrack',c.x,c.y,1.12,.88);c.phEgoUntil=time+20;c.cd.R=0;c.cdMax.R=95;c.hp=c.maxHp;c.phQStacks=0;c.phFireUntil=time+1.2;fx.push({type:'burst',x:c.x,y:c.y,r:c.r*3,t:0,life:.9,col:'#ff9c50'});text(c.x,c.y-c.r-E(52),'밀랍날개','#ffb36c',true,1.2);}}
  if(c.phEgoUntil>0&&time>=c.phEgoUntil){c.phEgoUntil=0;c.phAtkUntil=0;c.phDRUntil=0;c.phWingGuardUntil=0;c.phRCharge=null;c.phQStacks=0;c.phEgoUsed=false;fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2,t:0,life:.6,col:'#8B8580'});}
  if(c.phRCharge&&time>=c.phRCharge.until){const a=c.phRCharge.ang;c.phRCharge=null;c.phRRect=null;c.face=a;const hits=philipLineHits(c,a,E(1050),E(240)),count=hits.length;for(const u of hits){const d=philipSlash(c,u,160+c.ad*1.25);u.stunT=Math.max(u.stunT||0,1.5);philipBurn(c,u,d*count,'타오르는 일격');}const sx=c.x,sy=c.y;c.x=Math.max(E(25),Math.min(W-E(25),c.x+Math.cos(a)*E(850)));c.y=Math.max(E(25),Math.min(H-E(25),c.y+Math.sin(a)*E(850)));c.phDashTrail={sx,sy,ex:c.x,ey:c.y,until:time+.9,fire:true};c.phFireUntil=time+1.2;fx.push({type:'burst',x:c.x,y:c.y,r:E(260),t:0,life:.85,col:'#ff8b38'});}
 }
