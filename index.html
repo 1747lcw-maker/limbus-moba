@@ -24339,7 +24339,10 @@ function musicPlay(track){
 function musicRefresh(){musicPlay(musicScreenTrack());}
 function musicUnlock(){
   if(MUSIC.unlocked)return;
-  MUSIC.unlocked=true;musicRefresh();
+  MUSIC.unlocked=true;
+  const AC=window.AudioContext||window.webkitAudioContext;
+  try{if(AC&&!MUSIC.ctx){MUSIC.ctx=new AC();MUSIC.master=MUSIC.ctx.createGain();MUSIC.master.gain.value=0;MUSIC.master.connect(MUSIC.ctx.destination);MUSIC.ctx.resume().catch(()=>{});}}catch(e){console.warn('BGM audio context error',e);}
+  musicRefresh();
 }
 $('musicVolume')?.addEventListener('input',e=>musicSetVolume(Number(e.target.value)/100));
 $('musicMute')?.addEventListener('click',()=>{
