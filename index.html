@@ -2425,7 +2425,7 @@ const AI_DRAFT_ORDER = [
   ...['red','blue','blue','red'].map(team=>({type:'pick',team,phase:2}))
 ];
 function aiDraftName(key){return STATS[key]?.name || key;}
-function aiDraftPortrait(key){return ['naihuang','indigoElder','philip','liuEn','binah','blueReverb'].includes(key) ? cxCol(key) : (CHAMP_COL[key] || '#46515f');}
+function aiDraftPortrait(key){return ['naihwang','indigoElder','philip','liuEn','binah','blueReverb'].includes(key) ? cxCol(key) : (CHAMP_COL[key] || '#46515f');}
 function aiDraftSfx(kind){
   const ctx=SFX.ctx;
   if(!SFX.on||!ctx||!SFX.out||document.hidden)return;
