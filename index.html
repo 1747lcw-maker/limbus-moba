@@ -24328,14 +24328,13 @@ function musicPlay(track){
   }
   const a=MUSIC.audio;
   if(MUSIC.track!==track){
-    musicStopSynth();MUSIC.track=track;a.pause();a.src=MUSIC_TRACKS[track];a.load();
+    musicStopSynth();MUSIC.track=track;a.pause();a.currentTime=0;a.src=new URL(MUSIC_TRACKS[track],document.baseURI).href;a.load();
   }
   musicApplyVolume();
   if(!MUSIC.unlocked)return;
   if(MUSIC.synthTrack===track)return;
   const p=a.play();
   if(p&&p.catch)p.catch(()=>musicStartSynth(track));
-  setTimeout(()=>{if(MUSIC.track===track&&!MUSIC.synthTrack&&(a.error||a.readyState===0))musicStartSynth(track);},1800);
 }
 function musicRefresh(){musicPlay(musicScreenTrack());}
 function musicUnlock(){
