@@ -24239,9 +24239,10 @@ function demoTick(dt) {
 
 // ═════════════ 배경 음악: 메뉴/도감/승리 · 경기 · 밴픽 ═════════════
 const MUSIC_TRACKS = {
-  ambient: 'assets/music-menu.mp3',
-  battle: 'assets/music-battle.mp3',
-  draft: 'assets/music-draft.mp3'
+  // User-provided original tracks, in the requested order.
+  ambient: 'assets/music-menu.mp3',   // Limbus Company OST - Window - Lunartique
+  battle: 'assets/music-battle.mp3',  // Canto IX Boss 1 Battle Theme 2 - Lunartique
+  draft: 'assets/music-draft.mp3'    // Canto X Boss 4 Battle Theme - Studio EIM
 };
 const MUSIC = {audio:null, track:'', volume:.6, muted:false, unlocked:false, ctx:null, master:null, synthTrack:'', synthTimer:0, synthStep:0, synthNodes:[]};
 try { const saved=JSON.parse(localStorage.getItem('limbusMusicSettings')||'{}'); if(Number.isFinite(saved.volume)) MUSIC.volume=Math.max(0,Math.min(1,saved.volume)); MUSIC.muted=!!saved.muted; } catch {}
