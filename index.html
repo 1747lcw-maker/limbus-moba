@@ -13109,6 +13109,17 @@ function aiJungle(b, hpB) {
     if (pending) return {x:pending.x,y:pending.y};
     return null;
   }
+  // 자기 진영 캠프가 살아 있으면 기본적으로 갱킹보다 정글링을 우선한다.
+  // 단, 가까운 아군이 실제 교전 중이고 정글러도 빠르게 합류할 수 있을 때만 갱킹을 허용한다.
+  const readyCamps = own.filter(up);
+  const nearbyFight = heroes.some(e => e.alive && e.team !== b.team && e.role !== 'jungle' && seenBy(b.team,e) &&
+    dist(b,e) < E(1050) && alliesOf(b).some(a => a.alive && dist(a,e) < E(850) &&
+      ((a.lastDmgT ?? 99) < 1.25 || (e.lastDmgT ?? 99) < 1.25)));
+  if (readyCamps.length && !nearbyFight) {
+    b.gank = null;
+    const cp = readyCamps.sort((a,z) => dist(a,b) - dist(z,b))[0];
+    return {unit:low(cp)};
+  }
   // 갱 중이면 유지하되, 대상이 사라지거나 위험해지면 빠르게 포기
   if (b.gank) {
     const t = b.gank.t;
