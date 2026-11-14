@@ -3762,7 +3762,7 @@ function damage(src, tgt, amount, opts = {}) {
   let hpLoss = amount;
   let shieldLoss = 0;
   if (tgt.shield > 0) { const a = Math.min(tgt.shield, hpLoss); shieldLoss = a; tgt.shield -= a; hpLoss -= a; }
-  if(src&&src.key==='philip'&&opts.basic&&src.phEgoUntil>time&&hpLoss>0)philipBurn(src,tgt,hpLoss,'강화 평타');   // 보호막 먼저
+  if(src&&src.key==='philip'&&opts.basic&&src.phEgoUntil>time&&hpLoss>0)philipBurn(src,tgt,hpLoss*.3,'강화 평타');   // 보호막 먼저
   const geburaActualHpLoss = Math.min(hpLoss, Math.max(0, tgt.hp)); // 보호막·초과 피해를 제외한 실제 체력 피해
   if(tgt.key==='mathias'&&geburaActualHpLoss>0){if(!Array.isArray(tgt.maHpLossLog))tgt.maHpLossLog=[];tgt.maHpLossLog.push({at:time,amount:geburaActualHpLoss});tgt.maHpLossLog=tgt.maHpLossLog.filter(v=>v.at>=time-8);}
   tgt.hp -= hpLoss;
@@ -4691,7 +4691,7 @@ function castPhilip(c,key,ang){
  if(key==='R'){if((!window.DEMO||window.DEMO.champ!=='philip')&&(c.hp>c.maxHp*.30||c.phEgoUsed))return;if(window.DEMO&&window.DEMO.champ==='philip')c.phEgoUsed=false;c.phEgoUsed=true;sfxPlay('phDarkBell',c.x,c.y,1.0,.9);c.phTransformUntil=time+3;c.phInvulnUntil=time+3;c.phPendingEgo=true;c.cd.R=c.cdMax.R=180;c.vx=c.vy=0;c.dash=null;c.cast=null;cancelRecall(c);fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2.8,t:0,life:1,col:'#d28b58'});text(c.x,c.y-c.r-E(50),'불안정 개화 E.G.O','#e5a06b',true,1.15);return;}
  if(ego){
   if(key!=='R')sfxPlay('phFireSwing',c.x,c.y,.9,1);
-  if(key==='Q'){const a=ang==null?autoAim(c,E(390)):ang;c.face=a;const hits=philipLineHits(c,a,E(410),E(58));if(hits.length)c.phQStacks=(c.phQStacks||0)+1;const third=c.phQStacks>=3;if(third)c.phQStacks=0;for(const u of hits){const d=philipSlash(c,u,72+c.ad*.85);if(third){u.stunT=Math.max(u.stunT||0,2);philipBurn(c,u,d,'서글픈 노을');}}c.cd.Q=c.cdMax.Q=cds.Q;c.phBladeGlowUntil=time+.45;c.phFireUntil=time+.7;philipFlameAction(c,'q',a,.58,1.25);return;}
+  if(key==='Q'){const a=ang==null?autoAim(c,E(390)):ang;c.face=a;const hits=philipLineHits(c,a,E(410),E(58));if(hits.length)c.phQStacks=(c.phQStacks||0)+1;const third=c.phQStacks>=3;if(third)c.phQStacks=0;for(const u of hits){const d=philipSlash(c,u,72+c.ad*.85);if(third){u.stunT=Math.max(u.stunT||0,2);philipBurn(c,u,d*.3,'서글픈 노을');}}c.cd.Q=c.cdMax.Q=cds.Q;c.phBladeGlowUntil=time+.45;c.phFireUntil=time+.7;philipFlameAction(c,'q',a,.58,1.25);return;}
   if(key==='W'){c.face=ang==null?c.face:ang;c.phWingGuardUntil=time+5;c.phWingGuardAng=c.face;c.cd.W=c.cdMax.W=cds.W;c.phWingFxUntil=time+5;philipFlameAction(c,'w',c.face,5,1.25);text(c.x,c.y-c.r-E(42),'깃털 방패','#e6d4c2',true,.85);return;}
   if(key==='E'){c.phAtkUntil=time+4.5;c.phDRUntil=time+4.5;c.phDRAmount=.20;c.phHealUntil=time+4.5;c.hp=Math.min(c.maxHp,c.hp+Math.max(1,c.ad));c.cd.E=c.cdMax.E=cds.E;c.phFireUntil=time+4.5;c.phWingFxUntil=time+4.5;philipFlameAction(c,'e',c.face,4.5,1.35);text(c.x,c.y-c.r-E(42),'슬퍼하고 있는 나를 위해','#ffb36c',true,.9);return;}
  }else{
