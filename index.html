@@ -14370,6 +14370,15 @@ function drawMathiasBody(g,c){
   g.restore();
   const rage=Math.max(0,Math.min(100,c.maRage||0)), bx=c.x-r*1.05, by=c.y+r*1.12, bw=r*2.1;
   g.fillStyle='rgba(15,10,16,.85)';g.fillRect(bx,by,bw,E(5));g.fillStyle=rage>=100?'#ffb14a':'#e45a35';g.fillRect(bx,by,bw*rage/100,E(5));g.strokeStyle='#f4d5bd';g.lineWidth=E(1);g.strokeRect(bx,by,bw,E(5));
+  // 레바테인 영구 중첩: 0~4개를 캐릭터 아래에 상시 표시
+  const bladeStacks=Math.max(0,Math.min(4,Math.floor(c.maBladeStacks||0))), stackY=by+E(19);
+  g.save();g.textAlign='center';g.textBaseline='middle';g.font=`900 ${Math.max(9,E(10))}px system-ui,sans-serif`;
+  g.lineWidth=E(2);g.strokeStyle='rgba(20,10,12,.95)';g.fillStyle='#ffd0a0';
+  g.strokeText('레바테인',c.x-E(10),stackY);g.fillText('레바테인',c.x-E(10),stackY);
+  g.fillStyle='#fff0dc';g.strokeText(bladeStacks+'/4',c.x+bw*.36,stackY);g.fillText(bladeStacks+'/4',c.x+bw*.36,stackY);
+  const segW=E(11),segH=E(4),segGap=E(3),totalW=segW*4+segGap*3,startX=c.x-totalW/2,segY=stackY+E(8);
+  for(let i=0;i<4;i++){g.fillStyle=i<bladeStacks?'#ff642b':'rgba(35,22,24,.9)';g.fillRect(startX+i*(segW+segGap),segY,segW,segH);g.strokeStyle=i<bladeStacks?'#ffd08a':'#80606a';g.lineWidth=E(1);g.strokeRect(startX+i*(segW+segGap),segY,segW,segH);}
+  g.restore();
 }
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
