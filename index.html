@@ -2663,10 +2663,16 @@ function sfxSynth(ctx) {
     const pulse = .82 + .12 * Math.sin(2 * Math.PI * 11 * t) + .06 * Math.sin(2 * Math.PI * 19 * t);
     return (roar + low + hiss) * env * pulse;
   });
-  mk('phFireSwing', .48, (t, st) => { // 필립 E.G.O: 불길을 가르는 검격
-    const env=Math.min(1,t/.012)*Math.exp(-t*7.2), n=hp(st,noise(),900+Math.sin(t*24)*420);
-    const rush=lp(st,noise(),2100)*1.4, low=Math.sin(2*Math.PI*(155-75*t)*t)*Math.exp(-t*10)*.32;
-    return (n*.65+rush*.7+low)*env;
+  mk('phFireSwing', .72, (t, st) => { // 필립 E.G.O: 화염방사기처럼 강하게 뿜어져 나오는 불길
+    const attack=Math.min(1,t/.016), env=attack*Math.exp(-t*2.8);
+    const cutoff=1450+900*Math.sin(t*9)+520*Math.sin(t*23);
+    const roar=lp(st,noise(),cutoff)*2.45;
+    const turbulent=lp(st,noise(),3900)*.72+hp(st,noise(),680)*.28;
+    const low=Math.sin(2*Math.PI*(92+13*Math.sin(t*15))*t)*.72
+      +Math.sin(2*Math.PI*148*t)*.2;
+    const flamePulse=.88+.12*Math.sin(2*Math.PI*13*t)+.07*Math.sin(2*Math.PI*27*t);
+    const ignition=hp(st,noise(),2400)*Math.exp(-t*24)*.5;
+    return (roar+turbulent+low+ignition)*env*flamePulse;
   });
   mk('phDarkBell', 2.35, (t, st) => { // 필립 변신 대기: 어둡고 긴 금속 종 울림
     const env=Math.exp(-t*1.65), fundamental=Math.sin(2*Math.PI*82.4*t)*Math.exp(-t*1.35);
@@ -2751,7 +2757,7 @@ const SFX_GROUP = {                                                    // 묶음
   zapBig:{c:['zapBig'], v:.42, gap:.12, p:.06},
   flame:{c:['maFlame'], v:.62, gap:.72, p:.025},
   flameHit:{c:['maFlameHit'], v:.48, gap:.16, p:.04},
-  phFireSwing:{c:['phFireSwing'],v:.52,gap:.075,p:.06},
+  phFireSwing:{c:['phFireSwing'],v:.76,gap:.075,p:.035},
   phDarkBell:{c:['phDarkBell'],v:.62,gap:.5,p:0},
   phTransformCrack:{c:['phTransformCrack'],v:.78,gap:.12,p:.015},
   charge:{c:['charge'], v:.16, gap:.1, p:0},
