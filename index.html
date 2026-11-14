@@ -560,6 +560,14 @@
   #aiDraft .ad-grid-note button{margin-left:8px;padding:7px 12px;border:0;border-radius:7px;background:#e6c35c;color:#1b1a15;font-weight:800}
   @media(max-width:700px){#aiDraft .ad-main{grid-template-columns:1fr 1.3fr 1fr;gap:5px}#aiDraft .ad-team{padding:5px}#aiDraft .ad-slot{font-size:10px;gap:4px;padding:4px}#aiDraft .ad-slot .ad-avatar,#aiDraft .ad-slot .ad-empty{width:25px;height:25px;flex-basis:25px}#aiDraft .ad-grid{grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:4px}#aiDraft .ad-champ .ad-avatar{width:38px;height:38px}#aiDraft .ad-team h3{font-size:11px}}
   @media(max-width:430px){#aiDraft{padding:6px}#aiDraft .ad-main{grid-template-columns:90px minmax(0,1fr) 90px}#aiDraft .ad-slot{display:block;text-align:center;min-height:54px}#aiDraft .ad-slot .ad-avatar,#aiDraft .ad-slot .ad-empty{display:grid;margin:0 auto 3px}#aiDraft .ad-slot small{font-size:9px}}
+  #musicSettings{width:min(100%,560px);margin:18px auto 0;padding:13px 16px;border:1px solid #6b5238;border-radius:12px;background:linear-gradient(135deg,rgba(48,32,20,.96),rgba(19,15,12,.96));color:#f0dfc2;box-sizing:border-box}
+  .music-setting-head,.music-setting-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .music-setting-head b{font-size:14px;letter-spacing:.08em;color:#ffe0a0}
+  .music-setting-head output{font-size:13px;font-weight:800;color:#e6b47a;font-variant-numeric:tabular-nums}
+  #musicVolume{display:block;width:100%;margin:11px 0;accent-color:#e6b45f;cursor:pointer}
+  .music-setting-foot{font-size:11px;color:#b9a58c}
+  #musicMute{border:1px solid #806342;border-radius:7px;background:#2b2017;color:#f4d7a5;padding:5px 11px;font:700 11px system-ui,sans-serif;cursor:pointer}
+  #musicMute[aria-pressed="true"]{background:#6b342b;border-color:#c77b65;color:#fff}
 </style>
 
 <canvas id="c"></canvas>
@@ -604,6 +612,11 @@
       <button type="button" id="mCodex" class="mn-btn"><b>도감</b><span>챔피언 기초 스탯 · 스킬 계수 · 시연 영상</span></button>
       <button type="button" id="menuFs" class="mn-btn"><b>전체화면</b><span>화면을 넓게 사용하고 가로 화면으로 전환</span></button>
     </div>
+    <section id="musicSettings" aria-label="배경 음악 설정">
+      <div class="music-setting-head"><b>배경 음악</b><output id="musicVolumeText" for="musicVolume">60%</output></div>
+      <input id="musicVolume" type="range" min="0" max="100" value="60" step="1" aria-label="배경 음악 음량">
+      <div class="music-setting-foot"><span>음량 조절</span><button type="button" id="musicMute" aria-pressed="false">음소거</button></div>
+    </section>
   </div>
 </div>
 <div id="codex" hidden>
@@ -24223,6 +24236,58 @@ function demoTick(dt) {
   for (const d of demo.dum) { d.hp = Math.max(d.hp, 1); if (!d.alive) { d.alive = true; d.hp = d.maxHp; } }
   if (demo.t >= demo.len) { demo.t = 0; demo.i = 0; demo.n++; demoReset(); }
 }
+
+// ═════════════ 배경 음악: 메뉴/도감/승리 · 경기 · 밴픽 ═════════════
+const MUSIC_TRACKS = {
+  ambient: 'assets/music-menu.mp3',
+  battle: 'assets/music-battle.mp3',
+  draft: 'assets/music-draft.mp3'
+};
+const MUSIC = {audio:null, track:'', volume:.6, muted:false, unlocked:false};
+try { const saved=JSON.parse(localStorage.getItem('limbusMusicSettings')||'{}'); if(Number.isFinite(saved.volume)) MUSIC.volume=Math.max(0,Math.min(1,saved.volume)); MUSIC.muted=!!saved.muted; } catch {}
+function musicSave(){ try{localStorage.setItem('limbusMusicSettings',JSON.stringify({volume:MUSIC.volume,muted:MUSIC.muted}));}catch{} }
+function musicSetVolume(v){
+  MUSIC.volume=Math.max(0,Math.min(1,Number(v)||0));
+  if(MUSIC.audio) MUSIC.audio.volume=MUSIC.muted?0:MUSIC.volume;
+  musicSave(); musicSyncUI();
+}
+function musicSyncUI(){
+  const slider=$('musicVolume'), label=$('musicVolumeText'), mute=$('musicMute');
+  if(slider && document.activeElement!==slider) slider.value=String(Math.round(MUSIC.volume*100));
+  if(label) label.textContent=Math.round(MUSIC.volume*100)+'%';
+  if(mute){mute.textContent=MUSIC.muted?'음소거 해제':'음소거';mute.setAttribute('aria-pressed',String(MUSIC.muted));}
+}
+function musicScreenTrack(){
+  const shown=id=>{const el=$(id);return !!el&&!el.hidden;};
+  if(shown('aiDraft')) return 'draft';
+  if(vic || mvp || shown('vicMvp') || gameOver) return 'ambient';
+  if(started) return 'battle';
+  return 'ambient';
+}
+function musicPlay(track){
+  if(!MUSIC.audio){MUSIC.audio=new Audio();MUSIC.audio.loop=true;MUSIC.audio.preload='auto';}
+  const a=MUSIC.audio; a.volume=MUSIC.muted?0:MUSIC.volume;
+  if(MUSIC.track!==track){
+    MUSIC.track=track; a.pause(); a.src=MUSIC_TRACKS[track]; a.load();
+  }
+  if(!MUSIC.unlocked) return;
+  if(a.paused) a.play().catch(()=>{});
+}
+function musicRefresh(){musicPlay(musicScreenTrack());}
+function musicUnlock(){
+  if(MUSIC.unlocked) return;
+  MUSIC.unlocked=true; musicRefresh();
+}
+$('musicVolume')?.addEventListener('input',e=>musicSetVolume(Number(e.target.value)/100));
+$('musicMute')?.addEventListener('click',()=>{
+  MUSIC.muted=!MUSIC.muted; if(MUSIC.audio) MUSIC.audio.volume=MUSIC.muted?0:MUSIC.volume;
+  musicSave(); musicSyncUI();
+});
+musicSyncUI();
+document.addEventListener('pointerdown',musicUnlock,{once:true,capture:true});
+document.addEventListener('keydown',musicUnlock,{once:true,capture:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden) musicRefresh(); else if(MUSIC.audio) MUSIC.audio.pause();});
+setInterval(musicRefresh,500);
 
 // CODEX_END
 if (window.DEMO) demoInit();
