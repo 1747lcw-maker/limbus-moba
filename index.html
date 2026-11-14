@@ -4692,7 +4692,9 @@ function castSkillCore(c, key, ang, frac = null) {
   // CC 면역/저지불가 상태는 CC에 의한 스킬 봉쇄를 무시한다.
   const ccImmune = (c.ccImmuneUntil || 0) > time || (c.ccImmuneT || 0) > time || (c.unstoppableUntil || 0) > time || c.ccImmune === true || !!(c.cast && c.cast.unstoppable);
   const ccSkillLocked = !ccImmune && (c.stunT > 0 || c.airT > 0 || c.tauntT > time || c.fearT > time || c.silenceUntil > time);
-  if (!tmFree && ccSkillLocked) return;
+  // 필립은 변신 R을 CC 중에도 발동할 수 있다. 변신 후 무적 진입으로 생존 기회를 보장한다.
+  const philipEmergencyR = c.key === 'philip' && key === 'R';
+  if (!tmFree && ccSkillLocked && !philipEmergencyR) return;
   if (c.key === 'gebura' && c.gbTransformUntil > time) return;
   const nhComboBusy=c.key==='naihwang'&&!!c.nhCombo;
   if (!c.alive || !c.rank[key] || (c.cast && !tmFree) || (nhComboBusy&&(c.nhCombo.key!==key||time<c.nhCombo.nextAt||time>c.nhCombo.expires)) || (c.cd[key] > 0 && !recast && !(nhComboBusy&&c.nhCombo.key===key)) || gameOver) return;
