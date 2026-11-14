@@ -12486,12 +12486,17 @@ function aiCombo(b, p) {
   if (b.key === 'mathias') {
     // Q 2타는 자체 재사용 창(2.2초) 안에 쿨다운이 남아 있어도 사용 가능
     const readyQ = b.rank.Q > 0 && (b.cd.Q <= 0 || (b.maQStage === 1 && time < (b.maQUntil || 0)));
-    // W는 저체력 역전용 방어기: 체력이 크게 빠지고 근접 위협 또는 최근 피격이 있을 때 사용
+    // W는 저체력 생존기뿐 아니라 적의 접근·집중 공격을 받아내는 선제 방어기로도 사용
     const threats = enemiesOf(b).filter(e => e.alive && targetable(e));
     const threat = threats.slice().sort((x,y)=>dist(b,x)-dist(b,y))[0];
-    const nearThreat = threats.some(e => dist(e,b) < E(420));
+    const nearestThreat = threat ? dist(b,threat) : Infinity;
+    const nearbyThreats = threats.filter(e => dist(e,b) < E(360)).length;
     const recentlyHit = (b.lastDmgT ?? 99) < 1.5;
-    if (ready('W') && hpB <= .38 && (nearThreat || recentlyHit)) {
+    const useW = hpB <= .38 && (nearestThreat < E(420) || recentlyHit)
+      || nearestThreat < E(260) && hpB <= .78
+      || nearestThreat < E(380) && recentlyHit
+      || nearbyThreats >= 2 && nearestThreat < E(420);
+    if (ready('W') && useW) {
       const wa = threat ? Math.atan2(threat.y-b.y,threat.x-b.x) : b.face;
       castSkill(b,'W',wa); return true;
     }
@@ -13307,7 +13312,14 @@ function aiPoke(b, p) {
     const readyQ = b.rank.Q > 0 && (b.cd.Q <= 0 || (b.maQStage === 1 && time < (b.maQUntil || 0)));
     const foes = enemiesOf(b).filter(e => e.alive && targetable(e));
     const threat = foes.slice().sort((x,y)=>dist(b,x)-dist(b,y))[0];
-    if (ready('W') && hpB <= .38 && (foes.some(e=>dist(e,b)<E(420)) || (b.lastDmgT??99)<1.5)) {
+    const nearestThreat = threat ? dist(b,threat) : Infinity;
+    const nearbyThreats = foes.filter(e=>dist(e,b)<E(360)).length;
+    const recentlyHit = (b.lastDmgT??99)<1.5;
+    const useW = hpB <= .38 && (nearestThreat<E(420)||recentlyHit)
+      || nearestThreat<E(260) && hpB<=.78
+      || nearestThreat<E(380) && recentlyHit
+      || nearbyThreats>=2 && nearestThreat<E(420);
+    if (ready('W') && useW) {
       castSkill(b,'W',threat?Math.atan2(threat.y-b.y,threat.x-b.x):b.face); return true;
     }
     if (ready('E') && d > E(105) && d < E(560)) { castSkill(b,'E',a); return true; }
