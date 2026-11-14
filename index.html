@@ -24243,13 +24243,17 @@ const MUSIC_TRACKS = {
   battle: 'assets/music-battle.mp3',
   draft: 'assets/music-draft.mp3'
 };
-const MUSIC = {audio:null, track:'', volume:.6, muted:false, unlocked:false};
+const MUSIC = {audio:null, track:'', volume:.6, muted:false, unlocked:false, ctx:null, master:null, synthTrack:'', synthTimer:0, synthStep:0, synthNodes:[]};
 try { const saved=JSON.parse(localStorage.getItem('limbusMusicSettings')||'{}'); if(Number.isFinite(saved.volume)) MUSIC.volume=Math.max(0,Math.min(1,saved.volume)); MUSIC.muted=!!saved.muted; } catch {}
 function musicSave(){ try{localStorage.setItem('limbusMusicSettings',JSON.stringify({volume:MUSIC.volume,muted:MUSIC.muted}));}catch{} }
+function musicApplyVolume(){
+  const v=MUSIC.muted?0:MUSIC.volume;
+  if(MUSIC.audio) MUSIC.audio.volume=v;
+  if(MUSIC.master && MUSIC.ctx) MUSIC.master.gain.setTargetAtTime(v*.22,MUSIC.ctx.currentTime,.04);
+}
 function musicSetVolume(v){
   MUSIC.volume=Math.max(0,Math.min(1,Number(v)||0));
-  if(MUSIC.audio) MUSIC.audio.volume=MUSIC.muted?0:MUSIC.volume;
-  musicSave(); musicSyncUI();
+  musicApplyVolume(); musicSave(); musicSyncUI();
 }
 function musicSyncUI(){
   const slider=$('musicVolume'), label=$('musicVolumeText'), mute=$('musicMute');
@@ -24264,29 +24268,90 @@ function musicScreenTrack(){
   if(started) return 'battle';
   return 'ambient';
 }
-function musicPlay(track){
-  if(!MUSIC.audio){MUSIC.audio=new Audio();MUSIC.audio.loop=true;MUSIC.audio.preload='auto';}
-  const a=MUSIC.audio; a.volume=MUSIC.muted?0:MUSIC.volume;
-  if(MUSIC.track!==track){
-    MUSIC.track=track; a.pause(); a.src=MUSIC_TRACKS[track]; a.load();
+function musicStopSynth(){
+  if(MUSIC.synthTimer){clearInterval(MUSIC.synthTimer);MUSIC.synthTimer=0;}
+  for(const n of MUSIC.synthNodes){try{n.stop();}catch{}}
+  MUSIC.synthNodes.length=0; MUSIC.synthTrack='';
+}
+function musicTone(freq,duration,wave,level,when){
+  const c=MUSIC.ctx;if(!c||c.state!=='running'||!MUSIC.master)return;
+  const o=c.createOscillator(),g=c.createGain(),t=when??c.currentTime;
+  o.type=wave||'sine';o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,level),t+.035);
+  g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+  o.connect(g);g.connect(MUSIC.master);o.start(t);o.stop(t+duration+.03);
+  MUSIC.synthNodes.push(o);if(MUSIC.synthNodes.length>48)MUSIC.synthNodes.splice(0,24);
+}
+function musicSynthStep(track){
+  const c=MUSIC.ctx;if(!c||c.state!=='running')return;
+  const cfg={
+    ambient:{bpm:76,root:110,scale:[0,3,7,10,12,10,7,3],chord:[0,3,7],wave:'sine'},
+    battle:{bpm:132,root:82.41,scale:[0,7,10,12,15,12,10,7],chord:[0,3,7],wave:'sawtooth'},
+    draft:{bpm:104,root:98,scale:[0,2,5,7,9,7,5,2],chord:[0,4,7],wave:'triangle'}
+  }[track]||{bpm:90,root:110,scale:[0,3,7,10,12,10,7,3],chord:[0,3,7],wave:'sine'};
+  const beat=60/cfg.bpm,step=MUSIC.synthStep++,bar=Math.floor(step/4),pos=step%4;
+  const roots=[0,5,3,7],root=cfg.root*Math.pow(2,roots[bar%4]/12);
+  if(pos===0){
+    musicTone(root,beat*3.7,'sine',.12,c.currentTime);
+    for(const semi of cfg.chord)musicTone(root*2*Math.pow(2/semi===0?0:semi/12),beat*3.5,'sine',.025,c.currentTime);
   }
-  if(!MUSIC.unlocked) return;
-  if(a.paused) a.play().catch(()=>{});
+  const semi=cfg.scale[step%cfg.scale.length]+(bar%2?12:0);
+  musicTone(root*2*Math.pow(2,semi/12),beat*.82,cfg.wave,track==='battle'?.045:.035,c.currentTime);
+  if(track==='battle'&&pos%2===0){
+    musicTone(42,beat*.12,'triangle',.035,c.currentTime);
+    musicTone(180,beat*.08,'square',.012,c.currentTime+.015);
+  }else if(track==='draft'&&pos===2){
+    musicTone(root*3,beat*.35,'triangle',.018,c.currentTime);
+  }
+}
+function musicStartSynth(track){
+  if(!MUSIC.unlocked||document.hidden)return;
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  try{
+    if(!MUSIC.ctx){MUSIC.ctx=new AC();MUSIC.master=MUSIC.ctx.createGain();MUSIC.master.gain.value=0;MUSIC.master.connect(MUSIC.ctx.destination);}
+    const c=MUSIC.ctx;
+    const begin=()=>{
+      if(MUSIC.synthTrack===track)return;
+      musicStopSynth();MUSIC.synthTrack=track;MUSIC.synthStep=0;musicApplyVolume();
+      musicSynthStep(track);
+      const bpm=({ambient:76,battle:132,draft:104})[track]||90;
+      MUSIC.synthTimer=setInterval(()=>musicSynthStep(track),60000/bpm);
+    };
+    if(c.state==='suspended')c.resume().then(begin).catch(()=>{});else begin();
+  }catch(e){console.warn('BGM fallback error',e);}
+}
+function musicPlay(track){
+  if(!MUSIC.audio){
+    MUSIC.audio=new Audio();MUSIC.audio.loop=true;MUSIC.audio.preload='auto';
+    MUSIC.audio.addEventListener('error',()=>musicStartSynth(MUSIC.track));
+  }
+  const a=MUSIC.audio;
+  if(MUSIC.track!==track){
+    musicStopSynth();MUSIC.track=track;a.pause();a.src=MUSIC_TRACKS[track];a.load();
+  }
+  musicApplyVolume();
+  if(!MUSIC.unlocked)return;
+  if(MUSIC.synthTrack===track)return;
+  const p=a.play();
+  if(p&&p.catch)p.catch(()=>musicStartSynth(track));
+  setTimeout(()=>{if(MUSIC.track===track&&!MUSIC.synthTrack&&(a.error||a.readyState===0))musicStartSynth(track);},1800);
 }
 function musicRefresh(){musicPlay(musicScreenTrack());}
 function musicUnlock(){
-  if(MUSIC.unlocked) return;
-  MUSIC.unlocked=true; musicRefresh();
+  if(MUSIC.unlocked)return;
+  MUSIC.unlocked=true;musicRefresh();
 }
 $('musicVolume')?.addEventListener('input',e=>musicSetVolume(Number(e.target.value)/100));
 $('musicMute')?.addEventListener('click',()=>{
-  MUSIC.muted=!MUSIC.muted; if(MUSIC.audio) MUSIC.audio.volume=MUSIC.muted?0:MUSIC.volume;
-  musicSave(); musicSyncUI();
+  MUSIC.muted=!MUSIC.muted;musicApplyVolume();musicSave();musicSyncUI();
 });
 musicSyncUI();
 document.addEventListener('pointerdown',musicUnlock,{once:true,capture:true});
 document.addEventListener('keydown',musicUnlock,{once:true,capture:true});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden) musicRefresh(); else if(MUSIC.audio) MUSIC.audio.pause();});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){if(MUSIC.audio)MUSIC.audio.pause();if(MUSIC.ctx&&MUSIC.ctx.state==='running')MUSIC.ctx.suspend().catch(()=>{});}
+  else{if(MUSIC.ctx&&MUSIC.ctx.state==='suspended')MUSIC.ctx.resume().catch(()=>{});musicRefresh();}
+});
 setInterval(musicRefresh,500);
 
 // CODEX_END
