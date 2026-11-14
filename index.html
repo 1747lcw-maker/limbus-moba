@@ -12535,11 +12535,7 @@ function aiCombo(b, p) {
   }
   if (b.key === 'philip') {
     const a = aimAt(b,p,.18), ego = (b.phEgoUntil||0) > time;
-    // 체력 30% 이하라도 자동으로 궁을 낭비하지 않는다. 근접한 적의 즉각적인 위협이나 최근 집중 공격이 있을 때만 생존용으로 발동한다.
-    const immediateThreat = d < E(280) || (b.lastDmgT ?? 99) < 1.0;
-    if (!ego && !(b.phTransformUntil>time) && !b.phEgoUsed && b.hp<=b.maxHp*.30 && ready('R') && immediateThreat) {
-      castSkill(b,'R',a); return true;
-    }
+    // 30% 이하 즉시 R 발동은 updateBot의 최우선 생존 처리에서 담당한다.
     if (b.phTransformUntil>time) return false;
     if (ego) {
       // 변신 직후 강화 E로 공격·방어 버프를 확보하고, 사거리별로 강화 스킬을 순환한다.
@@ -13486,6 +13482,13 @@ function updateBot(b, dt) {
   if (!b.alive) { respawnTick(b, dt); b.path = null; b.stance = null; b.focus = null; return; }
   champTimers(b, dt);
   aiLearn(b);
+  // 필립은 체력이 30% 이하가 되는 즉시, 적의 위치나 교전 여부와 관계없이 변신 R을 사용한다.
+  // 이 체크를 일반 행동 잠금·CC 처리보다 먼저 실행해 위급한 순간 R이 지연되지 않게 한다.
+  if (b.key === 'philip' && b.hp <= b.maxHp * .30 && !(b.phEgoUntil > time) &&
+      !(b.phTransformUntil > time) && !b.phEgoUsed && b.rank.R > 0 && b.cd.R <= 0) {
+    castSkill(b, 'R', null);
+    return;
+  }
   if (b.rolandFuriDash || b.dash || b.blink || b.leap || b.alpha || b.rcut || b.scR || b.hcR || b.mrDash || b.mrGrab || b.ylDash || b.krDash || b.krR || b.vgDash || b.vgFin || b.chE || b.chQ || b.chRide || b.stasisT > time || b.itDash || hhBusy(b) || alBusy(b) || mtBusy(b) || gdBusy(b) || tmBusy(b) || dbBusy(b) || riBusy(b) || bpBusy(b) || xcBusy(b) || sdBusy(b) || efBusy(b) || dlBusy(b)) return;
   if (chBotBoard(b, dt)) return;                                  // 아군 카론이 버스 시동 중: 타러 감
   if (b.ylRevive) { moveChamp(b, 0, 0, dt); return; }
@@ -13497,7 +13500,14 @@ function updateBot(b, dt) {
   if (tauntedMove(b, dt) || fearMove(b, dt)) return;
   if (b.snipe) { aiSnipe(b); moveChamp(b, 0, 0, dt); return; }
   if (b.qCharge) { const t = b.qCharge.target; if (t && t.alive) { const a = Math.atan2(t.y - b.y, t.x - b.x); b.face = a; moveChamp(b, Math.cos(a), Math.sin(a), dt); } else moveChamp(b, 0, 0, dt); return; }   // Q 충전 중
-  const p = focusEnemy(b), hpB = b.hp / b.maxHp;
+  let p = focusEnemy(b);
+  const philipEgoCounter = b.key === 'philip' && (b.phEgoUntil || 0) > time;
+  // E.G.O 변신이 끝나면 주변의 가장 가까운 적을 즉시 반격 대상으로 고정한다.
+  if (philipEgoCounter) {
+    const counterTarget = nearestEnemyChamp(b, E(1400));
+    if (counterTarget) { p = counterTarget; b.target = counterTarget; b.stance = 'allin'; b.stanceT = 0; b.mode = 'lane'; cancelRecall(b); }
+  }
+  const hpB = b.hp / b.maxHp;
   b.thinkT = (b.thinkT || 0) - dt; b.stanceT = (b.stanceT || 0) - dt;
   const react = () => AI.react[0] + Math.random() * (AI.react[1] - AI.react[0]);
   let dx = 0, dy = 0;
@@ -13567,7 +13577,7 @@ function updateBot(b, dt) {
   const planS = TEAM_PLAN[b.team] && TEAM_PLAN[b.team].plan, sieging = planS && planS.strat === 'siege' && hpB > .45 &&
     alliesOf(b).some(a => a.alive && dist(a, b) < E(600)) && tur && (tur.target !== b || hpB > .75);   // 총공세: 동료가 곁에 있으면 포탑 밑에서도 버팀
   const planS0 = () => !!(planS && planS.strat === 'siege');
-  if (inHot && !sieging && !(b.stance === 'allin' && ev.canKill && hpB > .3)) {
+  if (inHot && !sieging && !philipEgoCounter && !(b.stance === 'allin' && ev.canKill && hpB > .3)) {
     b.noDiveT = time + 2.5;
     b.target = null; if (p.alive && pd < E(700)) { b.stance = 'retreat'; b.stanceT = 1; }   // 적이 없으면 사거리 밖으로만 (집까지 뛰어가지 않음)
     const a = Math.atan2(b.y - tur.y, b.x - tur.x), s = towerSpot(b), a2 = Math.atan2(s.y - b.y, s.x - b.x);
@@ -13594,6 +13604,7 @@ function updateBot(b, dt) {
   const macro = aiMacro(b, hpB, p, pd);
   if (b.mode === 'recall') { moveChamp(b, 0, 0, dt); return; }
   const noChase = b.noChaseT === p && time < (b.noChase || 0);
+  if (philipEgoCounter && p.alive && pd < E(1400)) want = 'allin';
   if (b.role !== 'jungle' && p.alive && pd < E(700)) {
     if (ev.canKill && !noChase) want = 'allin';
     else if (ev.inDanger) want = 'retreat';
@@ -13602,7 +13613,7 @@ function updateBot(b, dt) {
   }
   if (b.role !== 'jungle' && b.stance === 'allin' && want !== 'allin' && time < (b.commitUntil || 0) && !(hpB < .25 && ev.inDanger)) want = 'allin';
   const pUnder = p.alive && nearTurret(p.team, p, E(20));
-  if (want === 'allin' && pUnder && (time < (b.noDiveT || 0) || !(ev.canKill && hpB > .5)) && !(planS0() && hpB > .45)) want = 'trade';   // 포탑 밑 적은 확실할 때만
+  if (want === 'allin' && pUnder && !philipEgoCounter && (time < (b.noDiveT || 0) || !(ev.canKill && hpB > .5)) && !(planS0() && hpB > .45)) want = 'trade';   // 포탑 밑 적은 확실할 때만
   if (b.desperateT > time && p.alive && pd < E(700) && hpB > .15) want = 'allin';          // 기지 방어: 물러서지 않음
   if (b.rescueT > time && p.alive && pd < E(700) && hpB > .35 && !pUnder) want = 'allin';   // 구출: 합류해서 싸움
   if (want !== b.stance && (b.stanceT <= 0 || want === 'allin' || want === 'retreat')) {
