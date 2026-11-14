@@ -3690,6 +3690,7 @@ function damage(src, tgt, amount, opts = {}) {
   if(tgt&&tgt.key==='philip'&&(tgt.phWingGuardUntil||0)>time){const a=src?Math.atan2(src.y-tgt.y,src.x-tgt.x):0,da=Math.abs(Math.atan2(Math.sin(a-(tgt.phWingGuardAng||0)),Math.cos(a-(tgt.phWingGuardAng||0))));if(src&&src.team!==tgt.team&&da<Math.PI*.52){philipBurn(tgt,src,amount,'깃털 방패');return 0;}amount*=.25;}
   if(tgt&&tgt.key==='philip'&&(tgt.phDRUntil||0)>time)amount*=1-(tgt.phDRAmount??.15);
   if(src&&src.key==='philip'&&(src.phAtkUntil||0)>time)amount*=src.phEgoUntil>time?1.60:1.20;
+  if(src&&src.key==='philip')amount*=1.7; // 필립 전체 피해량 70% 증가
   if(src&&src.ieSupportUntil>time)amount*=1.10;
   if(tgt&&tgt.ieSupportUntil>time)amount*=.92;
   // 게부라 R 발현 준비 3초 동안 모든 피해 90% 감소
@@ -3759,7 +3760,8 @@ function damage(src, tgt, amount, opts = {}) {
   const preMit = amount;
   amount = Math.max(1, Math.round(mitigate(tgt, amount, opts.type || 'physical', src)));
   let hpLoss = amount;
-  if (tgt.shield > 0) { const a = Math.min(tgt.shield, hpLoss); tgt.shield -= a; hpLoss -= a; }
+  let shieldLoss = 0;
+  if (tgt.shield > 0) { const a = Math.min(tgt.shield, hpLoss); shieldLoss = a; tgt.shield -= a; hpLoss -= a; }
   if(src&&src.key==='philip'&&opts.basic&&src.phEgoUntil>time&&hpLoss>0)philipBurn(src,tgt,hpLoss,'강화 평타');   // 보호막 먼저
   const geburaActualHpLoss = Math.min(hpLoss, Math.max(0, tgt.hp)); // 보호막·초과 피해를 제외한 실제 체력 피해
   if(tgt.key==='mathias'&&geburaActualHpLoss>0){if(!Array.isArray(tgt.maHpLossLog))tgt.maHpLossLog=[];tgt.maHpLossLog.push({at:time,amount:geburaActualHpLoss});tgt.maHpLossLog=tgt.maHpLossLog.filter(v=>v.at>=time-8);}
@@ -3793,7 +3795,7 @@ function damage(src, tgt, amount, opts = {}) {
       fx.push({type:'pop', x:tgt.x, y:tgt.y, r:tgt.r * 1.3, color:'#e6c35c', t:0, life:.35});
     }
   }
-  if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { src.dmgDealt = (src.dmgDealt || 0) + geburaActualHpLoss; tgt.dmgTaken = (tgt.dmgTaken || 0) + geburaActualHpLoss; }   // 통계: 보호막·초과 피해를 제외한 실제 체력 감소량
+  if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { src.dmgDealt = (src.dmgDealt || 0) + geburaActualHpLoss + shieldLoss; tgt.dmgTaken = (tgt.dmgTaken || 0) + geburaActualHpLoss; }   // 통계: 보호막·초과 피해를 제외한 실제 체력 감소량
   if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { if (time - (tgt.lastChampHitT ?? -99) > 5) tgt.fightT0 = time; tgt.lastChampHitT = time; }
   if (isChamp(src) && src.gdGuard && tgt.team !== src.team) gdLifeline(src, amount);   // 귀도 집행 유예: 지키는 아군 딜의 15% 회복
   if (isChamp(src) && src.alive) {                    // 흡혈
@@ -21085,7 +21087,7 @@ function showMatchStats() {
   const teams = ['blue','red'];
   const rows = teams.map(team => {
     const list = heroes.filter(h=>h.team===team).sort((a,b)=>(b.dmgDealt||0)-(a.dmgDealt||0));
-    return '<section style="min-width:0"><h3 style="margin:8px 0 10px;color:'+(team==='blue'?'#75baff':'#ff8589')+'">'+(team==='blue'?'블루 팀':'레드 팀')+'</h3><div style="overflow:auto"><table style="border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap"><thead><tr>'+['챔피언','처치','데스','도움','가한 피해','받은 피해','회복량','획득 골드','CS'].map(x=>'<th style="padding:8px 6px;background:#202938;border-bottom:1px solid #465166;text-align:center">'+x+'</th>').join('')+'</tr></thead><tbody>'+list.map(c=>'<tr><td style="padding:8px 6px;border-bottom:1px solid #303b4b;font-weight:700">'+(c.name||STATS[c.key]?.name||c.key)+'</td>'+[c.k,c.d,c.a,c.dmgDealt,c.dmgTaken,c.healDone,c.goldEarned,c.cs].map((v,i)=>'<td style="padding:8px 6px;border-bottom:1px solid #303b4b;text-align:right;color:'+(i===3?'#ffb36a':i===5?'#80e0a4':i===6?'#f5d77c':'#e5eaf2')+'">'+fmt(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>';
+    return '<section style="min-width:0"><h3 style="margin:8px 0 10px;color:'+(team==='blue'?'#75baff':'#ff8589')+'">'+(team==='blue'?'블루 팀':'레드 팀')+'</h3><div style="overflow:auto"><table style="border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap"><thead><tr>'+['챔피언','처치','데스','도움','가한 피해(보호막 포함)','받은 피해','회복량','획득 골드','CS'].map(x=>'<th style="padding:8px 6px;background:#202938;border-bottom:1px solid #465166;text-align:center">'+x+'</th>').join('')+'</tr></thead><tbody>'+list.map(c=>'<tr><td style="padding:8px 6px;border-bottom:1px solid #303b4b;font-weight:700">'+(c.name||STATS[c.key]?.name||c.key)+'</td>'+[c.k,c.d,c.a,c.dmgDealt,c.dmgTaken,c.healDone,c.goldEarned,c.cs].map((v,i)=>'<td style="padding:8px 6px;border-bottom:1px solid #303b4b;text-align:right;color:'+(i===3?'#ffb36a':i===5?'#80e0a4':i===6?'#f5d77c':'#e5eaf2')+'">'+fmt(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>';
   }).join('');
   panel.innerHTML = '<div style="width:min(1200px,100%);max-height:100%;overflow:auto;background:#111923;border:1px solid #39475a;border-radius:16px;padding:18px;box-shadow:0 18px 70px #000b"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-size:11px;letter-spacing:2px;color:#9eacbf">MATCH RESULT</div><h2 style="margin:4px 0 14px;font-size:24px">전투 통계</h2></div><button id="matchStatsClose" style="border:1px solid #65748a;border-radius:8px;background:#263345;color:white;padding:9px 16px;font-weight:700;cursor:pointer">닫기</button></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr));gap:18px">'+rows+'</div><p style="margin:14px 0 0;color:#9aa8ba;font-size:11px">피해량은 챔피언에게 실제로 감소시킨 체력 기준이며, 회복량은 현재 기록되는 흡혈·게부라 회복 기준입니다. 획득 골드는 게임 중 골드 수급 기록입니다.</p></div>';
   panel.hidden = false;
