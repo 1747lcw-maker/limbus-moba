@@ -13539,7 +13539,7 @@ function updateBot(b, dt) {
   const macro = aiMacro(b, hpB, p, pd);
   if (b.mode === 'recall') { moveChamp(b, 0, 0, dt); return; }
   const noChase = b.noChaseT === p && time < (b.noChase || 0);
-  if (p.alive && pd < E(700)) {
+  if (b.role !== 'jungle' && p.alive && pd < E(700)) {
     if (ev.canKill && !noChase) want = 'allin';
     else if (ev.inDanger) want = 'retreat';
     else if (ev.score > .35 && !noChase) want = 'allin';
