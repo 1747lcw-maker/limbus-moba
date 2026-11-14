@@ -3830,6 +3830,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (opts.basic && isChamp(tgt) && hasItem(tgt, 'frost') && src && src.alive && !src.structure) src.frostT = time + 2;   // 서리조각
   if (tgt.recalling) cancelRecall(tgt);             // 맞으면 귀환 끊김
   if (isChamp(src) && (opts.skill || opts.basic) && !opts.noProc) hitFeedback(src, tgt, opts);
+  if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team && (opts.skill || opts.basic)) { tgt.lastChampHitBy = src; tgt.lastChampHitAt = time; src.lastChampHitTarget = tgt; src.lastChampHitAt = time; }
   if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team && !opts.noProc && !opts.rune && (opts.skill || opts.basic)) { runeOnHit(src, tgt, opts); perkOnHit(src, tgt, opts); }
   if (isChamp(tgt)) tgt.lastDmgT = 0;
   {
@@ -13126,7 +13127,7 @@ function aiJungle(b, hpB) {
     let best=null,bs=Infinity;
     for(const e of enemiesOf(b)){
       if(!e.alive||e.role==='jungle'||e.recalling||!seenBy(b.team,e))continue;
-      const allyFighting=alliesOf(b).some(a=>a.alive&&dist(a,e)<E(850)&&((a.lastDmgT??99)<1.25||(e.lastDmgT??99)<1.25));
+      const allyFighting=alliesOf(b).some(a=>a.alive&&dist(a,e)<E(700)&&((a.lastChampHitTarget===e&&time-(a.lastChampHitAt??-99)<1.8)||(e.lastChampHitBy===a&&time-(e.lastChampHitAt??-99)<1.8)));
       const critical=e.hp/e.maxHp<=.35;
       if(!allyFighting&&!critical)continue;
       if(dangerFor(b,e)&&dist(b,e)>E(550))continue;
@@ -13461,7 +13462,7 @@ function updateBot(b, dt) {
   // 정글러가 적 챔피언과 마주치면 캠프 판단보다 교전을 우선한다. 단, 적 포탑 안으로 무리하게 추격하지 않는다.
   if(b.role==='jungle'){
     const intruder=nearestEnemyChamp(b,E(980));
-    if(intruder&&alliesOf(b).some(a=>a.alive&&dist(a,intruder)<E(760)&&((a.lastDmgT??99)<1.25||(intruder.lastDmgT??99)<1.25))){
+    if(intruder&&alliesOf(b).some(a=>a.alive&&dist(a,intruder)<E(650)&&((a.lastChampHitTarget===intruder&&time-(a.lastChampHitAt??-99)<1.8)||(intruder.lastChampHitBy===a&&time-(intruder.lastChampHitAt??-99)<1.8)))){
       const id=aiEvaluate(b,intruder),range=E(b.st.range)+E(35);
       b.target=intruder;
       if(id.inDanger&&hpB<.42){const spot=towerSpot(b);go(spot.x,spot.y);moveChamp(b,dx,dy,dt);return;}
