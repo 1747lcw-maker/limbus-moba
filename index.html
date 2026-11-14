@@ -14499,6 +14499,20 @@ function drawPhilipBody(g,c){
   if((c.phBladeGlowUntil||0)>time){g.save();g.translate(c.x,c.y);g.rotate(c.face||0);g.strokeStyle='#ff9b45';g.shadowColor='#ff6a24';g.shadowBlur=E(18);g.lineWidth=E(6);g.beginPath();g.moveTo(c.r*.18,-c.r*.22);g.lineTo(c.r*(ego?2.05:1.72),-c.r*(ego?1.08:.9));g.stroke();g.restore();}
   if(c.phRRect&&c.phRRect.until>time){g.save();g.translate(c.x,c.y);g.rotate(c.phRRect.ang);g.fillStyle='rgba(255,130,55,.12)';g.strokeStyle='#ff9b52';g.lineWidth=E(3);g.fillRect(0,-E(120),E(1050),E(240));g.strokeRect(0,-E(120),E(1050),E(240));g.restore();}
   if(c.phDashTrail&&c.phDashTrail.until>time){const t=c.phDashTrail;g.save();g.globalAlpha=Math.min(1,(t.until-time)*1.5);g.strokeStyle=t.fire?'#ff8a35':'#f2eee8';g.lineWidth=E(12);g.lineCap='round';g.beginPath();g.moveTo(t.sx,t.sy);g.lineTo(t.ex,t.ey);g.stroke();g.strokeStyle=t.fire?'#ffd08a':'#ffffff';g.lineWidth=E(4);g.stroke();g.restore();}
+  // 필립 E.G.O 균열: 토프 그레이 몸체 위로 여러 갈래의 두꺼운 주황색 균열을 상시 표시
+  g.save();g.translate(c.x,c.y);g.rotate(c.face||0);g.beginPath();g.arc(0,0,c.r*.96,0,Math.PI*2);g.clip();
+  g.globalAlpha=ego?1:.92;g.lineCap='round';g.lineJoin='round';
+  const cracks=[
+    [[-c.r*.82,-c.r*.48],[-c.r*.48,-c.r*.28],[-c.r*.32,c.r*.02],[-c.r*.05,c.r*.16],[c.r*.12,c.r*.48]],
+    [[-c.r*.58,c.r*.82],[-c.r*.42,c.r*.48],[-c.r*.12,c.r*.30],[c.r*.08,c.r*.02],[c.r*.42,-c.r*.22],[c.r*.78,-c.r*.58]],
+    [[c.r*.02,-c.r*.92],[c.r*.12,-c.r*.58],[-c.r*.02,-c.r*.34],[c.r*.18,-c.r*.10],[c.r*.52,c.r*.06],[c.r*.86,c.r*.02]],
+    [[-c.r*.94,c.r*.08],[-c.r*.62,c.r*.12],[-c.r*.42,c.r*.32],[-c.r*.22,c.r*.62]],
+    [[c.r*.72,c.r*.82],[c.r*.48,c.r*.54],[c.r*.52,c.r*.30],[c.r*.30,c.r*.12]],
+    [[-c.r*.18,-c.r*.08],[-c.r*.42,-c.r*.02],[-c.r*.62,-c.r*.22]],
+    [[c.r*.18,c.r*.30],[c.r*.02,c.r*.52],[-c.r*.08,c.r*.82]]
+  ];
+  for(let i=0;i<cracks.length;i++){const pts=cracks[i];g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let j=1;j<pts.length;j++)g.lineTo(pts[j][0],pts[j][1]);g.strokeStyle='#9f3d20';g.lineWidth=E(ego?7:6);g.shadowColor='#ff742e';g.shadowBlur=E(ego?13:9);g.stroke();g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let j=1;j<pts.length;j++)g.lineTo(pts[j][0],pts[j][1]);g.strokeStyle=i%2?'#ffad62':'#ff8b3d';g.lineWidth=E(ego?3.8:3.2);g.shadowBlur=E(ego?16:11);g.stroke();}
+  g.shadowBlur=0;g.restore();
   // 필립: 토프 그레이 전투복, 반무테 안경, 롱소드
   g.save();g.translate(c.x,c.y);g.rotate(c.face||0);
   g.strokeStyle='#514d49';g.lineWidth=E(5);g.lineCap='round';
@@ -23461,7 +23475,7 @@ const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
 const cxCol = k => {
   if (k === 'binah') return 'linear-gradient(135deg, #08090d 0%, #111217 46%, #b99627 50%, #f2cf62 100%)';
-  if (k === 'philip') return 'linear-gradient(132deg, transparent 0 24%, #d96a32 24.5%, #ffb36a 25%, transparent 25.8% 58%, #c95425 58.5%, #ff9a43 59%, transparent 59.8%), linear-gradient(135deg, #55545a 0%, #77736f 38%, #a49a91 68%, #625f60 100%)';
+  if (k === 'philip') return 'linear-gradient(151deg, transparent 0 8%, #9f3d20 8.2% 10.2%, #ffad62 10.4% 11.5%, transparent 11.8% 27%, #b64c25 27.2% 29.8%, #ffc078 30% 31.2%, transparent 31.5% 49%, #a83f20 49.2% 52%, #ffb36a 52.2% 53.3%, transparent 53.6% 70%, #bd5429 70.2% 72.8%, #ffbd75 73% 74.2%, transparent 74.5%), linear-gradient(35deg, transparent 0 18%, #b84b24 18.2% 20.8%, #ffc078 21% 22.2%, transparent 22.5% 43%, #a94120 43.2% 46%, #ffad62 46.2% 47.4%, transparent 47.7% 67%, #b64c25 67.2% 70%, #ffc078 70.2% 71.4%, transparent 71.7%), linear-gradient(135deg, #55545a 0%, #77736f 38%, #a49a91 68%, #625f60 100%)';
   if (k === 'roland') return '#090a0d';
   if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
   if (k === 'liuEn') return '#41464f';
