@@ -14500,7 +14500,7 @@ function drawPhilipBody(g,c){
   if(c.phRRect&&c.phRRect.until>time){g.save();g.translate(c.x,c.y);g.rotate(c.phRRect.ang);g.fillStyle='rgba(255,130,55,.12)';g.strokeStyle='#ff9b52';g.lineWidth=E(3);g.fillRect(0,-E(120),E(1050),E(240));g.strokeRect(0,-E(120),E(1050),E(240));g.restore();}
   if(c.phDashTrail&&c.phDashTrail.until>time){const t=c.phDashTrail;g.save();g.globalAlpha=Math.min(1,(t.until-time)*1.5);g.strokeStyle=t.fire?'#ff8a35':'#f2eee8';g.lineWidth=E(12);g.lineCap='round';g.beginPath();g.moveTo(t.sx,t.sy);g.lineTo(t.ex,t.ey);g.stroke();g.strokeStyle=t.fire?'#ffd08a':'#ffffff';g.lineWidth=E(4);g.stroke();g.restore();}
   // 필립 E.G.O 균열: 토프 그레이 몸체 위로 여러 갈래의 두꺼운 주황색 균열을 상시 표시
-  g.save();g.translate(c.x,c.y);g.rotate(c.face||0);g.beginPath();g.arc(0,0,c.r*.96,0,Math.PI*2);g.clip();
+  if(ego){g.save();g.translate(c.x,c.y);g.rotate(c.face||0);g.beginPath();g.arc(0,0,c.r*.96,0,Math.PI*2);g.clip();
   g.globalAlpha=ego?1:.92;g.lineCap='round';g.lineJoin='round';
   const cracks=[
     [[-c.r*.82,-c.r*.48],[-c.r*.48,-c.r*.28],[-c.r*.32,c.r*.02],[-c.r*.05,c.r*.16],[c.r*.12,c.r*.48]],
@@ -14512,7 +14512,7 @@ function drawPhilipBody(g,c){
     [[c.r*.18,c.r*.30],[c.r*.02,c.r*.52],[-c.r*.08,c.r*.82]]
   ];
   for(let i=0;i<cracks.length;i++){const pts=cracks[i];g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let j=1;j<pts.length;j++)g.lineTo(pts[j][0],pts[j][1]);g.strokeStyle='#9f3d20';g.lineWidth=E(ego?7:6);g.shadowColor='#ff742e';g.shadowBlur=E(ego?13:9);g.stroke();g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let j=1;j<pts.length;j++)g.lineTo(pts[j][0],pts[j][1]);g.strokeStyle=i%2?'#ffad62':'#ff8b3d';g.lineWidth=E(ego?3.8:3.2);g.shadowBlur=E(ego?16:11);g.stroke();}
-  g.shadowBlur=0;g.restore();
+  g.shadowBlur=0;g.restore();}
   // 필립: 토프 그레이 전투복, 반무테 안경, 롱소드
   g.save();g.translate(c.x,c.y);g.rotate(c.face||0);
   g.strokeStyle='#514d49';g.lineWidth=E(5);g.lineCap='round';
