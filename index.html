@@ -3645,9 +3645,8 @@ function damage(src, tgt, amount, opts = {}) {
   if (nhTigerHit) amount *= .90;
   if (nhTigerHit && opts.skill && src.nhCombo && src.nhCombo.key === 'R') amount *= .7225;
   if(tgt&&tgt.key==='philip'&&(tgt.phInvulnUntil||0)>time)return 0;
+  if(tgt&&tgt.key==='philip'&&(tgt.phWingGuardUntil||0)>time){const a=src?Math.atan2(src.y-tgt.y,src.x-tgt.x):0,da=Math.abs(Math.atan2(Math.sin(a-(tgt.phWingGuardAng||0)),Math.cos(a-(tgt.phWingGuardAng||0))));if(src&&src.team!==tgt.team&&da<Math.PI*.52){philipBurn(tgt,src,amount,'깃털 방패');return 0;}amount*=.25;}
   if(tgt&&tgt.key==='philip'&&(tgt.phDRUntil||0)>time)amount*=1-(tgt.phDRAmount??.15);
-  if(tgt&&tgt.key==='philip'&&(tgt.phWingGuardUntil||0)>time)amount*=.25;
-  if(tgt&&tgt.key==='philip'&&(tgt.phWingGuardUntil||0)>time){const a=src?Math.atan2(src.y-tgt.y,src.x-tgt.x):0,da=Math.abs(Math.atan2(Math.sin(a-(tgt.phWingGuardAng||0)),Math.cos(a-(tgt.phWingGuardAng||0))));if(src&&src.team!==tgt.team&&da<Math.PI*.52){philipBurn(tgt,src,amount,'깃털 방패');return 0;}}
   if(src&&src.key==='philip'&&(src.phAtkUntil||0)>time)amount*=src.phEgoUntil>time?1.60:1.20;
   if(src&&src.ieSupportUntil>time)amount*=1.10;
   if(tgt&&tgt.ieSupportUntil>time)amount*=.92;
