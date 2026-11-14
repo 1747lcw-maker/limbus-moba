@@ -13101,47 +13101,93 @@ function aiJungleTarget() { return null; }       // 라이너는 정글 캠프�
 
 // 정글러: 첫 정글 다 돌기 → 갱 / 캠프 / 에픽
 function aiJungle(b, hpB) {
-  const own = JG_ROUTE.map(id => camps.find(c => c.id === id + '_' + b.team)).filter(Boolean);
+  // 정글러는 고정된 갱킹 조건이나 순서를 따르지 않고, 현재 가능한 행동의 기대 가치를 매번 비교한다.
+  const own = camps.filter(cp => !cp.epic && cp.id && cp.id.endsWith('_' + b.team));
   const up = cp => cp.respawnAt === null && cp.mobs.some(m => m.alive);
   const low = cp => cp.mobs.filter(m => m.alive).sort((x, y) => x.hp - y.hp)[0];
-  // 캠프가 처음 생성되기 전에는 정글을 돈 것으로 오인하지 않고 캠프 쪽에서 대기
-  const cleared = own.filter(cp => cp.mobs.length > 0 && !cp.mobs.some(m => m.alive) && cp.respawnAt !== null).length;
-  if (!b.fullClear && cleared >= 4) { b.fullClear = true; b.gankCd = time + 1; }
-  if (!b.fullClear) {
-    const cp = own.find(up);
-    if (cp) return {unit:low(cp)};
+  const candidates = [];
+
+  // 캠프: 가까운 캠프, 처치 가능성, 현재 체력에 따라 가치가 달라진다.
+  for (const cp of own) {
+    if (!up(cp)) continue;
+    const mob = low(cp);
+    if (!mob) continue;
+    const d = dist(cp, b);
+    const mobHp = mob.hp / Math.max(1, mob.maxHp || mob.hp);
+    let score = 1.05 - d / E(6200) * .62;
+    score += (1 - mobHp) * .10;
+    if (hpB < .45) score += .12;                 // 체력이 낮을수록 안전한 캠프 회복을 선호
+    if (hpB < .25) score += .22;
+    candidates.push({score, action:{unit:mob}, kind:'camp'});
+  }
+
+  // 갱킹: 교전이 일어났다는 사실만으로는 합류하지 않는다.
+  // 숫자 우위, 아군의 전투 참여, 적의 체력, 이동 거리, 포탑 위험을 함께 평가한다.
+  for (const e of enemiesOf(b)) {
+    if (!e.alive || e.role === 'jungle' || e.recalling || !seenBy(b.team,e)) continue;
+    const d = dist(b,e);
+    if (d > E(2600)) continue;
+    const nearbyAllies = alliesOf(b).filter(a => a.alive && dist(a,e) < E(900));
+    const nearbyEnemies = enemiesOf(b).filter(x => x.alive && x !== e && dist(x,e) < E(850));
+    const allyPower = nearbyAllies.reduce((v,a) => v + burstEst(a,e) * (a.hp / a.maxHp), burstEst(b,e) * hpB);
+    const enemyPower = burstEst(e,b) * (e.hp / e.maxHp) +
+      nearbyEnemies.reduce((v,x) => v + burstEst(x,b) * (x.hp / x.maxHp), 0);
+    const advantage = allyPower / Math.max(1,enemyPower);
+    const activeFight = nearbyAllies.some(a =>
+      (a.lastChampHitTarget === e && time - (a.lastChampHitAt ?? -99) < 2.2) ||
+      (e.lastChampHitBy === a && time - (e.lastChampHitAt ?? -99) < 2.2) ||
+      (a.stance === 'allin' && dist(a,e) < E(600)));
+    const vulnerable = 1 - e.hp / Math.max(1,e.maxHp);
+    let score = .34 + vulnerable * .62;
+    score += Math.min(nearbyAllies.length,2) * .19;
+    score += Math.max(-.6,Math.min(.8,(advantage - 1) * .42));
+    if (activeFight) score += .20;
+    if (nearbyEnemies.length >= nearbyAllies.length + 1) score -= .48;
+    if (nearbyAllies.length === 0 && e.hp / e.maxHp > .42) score -= .42;
+    score -= d / E(6500) * .58;
+    score -= (1 - hpB) * .72;
+    if (hpB < .38) score -= .42;
+    if (dangerFor(b,e)) score -= .72;
+    if (e.hp / e.maxHp < .22) score += .18;
+    // 갱킹 대상이 멀어지거나 전세가 바뀌면 다음 판단에서 즉시 다른 행동을 선택한다.
+    candidates.push({score, action:{unit:e,gank:true}, kind:'gank'});
+  }
+
+  // 에픽 오브젝트도 캠프·갱킹과 같은 선택지로 평가한다.
+  if (hpB >= .42) {
+    const ob = aiObjective(b,hpB);
+    if (ob) {
+      const cp = ob.cp;
+      const d = cp ? dist(cp,b) : ob.unit ? dist(ob.unit,b) : Math.hypot(ob.x-b.x,ob.y-b.y);
+      const alliesAt = cp ? alliesOf(b).filter(a => a.alive && dist(a,cp) < E(1200)).length : 0;
+      const enemiesAt = cp ? enemiesOf(b).filter(e => e.alive && dist(e,cp) < E(1000)).length : 0;
+      let score = 1.12 - d / E(7000) * .48 + Math.min(alliesAt,2) * .13 - Math.max(0,enemiesAt-alliesAt) * .38;
+      if (hpB < .58) score -= .28;
+      candidates.push({score, action:ob, kind:'objective'});
+    }
+  }
+
+  if (!candidates.length) {
+    // 캠프가 모두 비어 있으면 가장 먼저 돌아올 캠프 근처에서 대기한다.
     const pending = own.filter(cp => cp.respawnAt !== null).sort((a,b) => a.respawnAt - b.respawnAt)[0];
     if (pending) return {x:pending.x,y:pending.y};
     return null;
   }
-  // 갱 중이면 유지하되, 대상이 사라지거나 위험해지면 빠르게 포기
-  if (b.gank) {
-    const t = b.gank.t;
-    if (!t || !t.alive || t.recalling || time > b.gank.until || dangerFor(b,t) || hpB < .4) { b.gank=null; b.gankCd=time+12; }
-    else if (!seenBy(b.team,t)) {
-      const ls=t.seen&&t.seen[b.team];
-      if(ls&&time-ls.t<2.5&&Math.hypot(ls.x-b.x,ls.y-b.y)>E(60))return{x:ls.x,y:ls.y};
-      b.gank=null;b.gankCd=time+8;
-    } else return {unit:t,gank:true};
-  }
-  // 실제 교전 중인 아군이 있거나 적 체력이 35% 이하일 때만 갱킹
-  if(time>=(b.gankCd||0)&&hpB>.55){
-    let best=null,bs=Infinity;
-    for(const e of enemiesOf(b)){
-      if(!e.alive||e.role==='jungle'||e.recalling||!seenBy(b.team,e))continue;
-      const allyFighting=alliesOf(b).some(a=>a.alive&&dist(a,e)<E(700)&&((a.lastChampHitTarget===e&&time-(a.lastChampHitAt??-99)<1.8)||(e.lastChampHitBy===a&&time-(e.lastChampHitAt??-99)<1.8)));
-      const critical=e.hp/e.maxHp<=.35;
-      if(!allyFighting&&!critical)continue;
-      if(dangerFor(b,e)&&dist(b,e)>E(550))continue;
-      const score=e.hp/e.maxHp-(allyFighting?.22:0)+dist(b,e)/E(7000);
-      if(score<bs){bs=score;best=e;}
+
+  candidates.sort((a,b) => b.score - a.score);
+  const best = candidates[0];
+  // 갱킹은 파밍보다 분명한 이득이 있을 때만 선택한다. 전투 발생 자체는 합류 명령이 아니다.
+  if (best.kind === 'gank') {
+    const campBest = candidates.find(c => c.kind === 'camp');
+    if (best.score < .88 || (campBest && best.score < campBest.score + .18)) {
+      b.gank = null;
+      return campBest ? campBest.action : best.action;
     }
-    if(best&&bs<1.05){b.gank={t:best,until:time+10};return{unit:best,gank:true};}
+    b.gank = {t:best.action.unit, until:time + 2.5};
+  } else {
+    b.gank = null;
   }
-  let cp=null,cd=Infinity;
-  for(const camp of own)if(up(camp)){const d=dist(camp,b);if(d<cd){cd=d;cp=camp;}}
-  if(cp)return{unit:low(cp)};
-  return null;
+  return best.action;
 }
 
 // ═════════════ AI 판단 보조 (사람처럼 보고, 반응하고, 치고 빠짐) ═════════════
