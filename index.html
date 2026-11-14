@@ -13316,7 +13316,7 @@ function teamPlan(team) {                                    // 12초마다 팀 
         if (own) { x = own.x + (team === 'blue' ? E(60) : -E(60)); y = own.y; } }
       return {tg, lane, push, x:Math.max(80, Math.min(W - 80, x)), y:Math.max(110, Math.min(H - 110, y))};
     };
-    const bots_ = mine.filter(c => c !== player || window.AUTOPLAY || spectating);
+    const bots_ = mine.filter(c => c.role !== 'jungle' && (c !== player || window.AUTOPLAY || spectating));
     const assign = new Map();
     const mainLane = mainT.kind === 'nexus' ? 'mid' : laneOf(mainT);
     const others = ['top', 'mid', 'bottom'].filter(l => l !== mainLane && laneT(l));
@@ -13324,7 +13324,7 @@ function teamPlan(team) {                                    // 12초마다 팀 
       const power = c => c.level * 10 + c.items.reduce((s, id) => s + ITEMS[id].total, 0) / 300 + (['gregor', 'ryoshu', 'rodion', 'donq', 'ishmael'].includes(c.key) ? 8 : 0);
       const sp = bots_.slice().sort((a, b) => power(b) - power(a))[0];
       const sideL = others.sort((a, b) => Math.abs(['top', 'mid', 'bottom'].indexOf(b) - ['top', 'mid', 'bottom'].indexOf(mainLane)) - Math.abs(['top', 'mid', 'bottom'].indexOf(a) - ['top', 'mid', 'bottom'].indexOf(mainLane)))[0];
-      const side = mk(laneT(sideL), 1), main = mk(mainT, mine.length - 1);
+      const side = mk(laneT(sideL), 1), main = mk(mainT, bots_.length - 1);
       for (const c of bots_) assign.set(c, c === sp ? side : main);
       plan = {strat, main, assign};
     } else if (strat === 'pair' && others.length && bots_.length >= 3) {  // 둘씩 두 라인
@@ -13334,7 +13334,7 @@ function teamPlan(team) {                                    // 12초마다 팀 
       sorted.forEach((c, i) => assign.set(c, (i < half) === upper ? A : B));
       plan = {strat, main:A, assign};
     } else {
-      const main = mk(mainT, mine.length);
+      const main = mk(mainT, bots_.length);
       for (const c of bots_) assign.set(c, main);
       plan = {strat:strat === 'siege' ? 'siege' : 'group', main, assign};
     }
@@ -13394,6 +13394,8 @@ function aiMacro(b, hpB, p, pd) {                             // 반환: 이동�
       return null;
     }
   }
+  // 정글러는 팀 집결·라인 운영 목표를 받지 않고 정글 루트를 우선한다.
+  if (b.role === 'jungle') return null;
   const plan = teamPlan(b.team);
   const as = plan && (plan.assign.get(b) || plan.main);
   if (!as) { if (b.laneOverride) { b.laneOverride = null; b.path = aiLanePath(b); b.wp = 0; } return null; }
@@ -13457,7 +13459,7 @@ function updateBot(b, dt) {
   // 정글러가 적 챔피언과 마주치면 캠프 판단보다 교전을 우선한다. 단, 적 포탑 안으로 무리하게 추격하지 않는다.
   if(b.role==='jungle'){
     const intruder=nearestEnemyChamp(b,E(980));
-    if(intruder&&((dist(b,intruder)<E(650))||alliesOf(b).some(a=>a.alive&&dist(a,intruder)<E(760)&&((a.lastDmgT??99)<2||(intruder.lastDmgT??99)<2)))){
+    if(intruder&&alliesOf(b).some(a=>a.alive&&dist(a,intruder)<E(760)&&((a.lastDmgT??99)<1.25||(intruder.lastDmgT??99)<1.25))){
       const id=aiEvaluate(b,intruder),range=E(b.st.range)+E(35);
       b.target=intruder;
       if(id.inDanger&&hpB<.42){const spot=towerSpot(b);go(spot.x,spot.y);moveChamp(b,dx,dy,dt);return;}
@@ -13595,7 +13597,7 @@ function updateBot(b, dt) {
   if (macro && macro.defend && stance !== 'allin') { go(macro.x, macro.y); moveChamp(b, dx, dy, dt); return; }
 
   // ── 오브젝트 한타: 나오기 25초 전부터 둥지 앞 우리 쪽에 모임 → 적이 오면 싸우고, 이기면 오브젝트
-  if (stance !== 'allin') {
+  if (stance !== 'allin' && b.role !== 'jungle') {
     const ob = planS0() ? null : aiObjective(b, hpB);
     if (ob) {
       if (p.alive && pd < E(560) && !ev.inDanger) {
@@ -13651,7 +13653,7 @@ function updateBot(b, dt) {
   if (stance === 'farm' && b.thinkT <= 0) { const wv = aiWard(b, hpB, pd); if (wv) { go(wv.x, wv.y); moveChamp(b, dx, dy, dt); return; } }
 
   // ── 정글러
-  if (b.role === 'jungle' && stance !== 'allin' && !TEAM_PLAN[b.team]?.plan) {
+  if (b.role === 'jungle' && stance !== 'allin') {
     const j = aiJungle(b, hpB);
     if (j && j.unit) {
       const t = j.unit; b.target = t;
