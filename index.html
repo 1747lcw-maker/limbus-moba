@@ -3744,7 +3744,7 @@ function damage(src, tgt, amount, opts = {}) {
       fx.push({type:'pop', x:tgt.x, y:tgt.y, r:tgt.r * 1.3, color:'#e6c35c', t:0, life:.35});
     }
   }
-  if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { src.dmgDealt = (src.dmgDealt || 0) + hpLoss; tgt.dmgTaken = (tgt.dmgTaken || 0) + hpLoss; }   // 통계
+  if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { src.dmgDealt = (src.dmgDealt || 0) + geburaActualHpLoss; tgt.dmgTaken = (tgt.dmgTaken || 0) + geburaActualHpLoss; }   // 통계: 보호막·초과 피해를 제외한 실제 체력 감소량
   if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { if (time - (tgt.lastChampHitT ?? -99) > 5) tgt.fightT0 = time; tgt.lastChampHitT = time; }
   if (isChamp(src) && src.gdGuard && tgt.team !== src.team) gdLifeline(src, amount);   // 귀도 집행 유예: 지키는 아군 딜의 15% 회복
   if (isChamp(src) && src.alive) {                    // 흡혈
