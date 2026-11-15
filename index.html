@@ -4823,14 +4823,14 @@ function mosesTick(c,dt){
  if(c.mosesActive&&time>=(c.mosesActiveUntil||0)){c.mosesActive=null;c.mosesActiveUntil=0;}
  if(c.mosesActive){const key=c.mosesActive,r=E(360),rank=Math.max(0,(c.rank&&c.rank[key]||1)-1);
   // 활성화된 숨의 색이 실제 버프 대상 아군에게도 계속 보이도록 짧은 오라를 갱신
-  if((c.mosesFxAt||0)<=time){const auraColor={Q:'#fffdf2',W:'#58baff',E:'#e94b55'}[key]||'#fffdf2';for(const ally of heroes){if(!ally.alive||ally.team!==c.team||dist(c,ally)>r+ally.r)continue;fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:E(ally.r*2.25),t:0,life:.48,color:auraColor,owner:c,kind:key});}c.mosesFxAt=time+.34;}
+  if((c.mosesFxAt||0)<=time){const auraColor={Q:'#fffdf2',W:'#58baff',E:'#e94b55'}[key]||'#fffdf2';for(const ally of heroes){if(!ally.alive||ally.team!==c.team||dist(c,ally)>r+ally.r)continue;fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:E(ally.r*2.25),t:0,life:.48,color:auraColor,owner:c,kind:key});}c.mosesFxAt=time+.5;}
   for(const u of heroes){if(!u.alive||u.team!==c.team||dist(c,u)>r+u.r)continue;const id=u.id||u.key+':'+u.team;
    if(key==='Q'){u.anAsUntil=Math.max(u.anAsUntil||0,time+.35);u.mosesAsMul=1.15+rank*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+.35);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rank*.01);if(!c.mosesBuffed[id]){for(const sk of ['Q','W','E','R'])if(u.cd&&u.cd[sk]>0)u.cd[sk]=Math.max(0,u.cd[sk]-2);c.mosesBuffed[id]=true;}}
    else if(key==='W'&&!c.mosesBuffed[id]){const heal=Math.max(0,u.maxHp-u.hp)*(.20+rank*.01);const beforeHp=u.hp;u.hp=Math.min(u.maxHp,u.hp+heal);recordAllyHeal(c,u,beforeHp);c.mosesBuffed[id]=true;fx.push({type:'mosesAura',x:u.x,y:u.y,r:E(70),t:0,life:.8,color:'#58baff',owner:c,kind:'heal'});if(heal>0)text(u.x,u.y-E(34),'+'+Math.round(heal),'#72c9ff',true,.8);}
    else if(key==='E'){u.mosesAdUntil=time+.4;u.mosesAdMul=1.20+rank*.02;}
   }
  }
- if((c.mosesPassiveAt||0)<=time){const ally=heroes.filter(u=>u.alive&&u.team===c.team).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(ally&&ally.hp/ally.maxHp<=.4&&(c.mosesBreath||0)>0){const shield=Math.max(0,ally.hp)*c.mosesBreath;ally.shield=Math.max(ally.shield||0,shield);ally.shieldT=1.5;c.mosesPassiveUntil=time+1.5;c.mosesPassiveAt=time+90;fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:ally.r*2.5,t:0,life:1.5,color:'#d7d0bd',owner:c,kind:'protect'});text(ally.x,ally.y-E(38),'보호의 연기','#eee7d5',true,.8);}}
+ if((c.mosesPassiveCheckAt||0)<=time){c.mosesPassiveCheckAt=time+.25;if((c.mosesPassiveAt||0)<=time){const ally=heroes.filter(u=>u.alive&&u.team===c.team).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(ally&&ally.hp/ally.maxHp<=.4&&(c.mosesBreath||0)>0){const shield=Math.max(0,ally.hp)*c.mosesBreath;ally.shield=Math.max(ally.shield||0,shield);ally.shieldT=1.5;c.mosesPassiveUntil=time+1.5;c.mosesPassiveAt=time+90;fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:ally.r*2.5,t:0,life:1.5,color:'#d7d0bd',owner:c,kind:'protect'});text(ally.x,ally.y-E(38),'보호의 연기','#eee7d5',true,.8);}}}
  if(c.mosesR){const R=c.mosesR,T=R.target;if(!T||!T.alive||!c.alive){c.mosesR=null;return;}if(time>=R.fireAt){const ang=Math.atan2(T.y-c.y,T.x-c.x),len=dist(c,T),dmg=Math.max(0,c.hp)*(c.level||1);fx.push({type:'mosesSmoke',x:c.x,y:c.y,ang,len,t:0,life:.35,color:'#ef343e',owner:c});damage(c,T,dmg,{skill:true,type:'true',color:'#ff303b',noProc:true});fx.push({type:'mosesAura',x:T.x,y:T.y,r:E(100),t:0,life:.75,color:'#ff303b',owner:c,kind:'hit'});text(T.x,T.y-E(55),'붉은 점 · '+Math.round(dmg),'#ff4148',true,1);c.mosesR=null;}}
 }
 function drawMosesBody(g,c){
@@ -4886,11 +4886,11 @@ function drawMosesFx(g,f,k){
  g.lineWidth=E(3);g.beginPath();g.arc(0,0,rr,0,Math.PI*2);g.fill();g.stroke();
  g.globalAlpha=fade*.72;g.lineWidth=E(2);g.beginPath();g.arc(0,0,rr*.78,-time*1.7,-time*1.7+Math.PI*1.55);g.stroke();
  g.beginPath();g.arc(0,0,rr*1.13,time*1.25,time*1.25+Math.PI*1.2);g.stroke();
- for(let i=0;i<16;i++){const a=i*Math.PI/8+time*(kind==='E'?-1.15:1.05),orbit=rr*(.78+.12*Math.sin(time*3+i));const x=Math.cos(a)*orbit,y=Math.sin(a)*orbit,sz=E(3+(i%3)*1.2);
+ for(let i=0;i<8;i++){const a=i*Math.PI/4+time*(kind==='E'?-1.15:1.05),orbit=rr*(.78+.12*Math.sin(time*3+i));const x=Math.cos(a)*orbit,y=Math.sin(a)*orbit,sz=E(3+(i%3)*1.2);
   g.globalAlpha=fade*(.48+.38*Math.sin(time*5+i));g.fillStyle=i%3===0?p.glow:p.main;g.beginPath();g.arc(x,y,sz,0,Math.PI*2);g.fill();
  }
  // 아군 발밑에서 피어오르는 연무 입자와 금빛 파이프 계열의 잔광
- for(let i=0;i<7;i++){const a=i*2.399+time*(kind==='E'?-.8:.65),rise=((time*42+i*19)%E(74)),x=Math.cos(a)*(rr*.24+rise*.18),y=Math.sin(a)*(rr*.24+rise*.18)-rise*.35;
+ for(let i=0;i<3;i++){const a=i*2.399+time*(kind==='E'?-.8:.65),rise=((time*42+i*19)%E(74)),x=Math.cos(a)*(rr*.24+rise*.18),y=Math.sin(a)*(rr*.24+rise*.18)-rise*.35;
   g.globalAlpha=fade*.22;g.fillStyle=p.glow;g.beginPath();g.ellipse(x,y,E(5)+rise*.035,E(9)+rise*.04,a,0,Math.PI*2);g.fill();
  }
  if(kind==='protect'||kind==='heal'){g.globalAlpha=fade*.75;g.lineWidth=E(2);g.beginPath();g.arc(0,0,rr*.52,0,Math.PI*2);g.stroke();g.beginPath();g.moveTo(-E(10),0);g.lineTo(E(10),0);g.moveTo(0,-E(10));g.lineTo(0,E(10));g.stroke();}
@@ -22553,7 +22553,7 @@ function loop(now) {
   juice.punch *= Math.exp(-dt * 11); juice.hurt *= Math.exp(-dt * 3.5);
   requestAnimationFrame(loop);                                          // 먼저 다음 프레임 예약: 오류가 나도 루프가 끊기지 않음
   try {
-    if (!started) {} else if (spectating) { hitStop = 0; if (mpRole === 'guest') mpGuestFrame(dt); else if (specSpeed > 1) { for (let q = 0; q < specSpeed && !gameOver; q++) update(dt); } else update(dt); } else if (hitStop > 0) hitStop -= dt; else if (mpRole === 'guest') mpGuestFrame(dt); else update(dt);
+    if (!started) {} else if (hitStop > 0) hitStop -= dt; else if (mpRole === 'guest') mpGuestFrame(dt); else if (spectating && specSpeed > 1) { for (let q = 0; q < specSpeed && !gameOver; q++) update(dt); } else update(dt);
   } catch (e) { errNote(mpRole === 'guest' ? 'guestFrame' : 'update', e); }
   if (MP_SRV) return;                                                   // 서버: 계산만 (그리기 · 소리 없음)
   if (vic) try { vicTick(dt); } catch (e) { errNote('victory', e); }
