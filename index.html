@@ -1709,7 +1709,7 @@ const KI = {
 };
 const BASE_CRIT_DMG = 1.75;
 const asRatio = c => Math.max(1, c.as / c.st.as[0]);
-const critChance = c => Math.min(1, (c.crit || 0) * (c.key === 'roland' ? 2 : 1) + (c.key === 'rodion' ? c.pStacks * KR.P.per : 0));
+const critChance = c => c && c.key === 'araya' && c.arayaForm === 'future' ? .85 : Math.min(1, (c.crit || 0) * (c.key === 'roland' ? 2 : 1) + (c.key === 'rodion' ? c.pStacks * KR.P.per : 0));
 const critMult = c => BASE_CRIT_DMG + (c.key === 'dongbaek' ? KDB.P.critDmg : 0) + (c.key === 'rodion' && c.rank.W ? KR.W.critDmg[c.rank.W - 1] : 0) + (hasItem(c, 'justitia') ? 0.25 : 0);
 
 const TURRET_RANGE = E(480);   // 캐릭터 기준 480
@@ -2062,6 +2062,7 @@ const SK_BTN = {r:30, maxDrag:80, deadzone:14};
 // 공격 버튼을 중심으로 한 호 위에 Q → W → E → R 순서로 배치
 const SKILL_OFFSETS = {Q:[-124, 4], W:[-104, -70], E:[-46, -118], R:[30, -126]};
 const CHAMP_UI = {
+  araya:{names:{Q:'필연쇄 [必然殺]',W:'이연 - 잔 [二連 - 殘]',E:'지혜성도 [地慧星刀]',R:'극 공간참 - 절연 [空間斬 - 絶緣]'},cast:{},desc:{Q:'지정 방향으로 돌진해 경로와 끝 지점에 공간의 흉터를 남깁니다. 1초 뒤 균열이 동시에 폭발합니다.',W:'전방 부채꼴을 베어 물리 피해와 0.75초 둔화를 입히고, 적중한 적 챔피언 수에 비례해 보호막을 얻습니다.',E:'공간의 흉터가 새겨진 적에게 순간이동해 추가 물리 피해를 입힙니다.',R:'지정한 적에게 거대 공간참을 날리고 등 뒤로 순간이동합니다. 대상은 1.5초 동안 행동 불능이 되며, 이후 대상 위치에서 광역 폭발이 발생합니다.'}},
   roland:{names:{Q:'그건 그거고 이건 이거야',W:'함부로 끊어 낼 수는 없어',E:'안젤리카를 위한 춤',R:'내게는 고통밖에 없습니다. 그외에는...'},cast:{R2:'FURIOSO'},desc:{Q:'야스오의 강철 폭풍처럼 전방을 찌릅니다. 회오리 3타 없이 단일 찌르기만 사용합니다.',W:'이렐리아의 칼날 쇄도처럼 적에게 돌진합니다. 적 처치 시 재사용 대기시간이 초기화됩니다.',E:'사미라의 원형 검무처럼 주변을 베며 날아오는 투사체를 막아냅니다.',R:'뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 흡혈이 부여되고 궁극기를 재사용해 FURIOSO를 발동할 수 있습니다.'}},
   blueReverb:{names:{Q:'푸른 궤적',W:'잔향의 막',E:'전주',R:'잔향 악단'},cast:{},desc:{Q:'푸른 음표를 직선으로 발사합니다. 적중한 적은 3초 동안 주는 피해량이 7.3% 감소하고 이동 속도가 5% 감소하며 진동 2중첩을 얻습니다.',W:'2초 동안 자신과 주변 아군을 푸른 잔향의 막으로 감쌉니다. 막 안의 아군은 적 투사체에 면역이 됩니다.',E:'푸른 음표를 날려 적중한 적에게 마법 피해와 진동 2중첩을 부여합니다. 주변 아군은 3초 동안 주는 피해량이 8% 증가하고 이동 속도가 10% 증가합니다.',R:'수많은 푸른 음표를 전방으로 쏟아내 마법 피해를 입히고 적들을 2.5초 동안 광란 상태로 만들어 서로를 공격하게 합니다.'}},
   purpleTear:{names:{Q:'변형 검격', W:'연속 참격', E:'전술 전환', R:'보라빛 종결'},cast:{},desc:{Q:'보라빛 검격으로 전방의 적을 베어 피해를 줍니다.',W:'넓은 범위를 연속으로 베고 적의 이동을 둔화합니다.',E:'전술을 전환해 잠시 공격력이 상승합니다.',R:'보라빛 힘을 한 점에 모아 광역 피해와 둔화를 일으킵니다.'}},
@@ -2135,6 +2136,8 @@ const CHAMP_UI = {
 const skillNames = c => { const n=(CHAMP_UI[c.key] || CHAMP_UI.gregor).names; if(c.key!=='gebura')return n; return {...n,Q:c.gbQStage===1?'찌르기':c.gbQStage===2?'횡베기':'종베기',R:c.gbTransformUntil>time?'변신 중':c.gbFormUntil>time?(c.gbRStage===0?'대절단 세로':c.gbRStage===1?'대절단 가로':'붉은안개'):'E.G.O 발현::붉은안개'}; };
 // 조준 모양: {len, wid} 직선 / {circle} 원형 / {ring} 사거리 / null = 즉시
 function aimShape(c, key) {
+  if(c.key==='araya'&&key==='Q')return {point:E(560)};
+  if(c.key==='araya'&&key==='R')return {point:E(1000)};
   if(c.key==='mathias'&&key==='E')return {point:E(520)};
   if(c.key==='gachiu'&&['Q','W','E'].includes(key))return {point:E(key==='Q'?650:key==='W'?470:520)};
   if (key === 'I') return itemShape(c);
@@ -3686,6 +3689,10 @@ function mitigate(tgt, amount, type, src) {
 const DMG_COL = {true:'#ffffff', physical:'#ff9a3c', magic:'#b784ff', crit:'#ff3b3b'};
 const onScreen = u => Math.abs(u.x - cam.x) < vw / zoom / 2 + 40 && Math.abs(u.y - cam.y) < vh / zoom / 2 + 40;
 function damage(src, tgt, amount, opts = {}) {
+  if (src && src.key === 'araya' && src.arayaForm === 'future' && (opts.basic || opts.skill) && !opts.crit && !opts.arayaDot && Math.random() < .85) {
+    amount *= critMult(src); opts.crit = true;
+    if (tgt && tgt.x !== undefined) critFx(tgt, src.face || 0, false);
+  }
   // 뇌횡: 맹호탄 장전 상태의 모든 직접 피해 10% 감소, R 참격은 기존 감소에 더해 추가 15% 감소
   const nhTigerHit = src && src.key === 'naihwang' && (opts.basic ? !!src.nhShotTiger : !!(opts.skill && src.nhCombo && src.nhCombo.tiger));
   if (nhTigerHit) amount *= .90;
@@ -3765,6 +3772,14 @@ function damage(src, tgt, amount, opts = {}) {
   if (src && src.key === 'gebura' && src.team !== tgt.team && !tgt.structure && (isChamp(tgt) || isMonster(tgt))) geburaGainRage(src);
   if (tgt && tgt.key === 'gebura' && src && src.team !== tgt.team && !src.structure && (isChamp(src) || isMonster(src))) geburaGainRage(tgt);
   const preMit = amount;
+  if (src && src.key === 'araya' && src.team !== tgt.team && (opts.basic || opts.skill) && !opts.noProc && !opts.arayaDot && !tgt.structure) {
+    const form = src.arayaForm;
+    if (form === 'past' || form === 'present') {
+      if (!Array.isArray(tgt.arayaDots)) tgt.arayaDots = [];
+      const duration = form === 'past' ? 3 : 4, ratio = form === 'past' ? .40 : .50;
+      tgt.arayaDots.push({owner:src, left:duration, tickAt:time + .5, tickDamage:Math.max(1, preMit * ratio / (duration * 2)), type:form === 'past' ? 'physical' : 'magic', color:form === 'past' ? '#b52e45' : '#48baff'});
+    }
+  }
   amount = Math.max(1, Math.round(mitigate(tgt, amount, opts.type || 'physical', src)));
   let hpLoss = amount;
   let shieldLoss = 0;
@@ -4776,6 +4791,83 @@ function angelaOnKill(u,src){
  if(!u||!u.anRUntil||u.anRUntil<=time||!src||src.team===u.team)return;const owner=u.anROwner;if(!owner)return;fx.push({type:'anBookBurst',x:u.x,y:u.y,r:E(180),t:0,life:.9,owner});text(u.x,u.y-E(45),'책으로 변환','#ffe0a0',true,1);for(const v of heroes)if(v.alive&&v.team!==owner.team&&v!==u&&dist(v,u)<E(230))damage(owner,v,135+owner.ap*.5,{skill:true,type:'magic',color:'#9deaff'});if(src.anAllyUntil>time){const h=src.maxHp*.08;src.hp=Math.min(src.maxHp,src.hp+h);text(src.x,src.y-E(45),'+'+Math.round(h),'#8cffb0',true,.7);}
 }
 
+
+const KARAYA = {
+  P:{cycle:30,combatGrace:5},
+  Q:{cd:[9,8,7,6,5],dash:550,hit:[60,90,120,150,180],hitAd:.80,boom:[70,105,140,175,210],boomAd:1.00,radius:58},
+  W:{cd:[14,13,12,11,10],radius:310,arc:1.25,hit:[70,100,130,160,190],hitAd:.80,slow:.35,slowDur:.75,shield:.05,shieldCap:.25,shieldDur:3},
+  E:{cd:[12,11,10,9,8],range:800,hit:[80,115,150,185,220],hitAd:.90},
+  R:{cd:[120,100,80],range:1000,first:[100,175,250],firstAd:1.00,boom:[200,300,400],boomAd:1.50,delay:1.5,radius:500}
+};
+function arayaRank(c,key){return Math.max(0,Math.min((key==='R'?2:4),(c.rank&&c.rank[key]?c.rank[key]-1:0)));}
+function arayaFormName(form){return form==='past'?'과거':form==='present'?'현재':'미래';}
+function arayaTarget(c,ang,frac,range,markedOnly=false){
+  const pool=units.filter(u=>u&&u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&!u.ward&&(!markedOnly||(u.arayaMark&&u.arayaMark.owner===c&&u.arayaMark.until>time))&&edge(c,u)<=E(range));
+  if(!pool.length)return null;
+  if(ang===null||ang===undefined)return pool.filter(isChamp).sort((a,b)=>edge(c,a)-edge(c,b))[0]||pool.sort((a,b)=>edge(c,a)-edge(c,b))[0];
+  const d=E(range)*Math.max(.12,Math.min(1,frac==null?.6:frac)),px=c.x+Math.cos(ang)*d,py=c.y+Math.sin(ang)*d;
+  return pool.sort((a,b)=>Math.hypot(a.x-px,a.y-py)-Math.hypot(b.x-px,b.y-py))[0];
+}
+function arayaMark(c,u){if(!u||!u.alive)return;u.arayaMark={owner:c,until:time+4};fx.push({type:'arMark',x:u.x,y:u.y,r:u.r*1.5,t:0,life:.45});}
+function arayaLineDistance(x,y,r){const vx=r.x2-r.x1,vy=r.y2-r.y1,den=vx*vx+vy*vy||1,t=Math.max(0,Math.min(1,((x-r.x1)*vx+(y-r.y1)*vy)/den));return Math.hypot(x-(r.x1+vx*t),y-(r.y1+vy*t));}
+function arayaCast(c,key,ang,frac){
+  const i=arayaRank(c,key), color='#3988ff';
+  if(key==='Q'){
+    if(ang==null)ang=autoAim(c,E(KARAYA.Q.dash));
+    c.face=ang;c.target=null;c.cd.Q=c.cdMax.Q=KARAYA.Q.cd[i]*hasteMul(c);
+    const x1=c.x,y1=c.y,x2=Math.max(c.r,Math.min(W-c.r,c.x+Math.cos(ang)*E(KARAYA.Q.dash))),y2=Math.max(c.r,Math.min(H-c.r,c.y+Math.sin(ang)*E(KARAYA.Q.dash)));
+    const len=Math.hypot(x2-x1,y2-y1),a=Math.atan2(y2-y1,x2-x1);
+    const hits=segHits(c,a,len,E(78));
+    for(const u of hits){if(isChamp(u))callForHelp(c,u);damage(c,u,KARAYA.Q.hit[i]+c.ad*KARAYA.Q.hitAd,{skill:true,type:'physical',color});arayaMark(c,u);}
+    c.x=x2;c.y=y2;c.vx=c.vy=0;c.target=null;c.path=null;c.swingT=.28;
+    if(!Array.isArray(c.arayaRifts))c.arayaRifts=[];
+    c.arayaRifts.push({x1,y1,x2,y2,ang:a,explodeAt:time+1,done:false});
+    fx.push({type:'arDash',x:x2,y:y2,x1,y1,x2,y2,r:E(95),t:0,life:.5},{type:'arRift',x:x1,y:y1,x1,y1,x2,y2,r:E(55),t:0,life:1.05});
+    sfxPlay('swing',c.x,c.y,1,1.25);text(c.x,c.y-c.r-E(42),'필연쇄','#70baff',true,.8);return true;
+  }
+  if(key==='W'){
+    if(ang==null)ang=c.face;c.face=ang;c.target=null;c.cd.W=c.cdMax.W=KARAYA.W.cd[i]*hasteMul(c);c.swingT=.32;
+    let champsHit=0;
+    for(const u of units){if(!u.alive||u.team===c.team||u.structure||!targetable(u))continue;const d=dist(c,u),da=Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-ang),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-ang)));if(d>E(KARAYA.W.radius)+u.r||da>KARAYA.W.arc/2)continue;
+      if(isChamp(u)){champsHit++;callForHelp(c,u);}damage(c,u,KARAYA.W.hit[i]+c.ad*KARAYA.W.hitAd,{skill:true,type:'physical',color});if(u.alive){u.slowT=Math.max(u.slowT||0,KARAYA.W.slowDur);u.slowAmt=Math.max(u.slowAmt||0,KARAYA.W.slow);}
+    }
+    if(champsHit){const gain=Math.min(c.maxHp*KARAYA.W.shieldCap,champsHit*c.maxHp*KARAYA.W.shield);c.shield=Math.min(c.maxHp*KARAYA.W.shieldCap,(c.shield||0)+gain);c.shieldT=Math.max(c.shieldT||0,KARAYA.W.shieldDur);text(c.x,c.y-c.r-E(48),'차원 보호막','#75caff',true,.9);}
+    fx.push({type:'arWave',x:c.x,y:c.y,ang,r:E(KARAYA.W.radius),t:0,life:.48});sfxPlay('swing',c.x,c.y,1,1.05);return true;
+  }
+  if(key==='E'){
+    const u=arayaTarget(c,ang,frac,KARAYA.E.range,true);
+    if(!u){if(c===player)text(c.x,c.y-c.r-E(42),'공간의 흉터가 새겨진 적이 없습니다','#aab4c0',false,.9);return false;}
+    c.cd.E=c.cdMax.E=KARAYA.E.cd[i]*hasteMul(c);const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy)||1;
+    c.x=Math.max(c.r,Math.min(W-c.r,u.x-dx/d*(c.r+u.r+E(10))));c.y=Math.max(c.r,Math.min(H-c.r,u.y-dy/d*(c.r+u.r+E(10))));c.face=Math.atan2(u.y-c.y,u.x-c.x);c.vx=c.vy=0;c.target=null;c.path=null;c.swingT=.25;
+    damage(c,u,KARAYA.E.hit[i]+c.ad*KARAYA.E.hitAd,{skill:true,type:'physical',color:'#9bd4ff'});u.arayaMark=null;
+    fx.push({type:'arBlink',x:c.x,y:c.y,tx:u.x,ty:u.y,r:E(75),t:0,life:.5});sfxPlay('zap',u.x,u.y,.9,1.2);return true;
+  }
+  if(key==='R'){
+    const u=arayaTarget(c,ang,frac,KARAYA.R.range,false);if(!u){if(c===player)text(c.x,c.y-c.r-E(42),'궁극기 사거리 안에 적이 없습니다','#aab4c0',false,.8);return false;}
+    c.cd.R=c.cdMax.R=KARAYA.R.cd[i]*hasteMul(c);const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy)||1;
+    damage(c,u,KARAYA.R.first[i]+c.ad*KARAYA.R.firstAd,{skill:true,type:'physical',color:'#d9edff'});
+    c.x=Math.max(c.r,Math.min(W-c.r,u.x-dx/d*(c.r+u.r+E(12))));c.y=Math.max(c.r,Math.min(H-c.r,u.y-dy/d*(c.r+u.r+E(12))));c.face=Math.atan2(u.y-c.y,u.x-c.x);c.vx=c.vy=0;c.target=null;c.path=null;
+    u.stunT=Math.max(u.stunT||0,KARAYA.R.delay);u.silenceUntil=Math.max(u.silenceUntil||0,time+KARAYA.R.delay);u.dash=null;u.leap=null;u.target=null;if(u.cast&&!u.cast.unstoppable)u.cast=null;
+    u.arayaStasis={owner:c,until:time+KARAYA.R.delay};c.arayaUlt={target:u,explodeAt:time+KARAYA.R.delay,done:false};
+    fx.push({type:'arStasis',x:u.x,y:u.y,r:u.r*2.2,t:0,life:1.55});text(u.x,u.y-u.r-E(38),'시공간 정지','#b9e5ff',true,1.5);sfxPlay('ult',u.x,u.y,1.15,.8);return true;
+  }
+  return false;
+}
+function arayaTick(c,dt){
+  if(!c.arayaInitialized){c.arayaInitialized=true;c.arayaForm=['past','present','future'][Math.floor(Math.random()*3)];c.arayaCycle=0;c.arayaUiT=0;}
+  const fighting=(c.lastCombatT||0)>0&&time-(c.lastCombatT||0)<KARAYA.P.combatGrace;
+  if(fighting){c.arayaCycle=(c.arayaCycle||0)+dt;if(c.arayaCycle>=KARAYA.P.cycle){c.arayaCycle-=KARAYA.P.cycle;const old=c.arayaForm,forms=['past','present','future'];let next=forms[Math.floor(Math.random()*forms.length)];c.arayaForm=next;fx.push({type:'arForm',x:c.x,y:c.y,r:c.r*2.8,form:next,t:0,life:.9});text(c.x,c.y-c.r-E(56),arayaFormName(next)+' 폼','#80bdff',true,1.1);sfxPlay('ult',c.x,c.y,.75,next==='past'?.72:next==='future'?1.3:1);}
+  }
+  if(Array.isArray(c.arayaRifts))c.arayaRifts=c.arayaRifts.filter(r=>{if(!r.done&&time>=r.explodeAt){r.done=true;for(const u of units){if(!u.alive||u.team===c.team||u.structure||!targetable(u))continue;if(arayaLineDistance(u.x,u.y,r)<=E(KARAYA.Q.radius)+u.r){damage(c,u,KARAYA.Q.boom[arayaRank(c,'Q')]+c.ad*KARAYA.Q.boomAd,{skill:true,type:'physical',color:'#75caff'});arayaMark(c,u);}}fx.push({type:'arBoom',x:(r.x1+r.x2)/2,y:(r.y1+r.y2)/2,x1:r.x1,y1:r.y1,x2:r.x2,y2:r.y2,r:E(160),t:0,life:.55});sfxPlay('zap',(r.x1+r.x2)/2,(r.y1+r.y2)/2,1.1,.9);}return !r.done;});
+  if(c.arayaUlt&&!c.arayaUlt.done&&time>=c.arayaUlt.explodeAt){const u=c.arayaUlt.target,ux=u&&u.x!==undefined?u.x:c.x,uy=u&&u.y!==undefined?u.y:c.y;c.arayaUlt.done=true;
+    for(const v of units){if(!v.alive||v.team===c.team||v.structure||!targetable(v)||Math.hypot(v.x-ux,v.y-uy)>E(KARAYA.R.radius)+v.r)continue;damage(c,v,KARAYA.R.boom[arayaRank(c,'R')]+c.ad*KARAYA.R.boomAd,{skill:true,type:'physical',color:'#d9edff'});}
+    fx.push({type:'arUltBoom',x:ux,y:uy,r:E(KARAYA.R.radius),t:0,life:.8});text(ux,uy-E(35),'절연','#d9edff',true,1.2);sfxPlay('ult',ux,uy,1.5,.75);c.arayaUlt=null;
+  }
+}
+function arayaDotTick(dt){
+  for(const u of units){if(!u||!Array.isArray(u.arayaDots)||!u.arayaDots.length)continue;u.arayaDots=u.arayaDots.filter(d=>{if(!u.alive||!d.owner||!d.owner.alive||d.left<=0)return false;let guard=0;while(time>=d.tickAt&&d.left>0&&guard++<8){damage(d.owner,u,d.tickDamage,{type:d.type,noProc:true,arayaDot:true,color:d.color});d.left-=.5;d.tickAt+=.5;}return d.left>0;});}
+}
+
 function castSkillCore(c, key, ang, frac = null) {
   if(c.rolandFurioso||c.liuFurioso)return false; // 연속 궁극기 도중 다른 스킬 입력은 무시하고 상태 유지
   const recast = (c.key === 'mathias' && key === 'Q' && c.maQStage === 1 && time < (c.maQUntil||0)) || (c.key === 'gebura' && ((key === 'Q' && c.gbQStage > 0 && time < c.gbQUntil) || (key === 'R' && c.gbFormUntil > time && c.gbRStage < 2))) || (c.key === 'vespa' && key === 'W' && !!c.vespaWReady) || (c.key === 'dongbaek' && key === 'R' && !!c.dbR) || (c.key === 'guido' && key === 'W' && !!c.gdW) || (c.key === 'marten' && key === 'W' && !!c.mtW) || (c.key === 'alyssa' && key === 'Q' && !!c.alQ) || (c.key === 'vergil' && vgRecast(c, key)) || (c.key === 'meursault' && key === 'E' && !!c.mrGrab) || (c.key === 'ishmael' && ((key === 'W' && c.guardT > 0) || (key === 'R' && ishCanExecute(c)))) || (c.key === 'outis' && key === 'R' && !!c.snipe) || (c.key === 'sinclair' && key === 'E' && !!c.scGuard) || (c.key === 'roland' && key === 'R' && c.rolandFormUntil > time && c.rolandFuriosoReady && !c.rolandFurioso) || (c.key === 'liuEn' && key === 'R' && c.liuFormUntil > time && c.liuFuriosoReady && !c.liuFurioso);   // 이스마엘 재사용
@@ -4794,6 +4886,7 @@ function castSkillCore(c, key, ang, frac = null) {
   if (c.chRide) return;                                              // 메피에 탄 동안엔 스킬 불가
   if (c.key === 'philip') { castPhilip(c,key,ang,frac); return; }
   if (c.key === 'angela') { castAngela(c,key,ang,frac); return; }
+  if (c.key === 'araya') { if(arayaCast(c,key,ang,frac)===false)return; if(hasItem(c,'grinder')&&time>=c.grinderCd)c.grinderReady=true; return; }
   if (c.key === 'mathias') { castMathias(c,key,ang,frac); return; }
   if (c.key === 'gebura') { castGebura(c,key,ang,frac); return; }
   if (c.key === 'gachiu') { castGachiu(c,key,ang,frac); return; }
@@ -4976,6 +5069,7 @@ function castSkillCore(c, key, ang, frac = null) {
 
 function finishCast(c) {
   const {key, ang} = c.cast;
+  if (c.key === 'araya') { c.cast = null; return; }
   if (c.key === 'rodion') { const cs = c.cast; c.cast = null; finishRodion(c, cs); return; }
   if (c.key === 'yisang') { const cs = c.cast; c.cast = null; finishYisang(c, cs); return; }
   if (c.key === 'ishmael') { const cs = c.cast; c.cast = null; finishIshmael(c, cs); return; }
@@ -12698,6 +12792,13 @@ function aiCombo(b, p) {
     if (ready('Q') && d < E(KF.Q.len) - E(30)) { castSkill(b, 'Q', aimAt(b, p, KF.Q.cast + dist(b, p) / E(KF.Q.speed))); return true; }
     if (ready('W') && d < E(KF.W.range) && (hpP < .5 || alliesOf(b).some(a => a.alive && dist(a, p) < E(300)))) { castSkill(b, 'W', Math.atan2(p.y - b.y, p.x - b.x), Math.min(1, dist(b, p) / E(KF.W.range))); return true; }
   }
+  if (b.key === 'araya') {
+    const marked=enemiesOf(b).filter(e=>e.alive&&e.arayaMark&&e.arayaMark.owner===b&&e.arayaMark.until>time).sort((x,y)=>dist(b,x)-dist(b,y))[0];
+    if(ready('R')&&d<E(KARAYA.R.range)&& (hpP<.62||alliesOf(b).some(a=>a.alive&&dist(a,p)<E(500)))){castSkill(b,'R',Math.atan2(p.y-b.y,p.x-b.x),Math.min(1,d/E(KARAYA.R.range)));return true;}
+    if(ready('E')&&marked){castSkill(b,'E',Math.atan2(marked.y-b.y,marked.x-b.x));return true;}
+    if(ready('Q')&&d>E(170)&&d<E(KARAYA.Q.dash+120)){castSkill(b,'Q',Math.atan2(p.y-b.y,p.x-b.x),Math.min(1,d/E(KARAYA.Q.dash)));return true;}
+    if(ready('W')&&d<E(KARAYA.W.radius)){castSkill(b,'W',Math.atan2(p.y-b.y,p.x-b.x));return true;}
+  }
   if (b.key === 'ryoshu') {
     const foes = enemiesOf(b).filter(e => e.alive && dist(e, p) < E(KRY.R.radius)).length;
     if (ready('R') && d < E(KRY.R.range) && (hpP < .55 || foes >= 2 || hpB < .35)) { castSkill(b, 'R', Math.atan2(p.y - b.y, p.x - b.x), Math.min(1, dist(b, p) / E(KRY.R.range))); return true; }
@@ -13423,6 +13524,7 @@ function aiEscape(b, p) {
       .sort((x, y) => Math.hypot(y.x - p.x, y.y - p.y) - Math.hypot(x.x - p.x, x.y - p.y))[0];
     if (m) { castSkill(b, 'W', Math.atan2(m.y - b.y, m.x - b.x), Math.hypot(m.x - b.x, m.y - b.y) / E(KY.W.range)); return true; }
   }
+  if (b.key === 'araya' && ready('Q')) { castSkill(b,'Q',away,1); return true; }
   if (b.key === 'ryoshu' && ready('W') && edge(b, p) < E(p.st.range) + E(30)) { castSkill(b, 'W', null); return true; }
   if (b.key === 'faust' && ready('W')) { castSkill(b, 'W', away, 1); return true; }
   if (b.key === 'outis' && ready('E') && b.ammo > 0) { castSkill(b, 'E', Math.atan2(p.y - b.y, p.x - b.x)); return true; }
@@ -13979,6 +14081,8 @@ function update(dt) {
   for(const c of champs())if(c.key==='naihwang'&&c.nhCombo&&time>c.nhCombo.expires){c.nhCombo=null;c.nhInvUntil=0;}
   for(const c of champs())if(c.key==='mathias')mathiasTick(c,dt);
   for(const c of champs())if(c.key==='philip')philipTick(c,dt);
+  for(const c of champs())if(c.key==='araya')arayaTick(c,dt);
+  arayaDotTick(dt);
 
   if (time >= nextWave) {
     nextWave += WAVE_EVERY; waveNo++;
@@ -16245,7 +16349,26 @@ function drawArayaBody(g,c){
   g.fillStyle='#3f8dff';g.fillRect(r*.06,-r*.72,r*.16,E(2.4));g.restore();
   if(c.swingT>0)return;const a=c.face+2.18,hx=x+Math.cos(a)*r*.62,hy=y+Math.sin(a)*r*.62;
   g.save();g.translate(hx,hy);g.rotate(a);drawArayaKatana(g,E(104),.25);g.restore();
+  if(c.arayaInitialized){
+    const col=c.arayaForm==='past'?'#b52e45':c.arayaForm==='present'?'#48baff':'#e8c66b',left=Math.max(0,Math.ceil(KARAYA.P.cycle-(c.arayaCycle||0)));
+    g.save();g.textAlign='center';g.font='bold '+E(10)+'px system-ui';g.fillStyle=col;g.shadowColor=col;g.shadowBlur=E(8);g.fillText(arayaFormName(c.arayaForm)+' · '+left+'초',x,y-r-E(23));g.restore();
+    g.strokeStyle=col;g.globalAlpha=.55;g.lineWidth=E(2);g.beginPath();g.arc(x,y,r+E(8),-Math.PI/2,-Math.PI/2+Math.PI*2*Math.min(1,(c.arayaCycle||0)/30));g.stroke();g.globalAlpha=1;
+  }
 }
+function drawArayaFx(g,f,k){
+  const a=1-k;
+  g.save();g.globalCompositeOperation='lighter';g.lineCap='round';
+  if(f.type==='arRift'||f.type==='arBoom'||f.type==='arUltBoom'||f.type==='arDash'){
+    if(f.x1!==undefined){g.globalAlpha=f.type==='arRift'?.75:a;g.strokeStyle=f.type==='arRift'?'#3988ff':'#d9edff';g.lineWidth=E(f.type==='arRift'?8:20)*(f.type==='arRift'?1:a);g.shadowColor='#3988ff';g.shadowBlur=E(18);g.beginPath();g.moveTo(f.x1,f.y1);g.lineTo(f.x2,f.y2);g.stroke();}
+    if(f.type==='arBoom'||f.type==='arUltBoom'){g.globalAlpha=a;g.strokeStyle='#d9edff';g.lineWidth=E(8)*a;g.shadowBlur=E(28);g.beginPath();g.arc(f.x,f.y,f.r*(.25+k*.9),0,Math.PI*2);g.stroke();for(let i=0;i<12;i++){const th=i*Math.PI/6+k*.4;g.beginPath();g.moveTo(f.x+Math.cos(th)*f.r*.15,f.y+Math.sin(th)*f.r*.15);g.lineTo(f.x+Math.cos(th)*f.r*(.45+k*.7),f.y+Math.sin(th)*f.r*(.45+k*.7));g.stroke();}}
+    if(f.type==='arDash'){g.globalAlpha=a;g.strokeStyle='#70baff';g.lineWidth=E(5)*a;g.beginPath();g.arc(f.x,f.y,f.r*(.3+k),0,Math.PI*2);g.stroke();}
+  }else if(f.type==='arWave'){g.globalAlpha=a*.75;g.strokeStyle='#3988ff';g.lineWidth=E(13)*a;g.beginPath();g.arc(f.x,f.y,f.r*(.25+k*.8),f.ang-1.25,f.ang+1.25);g.stroke();g.strokeStyle='#d9edff';g.lineWidth=E(3)*a;g.stroke();}
+  else if(f.type==='arBlink'){g.globalAlpha=a;g.strokeStyle='#d9edff';g.lineWidth=E(8)*a;g.beginPath();g.moveTo(f.tx,f.ty);g.lineTo(f.x,f.y);g.stroke();g.beginPath();g.arc(f.x,f.y,f.r*(.3+k),0,Math.PI*2);g.stroke();}
+  else if(f.type==='arStasis'||f.type==='arMark'){g.globalAlpha=a;g.strokeStyle='#8bcaff';g.lineWidth=E(3);for(let i=0;i<8;i++){const th=i*Math.PI/4+k*.15,rr=f.r*(.65+.12*Math.sin(k*8+i));g.beginPath();g.moveTo(f.x+Math.cos(th)*rr*.3,f.y+Math.sin(th)*rr*.3);g.lineTo(f.x+Math.cos(th)*rr,f.y+Math.sin(th)*rr);g.stroke();}g.beginPath();g.arc(f.x,f.y,f.r*(.55+k*.25),0,Math.PI*2);g.stroke();}
+  else if(f.type==='arForm'){const col=f.form==='past'?'#b52e45':f.form==='present'?'#48baff':'#e8c66b';g.globalAlpha=a*.8;g.strokeStyle=col;g.lineWidth=E(5)*a;for(let i=0;i<3;i++){g.beginPath();g.arc(f.x,f.y,f.r*(.35+i*.28+k*.3),0,Math.PI*2);g.stroke();}}
+  g.restore();
+}
+
 function drawArayaSwing(g,c,k){
   const a0=c.face-1.05,a1=c.face+1.15*k,fade=1-k;g.save();g.globalCompositeOperation='lighter';g.globalAlpha=fade;
   crescent(g,c.x,c.y,c.r+E(72),Math.min(a0,a1),Math.max(a0,a1),E(15));g.fillStyle='rgba(35,105,235,.62)';g.fill();
@@ -19896,6 +20019,7 @@ function drawFx(g) {
     const k = Math.max(0, f.t / f.life);
     if (!fxSeen(f)) continue;
     if (f.type === 'wardSet' || f.type === 'wardDie') { drawWardFx(g, f, k); continue; }
+    if(f.type.startsWith('ar')){drawArayaFx(g,f,k);continue;}
     if(f.type.startsWith('an')){drawAngelaFx(g,f,k);continue;}
     if(f.type.startsWith('ma')){drawMathiasFx(g,f,k);continue;}
     if(f.type.startsWith('gb')){drawGeburaFx(g,f,k);continue;}
@@ -23920,7 +24044,13 @@ function cxDetail(k, key = 'P', roleOverride = null) {
   cxShowSkill(key, true);
 }
 // 앤젤라 · 빛의 도서관 관장
-CODEX_SK.araya = {P:{name:'미정',text:()=> '아라야의 고유 패시브는 아직 설계되지 않았습니다. 스킬 구성을 정하면 전투 효과와 설명을 함께 추가합니다.'},Q:{name:'미정',cd:7,range:400,text:()=> '아라야의 Q 스킬 상세 설정을 기다리는 중입니다.'},W:{name:'미정',cd:12,range:350,text:()=> '아라야의 W 스킬 상세 설정을 기다리는 중입니다.'},E:{name:'미정',cd:14,range:450,text:()=> '아라야의 E 스킬 상세 설정을 기다리는 중입니다.'},R:{name:'미정',cd:90,text:()=> '아라야의 궁극기 상세 설정을 기다리는 중입니다.'}};
+CODEX_SK.araya = {
+ P:{name:'시간 얽힘',text:()=> '전투 중 30초마다 <b>과거 · 현재 · 미래</b> 중 하나로 무작위 전환됩니다. 챔피언 위에 현재 폼과 다음 전환까지 남은 시간이 표시됩니다.<br><br><b>과거</b>: 모든 스킬과 기본 공격 피해량의 40%를 3초에 걸쳐 추가 물리 출혈 피해로 입힙니다.<br><b>현재</b>: 모든 스킬과 기본 공격 피해량의 50%를 4초에 걸쳐 추가 마법 화상 피해로 입힙니다.<br><b>미래</b>: 모든 스킬과 기본 공격이 85% 확률로 치명타로 적중합니다.'},
+ Q:{name:'필연쇄 [必然殺]',cd:KARAYA.Q.cd,range:KARAYA.Q.dash,text:()=> '지정한 방향으로 최대 550 거리만큼 돌진하며 경로상의 적에게 물리 피해를 입힙니다. 지나온 경로와 끝 지점에 공간의 흉터를 남기고, <b>정확히 1초 후</b> 균열이 동시에 폭발해 추가 물리 피해를 입힙니다. 폭발에 맞은 적에게도 공간의 흉터가 새겨집니다.'},
+ W:{name:'이연 - 잔 [二連 - 殘]',cd:KARAYA.W.cd,range:KARAYA.W.radius,text:()=> '전방 부채꼴을 거칠게 베어 물리 피해를 입히고 <b>0.75초 동안 35% 둔화</b>시킵니다. 적중한 적 챔피언 한 명당 최대 체력의 5%에 해당하는 보호막을 얻습니다. 보호막은 최대 체력의 25%까지 중첩됩니다.'},
+ E:{name:'지혜성도 [地慧星刀]',cd:KARAYA.E.cd,range:KARAYA.E.range,text:()=> '사거리 800 안에 Q 또는 Q 폭발로 공간의 흉터가 새겨진 적이 있으면 해당 적에게 순간이동해 내려찍습니다. 추가 물리 피해를 입히고 사용한 대상의 흉터를 소모합니다. 미래 폼에서는 85% 치명타 확률이 적용됩니다.'},
+ R:{name:'극 공간참 - 절연 [空間斬 - 絶緣]',cd:KARAYA.R.cd,range:KARAYA.R.range,text:()=> '사거리 1000 안의 적 한 명을 지정해 거대한 공간참을 날리고 대상의 등 뒤로 순간이동합니다. 최초 물리 피해를 입힌 뒤 대상은 <b>1.5초 동안 이동 및 스킬 사용 불가</b> 상태가 됩니다. 1.5초 후 대상 위치를 중심으로 반경 500의 차원 균열이 폭발해 주변 모든 적에게 광역 물리 피해를 입힙니다.'}
+};
 CODEX_SK.angela = {
   P:{name:'부정한 사서의 권능 · 감정 고조',text:()=> '앤젤라는 주문력이 높아질수록 <b>스킬 가속</b>을 추가로 얻습니다. 기본 공격은 허공에서 날카로운 책장을 소환해 날리는 원거리 마법 공격이며, 기본 공격과 스킬 적중 시 빛을 1칸 회복하며, 전투 중이 아니어도 5초마다 1칸을 회복합니다. 빛은 최대 <b>5칸</b>까지 저장할 수 있습니다. 주문력 1당 스킬 가속도 0.15를 얻습니다.<br><br>주변에서 적 챔피언이 피해를 입거나 처치되면 <b>감정 코인</b>이 쌓입니다. 감정 코인은 주변 1050 범위에서 적 챔피언이 피해를 입을 때 4, 처치될 때 35씩 쌓이며, 100개가 모이면 감정 단계가 상승합니다. 화면 상단에 나타나는 세 장의 환상체 책장 중 하나를 선택할 수 있습니다.<br><br><b>탐욕 · 공격</b>: 12초 동안 대상의 스킬 피해량이 22% 증가합니다. 대상이 처치에 관여하면 최대 체력의 6%를 회복합니다.<br><b>절망 · 방어</b>: 12초 동안 받는 피해가 20% 감소하고 최대 체력의 12%에 해당하는 보호막을 얻습니다.<br><b>분노 · 제어</b>: 앤젤라의 다음 기본 스킬 적중 시 90 + 주문력의 35%에 해당하는 추가 고정 피해를 입히고 0.75초 기절시킵니다.<br><br><b>운용 팁</b>: 교전이 시작되기 전 감정 선택으로 팀의 부족한 부분을 보완하세요. 폭발적인 화력이 필요하면 탐욕, 아군을 지켜야 한다면 절망, 핵심 적을 묶어야 한다면 분노가 효과적입니다.'},
   Q:{name:'환상체 발현 · 징벌의 페이지',cd:7,range:610,text:()=> '재사용 대기시간은 스킬 레벨에 따라 7 / 6.25 / 5.5 / 4.75 / 4초입니다. 사거리 610까지 날카로운 종이 칼날 세 장을 부채꼴로 날려 적중한 적에게 각각 <b>68 + 주문력의 52%</b>에 해당하는 마법 피해를 입힙니다. 가장 먼저 적중한 적에게 4초 동안 <b>지정된 표식</b>을 남깁니다. 아군의 기본 공격이 표식 대상을 맞히면 <b>38 + 주문력의 28%</b>에 해당하는 추가 마법 피해가 발생하고 앤젤라의 빛을 1칸 회복합니다.<br><br><b>빛 3칸 이상 소모 · 강화 발현</b>: 책장 칼날이 검붉은 환상체 에너지로 물들고 사거리가 증가합니다. 강화 발현은 빛 3칸을 소모하며 사거리가 760으로 증가하고, 적중한 적을 <b>1.25초 동안 속박</b>합니다.<br><br><b>운용 팁</b>: 표식을 먼저 맞힌 뒤 아군의 집중 공격을 유도하면 추가 피해와 빛 회복을 함께 노릴 수 있습니다. 적의 진입을 차단하거나 확실한 포착이 필요할 때는 빛을 모아 강화 발현을 사용하세요.'},
@@ -23938,6 +24068,7 @@ const cbYiW = () => {                                                 // 이상:
   const m = ms[0]; if (m) castSkill(P, 'W', Math.atan2(m.y - P.y, m.x - P.x), Math.min(1, Math.hypot(m.x - P.x, m.y - P.y) / R));
 };
 const CX_COMBO = {
+  araya:[{name:'시간의 필연',sum:'Q로 일직선 공간에 흉터를 새기고, 폭발을 기다리는 동안 E로 표식 대상에게 순간이동합니다. 미래 폼에서는 치명타 폭딜, 과거·현재 폼에서는 지속 피해를 극대화하는 아라야의 핵심 연계예요.',steps:[['P','현재 시간 폼을 확인합니다. 미래라면 순간 폭딜, 과거·현재라면 지속 피해를 중심으로 교전합니다.'],['Q','적을 향해 돌진하며 공간의 흉터를 남깁니다. 1초 뒤 경로 전체가 폭발합니다.'],['E','흉터가 새겨진 적에게 순간이동해 추가 피해를 입힙니다.'],['W','근접한 적들을 부채꼴로 베고 둔화시키며 챔피언 적중 수만큼 보호막을 얻습니다.'],['R','핵심 적에게 극 공간참을 적중시켜 1.5초 동안 정지시키고, 이어지는 광역 폭발로 한타를 마무리합니다.']],chain:(A,S)=>[S.k('Q'),S.k('E'),S.k('W'),S.k('R')]}],
   binah:[{name:'검은 까마귀의 조율',sum:'조율자를 소환해 적을 추격하게 하고, Q·E로 적을 묶은 뒤 조율자의 연속 공격으로 피해와 회복, 출혈을 누적하는 비나의 소환수 연계예요.',steps:[['R','조율자 둘을 소환해 적 챔피언을 각각 추적하게 합니다. 조율자는 공격할 때마다 피해량만큼 비나를 회복시키고, 같은 피해량의 출혈을 3초에 걸쳐 남깁니다.'],['Q','단일 기둥을 쓰러뜨려 조율자가 공격할 적을 둔화·속박합니다.'],['E','넓은 황금 파도를 보내 여러 적에게 진동을 쌓고 조율자의 공격 기회를 만듭니다.'],['W','조율자의 공격 대상과 거리를 조절하며 안전한 위치에서 지원합니다.'],['R','조율자가 지정한 적을 황금 까마귀의 추가 타격으로 마무리합니다.']],chain:(A,S)=>[S.k('R'),S.k('Q'),S.k('E'),S.k('W'),S.k('R')]}],
   philip:[{name:'밀랍날개의 개화',sum:'체력이 위험해졌을 때 E.G.O를 발현해 밀랍날개 형태로 전환하고, 강화된 검격과 방어 능력으로 적을 압박한 뒤 타오르는 일격으로 전장을 가로질러 마무리하는 필립의 연계예요.',steps:[['R','체력이 30% 이하일 때 불안정 개화 E.G.O를 발동합니다. 3초 동안 무적 상태로 변신을 준비하고, 변신이 완료되면 체력을 전부 회복하며 20초 동안 밀랍날개 형태가 됩니다.'],['E','후회로 공격력을 60% 높이고 받는 피해를 20% 줄이며, 체력도 회복합니다.'],['평타','불꽃을 두른 롱소드로 적을 압박하고 화상을 누적합니다.'],['Q','낙인을 세 번 적중시켜 마지막 검격의 2초 기절과 3초 화상을 노립니다.'],['W','깃털 방패로 전방 공격을 막아내며 반격을 준비합니다.'],['R','타오르는 일격을 1.5초 준비한 뒤 긴 직선으로 돌진해 적을 기절시키고, 스킬 피해량의 70%에 적중한 적 수를 곱한 화상 피해를 5초에 걸쳐 남깁니다.']],chain:(A,S)=>[S.k('R'),S.k('E',{after:3.1}),S.atk(),S.k('Q'),S.k('Q'),S.k('Q'),S.k('W'),S.k('R')]}],
   gebura:[{name:'붉은안개의 사냥',sum:'기합으로 적의 발을 묶은 뒤 3단 검술과 최강 돌진으로 분노를 활용하고, 붉은안개로 각성해 대절단 두 번으로 마무리하는 게부라의 암살 콤보예요.',steps:[['W','적이 접근해 오거나 도주 경로에 들어왔을 때 기합을 차징해 원 안의 적을 도발합니다.'],['Q','종베기로 거리를 좁히고, 이어 찌르기와 횡베기까지 연결해 큰 검기 피해를 줍니다.'],['E','분노가 쌓인 상태에서 최강 돌진으로 적을 추격합니다. 분노 비례 고정 피해와 체력 회복을 동시에 얻습니다.'],['R','분노가 20에 도달하면 E.G.O 발현을 시작합니다. 3초 동안 변신 준비를 마치고 붉은안개로 각성합니다.'],['R','대절단 세로로 핵심 적 한 명을 강하게 베어냅니다.'],['R','대절단 가로를 재사용해 주변 적까지 휩쓸며 전투를 마무리합니다.']],chain:(A,S)=>[S.k('W'),S.k('Q'),S.k('Q'),S.k('Q'),S.k('E'),S.k('R'),S.k('R'),S.k('R')]}],
