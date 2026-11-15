@@ -4741,17 +4741,30 @@ function angelaLight(c,n=1){if(!c||c.key!=='angela')return;c.anLight=Math.min(5,
 function angelaCombatEvent(src,tgt,amount,opts={}){
  if(!tgt||!isChamp(tgt))return;
  for(const a of heroes){if(a.key!=='angela'||!a.alive||tgt.team===a.team||dist(a,tgt)>E(1050))continue;a.anCoins=(a.anCoins||0)+(opts.kill?35:opts.basic||opts.skill?4:2);
-  while(a.anCoins>=100){a.anCoins-=100;a.anEmotionStage=(a.anEmotionStage||0)+1;fx.push({type:'anEmotion',x:a.x,y:a.y,r:E(130),t:0,life:1.05,owner:a});sfxPlay('chime',a.x,a.y,.9,1.1);if(a===player)angelaOpenEmotion(a);else angelaChooseEmotion(a,['greed','despair','anger'][Math.floor(Math.random()*3)]);}
+  while(a.anCoins>=100){a.anCoins-=100;a.anEmotionStage=(a.anEmotionStage||0)+1;fx.push({type:'anEmotion',x:a.x,y:a.y,r:E(130),t:0,life:1.05,owner:a});sfxPlay('chime',a.x,a.y,.9,1.1);angelaOpenEmotion(a);}
  }
 }
 function angelaOpenEmotion(c){
- if(!c||c!==player||document.getElementById('angelaEmotionChoice'))return;const box=document.createElement('div');box.id='angelaEmotionChoice';
- box.style.cssText='position:fixed;z-index:9999;left:50%;top:15%;transform:translateX(-50%);width:min(620px,94vw);padding:16px;border:1px solid #b78c43;border-radius:14px;background:linear-gradient(145deg,rgba(14,20,35,.97),rgba(45,20,29,.97));color:#f7edda;box-shadow:0 0 35px #8b552d;font:14px system-ui;text-align:center';
- box.innerHTML='<b style="font-size:18px;letter-spacing:.12em;color:#ffe2a0">감정 단계 상승 · 환상체 책장 선택</b><p style="margin:8px 0 14px;color:#c9d9e8">세 장의 책장 중 하나를 선택해 감정을 발현하세요.</p><div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap"><button data-em="greed" style="flex:1;min-width:145px;padding:14px 8px;border:1px solid #c18b43;border-radius:10px;background:#3b2b1c;color:#ffe0a0"><b>탐욕 · 공격</b><br><small>스킬 피해량 증가 · 처치 관여 시 회복</small></button><button data-em="despair" style="flex:1;min-width:145px;padding:14px 8px;border:1px solid #6f9db9;border-radius:10px;background:#172e43;color:#c9efff"><b>절망 · 방어</b><br><small>받는 피해 감소 · 보호막 획득</small></button><button data-em="anger" style="flex:1;min-width:145px;padding:14px 8px;border:1px solid #a94c48;border-radius:10px;background:#451e27;color:#ffc4b8"><b>분노 · 제어</b><br><small>다음 기본 스킬에 고정 피해 · 기절</small></button></div>';
- box.querySelectorAll('button[data-em]').forEach(btn=>btn.addEventListener('click',()=>{angelaChooseEmotion(c,btn.dataset.em);box.remove();}));document.body.appendChild(box);
+  // 감정 선택은 플레이어/AI 모두 전투 상황을 분석해 자동으로 결정한다.
+  if(!c||!c.alive)return;
+  const allies=heroes.filter(u=>u.alive&&u.team===c.team&&dist(c,u)<=E(850));
+  const enemies=heroes.filter(u=>u.alive&&u.team!==c.team&&dist(c,u)<=E(720)&&targetable(u));
+  const threatened=enemies.filter(e=>allies.some(a=>dist(e,a)<=E(430)));
+  const weakest=allies.slice().sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp))[0]||c;
+  const critical=weakest.hp/weakest.maxHp;
+  const selfHp=c.hp/c.maxHp;
+  let choice='greed';
+  // 아군이 위험한 교전 중이거나 앤젤라 자신이 위급하면 생존 감정을 우선한다.
+  if((critical<.43&&threatened.length>0)||(selfHp<.48&&enemies.length>0)) choice='despair';
+  // 적이 사거리 안에 밀집해 있으면 다음 스킬에 속박/고정 피해를 얹는 분노를 선택한다.
+  else if(enemies.length>=2||threatened.length>=1) choice='anger';
+  // 교전 압박이 낮거나 공격 기회를 준비할 때는 스킬 피해 증가를 선택한다.
+  else choice='greed';
+  angelaChooseEmotion(c,choice);
+  if(c===player)text(c.x,c.y-c.r-E(48),choice==='greed'?'자동 선택 · 탐욕':choice==='despair'?'자동 선택 · 절망':'자동 선택 · 분노',choice==='greed'?'#ffc86b':choice==='despair'?'#9edfff':'#ff7777',true,1.1);
 }
 function angelaChooseEmotion(c,type){
- if(!c||!c.alive)return;let target=c;if(c===player&&player.target&&player.target.alive&&player.target.team===c.team&&dist(c,player.target)<E(850))target=player.target;const until=time+12;
+ if(!c||!c.alive)return;let target=c;if(type==='despair'){const allies=heroes.filter(u=>u.alive&&u.team===c.team&&dist(c,u)<E(850));allies.sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp));target=allies[0]||c;}const until=time+12;
  if(type==='greed'){target.anGreedUntil=until;target.anGreedAmp=.22;target.anGreedHeal=true;text(target.x,target.y-E(55),'탐욕 · 공격','#ffc86b',true,1);}
  if(type==='despair'){target.anDespairUntil=until;target.anDespairReduce=.20;target.shield=Math.max(target.shield||0,target.maxHp*.12);target.shieldT=Math.max(target.shieldT||0,12);text(target.x,target.y-E(55),'절망 · 방어','#9edfff',true,1);}
  if(type==='anger'){c.anAngerReady=true;text(c.x,c.y-E(55),'분노 · 제어','#ff7777',true,1);}fx.push({type:'anEmotion',x:target.x,y:target.y,r:E(100),t:0,life:.8,owner:c});fx.push({type:'anRibbon',x:target.x,y:target.y,r:E(48),t:0,life:1.05,owner:c});sfxPlay('chime',target.x,target.y,1,1.2);
