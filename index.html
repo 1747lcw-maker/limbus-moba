@@ -20823,6 +20823,53 @@ Object.assign(SKILL_ICON_DRAW, { liuEn: {
    g.strokeStyle='rgba(185,220,245,.85)';g.lineWidth=2;g.beginPath();g.arc(0,0,19,-.3,2.8);g.stroke();
  }
 }});
+// 앤젤라 전용: 하늘빛 마도서와 도서관의 시간·초대장을 모티브로 한 P/Q/W/E/R 아이콘
+SKILL_BG.angela = ['#329fd4', '#071c35'];
+Object.assign(SKILL_ICON_DRAW, { angela: {
+ P:g=>{
+  iconGlow(g,0,0,32,'rgba(112,220,255,.9)');
+  g.save();g.rotate(-.16);
+  iconPoly(g,[[-22,-18],[-2,-23],[1,20],[-19,16]],'#123b59','#a9eaff');
+  iconPoly(g,[[2,-23],[22,-18],[19,16],[1,20]],'#e6faff','#ffffff');
+  iconLine(g,1,-19,1,17,'#55b9ed',2);
+  for(let y of [-11,-3,5]){iconLine(g,-15,y,-4,y+2,'#8cddff',1.6);iconLine(g,6,y,16,y-2,'#56b8e9',1.6);}
+  g.restore();
+  sStar(g,0,-27,5,2,4,'#ffffff');sStar(g,25,-16,3.5,1.4,4,'#dffaff');
+ },
+ Q:g=>{
+  iconGlow(g,0,0,33,'rgba(95,211,255,.95)');
+  for(let i=-1;i<=1;i++){g.save();g.rotate(i*.28-.25);iconPoly(g,[[-22,-4],[15,-7],[28,0],[15,7],[-22,4]],'#dffaff','#ffffff');iconLine(g,-17,0,20,0,'#55bff0',1.8);g.restore();}
+  for(let i=0;i<5;i++)sStar(g,-22+i*11,20-i*5,3.2,1.3,4,'#a9eaff');
+ },
+ W:g=>{
+  iconGlow(g,0,0,35,'rgba(75,190,255,.95)');
+  g.fillStyle='rgba(90,205,255,.2)';g.strokeStyle='#c9f4ff';g.lineWidth=2.8;
+  g.beginPath();g.arc(0,0,23,0,Math.PI*2);g.fill();g.stroke();
+  g.strokeStyle='#63caff';g.lineWidth=3;g.setLineDash([5,4]);g.beginPath();g.arc(0,0,16,0,Math.PI*2);g.stroke();g.setLineDash([]);
+  iconPoly(g,[[-7,-12],[7,-12],[4,-2],[12,6],[0,15],[-12,6],[-4,-2]],'#eafaff','#ffffff');
+  iconCircle(g,0,1,4,'#66caff','#ffffff');
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;iconLine(g,Math.cos(a)*26,Math.sin(a)*26,Math.cos(a)*33,Math.sin(a)*33,'#e2faff',2);}
+ },
+ E:g=>{
+  iconGlow(g,0,0,34,'rgba(105,220,255,.9)');
+  g.strokeStyle='#d6f7ff';g.lineWidth=3;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();
+  g.strokeStyle='#53b8e9';g.lineWidth=2;g.beginPath();g.arc(0,0,16,0,Math.PI*2);g.stroke();
+  iconLine(g,0,0,0,-13,'#ffffff',3);iconLine(g,0,0,11,6,'#ffffff',3);
+  for(let i=0;i<4;i++){const a=i*Math.PI/2;iconPoly(g,[[Math.cos(a)*27,Math.sin(a)*27],[Math.cos(a+.18)*34,Math.sin(a+.18)*34],[Math.cos(a+.36)*27,Math.sin(a+.36)*27]],'#8ce0ff','#eafaff');}
+  sStar(g,0,0,4,1.5,4,'#ffffff');
+ },
+ R:g=>{
+  iconGlow(g,0,0,37,'rgba(70,183,255,1)');
+  g.save();g.rotate(-.12);
+  iconPoly(g,[[-27,-19],[-3,-25],[0,23],[-23,17]],'#092b4b','#8edfff');
+  iconPoly(g,[[3,-25],[27,-19],[23,17],[0,23]],'#e8faff','#ffffff');
+  iconLine(g,0,-21,0,21,'#58bfeF',2);
+  for(let y of [-12,-3,6]){iconLine(g,-19,y,-5,y+2,'#a4eaff',1.8);iconLine(g,5,y,19,y-2,'#59bfea',1.8);}
+  g.restore();
+  for(let i=0;i<10;i++){const a=i*Math.PI*2/10,r=29+(i%2)*4;sStar(g,Math.cos(a)*r,Math.sin(a)*r,3.2,1.3,4,i%2?'#ffffff':'#a7eaff');}
+  g.strokeStyle='rgba(225,250,255,.9)';g.lineWidth=1.8;g.beginPath();g.arc(0,0,35,-.8,2.7);g.stroke();
+ }
+}});
 // 푸른 잔향 전용: 푸른 공명과 악보를 모티브로 한 스킬 아이콘
 SKILL_BG.blueReverb = ['#287fc0', '#061629'];
 Object.assign(SKILL_ICON_DRAW, {
