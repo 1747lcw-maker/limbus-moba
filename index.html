@@ -20632,7 +20632,7 @@ function drawStatPanel(g) {
     ['체력', `${Math.ceil(c.hp)}/${Math.round(c.maxHp)}`], ['이속', Math.round(c.speed * (speedMul(c) || 1))],
   ];
   const ammoHud = c.key === 'naihwang', mosesHud = c.key === 'moses';
-  const ph = 5 * 14 + 6 + (ammoHud ? 30 : 0) + (mosesHud ? 26 : 0);
+  const ph = 5 * 14 + 6 + (ammoHud ? 30 : 0) + (mosesHud ? 38 : 0);
   g.fillStyle = 'rgba(8,14,11,.72)'; g.beginPath(); g.roundRect(x - 3, y - 3, mw + 6, ph, 6); g.fill();
   g.font = '600 11px system-ui,sans-serif'; g.textBaseline = 'top';
   rows.forEach(([k, v], i) => {
