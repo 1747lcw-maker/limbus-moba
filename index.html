@@ -4745,6 +4745,14 @@ function angelaTarget(c,ang,frac,team,range){
 function angelaSkillHit(c,u,dmg,color='#83dfff'){
  if(!u||!u.alive)return;damage(c,u,dmg,{skill:true,type:'magic',color});if(c.anAngerReady&&u.alive){c.anAngerReady=false;damage(c,u,90+c.ap*.35,{skill:true,type:'true',color:'#ff666f',noProc:true});u.stunT=Math.max(u.stunT||0,.75);fx.push({type:'anChain',x:u.x,y:u.y,r:u.r*1.8,t:0,life:.48});text(u.x,u.y-u.r-E(30),'분노 · 기절','#ff7777',true,.7);}
 }
+function angelaUltAudio(){
+ try{
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const ac=new AC(),now=ac.currentTime,master=ac.createGain();master.gain.setValueAtTime(.0001,now);master.gain.exponentialRampToValueAtTime(.22,now+.22);master.gain.exponentialRampToValueAtTime(.0001,now+3.8);master.connect(ac.destination);
+  [110,164.81,220,329.63,440].forEach((hz,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=i<3?'sine':'triangle';o.frequency.setValueAtTime(hz,now);g.gain.setValueAtTime(.0001,now);g.gain.linearRampToValueAtTime(i<3?.16:.07,now+.35);g.gain.exponentialRampToValueAtTime(.0001,now+3.7);o.connect(g);g.connect(master);o.start(now);o.stop(now+3.75);});
+  [523.25,659.25,783.99,987.77,783.99,659.25].forEach((hz,i)=>{const t=now+.25+i*.32,o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.setValueAtTime(hz,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.11,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+.48);o.connect(g);g.connect(master);o.start(t);o.stop(t+.5);});
+  setTimeout(()=>ac.close().catch(()=>{}),4200);
+ }catch(e){}
+}
 function castAngela(c,key,ang,frac){
  if(key==='Q'){const enhanced=(c.anLight||0)>=3;if(enhanced)c.anLight-=3;if(ang==null)ang=autoAim(c,E(650));c.face=ang;const len=E(enhanced?760:610),spread=[-.24,0,.24],hit=new Set();let first=null;
   for(let i=0;i<3;i++){const a=ang+spread[i];fx.push({type:'anQ',x:c.x,y:c.y,ang:a,len,t:0,life:.42,enhanced,owner:c});for(const u of heroes){if(!u.alive||u.team===c.team||!seenBy(c.team,u)||!targetable(u))continue;const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy),da=Math.abs(Math.atan2(Math.sin(Math.atan2(dy,dx)-a),Math.cos(Math.atan2(dy,dx)-a)));if(d>len+u.r||da>.085+u.r/Math.max(1,d)||hit.has(u))continue;hit.add(u);if(!first)first=u;angelaSkillHit(c,u,68+c.ap*.52,enhanced?'#d94758':'#8feaff');if(u.alive&&enhanced){u.rootT=Math.max(u.rootT||0,time+1.25);fx.push({type:'anChain',x:u.x,y:u.y,r:u.r*1.5,t:0,life:.62});}}}
@@ -4755,7 +4763,7 @@ function castAngela(c,key,ang,frac){
   if(chosen.team===c.team){for(const k of ['Q','W','E'])chosen.cd[k]=Math.max(0,chosen.cd[k]-.35*(chosen.cdMax[k]||0));chosen.anMoveUntil=time+2;chosen.anMoveMul=1.48;chosen.anAsUntil=time+2;fx.push({type:'anClock',x:chosen.x,y:chosen.y,r:chosen.r*2.8,ally:true,t:0,life:1.1});text(chosen.x,chosen.y-E(50),'시간 가속','#9eeaff',true,.8);}
   else{angelaSkillHit(c,chosen,75+c.ap*.55,'#8bdfff');chosen.slowT=Math.max(chosen.slowT||0,1.5);chosen.slowAmt=Math.max(chosen.slowAmt||0,.62);chosen.anAtkSlowUntil=time+1.5;fx.push({type:'anClock',x:chosen.x,y:chosen.y,r:chosen.r*2.8,ally:false,t:0,life:1.1});text(chosen.x,chosen.y-E(50),'시간 정지','#ff7777',true,.8);}c.cd.E=c.cdMax.E=16*hasteMul(c);sfxPlay('chime',chosen.x,chosen.y,1,.75);return true;
  }
- if(key==='R'){c.cd.R=c.cdMax.R=150*hasteMul(c);fx.push({type:'anRGlobal',x:W/2,y:H/2,r:Math.max(W,H),t:0,life:1.5,owner:c});for(const u of heroes){if(!u.alive||!seenBy(c.team,u))continue;if(u.team===c.team){u.anAllyUntil=time+10;u.anAllyOwner=c;u.anAsUntil=time+10;u.anMoveUntil=time+10;u.anMoveMul=1.20;u.anHaste=30;u.anRHeal=true;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,owner:c});}else{u.anRUntil=time+10;u.anROwner=c;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,enemy:true,owner:c});}}angelaLight(c,2);text(c.x,c.y-E(60),'도서관의 무대','#ffe0a0',true,1.5);sfxPlay('boom',c.x,c.y,1.2,.7);return true;}
+ if(key==='R'){c.cd.R=c.cdMax.R=150*hasteMul(c);fx.push({type:'anRGlobal',x:W/2,y:H/2,r:Math.max(W,H),t:0,life:1.5,owner:c});for(const u of heroes){if(!u.alive||!seenBy(c.team,u))continue;if(u.team===c.team){u.anAllyUntil=time+10;u.anAllyOwner=c;u.anAsUntil=time+10;u.anMoveUntil=time+10;u.anMoveMul=1.20;u.anHaste=30;u.anRHeal=true;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,owner:c});}else{u.anRUntil=time+10;u.anROwner=c;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,enemy:true,owner:c});}}angelaLight(c,2);text(c.x,c.y-E(60),'도서관의 무대','#ffe0a0',true,1.5);sfxPlay('boom',c.x,c.y,1.2,.7);angelaUltAudio();return true;}
  return false;
 }
 function angelaTick(c,dt){
