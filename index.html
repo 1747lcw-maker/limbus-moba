@@ -2064,7 +2064,7 @@ const SK_BTN = {r:30, maxDrag:80, deadzone:14};
 // 공격 버튼을 중심으로 한 호 위에 Q → W → E → R 순서로 배치
 const SKILL_OFFSETS = {Q:[-124, 4], W:[-104, -70], E:[-46, -118], R:[30, -126]};
 const CHAMP_UI = {
-  moses:{names:{Q:'연무탄',W:'백색 장막',E:'금빛 잔향',R:'안개 속의 진실'},cast:{},desc:{Q:'담뱃대에서 응축한 연기를 직선으로 내뿜어 적에게 마법 피해를 입힙니다.',W:'아군에게 흰 연기 보호막을 씌워 피해를 흡수합니다.',E:'적 주변에 황금빛 연기를 터뜨려 마법 피해와 둔화를 부여합니다.',R:'넓은 범위에 황금빛 안개를 퍼뜨려 적에게 마법 피해를 주고 아군에게 보호막과 이동 속도를 부여합니다.'}},
+  moses:{names:{Q:'하얀숨',W:'푸른숨',E:'붉은숨',R:'붉은 점'},cast:{},desc:{Q:'3초 동안 주변 아군에게 공격 속도·이동 속도 증가와 재사용 대기시간 2초 감소를 부여합니다.',W:'3초 동안 범위 안 아군의 잃은 체력 일부를 회복합니다.',E:'3초 동안 범위 안 아군의 공격력을 증가시킵니다.',R:'호흡 30중첩에서만 사용 가능. 적 하나를 3초간 조준한 뒤 현재 체력×레벨의 고정 피해를 입힙니다.'}},
   araya:{names:{Q:'필연쇄 [必然殺]',W:'이연 - 잔 [二連 - 殘]',E:'지혜성도 [地慧星刀]',R:'극 공간참 - 절연 [空間斬 - 絶緣]'},cast:{},desc:{Q:'지정 방향으로 돌진해 경로와 끝 지점에 공간의 흉터를 남깁니다. 1초 뒤 균열이 동시에 폭발합니다.',W:'전방 부채꼴을 베어 물리 피해와 0.75초 둔화를 입히고, 적중한 적 챔피언 수에 비례해 보호막을 얻습니다.',E:'공간의 흉터가 새겨진 적에게 순간이동해 추가 물리 피해를 입힙니다.',R:'지정한 적에게 거대 공간참을 날리고 등 뒤로 순간이동합니다. 대상은 1.5초 동안 행동 불능이 되며, 이후 대상 위치에서 광역 폭발이 발생합니다.'}},
   roland:{names:{Q:'그건 그거고 이건 이거야',W:'함부로 끊어 낼 수는 없어',E:'안젤리카를 위한 춤',R:'내게는 고통밖에 없습니다. 그외에는...'},cast:{R2:'FURIOSO'},desc:{Q:'야스오의 강철 폭풍처럼 전방을 찌릅니다. 회오리 3타 없이 단일 찌르기만 사용합니다.',W:'이렐리아의 칼날 쇄도처럼 적에게 돌진합니다. 적 처치 시 재사용 대기시간이 초기화됩니다.',E:'사미라의 원형 검무처럼 주변을 베며 날아오는 투사체를 막아냅니다.',R:'뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 흡혈이 부여되고 궁극기를 재사용해 FURIOSO를 발동할 수 있습니다.'}},
   blueReverb:{names:{Q:'푸른 궤적',W:'잔향의 막',E:'전주',R:'잔향 악단'},cast:{},desc:{Q:'푸른 음표를 직선으로 발사합니다. 적중한 적은 3초 동안 주는 피해량이 7.3% 감소하고 이동 속도가 5% 감소하며 진동 2중첩을 얻습니다.',W:'2초 동안 자신과 주변 아군을 푸른 잔향의 막으로 감쌉니다. 막 안의 아군은 적 투사체에 면역이 됩니다.',E:'푸른 음표를 날려 적중한 적에게 마법 피해와 진동 2중첩을 부여합니다. 주변 아군은 3초 동안 주는 피해량이 8% 증가하고 이동 속도가 10% 증가합니다.',R:'수많은 푸른 음표를 전방으로 쏟아내 마법 피해를 입히고 적들을 2.5초 동안 광란 상태로 만들어 서로를 공격하게 합니다.'}},
@@ -3701,7 +3701,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (nhTigerHit) amount *= .90;
   if (nhTigerHit && opts.skill && src.nhCombo && src.nhCombo.key === 'R') amount *= .7225;
   if(tgt&&tgt.key==='philip'&&(tgt.phInvulnUntil||0)>time)return 0;
-  if(src&&src.anGreedUntil>time&&opts.skill)amount*=1+(src.anGreedAmp||.22);
+  if(src&&src.key==='moses'&&opts.basic){opts.type='magic';src.mosesBreath=Math.min(30,(src.mosesBreath||0)+2);}\n  if(src&&src.mosesAdUntil>time)amount*=src.mosesAdMul||1.2;\n  if(src&&src.anGreedUntil>time&&opts.skill)amount*=1+(src.anGreedAmp||.22);
   if(tgt&&tgt.anDespairUntil>time)amount*=1-(tgt.anDespairReduce||.20);
   if(tgt&&tgt.anRUntil>time&&src&&src.team!==tgt.team)amount*=1.22;
   if(tgt&&tgt.key==='philip'&&(tgt.phWingGuardUntil||0)>time){const a=src?Math.atan2(src.y-tgt.y,src.x-tgt.x):0,da=Math.abs(Math.atan2(Math.sin(a-(tgt.phWingGuardAng||0)),Math.cos(a-(tgt.phWingGuardAng||0))));if(src&&src.team!==tgt.team&&da<Math.PI*.52){philipBurn(tgt,src,amount,'깃털 방패');return 0;}amount*=.25;}
@@ -4120,7 +4120,7 @@ function basicAttack(c, t) {
   }
   const lam = hasItem(c, 'lament') && time < c.lamentT ? .06 * c.lamentN : 0;
   const cob = hasItem(c, 'cobalt') && c.hp < c.maxHp * .5 ? .2 : 0;                         // 푸른 흉터
-  c.atkT = 1 / Math.min(2.5, c.as * (c.anAsUntil>time?1.42:1) * (c.anAtkSlowUntil>time?.42:1) * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c) + (c.key==='naihwang'&&c.nhInstinctUntil>time ? .2 : 0)) * (c.key==='roland' ? 1.15 : 1) * (c.frostT > time ? .85 : 1));
+  c.atkT = 1 / Math.min(2.5, c.as * (c.anAsUntil>time?(c.mosesAsMul||1.42):1) * (c.anAtkSlowUntil>time?.42:1) * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c) + (c.key==='naihwang'&&c.nhInstinctUntil>time ? .2 : 0)) * (c.key==='roland' ? 1.15 : 1) * (c.frostT > time ? .85 : 1));
   if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(c.nhInstinctUntil>time?1.3:1.08, c.as * 1.38 * (c.nhInstinctUntil>time?1.2:1))); // 묵직한 한 방: 공격 속도 상한
   c.swingT = c.key === 'naihwang' ? .52 : c.key === 'gebura' ? .46 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
@@ -4249,7 +4249,7 @@ function autoAim(c, len) {
 const CAST = {Q:0.25, W:0.35, R:K.R.cast};
 const RECALL_TIME = 8;
 
-const hasteMul = c => 100 / (100 + (c.haste || 0) + (c.anAllyUntil>time?(c.anHaste||0):0) + (hasBuff(c, 'blue') ? 20 : 0));
+const hasteMul = c => 100 / (100 + (c.haste || 0) + (c.mosesBreath||0) + (c.anAllyUntil>time?(c.anHaste||0):0) + (hasBuff(c, 'blue') ? 20 : 0));
 const AI_AIM = {lat:48, fr:.075};                            // 상위 티어 AI: 이동 예측은 정확하지만 완벽한 조준은 아님
 const aiGauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 2;
 function aiAimNoise(c, key, ang, frac) {                     // AI가 쏘는 논타깃 스킬에 손떨림 · 예측 실수
@@ -4800,29 +4800,42 @@ function castAngela(c,key,ang,frac){
  return false;
 }
 function castMoses(c,key,ang,frac){
- const rk0=Math.max(0,Math.min(key==='R'?2:4,(c.rank&&c.rank[key]?c.rank[key]-1:0)));
- const cd={Q:[7,6.5,6,5.5,5],W:[13,12,11,10,9],E:[12,11,10,9,8],R:[105,90,75]};
+ const rk=Math.max(0,Math.min(4,(c.rank&&c.rank[key]?c.rank[key]-1:0))),cd={Q:[12,11.5,11,10.5,10],W:[14,13,12,11,10],E:[14,13,12,11,10],R:[110,95,80]};
  if((c.cd[key]||0)>0)return false;
- const color='#e4c56d', white='#fff9e8';
- const enemies=heroes.filter(u=>u.alive&&u.team!==c.team), allies=heroes.filter(u=>u.alive&&u.team===c.team);
- const nearest=enemies.sort((a,b)=>dist(c,a)-dist(c,b))[0];
- if(key==='Q'){
-   const a=Number.isFinite(ang)?ang:(nearest?Math.atan2(nearest.y-c.y,nearest.x-c.x):(c.face||0));
-   const len=E(590);fx.push({type:'mosesSmoke',x:c.x,y:c.y,ang:a,len,t:0,life:.55,color:color,owner:c});
-   for(const u of enemies){const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy),da=Math.abs(Math.atan2(Math.sin(Math.atan2(dy,dx)-a),Math.cos(Math.atan2(dy,dx)-a)));if(d<=len+u.r&&da<.11+u.r/Math.max(1,d))damage(c,u,75+rk0*22+c.ap*.48,{skill:true,type:'magic',color});}
- }else if(key==='W'){
-   const target=allies.filter(u=>u!==c).sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp))[0]||c;
-   const shield=105+rk0*32+c.ap*.55;target.shield=Math.max(target.shield||0,shield);target.shieldT=Math.max(target.shieldT||0,3.5);
-   fx.push({type:'mosesSmoke',x:target.x,y:target.y,ang:0,len:E(90),t:0,life:.8,color:white,owner:c});text(target.x,target.y-E(42),'백색 장막','#fff9e8',true,.8);
- }else if(key==='E'){
-   const target=nearest;if(!target)return false;const radius=E(220);fx.push({type:'mosesSmoke',x:target.x,y:target.y,ang:0,len:radius,t:0,life:.75,color:color,owner:c});
-   for(const u of enemies)if(dist(target,u)<radius+u.r){damage(c,u,65+rk0*20+c.ap*.42,{skill:true,type:'magic',color});u.slowT=Math.max(u.slowT||0,1.35);u.slowAmt=Math.max(u.slowAmt||0,.3);}
- }else if(key==='R'){
-   const radius=E(520);fx.push({type:'mosesSmoke',x:c.x,y:c.y,ang:0,len:radius,t:0,life:1.2,color:color,owner:c});
-   for(const u of heroes){if(!u.alive||dist(c,u)>radius)continue;if(u.team===c.team){u.shield=Math.max(u.shield||0,125+c.ap*.55);u.shieldT=Math.max(u.shieldT||0,4);u.mosesHasteUntil=time+3;u.mosesMoveMul=1.2;}else damage(c,u,145+c.ap*.68,{skill:true,type:'magic',color});}
+ if(['Q','W','E'].includes(key)&&(c.mosesActive||time<(c.mosesActiveUntil||0)))return false;
+ const allies=heroes.filter(u=>u.alive&&u.team===c.team),enemies=heroes.filter(u=>u.alive&&u.team!==c.team&&!u.ward),radius=E(360),color={Q:'#fffdf2',W:'#58baff',E:'#e94b55'};
+ if(['Q','W','E'].includes(key)){
+  c.mosesActive=key;c.mosesActiveUntil=time+3;c.mosesBuffed={};fx.push({type:'mosesAura',x:c.x,y:c.y,r:radius,t:0,life:3.05,color:color[key],owner:c,kind:key});
+  if(key==='Q')for(const u of allies){if(dist(c,u)>radius+u.r)continue;u.anAsUntil=Math.max(u.anAsUntil||0,time+3);u.mosesAsMul=1.15+rk*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+3);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rk*.01);for(const sk of ['Q','W','E','R'])if(u.cd&&u.cd[sk]>0)u.cd[sk]=Math.max(0,u.cd[sk]-2);}
+  c.cd[key]=c.cdMax[key]=cd[key][rk]*(typeof hasteMul==='function'?hasteMul(c):1);c.mosesBreath=Math.min(30,(c.mosesBreath||0)+2);text(c.x,c.y-E(48),key==='Q'?'하얀숨':key==='W'?'푸른숨':'붉은숨',color[key],true,1);return true;
  }
- c.cd[key]=c.cdMax[key]=cd[key][rk0]*(typeof hasteMul==='function'?hasteMul(c):1);c.face=Number.isFinite(ang)?ang:c.face;
- return true;
+ if(key==='R'){
+  if((c.mosesBreath||0)<30)return false;let target=null,best=Infinity;for(const u of enemies){const d=dist(c,u);if(d<best){best=d;target=u;}}if(!target)return false;
+  c.mosesBreath=0;c.mosesActive=null;c.mosesActiveUntil=0;c.mosesR={target,fireAt:time+3};fx.push({type:'mosesAim',x:c.x,y:c.y,target,t:0,life:3.05,owner:c});c.cd.R=c.cdMax.R=cd.R[Math.min(2,Math.max(0,(c.rank.R||1)-1))];text(c.x,c.y-E(52),'붉은 점 · 조준','#ff4148',true,1);return true;
+ }return false;
+}
+function mosesTick(c,dt){
+ if(c.key!=='moses')return;c.mosesBreath=Math.max(0,Math.min(30,c.mosesBreath||0));
+ if(c.mosesActive&&time>=(c.mosesActiveUntil||0)){c.mosesActive=null;c.mosesActiveUntil=0;}
+ if(c.mosesActive){const key=c.mosesActive,r=E(360),rank=Math.max(0,(c.rank&&c.rank[key]||1)-1);
+  for(const u of heroes){if(!u.alive||u.team!==c.team||dist(c,u)>r+u.r)continue;const id=u.id||u.key+':'+u.team;
+   if(key==='Q'){u.anAsUntil=Math.max(u.anAsUntil||0,time+.35);u.mosesAsMul=1.15+rank*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+.35);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rank*.01);}
+   else if(key==='W'&&!c.mosesBuffed[id]){const heal=Math.max(0,u.maxHp-u.hp)*(.20+rank*.01);u.hp=Math.min(u.maxHp,u.hp+heal);c.mosesBuffed[id]=true;fx.push({type:'mosesAura',x:u.x,y:u.y,r:E(70),t:0,life:.8,color:'#58baff',owner:c,kind:'heal'});if(heal>0)text(u.x,u.y-E(34),'+'+Math.round(heal),'#72c9ff',true,.8);}
+   else if(key==='E'){u.mosesAdUntil=time+.4;u.mosesAdMul=1.20+rank*.02;}
+  }
+ }
+ if((c.mosesPassiveAt||0)<=time){const ally=heroes.filter(u=>u.alive&&u.team===c.team).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(ally&&ally.hp/ally.maxHp<=.4&&(c.mosesBreath||0)>0){const shield=Math.max(0,ally.hp)*c.mosesBreath;ally.shield=Math.max(ally.shield||0,shield);ally.shieldT=Math.max(ally.shieldT||0,1.5);fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:ally.r*2.5,t:0,life:.8,color:'#d7d0bd',owner:c,kind:'protect'});text(ally.x,ally.y-E(38),'보호의 연기','#eee7d5',true,.8);c.mosesPassiveAt=time+1.5;}}
+ if(c.mosesR){const R=c.mosesR,T=R.target;if(!T||!T.alive||!c.alive){c.mosesR=null;return;}if(time>=R.fireAt){const ang=Math.atan2(T.y-c.y,T.x-c.x),len=dist(c,T),dmg=Math.max(0,c.hp)*(c.level||1);fx.push({type:'mosesSmoke',x:c.x,y:c.y,ang,len,t:0,life:.35,color:'#ef343e',owner:c});damage(c,T,dmg,{skill:true,type:'true',color:'#ff303b',noProc:true});fx.push({type:'mosesAura',x:T.x,y:T.y,r:E(100),t:0,life:.75,color:'#ff303b',owner:c,kind:'hit'});text(T.x,T.y-E(55),'붉은 점 · '+Math.round(dmg),'#ff4148',true,1);c.mosesR=null;}}
+}
+function drawMosesBody(g,c){
+ g.save();g.translate(c.x,c.y);g.rotate(c.face||0);const stacks=Math.min(30,c.mosesBreath||0),red=stacks/30;g.strokeStyle='#d8b65a';g.lineWidth=E(4);g.shadowColor=red>0?'#b52b36':'#ffe7a0';g.shadowBlur=E(10+stacks*.7);g.beginPath();g.moveTo(-E(5),-E(7));g.lineTo(E(25),-E(13));g.lineTo(E(32),-E(10));g.stroke();g.fillStyle='#fff9e8';g.beginPath();g.arc(0,0,c.r*.72,0,Math.PI*2);g.fill();g.strokeStyle=red>0?'#b52b36':'#c99a32';g.lineWidth=E(3);g.stroke();g.fillStyle='#e9d9ad';g.beginPath();g.arc(E(4),-E(4),E(3),0,Math.PI*2);g.fill();if(stacks>0){g.globalAlpha=.15+red*.35;g.strokeStyle='#c83b45';g.lineWidth=E(2+red*3);g.beginPath();g.ellipse(0,0,c.r*(1.2+red*.5),c.r*(.9+red*.4),time*2,0,Math.PI*2);g.stroke();}g.restore();
+}
+function drawMosesFx(g,f,k){
+ g.save();g.translate(f.x||0,f.y||0);
+ if(f.type==='mosesAim'&&f.target){const T=f.target,ang=Math.atan2(T.y-f.y,T.x-f.x),len=Math.hypot(T.x-f.x,T.y-f.y);g.strokeStyle='#ff303b';g.shadowColor='#ff303b';g.shadowBlur=E(12);g.lineWidth=E(2);g.globalAlpha=.8;g.beginPath();g.moveTo(0,0);g.lineTo(Math.cos(ang)*len,Math.sin(ang)*len);g.stroke();g.translate(T.x-f.x,T.y-f.y);g.rotate(time*1.2);g.lineWidth=E(3);g.beginPath();g.arc(0,0,E(25),0,Math.PI*2);g.moveTo(-E(36),0);g.lineTo(E(36),0);g.moveTo(0,-E(36));g.lineTo(0,E(36));g.stroke();g.restore();return;}
+ g.globalAlpha=Math.max(0,1-k)*.65;g.shadowColor=f.color||'#e4c56d';g.shadowBlur=E(22);
+ if(f.type==='mosesAura'){const r=f.r||E(260);g.strokeStyle=f.color||'#fff';g.fillStyle=f.kind==='Q'?'rgba(255,255,245,.12)':f.kind==='W'?'rgba(65,170,255,.16)':f.kind==='E'?'rgba(225,45,60,.16)':'rgba(220,210,190,.18)';g.lineWidth=E(4);g.beginPath();g.arc(0,0,r*(.96+.04*Math.sin(time*5)),0,Math.PI*2);g.fill();g.stroke();for(let i=0;i<18;i++){const a=i*Math.PI/9+time*.7;g.beginPath();g.arc(Math.cos(a)*r*.82,Math.sin(a)*r*.82,E(5),0,Math.PI*2);g.fill();}}
+ else{g.rotate(f.ang||0);g.globalAlpha=Math.max(0,1-k)*.72;for(let i=0;i<7;i++){const x=(f.len||E(100))*(.12+i*.12),y=Math.sin(k*9+i*1.8)*E(20);g.fillStyle=i%2?'#fff9e8':(f.color||'#e4c56d');g.strokeStyle='#fff4c7';g.lineWidth=E(2);g.beginPath();g.ellipse(x,y,E(15)*(1+k),E(9)*(1+k),i*.35,0,Math.PI*2);g.fill();g.stroke();}}g.restore();
 }
 function drawMosesBody(g,c){
  g.save();g.translate(c.x,c.y);g.rotate(c.face||0);
@@ -12534,7 +12547,7 @@ function champTimers(c, dt) {
     if (c.stunT > 0 && !c.cast.unstoppable) c.cast = null;          // 기절하면 시전 끊김
     else c.cast.t += dt;
   }
-  angelaTick(c,dt);
+  angelaTick(c,dt);\n  mosesTick(c,dt);
   if (c.key === 'gebura') geburaTick(c, dt);
   if (c.key === 'binah') binahTick(c, dt);
   if(c.key==='liuEn'){
@@ -20150,7 +20163,7 @@ function drawFx(g) {
     const k = Math.max(0, f.t / f.life);
     if (!fxSeen(f)) continue;
     if (f.type === 'wardSet' || f.type === 'wardDie') { drawWardFx(g, f, k); continue; }
-    if (f.type === 'mosesSmoke') { drawMosesFx(g,f,k); continue; }
+    if (f.type === 'mosesSmoke' || f.type === 'mosesAura' || f.type === 'mosesAim') { drawMosesFx(g,f,k); continue; }
     if(f.type.startsWith('ar')){drawArayaFx(g,f,k);continue;}
     if(f.type.startsWith('an')){drawAngelaFx(g,f,k);continue;}
     if(f.type.startsWith('ma')){drawMathiasFx(g,f,k);continue;}
@@ -24059,7 +24072,7 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], moses:['마법사','서포터'],
+  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], moses:['서포터','마법사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
@@ -24177,11 +24190,11 @@ function cxDetail(k, key = 'P', roleOverride = null) {
 }
 // 앤젤라 · 빛의 도서관 관장
 CODEX_SK.moses = {
- P:{name:'연기의 조율',text:()=> '모제스의 기본 공격은 담뱃대에서 뿜어낸 연기를 날리는 원거리 마법 공격입니다. 아군을 보호하고 적의 움직임을 방해하는 연기 기술을 사용합니다.'},
- Q:{name:'연무탄',cd:[7,6.5,6,5.5,5],text:()=> '담뱃대에서 응축한 황금빛 연기를 직선으로 내뿜어 경로상의 적에게 마법 피해를 입힙니다.'},
- W:{name:'백색 장막',cd:[13,12,11,10,9],text:()=> '가장 체력이 낮은 주변 아군에게 흰 연기를 둘러 3.5초 동안 보호막을 부여합니다.'},
- E:{name:'금빛 잔향',cd:[12,11,10,9,8],text:()=> '가장 가까운 적 주변에 황금빛 연기를 폭발시켜 광역 마법 피해와 둔화를 입힙니다.'},
- R:{name:'안개 속의 진실',cd:[105,90,75],text:()=> '주변 넓은 범위에 황금빛 안개를 퍼뜨립니다. 적에게 마법 피해를 입히고 아군에게 보호막과 이동 속도 증가를 부여합니다.'}
+ P:{name:'뒤틀림 탐정 · 보호의 연기',text:()=> '스킬 사용 또는 기본 공격 적중 시 호흡 2중첩을 얻습니다(최대 30). 호흡 1중첩당 스킬 가속이 1% 증가합니다. R 사용 시 초기화됩니다. 가장 가까운 아군의 체력이 40% 이하일 때 남은 체력×호흡 중첩만큼 1.5초 보호막을 부여합니다.'},
+ Q:{name:'하얀숨',cd:[12,11.5,11,10.5,10],text:()=> '3초 동안 주변 아군에게 공격 속도 15%와 이동 속도 10%를 부여하며, 스킬 레벨당 각 효과가 1%p 증가합니다. 아군의 재사용 대기시간을 2초 줄입니다.'},
+ W:{name:'푸른숨',cd:[14,13,12,11,10],text:()=> '3초 동안 범위 안 아군의 잃은 체력의 20%를 회복합니다. 스킬 레벨당 회복 비율이 1%p 증가합니다.'},
+ E:{name:'붉은숨',cd:[14,13,12,11,10],text:()=> '3초 동안 범위 안 아군의 공격력을 20% 증가시킵니다. 스킬 레벨당 공격력 증가량이 2%p 증가합니다.'},
+ R:{name:'붉은 점',cd:[110,95,80],text:()=> '호흡 30중첩일 때만 사용 가능합니다. 적 하나를 3초 동안 조준한 뒤 모제스의 현재 체력×모제스 레벨만큼 고정 피해를 입힙니다. 시전 즉시 호흡이 초기화됩니다.'}
 };
 CODEX_SK.araya = {
  P:{name:'시간 얽힘',text:()=> '전투 중 30초마다 <b>과거 · 현재 · 미래</b> 중 하나로 무작위 전환됩니다. 챔피언 위에 현재 폼과 다음 전환까지 남은 시간이 표시됩니다.<br><br><b>과거</b>: 모든 스킬과 기본 공격 피해량의 40%를 3초에 걸쳐 추가 물리 출혈 피해로 입힙니다.<br><b>현재</b>: 모든 스킬과 기본 공격 피해량의 50%를 4초에 걸쳐 추가 마법 화상 피해로 입힙니다.<br><b>미래</b>: 모든 스킬과 기본 공격이 85% 확률로 치명타로 적중합니다.'},
