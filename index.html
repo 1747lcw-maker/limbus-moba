@@ -21232,6 +21232,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   gebura:{coat:'#17060b',pants:'#09090d',hair:'#19080d',skin:'#9f2939',eye:'#ff1738',fx:'flame',smoke:true,line:'분노는 아직 끝나지 않았다.'},
   mathias:{coat:'#f0eef5',pants:'#292333',hair:'#f5f3fa',skin:'#e8cdbd',eye:'#a879e8',fx:'flame',line:'레바테인의 무게를 견딜 수 있겠나?'},
   binah:{coat:'#09090d',pants:'#050508',hair:'#08080d',skin:'#17151b',eye:'#f2cf62',fx:'raven',smoke:true,line:'조율은 끝났습니다. 이제 침묵하시지요.'},
+  angela:{coat:'#d9f5ff',pants:'#24364b',hair:'#dcefff',skin:'#f1e6df',eye:'#83dfff',fx:'angela',line:'초대장은 전달되었습니다. 이제 당신의 이야기를 책으로 남기겠어요.'},
 };
 let mvp = null, mvpRun = false;
 function mvpOpen(c, dev) {
@@ -21347,6 +21348,24 @@ function mWing(g, x, y, s, dir, open) {                                         
     g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = i % 2 ? '#f2f2f6' : '#1a1a20'; g.beginPath(); g.ellipse(L * .5, 0, L * .55, s * .13, 0, 0, 7); g.fill(); g.restore(); }
 }
 const MVP_ACT = {
+  angela: A => { // 마도서를 펼쳐 푸른 페이지 마법진과 빛의 책장을 전개
+    const a=A.a, open=mE(mClamp(a/.42,0,1)), pulse=.5+.5*Math.sin(a*5.2), burst=mClamp((a-.48)/.42,0,1);
+    return {back:g=>{
+      g.save();g.globalCompositeOperation='lighter';g.translate(A.x,A.floor-A.Rb*1.55);
+      for(let q=0;q<3;q++){const rr=A.Rb*(1.05+q*.58+Math.sin(a*2+q)*.06);g.globalAlpha=(.5-q*.1)*open;g.strokeStyle=q===1?'#dffaff':'#65cfff';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(0,0,rr,rr*.36,a*.18+q*.7,0,Math.PI*2);g.stroke();}
+      for(let i=0;i<12;i++){const th=i*Math.PI/6+a*.42,rr=A.Rb*(1.5+burst*2.1);g.globalAlpha=.8*(1-burst*.25);g.strokeStyle=i%2?'#b8f2ff':'#fff';g.lineWidth=A.Rb*.025;g.beginPath();g.moveTo(Math.cos(th)*A.Rb*.7,Math.sin(th)*A.Rb*.35);g.lineTo(Math.cos(th)*rr,Math.sin(th)*rr*.48);g.stroke();g.fillStyle='#dffaff';g.beginPath();g.arc(Math.cos(th)*rr,Math.sin(th)*rr*.48,A.Rb*.045,0,7);g.fill();}
+      g.restore();
+    },front:g=>{
+      const bx=A.x+A.Rb*.78,by=A.floor-A.Rb*1.28;
+      g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.9;g.shadowColor='#83dfff';g.shadowBlur=A.Rb*.35;
+      g.fillStyle='#163b5c';g.strokeStyle='#c9f5ff';g.lineWidth=A.Rb*.055;
+      g.beginPath();g.moveTo(bx-A.Rb*.55,by-A.Rb*.42);g.quadraticCurveTo(bx,by-A.Rb*.62,bx+A.Rb*.55,by-A.Rb*.42);g.lineTo(bx+A.Rb*.5,by+A.Rb*.42);g.quadraticCurveTo(bx,by+A.Rb*.22,bx-A.Rb*.5,by+A.Rb*.42);g.closePath();g.fill();g.stroke();
+      g.strokeStyle='#9cecff';g.lineWidth=A.Rb*.025;g.beginPath();g.moveTo(bx,by-A.Rb*.48);g.lineTo(bx,by+A.Rb*.35);g.stroke();
+      g.fillStyle='#e8fbff';g.globalAlpha=.45+.45*pulse;g.font='bold '+(A.Rb*.27)+'px serif';g.textAlign='center';g.fillText('✦',bx,by+A.Rb*.08);
+      if(burst>0){g.globalAlpha=(1-burst)*.9;g.strokeStyle='#fff';g.lineWidth=A.Rb*.04;g.beginPath();g.arc(bx,by,A.Rb*(.8+burst*1.8),0,Math.PI*2);g.stroke();}
+      g.restore();
+    }};
+  },
   dongrang: A => {                                                                          // 시든 잎이 소용돌이치고, 거대한 낫이 화면을 가로질러 내려찍음
     const a = A.a, k = mE(mClamp((a - .2) / .5, 0, 1)), sw = mClamp((a - .55) / .3, 0, 1);
     return {back: g => {
@@ -24163,6 +24182,11 @@ Object.assign(CX_COMBO, {
   indigoElder:[{name:'대호수의 포경 작전',sum:'먼 거리에서 작살을 꽂아 출혈과 둔화를 걸고, 바다 영역으로 전장을 장악한 뒤 고래 사냥의 X자 처형으로 마무리하는 연계예요. 선택한 형태에 따라 Q·W의 부가 효과가 달라집니다.',steps:[['Q','직선 작살을 먼저 적중시켜 형태별 효과를 부여해요. 탱커는 적중 피해만큼 회복하고, 원딜은 4초 출혈을 남기며, 서포터는 이동 속도를 낮춰요.'],['W','부채꼴 갈고리 작살로 후속 타격을 넣어요. 탱커는 최대 체력 비례 출혈, 원딜은 이동 속도와 피해량 증가, 서포터는 속박으로 추격을 이어가요.'],['E','넓은 바다 영역을 펼쳐 시야와 진입 경로를 장악하고, 서포터 형태라면 아군 강화 효과도 제공해요.'],['R','마지막으로 X자 포경 구역을 지정해 체력이 낮아진 적을 처형하고, 성공 시 팀 전체에 골드를 안겨요.']],chain:(A,S)=>[S.k('Q'),S.k('W'),S.k('E',{run:()=>castSkill(player,'E',null)}),S.fn(()=>{demo.dum[0].hp=demo.dum[0].maxHp*.2;}),S.k('R')]}],
   blueReverb:[{name:'푸른 잔향의 6중 진동',sum:'Q와 E를 적중시켜 진동을 빠르게 쌓고, 6중첩 속박을 만든 순간 궁극기와 아군 화력으로 한타를 여는 제어 연계예요.',steps:[['Q','푸른 궤적을 맞혀 진동을 쌓고 적의 이동·피해 능력을 낮춰요.'],['E','전주를 적중시켜 진동 중첩을 추가하고 아군에게 강화 효과를 줘요.'],['Q','다시 푸른 궤적을 맞혀 진동 6중첩 속박을 노려요.'],['W','잔향의 막으로 자신과 아군을 투사체로부터 보호해요.'],['R','잔향 악단으로 속박된 적과 주변 적에게 광역 피해와 혼란을 퍼뜨려요.']],chain:(A,S)=>[S.k('Q'),S.k('E'),S.k('Q'),S.k('W'),S.k('R')] }],
   mathias:[{name:'백색 폭풍의 처단',sum:'E로 적에게 단숨에 파고들어 발을 내려찍고, Q 2연속 발차기로 적을 띄운 뒤 W의 방어·반격으로 빈틈을 만든 다음 레바테인을 해방해 화염 참격으로 마무리하는 마티아스의 대표 콤보예요.',steps:[['E','청록색 문양을 남기며 적에게 도약해 내려찍고 기절시켜요.'],['Q','첫 번째 발차기로 둔화를 걸고 2차 발차기를 준비해요.'],['Q','더 넓은 돌려차기로 적을 띄워 궁극기 연계를 확정해요.'],['W','주황색 방어 문양을 펼쳐 반격을 준비하고, 방어가 끝나면 강력한 발차기로 응수해요.'],['R','레바테인을 꺼내 화염 초승달 참격을 연속으로 퍼부어 마무리해요.']],chain:(A,S)=>[S.k('E'),S.k('Q'),S.k('Q'),S.k('W'),S.k('R',{after:.95})]}]
+});
+Object.assign(CX_COMBO, {
+  angela:[{name:'빛의 도서관 · 최종 접대',sum:'궁극기로 전장 전체에 초대장을 발송한 뒤, 푸른 잔향의 선율로 아군의 진형을 강화하고 강화 발현한 징벌의 페이지로 적을 속박합니다. 마지막 시간 가속 프로토콜로 핵심 적의 반격을 봉쇄하는 앤젤라의 한타 콤보예요.',
+    steps:[['R','도서관의 무대를 펼쳐 시야에 포착된 모든 아군에게 공격·이동 속도와 스킬 가속을 부여하고, 적에게는 받는 피해 증가 표식을 남겨요.'],['W','적의 진입 경로에 푸른 마법진을 펼쳐요. 잠시 뒤 적은 피해와 둔화를 받고, 범위 안의 아군은 보호막과 공격·이동 속도 증가 효과를 얻어요.'],['Q','빛 3칸을 소모해 강화 발현! 검붉게 물든 책장 칼날 세 장으로 적을 속박하고 표식을 남겨요.'],['E','시간 가속 프로토콜로 속박된 적의 시간을 늦춰 공격 속도와 이동 속도를 크게 낮춰요. 아군을 지정하면 재사용 대기시간과 이동·공격 속도를 보조할 수도 있어요.']],
+    chain:(A,S)=>[S.k('R'),S.k('W',{run:()=>castSkill(player,'W',0,.55)}),S.fn(()=>{player.anLight=Math.max(3,player.anLight||0);}),S.k('Q',{run:()=>castSkill(player,'Q',0)}),S.k('E',{run:()=>castSkill(player,'E',0,.55)})]}]
 });
 
 // ── 도감 · 콤보 화면: 왼쪽 챔피언별 콤보 레시피 · 오른쪽 시연 ──
