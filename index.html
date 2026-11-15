@@ -20631,8 +20631,8 @@ function drawStatPanel(g) {
     ['치명타', Math.round(critChance(c) * 100) + '%'], ['치명 피해', Math.round(critMult(c) * 100) + '%'],
     ['체력', `${Math.ceil(c.hp)}/${Math.round(c.maxHp)}`], ['이속', Math.round(c.speed * (speedMul(c) || 1))],
   ];
-  const ammoHud = c.key === 'naihwang';
-  const ph = 5 * 14 + 6 + (ammoHud ? 30 : 0);
+  const ammoHud = c.key === 'naihwang', mosesHud = c.key === 'moses';
+  const ph = 5 * 14 + 6 + (ammoHud ? 30 : 0) + (mosesHud ? 26 : 0);
   g.fillStyle = 'rgba(8,14,11,.72)'; g.beginPath(); g.roundRect(x - 3, y - 3, mw + 6, ph, 6); g.fill();
   g.font = '600 11px system-ui,sans-serif'; g.textBaseline = 'top';
   rows.forEach(([k, v], i) => {
@@ -20653,6 +20653,19 @@ function drawStatPanel(g) {
     g.textAlign = 'right'; g.fillStyle = '#fff3df'; g.fillText(`${ammo} / ${maxAmmo}발`, bx + bw - 7, by + 9);
     g.fillStyle = 'rgba(0,0,0,.42)'; g.beginPath(); g.roundRect(bx + 7, by + 16, bw - 14, 4, 2); g.fill();
     g.fillStyle = col; g.beginPath(); g.roundRect(bx + 7, by + 16, (bw - 14) * Math.min(1, ammo / maxAmmo), 4, 2); g.fill();
+  }
+  // 모제스 호흡 스택 HUD: 스킬 가속과 R 준비 조건을 상시 표시
+  if (mosesHud) {
+    const stacks = Math.max(0, Math.min(30, Number(c.mosesBreath) || 0));
+    const bx = x + 4, by = y + 73, bw = mw - 8, bh = 22;
+    g.fillStyle = 'rgba(46,20,24,.9)'; g.beginPath(); g.roundRect(bx, by, bw, bh, 5); g.fill();
+    g.strokeStyle = '#b64b55'; g.lineWidth = 1.2; g.stroke();
+    g.font = '800 10px system-ui,sans-serif'; g.textBaseline = 'middle';
+    g.textAlign = 'left'; g.fillStyle = '#f0d9d0'; g.fillText('호흡', bx + 6, by + 8);
+    g.textAlign = 'right'; g.fillStyle = stacks >= 30 ? '#ff777d' : '#fff0e6'; g.fillText(stacks + ' / 30', bx + bw - 6, by + 8);
+    g.fillStyle = 'rgba(0,0,0,.5)'; g.beginPath(); g.roundRect(bx + 6, by + 15, bw - 12, 4, 2); g.fill();
+    g.fillStyle = stacks >= 30 ? '#ff424d' : '#c9a99a'; g.beginPath(); g.roundRect(bx + 6, by + 15, (bw - 12) * stacks / 30, 4, 2); g.fill();
+    if (stacks >= 30) { g.fillStyle = '#ff8b91'; g.font = '800 9px system-ui,sans-serif'; g.textAlign = 'center'; g.fillText('R 사용 가능', bx + bw / 2, by + bh + 8); }
   }
   // 아이템 칸
   const iy = y + ph + 2, sz = Math.min(26, (mw - 5 * 4) / 6);
@@ -24745,6 +24758,8 @@ function demoReset() {
   for (const c of [P, d1, d2, demo.ally]) fixState(c);
   // 비나 도감 시연 전용: 훈련용 적에게 요정 스택을 미리 부여해 자원 조건 없이 모든 스킬 시연
   if (P.key === 'binah') for (const u of [d1, d2]) { u.bnFairy = 50; u.bnFairyLast = time; u.bnFairyDecayAt = 0; }
+  // 모제스 궁극기 도감 시연: 실제 경기의 호흡 30중첩 조건을 시연용으로만 충족
+  if (P.key === 'moses' && DEMO.skill === 'R') P.mosesBreath = 30;
   if(P.key==='philip'){P.hp=P.maxHp;P.phEgoUsed=false;P.phEgoUntil=0;P.phTransformUntil=0;P.phPendingEgo=false;P.phRCharge=null;P.phRRect=null;P.phQStacks=0;}
   P.x = far ? DEMO_X - 330 : DEMO_X - 70; P.y = DEMO_Y; P.face = 0;
   d1.x = DEMO_X + 30; d1.y = DEMO_Y - 8; d2.x = DEMO_X + 85; d2.y = DEMO_Y + 38; d1.face = d2.face = Math.PI;
