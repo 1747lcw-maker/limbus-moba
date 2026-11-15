@@ -9102,6 +9102,36 @@ function alOnDeath(u) {                                                         
   alBooms.push({owner:u, team:u.team, x:u.x, y:u.y, t:0, lv:u.level, ap:u.ap, mul:u.alSelf ? KAL.P.boost : 1});
   u.alQ = null; u.alR = null; u.alFlyT = 0; u.alW = 0; u.alWT = 0;
 }
+function aiAngela(b,p,d,hpP){
+ const ready=k=>b.rank[k]>0&&b.cd[k]<=0;
+ const foes=enemiesOf(b).filter(e=>e.alive&&targetable(e)&&seenBy(b.team,e)&&edge(b,e)<=E(1100)).sort((x,y)=>edge(b,x)-edge(b,y));
+ const target=foes[0]||((p&&p.alive&&p.team!==b.team)?p:null);
+ const allies=heroes.filter(u=>u.alive&&u.team===b.team&&u!==b);
+ const lowAlly=allies.filter(a=>a.hp/a.maxHp<.62&&edge(b,a)<E(620)).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];
+ const nearFoes=foes.filter(e=>edge(b,e)<E(620));
+ const aim=target?Math.atan2(target.y-b.y,target.x-b.x):(b.face||0);
+ const frac=target?Math.max(.08,Math.min(1,edge(b,target)/E(620))):.55;
+ // 감정의 무대: 적이 여럿 보이면 우선적으로 궁극기 사용
+ if(ready('R')&&foes.length>=2){castSkill(b,'R',null);return true;}
+ // 아군 가속은 체력이 낮거나 교전 중인 아군에게 우선 사용
+ if(ready('E')&&lowAlly){const a=Math.atan2(lowAlly.y-b.y,lowAlly.x-b.x);castSkill(b,'E',a,Math.min(1,edge(b,lowAlly)/E(620)));return true;}
+ // W는 적과 아군이 모인 교전 지점에 설치
+ if(ready('W')&&target&&(nearFoes.length>0||allies.length>0)){
+   const cluster=allies.filter(a=>edge(a,target)<E(300)).length;
+   if(nearFoes.length>=1||cluster>=1||hpP<.55){castSkill(b,'W',aim,Math.max(.15,Math.min(1,edge(b,target)/E(570))));return true;}
+ }
+ // E로 적의 접근을 저지하거나 아군을 긴급 가속
+ if(ready('E')&&target&&edge(b,target)<E(540)&&(hpP<.7||edge(b,target)<E(330))){
+   castSkill(b,'E',aim,Math.min(1,edge(b,target)/E(620)));return true;
+ }
+ // Q는 사거리 내 가장 가까운 적 챔피언을 향해 꾸준히 발사
+ if(ready('Q')&&target&&edge(b,target)<E(680)){
+   const lead={x:target.x+(target.vx||0)*.22,y:target.y+(target.vy||0)*.22};
+   castSkill(b,'Q',Math.atan2(lead.y-b.y,lead.x-b.x));return true;
+ }
+ return false;
+}
+
 function aiAlyssa(b, p, d, hpP) {
   if (b.alR) return true;
   const ready = k => b.rank[k] > 0 && b.cd[k] <= 0;
@@ -13705,7 +13735,7 @@ function updateBot(b, dt) {
     if (counterTarget) { p = counterTarget; b.target = counterTarget; b.stance = 'allin'; b.stanceT = 0; b.mode = 'lane'; cancelRecall(b); }
   }
   const hpB = b.hp / b.maxHp;
-  if(b.key==='angela'&&p&&p.alive){const near=heroes.filter(u=>u.alive&&u.team===b.team&&u!==b&&dist(u,b)<E(620));if(b.rank.R>0&&b.cd.R<=0&&heroes.filter(u=>u.alive&&u.team!==b.team&&seenBy(b.team,u)).length>=2)castSkill(b,'R',null);else if(b.rank.W>0&&b.cd.W<=0&&near.length)castSkill(b,'W',Math.atan2(p.y-b.y,p.x-b.x),Math.min(1,dist(b,p)/E(570)));else if(b.rank.E>0&&b.cd.E<=0&&(hpB<.65||dist(b,p)<E(360)))castSkill(b,'E',hpB<.65?null:aimAt(b,p,.2),hpB<.65?null:1);else if(b.rank.Q>0&&b.cd.Q<=0&&dist(b,p)<E(680))castSkill(b,'Q',aimAt(b,p,.1),1);}
+  if(b.key==='angela'&&aiAngela(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
   b.thinkT = (b.thinkT || 0) - dt; b.stanceT = (b.stanceT || 0) - dt;
   const react = () => AI.react[0] + Math.random() * (AI.react[1] - AI.react[0]);
   let dx = 0, dy = 0;
@@ -14826,20 +14856,27 @@ function drawAngelaRBuff(g,c){
  g.beginPath();g.ellipse(0,-r*1.25,r*.62,r*.18,0,0,Math.PI*2);g.stroke();g.restore();
 }
 function drawAngelaBody(g,c){
-  g.save();g.translate(c.x,c.y);g.rotate(c.face||0);const r=c.r;
+  const r=c.r;
+  // 본체와 책만 캐릭터의 바라보는 방향을 따라 회전한다.
+  g.save();g.translate(c.x,c.y);g.rotate(c.face||0);
   g.fillStyle='#d8f5ff';g.strokeStyle='#4bbde8';g.lineWidth=E(2.5);
   g.beginPath();g.moveTo(-r*.35,-r*.55);g.lineTo(r*.42,-r*.52);g.lineTo(r*.68,r*.55);g.lineTo(-r*.62,r*.55);g.closePath();g.fill();g.stroke();
   g.fillStyle='#83dfff';g.beginPath();g.arc(0,-r*.18,r*.43,0,Math.PI*2);g.fill();
-  // 손에 든 책: 하늘색 마력이 책장 사이에서 빛난다.
   g.save();g.translate(r*.78,r*.05);g.rotate(-.18);g.shadowColor='#8be6ff';g.shadowBlur=E(12);
   g.fillStyle='#174d75';g.strokeStyle='#b8f1ff';g.lineWidth=E(2);
   g.beginPath();g.moveTo(-r*.08,-r*.48);g.lineTo(r*.48,-r*.38);g.lineTo(r*.48,r*.38);g.lineTo(-r*.08,r*.48);g.closePath();g.fill();g.stroke();
   g.fillStyle='#dffaff';g.beginPath();g.moveTo(-r*.02,-r*.38);g.lineTo(r*.39,-r*.3);g.lineTo(r*.39,r*.29);g.lineTo(-r*.02,r*.38);g.closePath();g.fill();
   g.strokeStyle='#48c9ff';g.lineWidth=E(1.5);g.beginPath();g.moveTo(r*.17,-r*.25);g.lineTo(r*.17,r*.25);g.stroke();
   g.fillStyle='#53dfff';g.beginPath();g.arc(r*.18,0,r*.09+Math.sin(time*6)*E(1.5),0,Math.PI*2);g.fill();g.restore();
-  g.save();g.font='bold '+E(8)+'px sans-serif';g.textAlign='center';g.fillStyle='#c5f4ff';g.shadowColor='#4acbff';g.shadowBlur=E(5);g.fillText('감정 '+Math.floor(c.anCoins||0)+'/100',0,-r*1.05);g.restore();
+  g.restore();
+  // UI형 감정/빛 스택은 별도 월드 좌표로 그려 방향 회전에 영향을 받지 않게 한다.
+  g.save();g.translate(c.x,c.y);g.textAlign='center';g.textBaseline='middle';
+  g.font='bold '+E(8)+'px sans-serif';g.fillStyle='#c5f4ff';g.shadowColor='#4acbff';g.shadowBlur=E(5);
+  g.fillText('감정 '+Math.floor(c.anEmotionStage||0)+' · '+Math.floor(c.anCoins||0)+'/100',0,-r*1.08);
+  g.shadowBlur=0;
   for(let i=0;i<3;i++){const a=time*1.8+i*Math.PI*2/3;g.fillStyle='#a8f1ff';g.globalAlpha=.65+.3*Math.sin(time*5+i);g.beginPath();g.arc(r*.9+Math.cos(a)*r*.2,Math.sin(a)*r*.55,r*.055,0,Math.PI*2);g.fill();}
-  g.save();for(let i=0;i<5;i++){g.fillStyle=i<(c.anLight||0)?'#a5f0ff':'rgba(110,150,170,.35)';g.shadowColor='#6edfff';g.shadowBlur=i<(c.anLight||0)?E(8):0;g.beginPath();g.arc(-r*.45+i*r*.22,r*1.02,E(3.2),0,Math.PI*2);g.fill();}g.restore();
+  g.globalAlpha=1;
+  for(let i=0;i<5;i++){g.fillStyle=i<(c.anLight||0)?'#a5f0ff':'rgba(110,150,170,.35)';g.shadowColor='#6edfff';g.shadowBlur=i<(c.anLight||0)?E(8):0;g.beginPath();g.arc(-r*.45+i*r*.22,r*1.02,E(3.2),0,Math.PI*2);g.fill();}
   g.restore();
 }
 function drawChamp(g, c) {
