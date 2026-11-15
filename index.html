@@ -785,6 +785,7 @@
       </button>
       <button type="button" class="sel-card" data-champ="angela"><span class="sel-token" style="background:#83dfff"></span><b>앤젤라</b><span class="go">선택</span></button>
        <button type="button" class="sel-card" data-champ="araya"><span class="sel-token" style="background:linear-gradient(135deg,#071326,#1457b8)"></span><b>아라야</b><span class="go">선택</span></button>
+      <button type="button" class="sel-card" data-champ="moses"><span class="sel-token" style="background:linear-gradient(135deg,#fffdf2,#c99a32);border:1px solid #f5d77d"></span><b>모제스</b><span class="go">선택</span></button>
       <button type="button" class="sel-card" data-champ="dongrang">
         <span class="sel-token" style="background:#b07a28;box-shadow:0 0 0 2px #efe6d2"></span>
         <b>동랑</b>
@@ -1115,6 +1116,7 @@ function fxSeen(f) {
 const STATS = {
   philip: {name:'필립', r:31, range:105, speed:290, acquire:260, hp:[690, 132], regen:[1.8, 0.16], ad:[66, 4.0], armor:[37, 5.2], mr:[33, 3.0], as:[0.66, 0.026]},
   angela: {name:'앤젤라', r:28, range:455, speed:275, acquire:490, ap:[25, 8], ranged:true, hp:[530, 106], regen:[1.35, 0.12], ad:[48, 2.6], armor:[23, 4.5], mr:[32, 2.8], as:[0.62, 0.02]},
+  moses: {name:'모제스', r:28, range:440, speed:275, acquire:480, ap:[22, 7.5], ranged:true, roles:['support'], hp:[545,108], regen:[1.4,.13], ad:[47,2.5], armor:[24,4.5], mr:[33,2.8], as:[.62,.02]},
    araya: {name:'아라야', r:29, range:92, speed:315, acquire:255, hp:[575,108], regen:[1.5,.14], ad:[68,4.1], armor:[29,4.7], mr:[30,2.6], as:[.69,.03]},
   gregor: {name:'그레고르', r:30, range:85, speed:290, acquire:240,
            hp:[650, 126], regen:[1.7, 0.15], ad:[65, 4.2], armor:[36, 5.4], mr:[32, 2.9], as:[0.66, 0.026]},
@@ -2062,6 +2064,7 @@ const SK_BTN = {r:30, maxDrag:80, deadzone:14};
 // 공격 버튼을 중심으로 한 호 위에 Q → W → E → R 순서로 배치
 const SKILL_OFFSETS = {Q:[-124, 4], W:[-104, -70], E:[-46, -118], R:[30, -126]};
 const CHAMP_UI = {
+  moses:{names:{Q:'연무탄',W:'백색 장막',E:'금빛 잔향',R:'안개 속의 진실'},cast:{},desc:{Q:'담뱃대에서 응축한 연기를 직선으로 내뿜어 적에게 마법 피해를 입힙니다.',W:'아군에게 흰 연기 보호막을 씌워 피해를 흡수합니다.',E:'적 주변에 황금빛 연기를 터뜨려 마법 피해와 둔화를 부여합니다.',R:'넓은 범위에 황금빛 안개를 퍼뜨려 적에게 마법 피해를 주고 아군에게 보호막과 이동 속도를 부여합니다.'}},
   araya:{names:{Q:'필연쇄 [必然殺]',W:'이연 - 잔 [二連 - 殘]',E:'지혜성도 [地慧星刀]',R:'극 공간참 - 절연 [空間斬 - 絶緣]'},cast:{},desc:{Q:'지정 방향으로 돌진해 경로와 끝 지점에 공간의 흉터를 남깁니다. 1초 뒤 균열이 동시에 폭발합니다.',W:'전방 부채꼴을 베어 물리 피해와 0.75초 둔화를 입히고, 적중한 적 챔피언 수에 비례해 보호막을 얻습니다.',E:'공간의 흉터가 새겨진 적에게 순간이동해 추가 물리 피해를 입힙니다.',R:'지정한 적에게 거대 공간참을 날리고 등 뒤로 순간이동합니다. 대상은 1.5초 동안 행동 불능이 되며, 이후 대상 위치에서 광역 폭발이 발생합니다.'}},
   roland:{names:{Q:'그건 그거고 이건 이거야',W:'함부로 끊어 낼 수는 없어',E:'안젤리카를 위한 춤',R:'내게는 고통밖에 없습니다. 그외에는...'},cast:{R2:'FURIOSO'},desc:{Q:'야스오의 강철 폭풍처럼 전방을 찌릅니다. 회오리 3타 없이 단일 찌르기만 사용합니다.',W:'이렐리아의 칼날 쇄도처럼 적에게 돌진합니다. 적 처치 시 재사용 대기시간이 초기화됩니다.',E:'사미라의 원형 검무처럼 주변을 베며 날아오는 투사체를 막아냅니다.',R:'뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 흡혈이 부여되고 궁극기를 재사용해 FURIOSO를 발동할 수 있습니다.'}},
   blueReverb:{names:{Q:'푸른 궤적',W:'잔향의 막',E:'전주',R:'잔향 악단'},cast:{},desc:{Q:'푸른 음표를 직선으로 발사합니다. 적중한 적은 3초 동안 주는 피해량이 7.3% 감소하고 이동 속도가 5% 감소하며 진동 2중첩을 얻습니다.',W:'2초 동안 자신과 주변 아군을 푸른 잔향의 막으로 감쌉니다. 막 안의 아군은 적 투사체에 면역이 됩니다.',E:'푸른 음표를 날려 적중한 적에게 마법 피해와 진동 2중첩을 부여합니다. 주변 아군은 3초 동안 주는 피해량이 8% 증가하고 이동 속도가 10% 증가합니다.',R:'수많은 푸른 음표를 전방으로 쏟아내 마법 피해를 입히고 적들을 2.5초 동안 광란 상태로 만들어 서로를 공격하게 합니다.'}},
@@ -3929,7 +3932,7 @@ function damage(src, tgt, amount, opts = {}) {
 
 // ═════════════ 적중 피드백 (모든 챔피언 공통) ═════════════
 // 맞은 대상: 하얗게 번쩍 + 맞은 방향으로 살짝 밀림. 스킬이면 챔피언 색의 충격 고리, 챔피언을 맞히면 조준 표시(X)
-const HIT_COL = {araya:'#3988ff',dongrang:'#f0d070', ran:'#d8ff4a', effie:'#b8c8ff', saude:'#bfe6ff', xichun:'#ff4050', wei:'#d8dce2', bongdad:'#ffb060', ricardo:'#c77dff', gubo:'#e0303e', dongbaek:'#ffd84a', thoma:'#e8d48a', guido:'#d8dce4', marten:'#ffd36a', alyssa:'#ffb04a', hohenheim:'#9fe0ff', gregor:'#ffb347', rodion:'#e8ecf4', yisang:'#ffffff', ryoshu:'#ff5a3a', faust:'#ffb8d2', donq:'#ffd23f', outis:'#8ff0b0', honglu:'#8ff5e0', sinclair:'#e8f070', heathcliff:'#d9a8ff', meursault:'#bcd6ff', yuri:'#ffd0d8', kromer:'#ffe7a3', vergil:'#ff6a5a', charon:'#bfe8de', bot:'#ff6b6b'};
+const HIT_COL = {moses:'#d8b65a',araya:'#3988ff',dongrang:'#f0d070', ran:'#d8ff4a', effie:'#b8c8ff', saude:'#bfe6ff', xichun:'#ff4050', wei:'#d8dce2', bongdad:'#ffb060', ricardo:'#c77dff', gubo:'#e0303e', dongbaek:'#ffd84a', thoma:'#e8d48a', guido:'#d8dce4', marten:'#ffd36a', alyssa:'#ffb04a', hohenheim:'#9fe0ff', gregor:'#ffb347', rodion:'#e8ecf4', yisang:'#ffffff', ryoshu:'#ff5a3a', faust:'#ffb8d2', donq:'#ffd23f', outis:'#8ff0b0', honglu:'#8ff5e0', sinclair:'#e8f070', heathcliff:'#d9a8ff', meursault:'#bcd6ff', yuri:'#ffd0d8', kromer:'#ffe7a3', vergil:'#ff6a5a', charon:'#bfe8de', bot:'#ff6b6b'};
 function hitFeedback(src, tgt, opts) {
   const a = Math.atan2(tgt.y - src.y, tgt.x - src.x);
   tgt.flashT = opts.skill ? .16 : .1;
@@ -4796,6 +4799,40 @@ function castAngela(c,key,ang,frac){
  if(key==='R'){c.cd.R=c.cdMax.R=[150,125,100][rk(c,'R')]*hasteMul(c);fx.push({type:'anRGlobal',x:W/2,y:H/2,r:Math.max(W,H),t:0,life:1.5,owner:c});for(const u of heroes){if(!u.alive||!seenBy(c.team,u))continue;if(u.team===c.team){u.anAllyUntil=time+10;u.anAllyOwner=c;u.anAsUntil=time+10;u.anMoveUntil=time+10;u.anMoveMul=1.20;u.anHaste=30;u.anRHeal=true;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,owner:c});}else{u.anRUntil=time+10;u.anROwner=c;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,enemy:true,owner:c});}}angelaLight(c,2);text(c.x,c.y-E(60),'도서관의 무대','#ffe0a0',true,1.5);sfxPlay('boom',c.x,c.y,1.2,.7);angelaUltAudio();return true;}
  return false;
 }
+function castMoses(c,key,ang,frac){
+ const rk0=Math.max(0,Math.min(key==='R'?2:4,(c.rank&&c.rank[key]?c.rank[key]-1:0)));
+ const cd={Q:[7,6.5,6,5.5,5],W:[13,12,11,10,9],E:[12,11,10,9,8],R:[105,90,75]};
+ if((c.cd[key]||0)>0)return false;
+ const color='#e4c56d', white='#fff9e8';
+ const enemies=heroes.filter(u=>u.alive&&u.team!==c.team), allies=heroes.filter(u=>u.alive&&u.team===c.team);
+ const nearest=enemies.sort((a,b)=>dist(c,a)-dist(c,b))[0];
+ if(key==='Q'){
+   const a=Number.isFinite(ang)?ang:(nearest?Math.atan2(nearest.y-c.y,nearest.x-c.x):(c.face||0));
+   const len=E(590);fx.push({type:'mosesSmoke',x:c.x,y:c.y,ang:a,len,t:0,life:.55,color:color,owner:c});
+   for(const u of enemies){const dx=u.x-c.x,dy=u.y-c.y,d=Math.hypot(dx,dy),da=Math.abs(Math.atan2(Math.sin(Math.atan2(dy,dx)-a),Math.cos(Math.atan2(dy,dx)-a)));if(d<=len+u.r&&da<.11+u.r/Math.max(1,d))damage(c,u,75+rk0*22+c.ap*.48,{skill:true,type:'magic',color});}
+ }else if(key==='W'){
+   const target=allies.filter(u=>u!==c).sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp))[0]||c;
+   const shield=105+rk0*32+c.ap*.55;target.shield=Math.max(target.shield||0,shield);target.shieldT=Math.max(target.shieldT||0,3.5);
+   fx.push({type:'mosesSmoke',x:target.x,y:target.y,ang:0,len:E(90),t:0,life:.8,color:white,owner:c});text(target.x,target.y-E(42),'백색 장막','#fff9e8',true,.8);
+ }else if(key==='E'){
+   const target=nearest;if(!target)return false;const radius=E(220);fx.push({type:'mosesSmoke',x:target.x,y:target.y,ang:0,len:radius,t:0,life:.75,color:color,owner:c});
+   for(const u of enemies)if(dist(target,u)<radius+u.r){damage(c,u,65+rk0*20+c.ap*.42,{skill:true,type:'magic',color});u.slowT=Math.max(u.slowT||0,1.35);u.slowAmt=Math.max(u.slowAmt||0,.3);}
+ }else if(key==='R'){
+   const radius=E(520);fx.push({type:'mosesSmoke',x:c.x,y:c.y,ang:0,len:radius,t:0,life:1.2,color:color,owner:c});
+   for(const u of heroes){if(!u.alive||dist(c,u)>radius)continue;if(u.team===c.team){u.shield=Math.max(u.shield||0,125+c.ap*.55);u.shieldT=Math.max(u.shieldT||0,4);u.mosesHasteUntil=time+3;u.mosesMoveMul=1.2;}else damage(c,u,145+c.ap*.68,{skill:true,type:'magic',color});}
+ }
+ c.cd[key]=c.cdMax[key]=cd[key][rk0]*(typeof hasteMul==='function'?hasteMul(c):1);c.face=Number.isFinite(ang)?ang:c.face;
+ return true;
+}
+function drawMosesBody(g,c){
+ g.save();g.translate(c.x,c.y);g.rotate(c.face||0);
+ g.strokeStyle='#d8b65a';g.lineWidth=E(4);g.shadowColor='#ffe7a0';g.shadowBlur=E(10);
+ g.beginPath();g.moveTo(-E(5),-E(7));g.lineTo(E(25),-E(13));g.lineTo(E(32),-E(10));g.stroke();
+ g.fillStyle='#fff9e8';g.beginPath();g.arc(0,0,c.r*.72,0,Math.PI*2);g.fill();
+ g.strokeStyle='#c99a32';g.lineWidth=E(3);g.stroke();
+ g.fillStyle='#e9d9ad';g.beginPath();g.arc(E(4),-E(4),E(3),0,Math.PI*2);g.fill();
+ g.restore();
+}
 function angelaTick(c,dt){
  if(c.key!=='angela')return;c.anLight=c.anLight||0;c.anLightClock=(c.anLightClock||0)+dt;while(c.anLightClock>=5){c.anLightClock-=5;angelaLight(c,1);}
  if(c.anZone&&!c.anZone.done&&time>=c.anZone.at){const z=c.anZone;z.done=true;for(const u of units){if(!u.alive||u.ward||!isChamp(u))continue;const d=Math.hypot(u.x-z.x,u.y-z.y);if(d>z.r+u.r)continue;if(u.team!==c.team){angelaSkillHit(c,u,82+c.ap*.42,'#7bcfff');if(u.alive){u.slowT=Math.max(u.slowT||0,1.6);u.slowAmt=Math.max(u.slowAmt||0,.35);}}else if(isChamp(u)){u.shield=Math.max(u.shield||0,75+c.ap*.38);u.shieldT=Math.max(u.shieldT||0,3);u.anMoveUntil=time+2.2;u.anMoveMul=1.35;u.anAsUntil=time+2.2;fx.push({type:'anAura',x:u.x,y:u.y,r:u.r*2,t:0,life:1.1,owner:c});}}fx.push({type:'anWburst',x:z.x,y:z.y,r:z.r,t:0,life:.65,owner:c});c.anZone=null;}
@@ -4899,6 +4936,7 @@ function castSkillCore(c, key, ang, frac = null) {
   if (c.chRide) return;                                              // 메피에 탄 동안엔 스킬 불가
   if (c.key === 'philip') { castPhilip(c,key,ang,frac); return; }
   if (c.key === 'angela') { castAngela(c,key,ang,frac); return; }
+  if (c.key === 'moses') { castMoses(c,key,ang,frac); return; }
   if (c.key === 'araya') { if(arayaCast(c,key,ang,frac)===false)return; if(hasItem(c,'grinder')&&time>=c.grinderCd)c.grinderReady=true; return; }
   if (c.key === 'mathias') { castMathias(c,key,ang,frac); return; }
   if (c.key === 'gebura') { castGebura(c,key,ang,frac); return; }
@@ -15037,6 +15075,7 @@ function drawChamp(g, c) {
   if (c.key === 'mathias') drawMathiasBody(g,c);
   if (c.key === 'philip') drawPhilipBody(g,c);
   if (c.key === 'angela') drawAngelaBody(g,c);
+  if (c.key === 'moses') drawMosesBody(g,c);
    if (c.key === 'araya') drawArayaBody(g,c);
   if (c.key === 'philip') drawPhilipBody(g,c);
   if (c.key === 'indigoElder') drawIndigoElderBody(g,c);
@@ -20092,6 +20131,7 @@ function drawAngelaFx(g,f,k){
  if(f.type==='anQ'){const d=f.len*k;g.rotate(f.ang);g.translate(d,0);g.rotate(.5);g.shadowColor=f.enhanced?'#ff334e':'#8feaff';g.shadowBlur=E(14);g.fillStyle=f.enhanced?'#8c2438':'#dffaff';g.strokeStyle=f.enhanced?'#ff9aa5':'#55cfff';g.lineWidth=E(2);g.beginPath();g.moveTo(E(-18),E(-7));g.lineTo(E(22),0);g.lineTo(E(-18),E(7));g.closePath();g.fill();g.stroke();}
  else if(f.type==='anW'||f.type==='anWburst'){const r=f.r*(f.type==='anW'?1:1+k*1.4);g.strokeStyle='#78dcff';g.lineWidth=E(3)*(1-k)+1;g.shadowColor='#53cfff';g.shadowBlur=E(18);g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.stroke();g.strokeStyle='#e7c66d';g.lineWidth=E(2);for(let i=0;i<12;i++){const a=i*Math.PI/6+(1-k)*.7;g.beginPath();g.moveTo(Math.cos(a)*r*.72,Math.sin(a)*r*.72);g.lineTo(Math.cos(a)*r*.95,Math.sin(a)*r*.95);g.stroke();}g.fillStyle='rgba(77,190,245,.12)';g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.fill();if(f.type==='anW'){g.strokeStyle='#d9c47b';g.font=E(18)+'px serif';g.textAlign='center';g.fillText('♫',0,0);}}
  else if(f.type==='anClock'){const r=f.r*(1+k*.35);g.rotate((f.ally?1:-1)*(1-k)*7);g.strokeStyle=f.ally?'#86eaff':'#ff6969';g.lineWidth=E(3);g.shadowColor=g.strokeStyle;g.shadowBlur=E(12);g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.stroke();for(let i=0;i<12;i++){const a=i*Math.PI/6;g.beginPath();g.moveTo(Math.cos(a)*r*.78,Math.sin(a)*r*.78);g.lineTo(Math.cos(a)*r*.96,Math.sin(a)*r*.96);g.stroke();}g.beginPath();g.moveTo(0,0);g.lineTo(0,-r*.62);g.moveTo(0,0);g.lineTo(r*.48,r*.22);g.stroke();}
+ else if(f.type==='mosesSmoke'){const r=f.len*(.22+k*.78);g.rotate(f.ang||0);g.globalAlpha=1-k*.65;g.fillStyle=f.color||'#e4c56d';g.strokeStyle='#fff4c7';g.lineWidth=E(2);g.shadowColor=f.color||'#e4c56d';g.shadowBlur=E(18);for(let i=0;i<5;i++){const x=r*(.15+i*.17),y=Math.sin(k*8+i*1.7)*E(16);g.beginPath();g.ellipse(x,y,E(18)*(1+k),E(10)*(1+k),i*.4,0,Math.PI*2);g.fill();g.stroke();}}
  else if(f.type==='anEnvelope'){g.rotate((1-k)*Math.PI*2);g.shadowColor=f.enemy?'#ff5c61':'#ffd77a';g.shadowBlur=E(16);g.fillStyle=f.enemy?'#8d2636':'#a45b29';g.strokeStyle='#ffe6a3';g.lineWidth=E(2);g.beginPath();g.moveTo(-E(13),-E(10));g.lineTo(E(13),-E(10));g.lineTo(E(13),E(10));g.lineTo(-E(13),E(10));g.closePath();g.fill();g.stroke();g.beginPath();g.moveTo(-E(13),-E(10));g.lineTo(0,E(2));g.lineTo(E(13),-E(10));g.stroke();}
  else if(f.type==='anRibbon'){g.strokeStyle='#c82e4b';g.fillStyle='rgba(194,45,72,.25)';g.lineWidth=E(4);g.shadowColor='#ff536f';g.shadowBlur=E(14);g.beginPath();g.moveTo(-f.r*.7,-f.r*.2);g.bezierCurveTo(-f.r*1.1,-f.r*.9,f.r*.3,-f.r*.9,f.r*.55,-f.r*.2);g.bezierCurveTo(f.r*.8,f.r*.6,-f.r*.4,f.r*.65,-f.r*.7,-f.r*.2);g.fill();g.stroke();g.fillStyle='#ffe4a0';g.font=E(16)+'px serif';g.textAlign='center';g.fillText('▤',0,-f.r*.35);}
  else if(f.type==='anBookBurst'){const r=f.r*(.35+k);g.rotate(k*1.2);g.shadowColor='#fff0a8';g.shadowBlur=E(22);g.strokeStyle='#ffe6a0';g.lineWidth=E(4)*(1-k);g.beginPath();g.moveTo(-r*.7,-r*.45);g.lineTo(0,-r*.25);g.lineTo(r*.7,-r*.45);g.lineTo(r*.7,r*.45);g.lineTo(0,r*.25);g.lineTo(-r*.7,r*.45);g.closePath();g.stroke();g.beginPath();g.moveTo(0,-r*.25);g.lineTo(0,r*.25);g.stroke();for(let i=0;i<10;i++){const a=i*Math.PI/5;g.beginPath();g.moveTo(Math.cos(a)*r*.8,Math.sin(a)*r*.8);g.lineTo(Math.cos(a)*r*1.5,Math.sin(a)*r*1.5);g.stroke();}}
