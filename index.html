@@ -4763,23 +4763,12 @@ function angelaCombatEvent(src,tgt,amount,opts={}){
  }
 }
 function angelaOpenEmotion(c){
-  // 감정 선택은 플레이어/AI 모두 전투 상황을 분석해 자동으로 결정한다.
+  // 감정 코인 100개를 달성하면 탐욕·절망·분노 중 하나를 동일한 확률로 무작위 선택한다.
   if(!c||!c.alive)return;
-  const allies=heroes.filter(u=>u.alive&&u.team===c.team&&dist(c,u)<=E(850));
-  const enemies=heroes.filter(u=>u.alive&&u.team!==c.team&&dist(c,u)<=E(720)&&targetable(u));
-  const threatened=enemies.filter(e=>allies.some(a=>dist(e,a)<=E(430)));
-  const weakest=allies.slice().sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp))[0]||c;
-  const critical=weakest.hp/weakest.maxHp;
-  const selfHp=c.hp/c.maxHp;
-  let choice='greed';
-  // 아군이 위험한 교전 중이거나 앤젤라 자신이 위급하면 생존 감정을 우선한다.
-  if((critical<.43&&threatened.length>0)||(selfHp<.48&&enemies.length>0)) choice='despair';
-  // 적이 사거리 안에 밀집해 있으면 다음 스킬에 속박/고정 피해를 얹는 분노를 선택한다.
-  else if(enemies.length>=2||threatened.length>=1) choice='anger';
-  // 교전 압박이 낮거나 공격 기회를 준비할 때는 스킬 피해 증가를 선택한다.
-  else choice='greed';
+  const choices=['greed','despair','anger'];
+  const choice=choices[Math.floor(Math.random()*choices.length)];
   angelaChooseEmotion(c,choice);
-  if(c===player)text(c.x,c.y-c.r-E(48),choice==='greed'?'자동 선택 · 탐욕':choice==='despair'?'자동 선택 · 절망':'자동 선택 · 분노',choice==='greed'?'#ffc86b':choice==='despair'?'#9edfff':'#ff7777',true,1.1);
+  if(c===player)text(c.x,c.y-c.r-E(48),choice==='greed'?'무작위 선택 · 탐욕':choice==='despair'?'무작위 선택 · 절망':'무작위 선택 · 분노',choice==='greed'?'#ffc86b':choice==='despair'?'#9edfff':'#ff7777',true,1.1);
 }
 function angelaChooseEmotion(c,type){
  if(!c||!c.alive)return;let target=c;if(type==='despair'){const allies=heroes.filter(u=>u.alive&&u.team===c.team&&dist(c,u)<E(850));allies.sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp));target=allies[0]||c;}const until=time+12;
