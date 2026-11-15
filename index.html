@@ -9102,6 +9102,41 @@ function alOnDeath(u) {                                                         
   alBooms.push({owner:u, team:u.team, x:u.x, y:u.y, t:0, lv:u.level, ap:u.ap, mul:u.alSelf ? KAL.P.boost : 1});
   u.alQ = null; u.alR = null; u.alFlyT = 0; u.alW = 0; u.alWT = 0;
 }
+function aiAraya(b,p,d,hpP){
+ const ready=k=>b.rank[k]>0&&b.cd[k]<=0;
+ const foes=enemiesOf(b).filter(e=>e.alive&&!e.structure&&!e.ward&&targetable(e)&&seenBy(b.team,e)&&edge(b,e)<=E(1050))
+   .sort((x,y)=>(isChamp(y)?1:0)-(isChamp(x)?1:0)||edge(b,x)-edge(b,y));
+ const target=foes.find(isChamp)||((p&&p.alive&&p.team!==b.team&&isChamp(p))?p:null);
+ if(!target)return false;
+ const distTo=edge(b,target),ang=Math.atan2(target.y-b.y,target.x-b.x);
+ const frac=range=>Math.max(.12,Math.min(1,distTo/E(range)));
+ const marked=foes.filter(e=>isChamp(e)&&e.arayaMark&&e.arayaMark.owner===b&&e.arayaMark.until>time)
+   .sort((x,y)=>edge(b,x)-edge(b,y))[0];
+ // 표식이 남아 있는 적에게는 E로 즉시 추격·마무리
+ if(ready('E')&&marked&&edge(b,marked)<=E(KARAYA.E.range)){
+   const a=Math.atan2(marked.y-b.y,marked.x-b.x);
+   if(castSkill(b,'E',a,fracForAraya(b,marked,KARAYA.E.range)))return true;
+ }
+ // 궁극기는 사거리 내 적 챔피언을 놓치지 않도록 사용. 여러 명이 모였거나 처치각이면 우선
+ if(ready('R')&&distTo<=E(KARAYA.R.range)&&
+   (target.hp/target.maxHp<.78||foes.filter(e=>isChamp(e)&&edge(b,e)<E(520)).length>=2||b.hp/b.maxHp>.35)){
+   if(castSkill(b,'R',ang,frac(KARAYA.R.range)))return true;
+ }
+ // W는 적이 부채꼴 안에 들어왔을 때만 사용해 허공에 낭비하지 않음
+ if(ready('W')&&distTo<=E(KARAYA.W.radius+90)){
+   const hit=foes.filter(e=>edge(b,e)<=E(KARAYA.W.radius)+e.r&&
+     Math.abs(Math.atan2(Math.sin(Math.atan2(e.y-b.y,e.x-b.x)-ang),Math.cos(Math.atan2(e.y-b.y,e.x-b.x)-ang)))<=KARAYA.W.arc/2);
+   if(hit.length&&castSkill(b,'W',ang))return true;
+ }
+ // Q의 550 돌진은 교전 개시와 표식 부여에 적극 활용
+ if(ready('Q')&&distTo<=E(KARAYA.Q.dash+90)&&distTo>E(65)){
+   const lead={x:target.x+(target.vx||0)*.18,y:target.y+(target.vy||0)*.18};
+   if(castSkill(b,'Q',Math.atan2(lead.y-b.y,lead.x-b.x)))return true;
+ }
+ return false;
+}
+function fracForAraya(b,u,range){return Math.max(.12,Math.min(1,edge(b,u)/E(range)));}
+
 function aiAngela(b,p,d,hpP){
  const ready=k=>b.rank[k]>0&&b.cd[k]<=0;
  const foes=enemiesOf(b).filter(e=>e.alive&&targetable(e)&&seenBy(b.team,e)&&edge(b,e)<=E(1100)).sort((x,y)=>edge(b,x)-edge(b,y));
@@ -13735,6 +13770,7 @@ function updateBot(b, dt) {
     if (counterTarget) { p = counterTarget; b.target = counterTarget; b.stance = 'allin'; b.stanceT = 0; b.mode = 'lane'; cancelRecall(b); }
   }
   const hpB = b.hp / b.maxHp;
+  if(b.key==='araya'&&aiAraya(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
   if(b.key==='angela'&&aiAngela(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
   b.thinkT = (b.thinkT || 0) - dt; b.stanceT = (b.stanceT || 0) - dt;
   const react = () => AI.react[0] + Math.random() * (AI.react[1] - AI.react[0]);
