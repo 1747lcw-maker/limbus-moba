@@ -21331,6 +21331,14 @@ Object.assign(SKILL_ICON_DRAW,{araya:{
  E:g=>{iconGlow(g,0,0,28,'rgba(40,120,255,.65)');g.strokeStyle='#69adff';g.lineWidth=3;g.beginPath();g.arc(0,0,20,-1.1,1.7);g.stroke();sArrow(g,-20,15,19,-14,'#e4f3ff',3);},
  R:g=>{iconGlow(g,0,0,30,'rgba(45,130,255,.8)');for(let i=0;i<6;i++){g.save();g.rotate(i*Math.PI/3);sSlash(g,-5,-25,5,22,i%2?'#d9edff':'#1e62ca',5);g.restore();}iconCircle(g,0,0,8,'#071326','#8bc5ff');}
 }});
+SKILL_BG.moses=['#e8e5d7','#182331'];
+Object.assign(SKILL_ICON_DRAW,{moses:{
+ P:g=>{iconGlow(g,0,0,30,'rgba(205,190,150,.55)');iconCircle(g,0,0,22,'#182331','#d9c9a6');iconRect(g,-13,-17,26,34,'#d8d0bd',2);g.strokeStyle='#8d7657';g.lineWidth=1.5;for(let y=-10;y<=10;y+=6)iconLine(g,-8,y,8,y,'#8d7657',1.4);iconLine(g,0,-14,0,14,'#b7a47f',1.5);},
+ Q:g=>{iconGlow(g,0,0,33,'rgba(255,255,245,.9)');g.strokeStyle='#fffdf2';g.lineWidth=4;g.beginPath();g.arc(0,0,22,-.9,2.5);g.stroke();g.strokeStyle='#c8d6df';g.lineWidth=2;g.beginPath();g.arc(0,0,15,-.8,2.45);g.stroke();for(let i=0;i<7;i++){const a=-1.1+i*.42;iconLine(g,Math.cos(a)*19,Math.sin(a)*19,Math.cos(a)*31,Math.sin(a)*31,'#fffdf2',2.2);}},
+ W:g=>{iconGlow(g,0,0,34,'rgba(65,165,255,.85)');g.fillStyle='rgba(65,165,255,.2)';g.strokeStyle='#8bd7ff';g.lineWidth=3;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.fill();g.stroke();for(let i=0;i<5;i++){const a=i*Math.PI*2/5;iconLine(g,Math.cos(a)*8,Math.sin(a)*8,Math.cos(a)*20,Math.sin(a)*20,'#c7efff',2.5);}iconCircle(g,0,0,7,'#e9faff','#ffffff');},
+ E:g=>{iconGlow(g,0,0,34,'rgba(225,55,65,.85)');g.strokeStyle='#ff7b83';g.lineWidth=4;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();g.strokeStyle='#ffd6d6';g.lineWidth=2;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.stroke();iconPoly(g,[[-4,-19],[4,-19],[3,-4],[13,3],[4,12],[-4,4],[-13,3],[-3,-4]],'#7d1824','#ffd6d6');for(let i=0;i<6;i++){const a=i*Math.PI/3;iconLine(g,Math.cos(a)*25,Math.sin(a)*25,Math.cos(a)*32,Math.sin(a)*32,'#ff9da3',2);}},
+ R:g=>{iconGlow(g,0,0,37,'rgba(255,35,48,.98)');g.strokeStyle='#ff6873';g.lineWidth=3;g.beginPath();g.arc(0,0,26,0,Math.PI*2);g.stroke();g.setLineDash([4,3]);g.strokeStyle='#ffe6e6';g.lineWidth=1.5;g.beginPath();g.arc(0,0,18,0,Math.PI*2);g.stroke();g.setLineDash([]);iconCircle(g,0,0,7,'#26080d','#ffb8bd');iconLine(g,-30,0,30,0,'#ffb8bd',2);iconLine(g,0,-30,0,30,'#ffb8bd',2);iconPoly(g,[[-5,-5],[0,-13],[5,-5],[4,5],[0,10],[-4,5]],'#ff303e','#fff0f0');}
+}});
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
@@ -21604,6 +21612,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   mathias:{coat:'#f0eef5',pants:'#292333',hair:'#f5f3fa',skin:'#e8cdbd',eye:'#a879e8',fx:'flame',line:'레바테인의 무게를 견딜 수 있겠나?'},
   binah:{coat:'#09090d',pants:'#050508',hair:'#08080d',skin:'#17151b',eye:'#f2cf62',fx:'raven',smoke:true,line:'조율은 끝났습니다. 이제 침묵하시지요.'},
   angela:{coat:'#d9f5ff',pants:'#24364b',hair:'#dcefff',skin:'#f1e6df',eye:'#83dfff',fx:'angela',line:'초대장은 전달되었습니다. 이제 당신의 이야기를 책으로 남기겠어요.'},
+  moses:{coat:'#e8e5d7',pants:'#202b38',hair:'#d5d0c3',skin:'#e7d8c8',eye:'#e7d8b5',fx:'shard',line:'연기는 걷혔어요. 이제 사건의 진실만 남았군요.'},
   araya:{coat:'#0b1d3b',pants:'#050d1c',hair:'#071326',skin:'#e6eaf2',eye:'#4d9cff',fx:'bolt',line:'푸른 칼끝이 지나간 자리에는, 침묵만이 남는다.'},
 };
 let mvp = null, mvpRun = false;
@@ -21720,6 +21729,19 @@ function mWing(g, x, y, s, dir, open) {                                         
     g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = i % 2 ? '#f2f2f6' : '#1a1a20'; g.beginPath(); g.ellipse(L * .5, 0, L * .55, s * .13, 0, 0, 7); g.fill(); g.restore(); }
 }
 const MVP_ACT = {
+  moses:A=>{const a=A.a,open=mE(mClamp(a/.5,0,1)),pulse=.5+.5*Math.sin(a*4.5),aim=mClamp((a-.8)/.55,0,1),fade=mClamp((a-1.7)/.65,0,1);
+    return{back:g=>{g.save();g.globalCompositeOperation='lighter';g.translate(A.x,A.floor-A.Rb*1.55);
+      for(let j=0;j<3;j++){const rr=A.Rb*(1.15+j*.55+Math.sin(a*2+j)*.05);g.globalAlpha=(.42-j*.08)*open;g.strokeStyle=j===1?'#fffdf2':'#7dcfff';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(0,0,rr,rr*.34,a*.16+j*.7,0,Math.PI*2);g.stroke();}
+      for(let i=0;i<12;i++){const th=i*Math.PI/6+a*.35,rr=A.Rb*(1.5+aim*2.2);g.globalAlpha=.55*open;g.strokeStyle=i%2?'#fffdf2':'#69c7ff';g.lineWidth=A.Rb*.025;g.beginPath();g.moveTo(Math.cos(th)*A.Rb*.7,Math.sin(th)*A.Rb*.3);g.lineTo(Math.cos(th)*rr,Math.sin(th)*rr*.42);g.stroke();}
+      if(aim>0){g.globalAlpha=aim*(1-fade*.25);g.strokeStyle='#ff424d';g.lineWidth=A.Rb*.07;g.beginPath();g.arc(0,0,A.Rb*(.75+aim*1.4),0,Math.PI*2);g.stroke();}
+      g.restore();},
+    front:g=>{const bx=A.x+A.Rb*.88,by=A.floor-A.Rb*1.35;g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.92;g.shadowColor='#9bdfff';g.shadowBlur=A.Rb*.35;
+      g.fillStyle='#172536';g.strokeStyle='#e8e5d7';g.lineWidth=A.Rb*.055;g.beginPath();g.moveTo(bx-A.Rb*.58,by-A.Rb*.4);g.quadraticCurveTo(bx,by-A.Rb*.58,bx+A.Rb*.58,by-A.Rb*.4);g.lineTo(bx+A.Rb*.5,by+A.Rb*.4);g.quadraticCurveTo(bx,by+A.Rb*.22,bx-A.Rb*.5,by+A.Rb*.4);g.closePath();g.fill();g.stroke();
+      g.strokeStyle='#82cfff';g.lineWidth=A.Rb*.025;g.beginPath();g.moveTo(bx,by-A.Rb*.45);g.lineTo(bx,by+A.Rb*.34);g.stroke();g.fillStyle='#fffdf2';g.globalAlpha=.45+.45*pulse;g.font='bold '+(A.Rb*.28)+'px serif';g.textAlign='center';g.fillText('✦',bx,by+A.Rb*.08);
+      if(aim>0){g.globalAlpha=aim*(1-fade*.25);g.shadowColor='#ff303e';g.shadowBlur=A.Rb*.5;g.strokeStyle='#ff424d';g.lineWidth=A.Rb*.055;g.beginPath();g.arc(A.x+A.Rb*2.25,A.floor-A.Rb*2.1,A.Rb*(.28+aim*.55),0,Math.PI*2);g.stroke();g.beginPath();g.moveTo(A.x+A.Rb*1.2,A.floor-A.Rb*2.1);g.lineTo(A.x+A.Rb*3.2,A.floor-A.Rb*2.1);g.moveTo(A.x+A.Rb*2.25,A.floor-A.Rb*3.1);g.lineTo(A.x+A.Rb*2.25,A.floor-A.Rb*1.1);g.stroke();g.globalAlpha=.9;g.fillStyle='#ff303e';g.beginPath();g.arc(A.x+A.Rb*2.25,A.floor-A.Rb*2.1,A.Rb*.07,0,7);g.fill();}
+      g.restore();}};
+  },
+
   araya:A=>{const a=A.a,k=mE(mClamp(a/.55,0,1)),slash=mClamp((a-.35)/.42,0,1);return{back:g=>{g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.65*k;for(let i=0;i<5;i++){const rr=A.Rb*(1.2+i*.38);g.strokeStyle=i%2?'rgba(50,130,255,.45)':'rgba(155,210,255,.7)';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(A.x,A.floor-A.Rb*.5,rr,rr*.28,-.25+i*.12,a*.8+i,a*.8+i+Math.PI*1.35);g.stroke();}g.restore();},front:g=>{if(slash<=0)return;g.save();g.globalCompositeOperation='lighter';g.globalAlpha=1-slash*.45;g.lineCap='round';g.shadowColor='#3988ff';g.shadowBlur=A.Rb*.3;g.strokeStyle='#1457b8';g.lineWidth=A.Rb*(.32*(1-slash*.5));g.beginPath();g.moveTo(A.x-A.Rb*3,A.floor-A.Rb*3.2);g.quadraticCurveTo(A.x+A.Rb*.3,A.floor-A.Rb*1.1,A.x+A.Rb*3.4,A.floor-A.Rb*.35);g.stroke();g.strokeStyle='#d9edff';g.lineWidth=A.Rb*.055;g.stroke();g.restore();}};},
   angela: A => { // 마도서를 펼쳐 푸른 페이지 마법진과 빛의 책장을 전개
     const a=A.a, open=mE(mClamp(a/.42,0,1)), pulse=.5+.5*Math.sin(a*5.2), burst=mClamp((a-.48)/.42,0,1);
@@ -24457,6 +24479,7 @@ const CX_COMBO = {
 };
 // ── 콤보 추가분: 남은 챔피언 + 두 번째 콤보 ──
 Object.assign(CX_COMBO, {
+  moses:[{name:'붉은 점의 수사',sum:'평타와 스킬로 호흡을 30중첩까지 쌓고, Q·W·E를 차례로 아군에게 지원한 뒤 R로 핵심 적을 3초 조준해 마무리하는 모제스의 지원형 연계예요. Q·W·E는 각각 3초 효과가 끝난 뒤 다음 숨을 사용합니다.',steps:[['P','기본 공격 15회로 호흡을 30중첩까지 쌓습니다. 호흡은 스킬 가속도 높여 줍니다.'],['Q','하얀숨으로 주변 아군의 공격 속도와 이동 속도를 높이고 재사용 대기시간을 줄입니다.'],['W','하얀숨의 3초 효과가 끝난 뒤 푸른숨으로 아군의 잃은 체력을 회복합니다.'],['E','푸른숨의 3초 효과가 끝나면 붉은숨으로 아군의 공격력을 강화합니다.'],['R','호흡 30중첩을 소모해 적을 3초간 조준한 뒤 현재 체력×모제스 레벨의 고정 피해를 입힙니다.']],chain:(A,S)=>[...Array.from({length:15},()=>S.atk()),S.k('Q'),S.k('W',{after:3.1}),S.k('E',{after:3.1}),S.k('R',{after:3.1})]}],
   ishmael:[{name:'원한 되갚기',
     sum:'방어 태세로 피해를 받아 원한을 모은 뒤, 태세 중의 파도 헤집기로 띄우고 슬라이딩과 작살로 끝내는 이스마엘의 반격 연계예요.',
     steps:[['W', '원한으로 정면 방어 태세를 취해 받는 피해를 줄이고, 줄여 낸 만큼 원한을 쌓아요.'],
