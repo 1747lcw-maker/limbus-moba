@@ -4807,11 +4807,11 @@ function castMoses(c,key,ang,frac){
  if(['Q','W','E'].includes(key)){
   c.mosesActive=key;c.mosesActiveUntil=time+3;c.mosesBuffed={};fx.push({type:'mosesAura',x:c.x,y:c.y,r:radius,t:0,life:3.05,color:color[key],owner:c,kind:key});
   if(key==='Q')for(const u of allies){if(dist(c,u)>radius+u.r)continue;u.anAsUntil=Math.max(u.anAsUntil||0,time+3);u.mosesAsMul=1.15+rk*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+3);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rk*.01);for(const sk of ['Q','W','E','R'])if(u.cd&&u.cd[sk]>0)u.cd[sk]=Math.max(0,u.cd[sk]-2);}
-  c.cd[key]=c.cdMax[key]=cd[key][rk]*(typeof hasteMul==='function'?hasteMul(c):1);c.mosesBreath=Math.min(30,(c.mosesBreath||0)+2);text(c.x,c.y-E(48),key==='Q'?'하얀숨':key==='W'?'푸른숨':'붉은숨',color[key],true,1);return true;
+  c.mosesBreath=Math.min(30,(c.mosesBreath||0)+2);c.cd[key]=c.cdMax[key]=cd[key][rk]*(typeof hasteMul==='function'?hasteMul(c):1);text(c.x,c.y-E(48),key==='Q'?'하얀숨':key==='W'?'푸른숨':'붉은숨',color[key],true,1);return true;
  }
  if(key==='R'){
-  if((c.mosesBreath||0)<30)return false;let target=null,best=Infinity;for(const u of enemies){const d=dist(c,u);if(d<best){best=d;target=u;}}if(!target)return false;
-  c.mosesBreath=0;c.mosesActive=null;c.mosesActiveUntil=0;c.mosesR={target,fireAt:time+3};fx.push({type:'mosesAim',x:c.x,y:c.y,target,t:0,life:3.05,owner:c});c.cd.R=c.cdMax.R=cd.R[Math.min(2,Math.max(0,(c.rank.R||1)-1))];text(c.x,c.y-E(52),'붉은 점 · 조준','#ff4148',true,1);return true;
+  if((c.mosesBreath||0)<30)return false;let target=c.target&&c.target.alive&&c.target.team!==c.team&&isChamp(c.target)?c.target:null,best=Infinity;if(!target)for(const u of enemies){if(!isChamp(u))continue;const d=dist(c,u);if(d<best){best=d;target=u;}}if(!target)return false;
+  c.mosesBreath=0;c.mosesActive=null;c.mosesActiveUntil=0;c.mosesR={target,fireAt:time+3};fx.push({type:'mosesAim',x:c.x,y:c.y,target,t:0,life:3.05,owner:c});c.cd.R=c.cdMax.R=cd.R[Math.min(2,Math.max(0,(c.rank.R||1)-1))]*(typeof hasteMul==='function'?hasteMul(c):1);text(c.x,c.y-E(52),'붉은 점 · 조준','#ff4148',true,1);return true;
  }return false;
 }
 function mosesTick(c,dt){
