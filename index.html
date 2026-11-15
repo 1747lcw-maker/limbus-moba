@@ -3701,7 +3701,9 @@ function damage(src, tgt, amount, opts = {}) {
   if (nhTigerHit) amount *= .90;
   if (nhTigerHit && opts.skill && src.nhCombo && src.nhCombo.key === 'R') amount *= .7225;
   if(tgt&&tgt.key==='philip'&&(tgt.phInvulnUntil||0)>time)return 0;
-  if(src&&src.key==='moses'&&opts.basic){opts.type='magic';src.mosesBreath=Math.min(30,(src.mosesBreath||0)+2);}\n  if(src&&src.mosesAdUntil>time)amount*=src.mosesAdMul||1.2;\n  if(src&&src.anGreedUntil>time&&opts.skill)amount*=1+(src.anGreedAmp||.22);
+  if(src&&src.key==='moses'&&opts.basic){opts.type='magic';src.mosesBreath=Math.min(30,(src.mosesBreath||0)+2);}
+  if(src&&src.mosesAdUntil>time)amount*=src.mosesAdMul||1.2;
+  if(src&&src.anGreedUntil>time&&opts.skill)amount*=1+(src.anGreedAmp||.22);
   if(tgt&&tgt.anDespairUntil>time)amount*=1-(tgt.anDespairReduce||.20);
   if(tgt&&tgt.anRUntil>time&&src&&src.team!==tgt.team)amount*=1.22;
   if(tgt&&tgt.key==='philip'&&(tgt.phWingGuardUntil||0)>time){const a=src?Math.atan2(src.y-tgt.y,src.x-tgt.x):0,da=Math.abs(Math.atan2(Math.sin(a-(tgt.phWingGuardAng||0)),Math.cos(a-(tgt.phWingGuardAng||0))));if(src&&src.team!==tgt.team&&da<Math.PI*.52){philipBurn(tgt,src,amount,'깃털 방패');return 0;}amount*=.25;}
@@ -12547,7 +12549,8 @@ function champTimers(c, dt) {
     if (c.stunT > 0 && !c.cast.unstoppable) c.cast = null;          // 기절하면 시전 끊김
     else c.cast.t += dt;
   }
-  angelaTick(c,dt);\n  mosesTick(c,dt);
+  angelaTick(c,dt);
+  mosesTick(c,dt);
   if (c.key === 'gebura') geburaTick(c, dt);
   if (c.key === 'binah') binahTick(c, dt);
   if(c.key==='liuEn'){
