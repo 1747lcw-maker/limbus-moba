@@ -3691,6 +3691,7 @@ function mitigate(tgt, amount, type, src) {
 
 const DMG_COL = {true:'#ffffff', physical:'#ff9a3c', magic:'#b784ff', crit:'#ff3b3b'};
 const onScreen = u => Math.abs(u.x - cam.x) < vw / zoom / 2 + 40 && Math.abs(u.y - cam.y) < vh / zoom / 2 + 40;
+function recordAllyHeal(healer, ally, beforeHp) { if (healer && ally && healer !== ally && healer.team === ally.team) healer.healDone = (healer.healDone || 0) + Math.max(0, ally.hp - beforeHp); }
 function damage(src, tgt, amount, opts = {}) {
   if (src && src.key === 'araya' && src.arayaForm === 'future' && (opts.basic || opts.skill) && !opts.crit && !opts.arayaDot && Math.random() < .85) {
     amount *= critMult(src); opts.crit = true;
@@ -4824,7 +4825,7 @@ function mosesTick(c,dt){
   if((c.mosesFxAt||0)<=time){const auraColor={Q:'#fffdf2',W:'#58baff',E:'#e94b55'}[key]||'#fffdf2';for(const ally of heroes){if(!ally.alive||ally.team!==c.team||dist(c,ally)>r+ally.r)continue;fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:E(ally.r*2.25),t:0,life:.48,color:auraColor,owner:c,kind:key});}c.mosesFxAt=time+.34;}
   for(const u of heroes){if(!u.alive||u.team!==c.team||dist(c,u)>r+u.r)continue;const id=u.id||u.key+':'+u.team;
    if(key==='Q'){u.anAsUntil=Math.max(u.anAsUntil||0,time+.35);u.mosesAsMul=1.15+rank*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+.35);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rank*.01);if(!c.mosesBuffed[id]){for(const sk of ['Q','W','E','R'])if(u.cd&&u.cd[sk]>0)u.cd[sk]=Math.max(0,u.cd[sk]-2);c.mosesBuffed[id]=true;}}
-   else if(key==='W'&&!c.mosesBuffed[id]){const heal=Math.max(0,u.maxHp-u.hp)*(.20+rank*.01);u.hp=Math.min(u.maxHp,u.hp+heal);c.mosesBuffed[id]=true;fx.push({type:'mosesAura',x:u.x,y:u.y,r:E(70),t:0,life:.8,color:'#58baff',owner:c,kind:'heal'});if(heal>0)text(u.x,u.y-E(34),'+'+Math.round(heal),'#72c9ff',true,.8);}
+   else if(key==='W'&&!c.mosesBuffed[id]){const heal=Math.max(0,u.maxHp-u.hp)*(.20+rank*.01);const beforeHp=u.hp;u.hp=Math.min(u.maxHp,u.hp+heal);recordAllyHeal(c,u,beforeHp);c.mosesBuffed[id]=true;fx.push({type:'mosesAura',x:u.x,y:u.y,r:E(70),t:0,life:.8,color:'#58baff',owner:c,kind:'heal'});if(heal>0)text(u.x,u.y-E(34),'+'+Math.round(heal),'#72c9ff',true,.8);}
    else if(key==='E'){u.mosesAdUntil=time+.4;u.mosesAdMul=1.20+rank*.02;}
   }
  }
@@ -6214,7 +6215,7 @@ function faustBurst(c, x, y, i, direct) {
   }
   const healed = [c, ...alliesOf(c).filter(a => a.alive && Math.hypot(a.x - x, a.y - y) < R + a.r)];   // 자신 + 폭발 범위 아군 회복
   for (const a of healed) {
-    const before = a.hp; a.hp = Math.min(a.maxHp, a.hp + heal);
+    const before = a.hp; a.hp = Math.min(a.maxHp, a.hp + heal); recordAllyHeal(c, a, before);
     if (a.hp > before + 1) { fx.push({type:'fHeal', x:a.x, y:a.y, r:a.r, t:0, life:.5}); if (a === player || c === player) text(a.x, a.y - a.r - E(35), '+' + Math.round(a.hp - before), '#7dffa8', false, .8); }
   }
   if (direct && isAllyChamp(c, direct)) faustLink(c, direct);
@@ -6445,7 +6446,7 @@ function updateDonPools(dt) {
     const R = E(KD.R.poolR);
     for (const a of champs()) if (a.alive && a.team === p.owner.team && Math.hypot(a.x - p.x, a.y - p.y) < R + a.r) {
       const heal = (KD.R.heal[p.i] + KD.R.healPct * a.maxHp) * dt;
-      a.hp = Math.min(a.maxHp, a.hp + heal);
+      const beforeHp = a.hp; a.hp = Math.min(a.maxHp, a.hp + heal); recordAllyHeal(p.owner, a, beforeHp);
       if ((a.poolTxt = (a.poolTxt || 0) - dt) <= 0) { a.poolTxt = .5; if (a === player) text(a.x, a.y - a.r - E(35), '+' + Math.round(heal * 2 / dt * .5), '#7dffa8', false, .6); }
     }
     return p.t < KD.R.pool;
@@ -7240,7 +7241,7 @@ function perkTakedown(c) {                                          // kill(): �
   if (hasPerk(c, 'rd_feast')) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * .08);
   if (hasPerk(c, 'tm_reset')) for (const k of ['Q', 'W', 'E']) c.cd[k] = Math.max(0, c.cd[k] - 2);
   if (hasPerk(c, 'gr_bounty')) { c.gold += 40; c.goldEarned = (c.goldEarned || 0) + (40); if (c === player) text(c.x, c.y - c.r - E(70), '+40 현상금 사냥', '#e6c35c', false, 1); }
-  if (hasPerk(c, 'gr_cheer')) for (const a of champs()) if (a.alive && a.team === c.team && dist(a, c) < E(700)) a.hp = Math.min(a.maxHp, a.hp + a.maxHp * .06);
+  if (hasPerk(c, 'gr_cheer')) for (const a of champs()) if (a.alive && a.team === c.team && dist(a, c) < E(700)) { const beforeHp=a.hp; a.hp = Math.min(a.maxHp, a.hp + a.maxHp * .06); recordAllyHeal(c,a,beforeHp); }
 }
 const perkMs = u => !u.perkSet ? 1 : (u.pkChaseT > time ? 1.25 : 1) * (u.pkRhyT > time ? 1.08 : 1) * (u.pkFlowT > time ? 1.15 : 1) * (u.pkFleeT > time ? 1.35 : 1) * (hasPerk(u, 'gr_ally') && u.pkAllyN ? 1.06 : 1);
 const perkXp = c => hasPerk(c, 'gr_xp') ? 1.06 : 1;
@@ -7359,7 +7360,7 @@ function castSpell(c, k, ang, frac) {
     c.face = Math.atan2(t.y - c.y, t.x - c.x);
   } else if (id === 'ampule') {
     const amt = spellLv(s.heal, c), mate = alliesOf(c).filter(a => a.alive && dist(a, c) < E(s.ally)).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-    for (const u of [c, mate]) if (u) { u.hp = Math.min(u.maxHp, u.hp + amt * (u.spBrand && time < u.spBrand.until ? .6 : 1)); u.spMsT = time + s.msDur; fx.push({type:'spAmpule', owner:u, t:0, life:.6}); if (u === player || c === player) text(u.x, u.y - u.r - E(30), '+' + Math.round(amt), '#6cf08a', false, .8); }
+    for (const u of [c, mate]) if (u) { const beforeHp=u.hp; u.hp = Math.min(u.maxHp, u.hp + amt * (u.spBrand && time < u.spBrand.until ? .6 : 1)); recordAllyHeal(c,u,beforeHp); u.spMsT = time + s.msDur; fx.push({type:'spAmpule', owner:u, t:0, life:.6}); if (u === player || c === player) text(u.x, u.y - u.r - E(30), '+' + Math.round(amt), '#6cf08a', false, .8); }
   } else if (id === 'calm') {
     c.stunT = c.airT > 0 ? c.stunT : 0; c.slowT = 0; c.rootT = 0; c.tauntT = 0; c.spCalmT = time + 1.5;
     fx.push({type:'spCalm', owner:c, t:0, life:.5});
