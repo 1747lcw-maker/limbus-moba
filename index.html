@@ -4828,7 +4828,7 @@ function mosesTick(c,dt){
    else if(key==='E'){u.mosesAdUntil=time+.4;u.mosesAdMul=1.20+rank*.02;}
   }
  }
- if((c.mosesPassiveAt||0)<=time){const ally=heroes.filter(u=>u.alive&&u.team===c.team).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(ally&&ally.hp/ally.maxHp<=.4&&(c.mosesBreath||0)>0){const shield=Math.max(0,ally.hp)*c.mosesBreath;ally.shield=Math.max(ally.shield||0,shield);ally.shieldT=Math.max(ally.shieldT||0,1.5);fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:ally.r*2.5,t:0,life:.8,color:'#d7d0bd',owner:c,kind:'protect'});text(ally.x,ally.y-E(38),'보호의 연기','#eee7d5',true,.8);c.mosesPassiveAt=time+1.5;}}
+ if((c.mosesPassiveAt||0)<=time){const ally=heroes.filter(u=>u.alive&&u.team===c.team).sort((x,y)=>dist(c,x)-dist(c,y))[0];if(ally&&ally.hp/ally.maxHp<=.4&&(c.mosesBreath||0)>0){const shield=Math.max(0,ally.hp)*c.mosesBreath;ally.shield=Math.max(ally.shield||0,shield);ally.shieldT=1.5;c.mosesPassiveUntil=time+1.5;c.mosesPassiveAt=time+90;fx.push({type:'mosesAura',x:ally.x,y:ally.y,r:ally.r*2.5,t:0,life:1.5,color:'#d7d0bd',owner:c,kind:'protect'});text(ally.x,ally.y-E(38),'보호의 연기','#eee7d5',true,.8);}}
  if(c.mosesR){const R=c.mosesR,T=R.target;if(!T||!T.alive||!c.alive){c.mosesR=null;return;}if(time>=R.fireAt){const ang=Math.atan2(T.y-c.y,T.x-c.x),len=dist(c,T),dmg=Math.max(0,c.hp)*(c.level||1);fx.push({type:'mosesSmoke',x:c.x,y:c.y,ang,len,t:0,life:.35,color:'#ef343e',owner:c});damage(c,T,dmg,{skill:true,type:'true',color:'#ff303b',noProc:true});fx.push({type:'mosesAura',x:T.x,y:T.y,r:E(100),t:0,life:.75,color:'#ff303b',owner:c,kind:'hit'});text(T.x,T.y-E(55),'붉은 점 · '+Math.round(dmg),'#ff4148',true,1);c.mosesR=null;}}
 }
 function drawMosesBody(g,c){
@@ -20654,18 +20654,23 @@ function drawStatPanel(g) {
     g.fillStyle = 'rgba(0,0,0,.42)'; g.beginPath(); g.roundRect(bx + 7, by + 16, bw - 14, 4, 2); g.fill();
     g.fillStyle = col; g.beginPath(); g.roundRect(bx + 7, by + 16, (bw - 14) * Math.min(1, ammo / maxAmmo), 4, 2); g.fill();
   }
-  // 모제스 호흡 스택 HUD: 스킬 가속과 R 준비 조건을 상시 표시
+  // 모제스 보호의 연기 패시브: 발동 지속시간과 90초 재사용 대기시간 표시
   if (mosesHud) {
-    const stacks = Math.max(0, Math.min(30, Number(c.mosesBreath) || 0));
-    const bx = x + 4, by = y + 73, bw = mw - 8, bh = 22;
-    g.fillStyle = 'rgba(46,20,24,.9)'; g.beginPath(); g.roundRect(bx, by, bw, bh, 5); g.fill();
-    g.strokeStyle = '#b64b55'; g.lineWidth = 1.2; g.stroke();
-    g.font = '800 10px system-ui,sans-serif'; g.textBaseline = 'middle';
-    g.textAlign = 'left'; g.fillStyle = '#f0d9d0'; g.fillText('호흡', bx + 6, by + 8);
-    g.textAlign = 'right'; g.fillStyle = stacks >= 30 ? '#ff777d' : '#fff0e6'; g.fillText(stacks + ' / 30', bx + bw - 6, by + 8);
-    g.fillStyle = 'rgba(0,0,0,.5)'; g.beginPath(); g.roundRect(bx + 6, by + 15, bw - 12, 4, 2); g.fill();
-    g.fillStyle = stacks >= 30 ? '#ff424d' : '#c9a99a'; g.beginPath(); g.roundRect(bx + 6, by + 15, (bw - 12) * stacks / 30, 4, 2); g.fill();
-    if (stacks >= 30) { g.fillStyle = '#ff8b91'; g.font = '800 9px system-ui,sans-serif'; g.textAlign = 'center'; g.fillText('R 사용 가능', bx + bw / 2, by + bh + 8); }
+    const bx = x + 4, by = y + 73, bw = mw - 8, bh = 30;
+    const remain = Math.max(0, (c.mosesPassiveAt || 0) - time);
+    const active = Math.max(0, (c.mosesPassiveUntil || 0) - time);
+    const ready = remain <= 0;
+    const progress = Math.max(0, Math.min(1, 1 - remain / 90));
+    g.fillStyle = 'rgba(35,34,30,.92)'; g.beginPath(); g.roundRect(bx, by, bw, bh, 5); g.fill();
+    g.strokeStyle = active > 0 ? '#eee7d5' : '#b8a98b'; g.lineWidth = 1.2; g.stroke();
+    g.save(); g.translate(bx + 14, by + 15); g.strokeStyle = '#eee7d5'; g.lineWidth = 2;
+    g.beginPath(); g.arc(-3, 1, 5, Math.PI * .15, Math.PI * 1.45); g.arc(3, -2, 5, Math.PI * 1.05, Math.PI * 2.25); g.stroke(); g.restore();
+    g.font = '800 10px system-ui,sans-serif'; g.textBaseline = 'middle'; g.textAlign = 'left';
+    g.fillStyle = '#eee7d5'; g.fillText('보호의 연기', bx + 26, by + 9);
+    g.textAlign = 'right'; g.fillStyle = active > 0 ? '#fff3cf' : ready ? '#9fe0a8' : '#e8d7b5';
+    g.fillText(active > 0 ? `발동 중 ${active.toFixed(1)}초` : ready ? '사용 가능' : `${Math.floor(remain / 60)}:${String(Math.ceil(remain % 60)).padStart(2,'0')}`, bx + bw - 6, by + 9);
+    g.fillStyle = 'rgba(0,0,0,.5)'; g.beginPath(); g.roundRect(bx + 6, by + 22, bw - 12, 4, 2); g.fill();
+    g.fillStyle = active > 0 ? '#eee7d5' : ready ? '#74c987' : '#b8a98b'; g.beginPath(); g.roundRect(bx + 6, by + 22, (bw - 12) * (active > 0 ? active / 1.5 : progress), 4, 2); g.fill();
   }
   // 아이템 칸
   const iy = y + ph + 2, sz = Math.min(26, (mw - 5 * 4) / 6);
@@ -24273,7 +24278,7 @@ function cxDetail(k, key = 'P', roleOverride = null) {
 }
 // 앤젤라 · 빛의 도서관 관장
 CODEX_SK.moses = {
- P:{name:'뒤틀림 탐정 · 보호의 연기',text:()=> '스킬 사용 또는 기본 공격 적중 시 호흡 2중첩을 얻습니다(최대 30). 호흡 1중첩당 스킬 가속이 1% 증가합니다. R 사용 시 초기화됩니다. 가장 가까운 아군의 체력이 40% 이하일 때 남은 체력×호흡 중첩만큼 1.5초 보호막을 부여합니다.'},
+ P:{name:'뒤틀림 탐정 · 보호의 연기',text:()=> '스킬 사용 또는 기본 공격 적중 시 호흡 2중첩을 얻습니다(최대 30). 호흡 1중첩당 스킬 가속이 1% 증가합니다. R 사용 시 초기화됩니다. 가장 가까운 아군의 체력이 40% 이하일 때 남은 체력×호흡 중첩만큼 1.5초 보호막을 부여합니다. 발동 후 재사용 대기시간은 90초입니다.'},
  Q:{name:'하얀숨',cd:[12,11.5,11,10.5,10],text:()=> '3초 동안 주변 아군에게 공격 속도 15%와 이동 속도 10%를 부여하며, 스킬 레벨당 각 효과가 1%p 증가합니다. 아군의 재사용 대기시간을 2초 줄입니다.'},
  W:{name:'푸른숨',cd:[14,13,12,11,10],text:()=> '3초 동안 범위 안 아군의 잃은 체력의 20%를 회복합니다. 스킬 레벨당 회복 비율이 1%p 증가합니다.'},
  E:{name:'붉은숨',cd:[14,13,12,11,10],text:()=> '3초 동안 범위 안 아군의 공격력을 20% 증가시킵니다. 스킬 레벨당 공격력 증가량이 2%p 증가합니다.'},
