@@ -13120,7 +13120,7 @@ const killableMinion = (b, u) => u.hp <= b.ad * physMul(u, b) * 1.1 + csExecHp(u
 // ═════════════ 3대3 봇전: 팀·역할 ═════════════
 const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'탑', jungle:'정글', mid:'미드', bottom:'바텀', support:'서폿'};
 // 챔피언별 선호 라인 (앞쪽일수록 우선). 봇전 · 관전 · 멀티 빈자리 AI가 이 순서로 자리를 찾아감
-const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
+const ROLE_PREF = {araya:['jungle','mid','top'], gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
   alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support']};
