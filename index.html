@@ -784,6 +784,7 @@
         <span class="go">선택</span>
       </button>
       <button type="button" class="sel-card" data-champ="angela"><span class="sel-token" style="background:#83dfff"></span><b>앤젤라</b><span class="go">선택</span></button>
+       <button type="button" class="sel-card" data-champ="araya"><span class="sel-token" style="background:linear-gradient(135deg,#071326,#1457b8)"></span><b>아라야</b><span class="go">선택</span></button>
       <button type="button" class="sel-card" data-champ="dongrang">
         <span class="sel-token" style="background:#b07a28;box-shadow:0 0 0 2px #efe6d2"></span>
         <b>동랑</b>
@@ -1114,6 +1115,7 @@ function fxSeen(f) {
 const STATS = {
   philip: {name:'필립', r:31, range:105, speed:290, acquire:260, hp:[690, 132], regen:[1.8, 0.16], ad:[66, 4.0], armor:[37, 5.2], mr:[33, 3.0], as:[0.66, 0.026]},
   angela: {name:'앤젤라', r:28, range:455, speed:275, acquire:490, ap:[25, 8], ranged:true, hp:[530, 106], regen:[1.35, 0.12], ad:[48, 2.6], armor:[23, 4.5], mr:[32, 2.8], as:[0.62, 0.02]},
+   araya: {name:'아라야', r:29, range:92, speed:315, acquire:255, hp:[575,108], regen:[1.5,.14], ad:[68,4.1], armor:[29,4.7], mr:[30,2.6], as:[.69,.03]},
   gregor: {name:'그레고르', r:30, range:85, speed:290, acquire:240,
            hp:[650, 126], regen:[1.7, 0.15], ad:[65, 4.2], armor:[36, 5.4], mr:[32, 2.9], as:[0.66, 0.026]},
   rodion: {name:'로쟈', r:30, range:95, speed:285, acquire:250,
@@ -3912,7 +3914,7 @@ function damage(src, tgt, amount, opts = {}) {
 
 // ═════════════ 적중 피드백 (모든 챔피언 공통) ═════════════
 // 맞은 대상: 하얗게 번쩍 + 맞은 방향으로 살짝 밀림. 스킬이면 챔피언 색의 충격 고리, 챔피언을 맞히면 조준 표시(X)
-const HIT_COL = {dongrang:'#f0d070', ran:'#d8ff4a', effie:'#b8c8ff', saude:'#bfe6ff', xichun:'#ff4050', wei:'#d8dce2', bongdad:'#ffb060', ricardo:'#c77dff', gubo:'#e0303e', dongbaek:'#ffd84a', thoma:'#e8d48a', guido:'#d8dce4', marten:'#ffd36a', alyssa:'#ffb04a', hohenheim:'#9fe0ff', gregor:'#ffb347', rodion:'#e8ecf4', yisang:'#ffffff', ryoshu:'#ff5a3a', faust:'#ffb8d2', donq:'#ffd23f', outis:'#8ff0b0', honglu:'#8ff5e0', sinclair:'#e8f070', heathcliff:'#d9a8ff', meursault:'#bcd6ff', yuri:'#ffd0d8', kromer:'#ffe7a3', vergil:'#ff6a5a', charon:'#bfe8de', bot:'#ff6b6b'};
+const HIT_COL = {araya:'#3988ff',dongrang:'#f0d070', ran:'#d8ff4a', effie:'#b8c8ff', saude:'#bfe6ff', xichun:'#ff4050', wei:'#d8dce2', bongdad:'#ffb060', ricardo:'#c77dff', gubo:'#e0303e', dongbaek:'#ffd84a', thoma:'#e8d48a', guido:'#d8dce4', marten:'#ffd36a', alyssa:'#ffb04a', hohenheim:'#9fe0ff', gregor:'#ffb347', rodion:'#e8ecf4', yisang:'#ffffff', ryoshu:'#ff5a3a', faust:'#ffb8d2', donq:'#ffd23f', outis:'#8ff0b0', honglu:'#8ff5e0', sinclair:'#e8f070', heathcliff:'#d9a8ff', meursault:'#bcd6ff', yuri:'#ffd0d8', kromer:'#ffe7a3', vergil:'#ff6a5a', charon:'#bfe8de', bot:'#ff6b6b'};
 function hitFeedback(src, tgt, opts) {
   const a = Math.atan2(tgt.y - src.y, tgt.x - src.x);
   tgt.flashT = opts.skill ? .16 : .1;
@@ -12499,7 +12501,7 @@ const AI_BUILD = {
   yuri: ['s_blade', 'lament', 'pink', 'cobalt', 'justitia'],
   yisang: ['s_ring', 'galaxy', 'fragment', 'dacapo', 'star'],
 };
-const AI_SKILL_ORDER = {philip:['Q','E','W'],mathias:['Q','W','E'],dongrang:['Q', 'E', 'W'], ran:['Q', 'E', 'W'], effie:['Q', 'W', 'E'], saude:['Q', 'W', 'E'], xichun:['Q', 'E', 'W'], wei:['Q', 'E', 'W'], bongdad:['Q', 'W', 'E'], ricardo:['Q', 'E', 'W'], gubo:['Q', 'E', 'W'], dongbaek:['Q', 'W', 'E'], thoma:['Q', 'W', 'E'], guido:['Q', 'W', 'E'], marten:['Q', 'E', 'W'], alyssa:['Q', 'W', 'E'], hohenheim:['Q', 'W', 'E'], gregor:['Q', 'W', 'E'], rodion:['Q', 'E', 'W'], yisang:['W', 'Q', 'E'], ishmael:['Q', 'E', 'W'], ryoshu:['Q', 'E', 'W'], faust:['Q', 'E', 'W'], donq:['Q', 'W', 'E'], outis:['Q', 'W', 'E'], honglu:['Q', 'W', 'E'], sinclair:['Q', 'W', 'E'], heathcliff:['Q', 'E', 'W'], meursault:['Q', 'E', 'W'], yuri:['E', 'W', 'Q'], kromer:['Q', 'E', 'W'], vergil:['Q', 'W', 'E'], charon:['Q', 'E', 'W'], roland:['Q','W','E'], blueReverb:['Q','W','E'], purpleTear:['Q','E','W'], vespa:['Q','W','E'], naihwang:['Q','W','E'], gachiu:['W','Q','E'], indigoElder:['Q','W','E'], liuEn:['Q','W','E'], callisto:['Q','E','W']};
+const AI_SKILL_ORDER = {araya:['Q','E','W'], philip:['Q','E','W'],mathias:['Q','W','E'],dongrang:['Q', 'E', 'W'], ran:['Q', 'E', 'W'], effie:['Q', 'W', 'E'], saude:['Q', 'W', 'E'], xichun:['Q', 'E', 'W'], wei:['Q', 'E', 'W'], bongdad:['Q', 'W', 'E'], ricardo:['Q', 'E', 'W'], gubo:['Q', 'E', 'W'], dongbaek:['Q', 'W', 'E'], thoma:['Q', 'W', 'E'], guido:['Q', 'W', 'E'], marten:['Q', 'E', 'W'], alyssa:['Q', 'W', 'E'], hohenheim:['Q', 'W', 'E'], gregor:['Q', 'W', 'E'], rodion:['Q', 'E', 'W'], yisang:['W', 'Q', 'E'], ishmael:['Q', 'E', 'W'], ryoshu:['Q', 'E', 'W'], faust:['Q', 'E', 'W'], donq:['Q', 'W', 'E'], outis:['Q', 'W', 'E'], honglu:['Q', 'W', 'E'], sinclair:['Q', 'W', 'E'], heathcliff:['Q', 'E', 'W'], meursault:['Q', 'E', 'W'], yuri:['E', 'W', 'Q'], kromer:['Q', 'E', 'W'], vergil:['Q', 'W', 'E'], charon:['Q', 'E', 'W'], roland:['Q','W','E'], blueReverb:['Q','W','E'], purpleTear:['Q','E','W'], vespa:['Q','W','E'], naihwang:['Q','W','E'], gachiu:['W','Q','E'], indigoElder:['Q','W','E'], liuEn:['Q','W','E'], callisto:['Q','E','W']};
 const AI = {react:[.1, .2], dodgeReact:[.09, .16], dodgeChance:.84, engage:650, lastHit:1.15}; // 숙련 AI: 빠르게 판단하고 회피하되 모든 공격을 피하지는 않음
 
 // ── 포탑 철거: 맞아 줄 챔피언(탱커)을 앞세워 포탑 어그로를 받게 하고 나머지가 같이 침 ──
@@ -13118,10 +13120,10 @@ const killableMinion = (b, u) => u.hp <= b.ad * physMul(u, b) * 1.1 + csExecHp(u
 // ═════════════ 3대3 봇전: 팀·역할 ═════════════
 const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'탑', jungle:'정글', mid:'미드', bottom:'바텀', support:'서폿'};
 // 챔피언별 선호 라인 (앞쪽일수록 우선). 봇전 · 관전 · 멀티 빈자리 AI가 이 순서로 자리를 찾아감
-const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
+const ROLE_PREF = {araya:['jungle','mid','top'], gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support'], araya:['jungle','mid','top']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 제한과 팀 내부 연계 픽 판단을 분리
   const used = new Set(taken), partnerUsed = new Set(partnerTaken), out = [];
@@ -13145,7 +13147,7 @@ function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 
   }
   return out;
 }
-const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip', 'angela'];
+const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip', 'angela', 'araya'];
 const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
 const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // AI 선택 후보
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
@@ -14841,6 +14843,7 @@ function drawChamp(g, c) {
   if (c.key === 'mathias') drawMathiasBody(g,c);
   if (c.key === 'philip') drawPhilipBody(g,c);
   if (c.key === 'angela') drawAngelaBody(g,c);
+   if (c.key === 'araya') drawArayaBody(g,c);
   if (c.key === 'philip') drawPhilipBody(g,c);
   if (c.key === 'indigoElder') drawIndigoElderBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
@@ -14896,7 +14899,9 @@ function drawChamp(g, c) {
       g.restore();
     } else if (c.key === 'faust') {    // 원거리 평타: 손에서 번쩍
       drawFaustCast(g, c, k);
-    } else if (c.key === 'ryoshu') {   // 아라야시키 베기
+    } else if (c.key === 'araya') {
+       drawArayaSwing(g,c,k);
+     } else if (c.key === 'ryoshu') {   // 아라야시키 베기
       drawKatanaSwing(g, c, k);
     } else if (c.key === 'honglu' || c.key === 'sinclair' || c.key === 'heathcliff' || c.key === 'meursault' || c.key === 'yuri' || c.key === 'kromer' || c.key === 'vergil' || c.key === 'charon' || c.key === 'hohenheim' || c.key === 'alyssa' || c.key === 'marten' || c.key === 'guido' || c.key === 'thoma' || c.key === 'dongbaek' || c.key === 'gubo' || c.key === 'ricardo' || c.key === 'bongdad' || c.key === 'xichun' || c.key === 'wei' || c.key === 'saude' || c.key === 'effie' || c.key === 'ran' || c.key === 'dongrang') {   // 몸통 그리기에서 처리
     } else if (c.key === 'outis') {    // 사격 반동은 몸통 그리기에서
@@ -16219,6 +16224,34 @@ function scabbard(g, len) {                             // 원점 중심, x축 �
   g.strokeStyle = '#3a2a2e'; g.lineWidth = E(1); g.stroke();
   g.strokeStyle = RY.red; g.lineWidth = E(2);
   g.beginPath(); g.moveTo(-len * .18, -E(3.6)); g.quadraticCurveTo(-len * .1, E(9), -len * .02, E(3.6)); g.stroke();
+}
+function drawArayaKatana(g,len,glow=0){
+  g.save();g.lineCap='round';g.strokeStyle='#050914';g.lineWidth=E(8);g.beginPath();g.moveTo(-len*.34,0);g.lineTo(len*.72,0);g.stroke();
+  g.strokeStyle='#162c4f';g.lineWidth=E(5);g.beginPath();g.moveTo(-len*.28,0);g.lineTo(len*.76,0);g.stroke();
+  g.fillStyle='#071326';g.beginPath();g.moveTo(len*.72,-E(5));g.quadraticCurveTo(len*.98,-E(1),len,0);g.quadraticCurveTo(len*.92,E(5),len*.72,E(4));g.closePath();g.fill();
+  g.strokeStyle='#8fc5ff';g.lineWidth=E(1.5);g.beginPath();g.moveTo(-len*.18,-E(1));g.quadraticCurveTo(len*.35,-E(4),len*.92,-E(2));g.stroke();
+  g.strokeStyle='#0a1020';g.lineWidth=E(9);g.beginPath();g.moveTo(-len*.34,0);g.lineTo(-len*.53,0);g.stroke();
+  g.strokeStyle='#3f8dff';g.lineWidth=E(2);g.beginPath();g.moveTo(-len*.3,-E(5));g.lineTo(-len*.3,E(5));g.stroke();
+  if(glow>0){g.shadowColor='#3988ff';g.shadowBlur=E(18)*glow;g.strokeStyle='rgba(85,160,255,.8)';g.lineWidth=E(2.5);g.beginPath();g.moveTo(-len*.1,-E(2));g.lineTo(len*.92,-E(2));g.stroke();}
+  g.restore();
+}
+function drawArayaBody(g,c){
+  const x=c.x,y=c.y,r=c.r;g.save();g.translate(x,y);g.rotate(c.face);
+  g.fillStyle='#071326';g.strokeStyle='#245ca8';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.62,-r*.35);g.quadraticCurveTo(-r*.15,-r*1.05,r*.28,-r*.48);g.lineTo(r*.78,r*.78);g.lineTo(r*.18,r*.9);g.lineTo(-r*.2,r*.34);g.lineTo(-r*.62,r*.82);g.lineTo(-r*.9,r*.55);g.closePath();g.fill();g.stroke();
+  g.strokeStyle='#3b8cff';g.lineWidth=E(2.4);g.beginPath();g.moveTo(-r*.48,-r*.25);g.lineTo(-r*.06,r*.62);g.lineTo(r*.2,r*.83);g.stroke();
+  g.fillStyle='#e6eaf2';g.beginPath();g.arc(0,-r*.68,r*.39,0,Math.PI*2);g.fill();
+  g.fillStyle='#071326';g.beginPath();g.moveTo(-r*.42,-r*.72);g.quadraticCurveTo(-r*.2,-r*1.28,r*.22,-r*1.04);g.lineTo(r*.42,-r*.62);g.lineTo(r*.08,-r*.77);g.lineTo(-r*.16,-r*.58);g.closePath();g.fill();
+  g.fillStyle='#3f8dff';g.fillRect(r*.06,-r*.72,r*.16,E(2.4));g.restore();
+  if(c.swingT>0)return;const a=c.face+2.18,hx=x+Math.cos(a)*r*.62,hy=y+Math.sin(a)*r*.62;
+  g.save();g.translate(hx,hy);g.rotate(a);drawArayaKatana(g,E(104),.25);g.restore();
+}
+function drawArayaSwing(g,c,k){
+  const a0=c.face-1.05,a1=c.face+1.15*k,fade=1-k;g.save();g.globalCompositeOperation='lighter';g.globalAlpha=fade;
+  crescent(g,c.x,c.y,c.r+E(72),Math.min(a0,a1),Math.max(a0,a1),E(15));g.fillStyle='rgba(35,105,235,.62)';g.fill();
+  crescent(g,c.x,c.y,c.r+E(67),Math.min(a0,a1)+.04,Math.max(a0,a1)-.04,E(4));g.fillStyle='rgba(220,240,255,.9)';g.fill();g.restore();
+  const a=c.face+2.18-3.23*k,hx=c.x+Math.cos(a)*c.r*.62,hy=c.y+Math.sin(a)*c.r*.62;
+  g.save();g.translate(hx,hy);g.rotate(a);drawArayaKatana(g,E(104),.85*fade);g.restore();
 }
 function drawRyoshuBody(g, c) {
   const n = ryoStacks(c);
@@ -20524,6 +20557,7 @@ function itemIconCanvas(id) {   // 배경(분류 색) + 그림을 한 번만 그
 // ═════════════ 스킬 아이콘 (챔피언별 P/Q/W/E/R, 좌표계 -32..32) ═════════════
 const SKILL_BG = {mathias:['#f2f0f7','#321b3d'],dongrang:['#b07a28', '#1e1408'], ran:['#b8e641', '#1a220a'], effie:['#9aa8b8', '#141a22'], saude:['#5aa0c8', '#0c1a24'], xichun:['#c8202c', '#2a0608'], wei:['#3a3a42', '#0c0c0e'], bongdad:['#f39a2e', '#2a1606'], ricardo:['#7b3fa8', '#1e0c2c'], gubo:['#2c2a48', '#14101e'], dongbaek:['#d6a93e', '#2a1c08'], thoma:['#8a7b4c', '#1c1a0e'], guido:['#8f1d24', '#1e0608'], marten:['#4f6a34', '#121a0c'], alyssa:['#c03a1c', '#2a0806'], hohenheim:['#2e55b8', '#08102a'], gregor:['#5a3f22', '#1c140b'], rodion:['#4a3f55', '#16121a'], yisang:['#3a4a5a', '#0b0b10'], ishmael:['#8a4a1a', '#1e1008'],
   ryoshu:['#7a141c', '#1a0406'], faust:['#6a5a78', '#1e1824'], donq:['#8a6a10', '#1e1804'], outis:['#1f5a34', '#08180e'], honglu:['#1f8f84', '#062422'], sinclair:['#5a6610', '#161a04'], heathcliff:['#4a2a6e', '#140a1e'], meursault:['#2a4a86', '#08101e'], yuri:['#8a2a3e', '#1e080e'], kromer:['#6a5a3a', '#14100c'], vergil:['#5a1a1a', '#0c0c10'], charon:['#3d5c58', '#0c1414'], vespa:['#d5aa16','#111318'], naihwang:['#8e2631','#16090d'], gachiu:['#a52c50','#100811'], indigoElder:['#477d9d','#081a2b'], gebura:['#8f1025','#160309']};
+SKILL_BG.araya=['#1457b8','#050d1c'];
 const SKILL_ICON_CACHE = {};
 const sArrow = (g, x1, y1, x2, y2, col, w) => { iconLine(g, x1, y1, x2, y2, col, w); const a = Math.atan2(y2 - y1, x2 - x1), h = w * 2.4; iconPoly(g, [[x2 + Math.cos(a) * h * .6, y2 + Math.sin(a) * h * .6], [x2 + Math.cos(a + 2.4) * h, y2 + Math.sin(a + 2.4) * h], [x2 + Math.cos(a - 2.4) * h, y2 + Math.sin(a - 2.4) * h]], col); };
 const sSlash = (g, x1, y1, x2, y2, col, w) => { g.fillStyle = col; const a = Math.atan2(y2 - y1, x2 - x1), nx = -Math.sin(a) * w, ny = Math.cos(a) * w, mx = (x1 + x2) / 2, my = (y1 + y2) / 2; g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo(mx + nx, my + ny, x2, y2); g.quadraticCurveTo(mx + nx * .2, my + ny * .2, x1, y1); g.fill(); };
@@ -20960,6 +20994,13 @@ Object.assign(SKILL_ICON_DRAW,{philip:{
  E:g=>{iconGlow(g,0,0,32,'rgba(255,180,110,.75)');iconCircle(g,0,0,18,'rgba(70,37,30,.8)','#f2d7c2');for(let i=0;i<8;i++){const a=i*Math.PI/4;sFlame(g,Math.cos(a)*20,Math.sin(a)*20,.48,'#e56c32','#ffe1a2');}iconCircle(g,0,0,7,'#f1d8c4','#fff4e6');},
  R:g=>{iconGlow(g,0,0,36,'rgba(255,105,38,.95)');for(let i=0;i<8;i++){g.save();g.rotate(i*Math.PI/4);sFlame(g,0,-23,.9,'#b94a27','#ffe0a0');g.restore();}iconCircle(g,0,0,15,'#34232a','#f2d6c1');iconPoly(g,[[-9,-8],[0,-18],[9,-8],[6,10],[0,17],[-6,10]],'#8b4b39','#ffe4c4');}
 }});
+Object.assign(SKILL_ICON_DRAW,{araya:{
+ P:g=>{iconGlow(g,0,0,28,'rgba(30,105,230,.55)');g.strokeStyle='#3d8cff';g.lineWidth=3;g.beginPath();g.arc(0,0,20,0,Math.PI*2);g.stroke();iconLine(g,-12,13,12,-13,'#d8eaff',3);},
+ Q:g=>{iconGlow(g,0,0,28,'rgba(35,115,255,.7)');g.save();g.rotate(-.55);sSlash(g,-26,0,26,0,'#08152b',10);sSlash(g,-23,-1,28,-2,'#6fb4ff',3);sSlash(g,-20,-2,27,-3,'#eaf6ff',1.5);g.restore();},
+ W:g=>{iconGlow(g,0,0,28,'rgba(25,90,210,.65)');for(let i=0;i<3;i++){g.save();g.rotate(-.75+i*.75);sSlash(g,-21,0,21,0,i===1?'#dceeff':'#256ad0',5);g.restore();}},
+ E:g=>{iconGlow(g,0,0,28,'rgba(40,120,255,.65)');g.strokeStyle='#69adff';g.lineWidth=3;g.beginPath();g.arc(0,0,20,-1.1,1.7);g.stroke();sArrow(g,-20,15,19,-14,'#e4f3ff',3);},
+ R:g=>{iconGlow(g,0,0,30,'rgba(45,130,255,.8)');for(let i=0;i<6;i++){g.save();g.rotate(i*Math.PI/3);sSlash(g,-5,-25,5,22,i%2?'#d9edff':'#1e62ca',5);g.restore();}iconCircle(g,0,0,8,'#071326','#8bc5ff');}
+}});
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
@@ -21233,6 +21274,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   mathias:{coat:'#f0eef5',pants:'#292333',hair:'#f5f3fa',skin:'#e8cdbd',eye:'#a879e8',fx:'flame',line:'레바테인의 무게를 견딜 수 있겠나?'},
   binah:{coat:'#09090d',pants:'#050508',hair:'#08080d',skin:'#17151b',eye:'#f2cf62',fx:'raven',smoke:true,line:'조율은 끝났습니다. 이제 침묵하시지요.'},
   angela:{coat:'#d9f5ff',pants:'#24364b',hair:'#dcefff',skin:'#f1e6df',eye:'#83dfff',fx:'angela',line:'초대장은 전달되었습니다. 이제 당신의 이야기를 책으로 남기겠어요.'},
+  araya:{coat:'#0b1d3b',pants:'#050d1c',hair:'#071326',skin:'#e6eaf2',eye:'#4d9cff',fx:'bolt',line:'푸른 칼끝이 지나간 자리에는, 침묵만이 남는다.'},
 };
 let mvp = null, mvpRun = false;
 function mvpOpen(c, dev) {
@@ -21348,6 +21390,7 @@ function mWing(g, x, y, s, dir, open) {                                         
     g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = i % 2 ? '#f2f2f6' : '#1a1a20'; g.beginPath(); g.ellipse(L * .5, 0, L * .55, s * .13, 0, 0, 7); g.fill(); g.restore(); }
 }
 const MVP_ACT = {
+  araya:A=>{const a=A.a,k=mE(mClamp(a/.55,0,1)),slash=mClamp((a-.35)/.42,0,1);return{back:g=>{g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.65*k;for(let i=0;i<5;i++){const rr=A.Rb*(1.2+i*.38);g.strokeStyle=i%2?'rgba(50,130,255,.45)':'rgba(155,210,255,.7)';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(A.x,A.floor-A.Rb*.5,rr,rr*.28,-.25+i*.12,a*.8+i,a*.8+i+Math.PI*1.35);g.stroke();}g.restore();},front:g=>{if(slash<=0)return;g.save();g.globalCompositeOperation='lighter';g.globalAlpha=1-slash*.45;g.lineCap='round';g.shadowColor='#3988ff';g.shadowBlur=A.Rb*.3;g.strokeStyle='#1457b8';g.lineWidth=A.Rb*(.32*(1-slash*.5));g.beginPath();g.moveTo(A.x-A.Rb*3,A.floor-A.Rb*3.2);g.quadraticCurveTo(A.x+A.Rb*.3,A.floor-A.Rb*1.1,A.x+A.Rb*3.4,A.floor-A.Rb*.35);g.stroke();g.strokeStyle='#d9edff';g.lineWidth=A.Rb*.055;g.stroke();g.restore();}};},
   angela: A => { // 마도서를 펼쳐 푸른 페이지 마법진과 빛의 책장을 전개
     const a=A.a, open=mE(mClamp(a/.42,0,1)), pulse=.5+.5*Math.sin(a*5.2), burst=mClamp((a-.48)/.42,0,1);
     return {back:g=>{
@@ -22065,7 +22108,7 @@ $('shopBtn').addEventListener('click', () => openShop(!shopOpen));
 addEventListener('keydown', e => { if (spectating || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; if (e.key.toLowerCase() === 'p') openShop(!shopOpen); if (e.key === 'Escape' && shopOpen) openShop(false); });
 
 // ═════════════ 점수판 (탭) ═════════════
-const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', mathias:'#f1eff8', angela:'#83dfff', bot:'#7a3438'};
+const CHAMP_COL = {araya:'#1457b8',dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', mathias:'#f1eff8', angela:'#83dfff', bot:'#7a3438'};
 const TEAM_SIZE = 5;
 let boardOpen = false, boardT = 0;
 function openBoard(on) {
@@ -23760,14 +23803,15 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'],
+  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], araya:['암살자','전사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
 const cxCol = k => {
   if (k === 'binah') return 'linear-gradient(135deg, #08090d 0%, #111217 46%, #b99627 50%, #f2cf62 100%)';
   if (k === 'philip') return 'linear-gradient(151deg, transparent 0 8%, #9f3d20 8.2% 10.2%, #ffad62 10.4% 11.5%, transparent 11.8% 27%, #b64c25 27.2% 29.8%, #ffc078 30% 31.2%, transparent 31.5% 49%, #a83f20 49.2% 52%, #ffb36a 52.2% 53.3%, transparent 53.6% 70%, #bd5429 70.2% 72.8%, #ffbd75 73% 74.2%, transparent 74.5%), linear-gradient(35deg, transparent 0 18%, #b84b24 18.2% 20.8%, #ffc078 21% 22.2%, transparent 22.5% 43%, #a94120 43.2% 46%, #ffad62 46.2% 47.4%, transparent 47.7% 67%, #b64c25 67.2% 70%, #ffc078 70.2% 71.4%, transparent 71.7%), linear-gradient(135deg, #55545a 0%, #77736f 38%, #a49a91 68%, #625f60 100%)';
-  if (k === 'roland') return '#090a0d';
+  if (k === 'araya') return 'linear-gradient(135deg,#050d1c 0%,#0b1d3b 45%,#124ca8 70%,#3988ff 100%)';
+   if (k === 'roland') return '#090a0d';
   if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
   if (k === 'liuEn') return '#41464f';
   if (k === 'indigoElder') return 'linear-gradient(135deg, #414b56 0%, #7f91a2 48%, #c5d3df 50%, #536c82 100%)';
@@ -23876,6 +23920,7 @@ function cxDetail(k, key = 'P', roleOverride = null) {
   cxShowSkill(key, true);
 }
 // 앤젤라 · 빛의 도서관 관장
+CODEX_SK.araya = {P:{name:'미정',text:()=> '아라야의 고유 패시브는 아직 설계되지 않았습니다. 스킬 구성을 정하면 전투 효과와 설명을 함께 추가합니다.'},Q:{name:'미정',cd:7,range:400,text:()=> '아라야의 Q 스킬 상세 설정을 기다리는 중입니다.'},W:{name:'미정',cd:12,range:350,text:()=> '아라야의 W 스킬 상세 설정을 기다리는 중입니다.'},E:{name:'미정',cd:14,range:450,text:()=> '아라야의 E 스킬 상세 설정을 기다리는 중입니다.'},R:{name:'미정',cd:90,text:()=> '아라야의 궁극기 상세 설정을 기다리는 중입니다.'}};
 CODEX_SK.angela = {
   P:{name:'부정한 사서의 권능 · 감정 고조',text:()=> '앤젤라는 주문력이 높아질수록 <b>스킬 가속</b>을 추가로 얻습니다. 기본 공격은 허공에서 날카로운 책장을 소환해 날리는 원거리 마법 공격이며, 기본 공격과 스킬 적중 시 빛을 1칸 회복하며, 전투 중이 아니어도 5초마다 1칸을 회복합니다. 빛은 최대 <b>5칸</b>까지 저장할 수 있습니다. 주문력 1당 스킬 가속도 0.15를 얻습니다.<br><br>주변에서 적 챔피언이 피해를 입거나 처치되면 <b>감정 코인</b>이 쌓입니다. 감정 코인은 주변 1050 범위에서 적 챔피언이 피해를 입을 때 4, 처치될 때 35씩 쌓이며, 100개가 모이면 감정 단계가 상승합니다. 화면 상단에 나타나는 세 장의 환상체 책장 중 하나를 선택할 수 있습니다.<br><br><b>탐욕 · 공격</b>: 12초 동안 대상의 스킬 피해량이 22% 증가합니다. 대상이 처치에 관여하면 최대 체력의 6%를 회복합니다.<br><b>절망 · 방어</b>: 12초 동안 받는 피해가 20% 감소하고 최대 체력의 12%에 해당하는 보호막을 얻습니다.<br><b>분노 · 제어</b>: 앤젤라의 다음 기본 스킬 적중 시 90 + 주문력의 35%에 해당하는 추가 고정 피해를 입히고 0.75초 기절시킵니다.<br><br><b>운용 팁</b>: 교전이 시작되기 전 감정 선택으로 팀의 부족한 부분을 보완하세요. 폭발적인 화력이 필요하면 탐욕, 아군을 지켜야 한다면 절망, 핵심 적을 묶어야 한다면 분노가 효과적입니다.'},
   Q:{name:'환상체 발현 · 징벌의 페이지',cd:7,range:610,text:()=> '재사용 대기시간은 스킬 레벨에 따라 7 / 6.25 / 5.5 / 4.75 / 4초입니다. 사거리 610까지 날카로운 종이 칼날 세 장을 부채꼴로 날려 적중한 적에게 각각 <b>68 + 주문력의 52%</b>에 해당하는 마법 피해를 입힙니다. 가장 먼저 적중한 적에게 4초 동안 <b>지정된 표식</b>을 남깁니다. 아군의 기본 공격이 표식 대상을 맞히면 <b>38 + 주문력의 28%</b>에 해당하는 추가 마법 피해가 발생하고 앤젤라의 빛을 1칸 회복합니다.<br><br><b>빛 3칸 이상 소모 · 강화 발현</b>: 책장 칼날이 검붉은 환상체 에너지로 물들고 사거리가 증가합니다. 강화 발현은 빛 3칸을 소모하며 사거리가 760으로 증가하고, 적중한 적을 <b>1.25초 동안 속박</b>합니다.<br><br><b>운용 팁</b>: 표식을 먼저 맞힌 뒤 아군의 집중 공격을 유도하면 추가 피해와 빛 회복을 함께 노릴 수 있습니다. 적의 진입을 차단하거나 확실한 포착이 필요할 때는 빛을 모아 강화 발현을 사용하세요.'},
