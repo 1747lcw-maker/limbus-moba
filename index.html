@@ -783,6 +783,7 @@
         <b>란</b>
         <span class="go">선택</span>
       </button>
+      <button type="button" class="sel-card" data-champ="angela"><span class="sel-token" style="background:#83dfff"></span><b>앤젤라</b><span class="go">선택</span></button>
       <button type="button" class="sel-card" data-champ="dongrang">
         <span class="sel-token" style="background:#b07a28;box-shadow:0 0 0 2px #efe6d2"></span>
         <b>동랑</b>
@@ -1112,6 +1113,7 @@ function fxSeen(f) {
 // 피해 감소: 방어력(물리)·마법저항력(마법) R 에 대해 받는 피해 = 원래 피해 × 100 / (100 + R)
 const STATS = {
   philip: {name:'필립', r:31, range:105, speed:290, acquire:260, hp:[690, 132], regen:[1.8, 0.16], ad:[66, 4.0], armor:[37, 5.2], mr:[33, 3.0], as:[0.66, 0.026]},
+  angela: {name:'앤젤라', r:28, range:455, speed:275, acquire:490, ap:[25, 8], ranged:true, hp:[530, 106], regen:[1.35, 0.12], ad:[48, 2.6], armor:[23, 4.5], mr:[32, 2.8], as:[0.62, 0.02]},
   gregor: {name:'그레고르', r:30, range:85, speed:290, acquire:240,
            hp:[650, 126], regen:[1.7, 0.15], ad:[65, 4.2], armor:[36, 5.4], mr:[32, 2.9], as:[0.66, 0.026]},
   rodion: {name:'로쟈', r:30, range:95, speed:285, acquire:250,
@@ -13052,7 +13054,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 제한과 팀 내부 연계 픽 판단을 분리
   const used = new Set(taken), partnerUsed = new Set(partnerTaken), out = [];
@@ -13076,7 +13078,7 @@ function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 
   }
   return out;
 }
-const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip'];
+const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip', 'angela'];
 const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
 const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // AI 선택 후보
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
@@ -14644,6 +14646,21 @@ function drawPhilipBody(g,c){
   g.moveTo(c.r*.08,c.r*.08);g.quadraticCurveTo(c.r*.3,c.r*.18,c.r*.56,c.r*.08);g.lineTo(c.r*.62,-c.r*.2);g.stroke();
   g.restore();
 }
+function drawAngelaBody(g,c){
+  g.save();g.translate(c.x,c.y);g.rotate(c.face||0);const r=c.r;
+  g.fillStyle='#d8f5ff';g.strokeStyle='#4bbde8';g.lineWidth=E(2.5);
+  g.beginPath();g.moveTo(-r*.35,-r*.55);g.lineTo(r*.42,-r*.52);g.lineTo(r*.68,r*.55);g.lineTo(-r*.62,r*.55);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#83dfff';g.beginPath();g.arc(0,-r*.18,r*.43,0,Math.PI*2);g.fill();
+  // 손에 든 책: 하늘색 마력이 책장 사이에서 빛난다.
+  g.save();g.translate(r*.78,r*.05);g.rotate(-.18);g.shadowColor='#8be6ff';g.shadowBlur=E(12);
+  g.fillStyle='#174d75';g.strokeStyle='#b8f1ff';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.08,-r*.48);g.lineTo(r*.48,-r*.38);g.lineTo(r*.48,r*.38);g.lineTo(-r*.08,r*.48);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#dffaff';g.beginPath();g.moveTo(-r*.02,-r*.38);g.lineTo(r*.39,-r*.3);g.lineTo(r*.39,r*.29);g.lineTo(-r*.02,r*.38);g.closePath();g.fill();
+  g.strokeStyle='#48c9ff';g.lineWidth=E(1.5);g.beginPath();g.moveTo(r*.17,-r*.25);g.lineTo(r*.17,r*.25);g.stroke();
+  g.fillStyle='#53dfff';g.beginPath();g.arc(r*.18,0,r*.09+Math.sin(time*6)*E(1.5),0,Math.PI*2);g.fill();g.restore();
+  for(let i=0;i<3;i++){const a=time*1.8+i*Math.PI*2/3;g.fillStyle='#a8f1ff';g.globalAlpha=.65+.3*Math.sin(time*5+i);g.beginPath();g.arc(r*.9+Math.cos(a)*r*.2,Math.sin(a)*r*.55,r*.055,0,Math.PI*2);g.fill();}
+  g.restore();
+}
 function drawChamp(g, c) {
   if (!c.alive || c.hidden) return;
   const isP = c === player;
@@ -14719,7 +14736,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'binah' ? '#111018' : c.key === 'gebura' ? '#410812' : c.key === 'philip' ? '#8B8580' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'binah' ? '#111018' : c.key === 'gebura' ? '#410812' : c.key === 'philip' ? '#8B8580' : c.key === 'angela' ? '#83dfff' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -14746,6 +14763,7 @@ function drawChamp(g, c) {
   if (c.key === 'gebura') { drawGeburaBody(g,c); if(c.gbFormUntil>time)drawGeburaEgoArmor(g,c); if(c.gbFormUntil>time)drawGeburaAura(g,c); if(c.gbW)drawGeburaCharge(g,c); drawGeburaRageGauge(g,c); }
   if (c.key === 'mathias') drawMathiasBody(g,c);
   if (c.key === 'philip') drawPhilipBody(g,c);
+  if (c.key === 'angela') drawAngelaBody(g,c);
   if (c.key === 'philip') drawPhilipBody(g,c);
   if (c.key === 'indigoElder') drawIndigoElderBody(g,c);
   if (c.key === 'ishmael') drawIshmaelBody(g, c);
@@ -21889,7 +21907,7 @@ $('shopBtn').addEventListener('click', () => openShop(!shopOpen));
 addEventListener('keydown', e => { if (spectating || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; if (e.key.toLowerCase() === 'p') openShop(!shopOpen); if (e.key === 'Escape' && shopOpen) openShop(false); });
 
 // ═════════════ 점수판 (탭) ═════════════
-const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', mathias:'#f1eff8', bot:'#7a3438'};
+const CHAMP_COL = {dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', mathias:'#f1eff8', angela:'#83dfff', bot:'#7a3438'};
 const TEAM_SIZE = 5;
 let boardOpen = false, boardT = 0;
 function openBoard(on) {
