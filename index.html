@@ -9252,33 +9252,55 @@ function fracForAraya(b,u,range){return Math.max(.12,Math.min(1,edge(b,u)/E(rang
 function aiAngela(b,p,d,hpP){
  const ready=k=>b.rank[k]>0&&b.cd[k]<=0;
  const foes=enemiesOf(b).filter(e=>e.alive&&targetable(e)&&seenBy(b.team,e)&&edge(b,e)<=E(1100)).sort((x,y)=>edge(b,x)-edge(b,y));
- const target=foes[0]||((p&&p.alive&&p.team!==b.team)?p:null);
+ const target=foes[0]||((p&&p.alive&&p.team!==b.team&&isChamp(p))?p:null);
  const allies=heroes.filter(u=>u.alive&&u.team===b.team&&u!==b);
- const lowAlly=allies.filter(a=>a.hp/a.maxHp<.62&&edge(b,a)<E(620)).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];
- const nearFoes=foes.filter(e=>edge(b,e)<E(620));
- const aim=target?Math.atan2(target.y-b.y,target.x-b.x):(b.face||0);
- const frac=target?Math.max(.08,Math.min(1,edge(b,target)/E(620))):.55;
- // 감정의 무대: 적이 여럿 보이면 우선적으로 궁극기 사용
- if(ready('R')&&foes.length>=2){castSkill(b,'R',null);return true;}
- // 아군 가속은 체력이 낮거나 교전 중인 아군에게 우선 사용
- if(ready('E')&&lowAlly){const a=Math.atan2(lowAlly.y-b.y,lowAlly.x-b.x);castSkill(b,'E',a,Math.min(1,edge(b,lowAlly)/E(620)));return true;}
- // W는 적과 아군이 모인 교전 지점에 설치
- if(ready('W')&&target&&(nearFoes.length>0||allies.length>0)){
-   const cluster=allies.filter(a=>edge(a,target)<E(300)).length;
-   if(nearFoes.length>=1||cluster>=1||hpP<.55){castSkill(b,'W',aim,Math.max(.15,Math.min(1,edge(b,target)/E(570))));return true;}
+ const lowAlly=allies.filter(a=>a.hp/a.maxHp<.72&&edge(b,a)<E(650)).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];
+ const nearFoes=foes.filter(e=>edge(b,e)<E(700));
+ const aim=target?aimAt(b,target,.22):(b.face||0);
+ const range=target?edge(b,target):Infinity;
+ const frac=target?Math.max(.08,Math.min(1,range/E(620))):.55;
+ // 교전 규모와 아군 상태를 함께 판단해 궁극기·지원기를 적극적으로 사용한다.
+ if(ready('R')&&foes.length>=2&&castSkill(b,'R',null))return true;
+ if(ready('E')&&lowAlly&&castSkill(b,'E',Math.atan2(lowAlly.y-b.y,lowAlly.x-b.x),Math.min(1,edge(b,lowAlly)/E(620))))return true;
+ if(ready('W')&&target&&(nearFoes.length>=1||allies.filter(a=>edge(a,target)<E(320)).length>=1||hpP<.65)){
+   if(castSkill(b,'W',aim,Math.max(.15,Math.min(1,range/E(570)))))return true;
  }
- // E로 적의 접근을 저지하거나 아군을 긴급 가속
- if(ready('E')&&target&&edge(b,target)<E(540)&&(hpP<.7||edge(b,target)<E(330))){
-   castSkill(b,'E',aim,Math.min(1,edge(b,target)/E(620)));return true;
- }
- // Q는 사거리 내 가장 가까운 적 챔피언을 향해 꾸준히 발사
- if(ready('Q')&&target&&edge(b,target)<E(680)){
-   const lead={x:target.x+(target.vx||0)*.22,y:target.y+(target.vy||0)*.22};
-   castSkill(b,'Q',Math.atan2(lead.y-b.y,lead.x-b.x));return true;
- }
+ if(ready('E')&&target&&range<E(560)&&(hpP<.78||range<E(350))&&castSkill(b,'E',aim,Math.min(1,range/E(620))))return true;
+ if(ready('Q')&&target&&range<E(700)&&castSkill(b,'Q',aimAt(b,target,.24)))return true;
+ // 적이 시야에 없더라도 부상 아군에게 지원 스킬을 낭비하지 않도록 false로 돌려보낸다.
  return false;
 }
-
+function aiMoses(b,p,d,hpP){
+ const ready=k=>b.rank[k]>0&&b.cd[k]<=0;
+ const allies=heroes.filter(u=>u.alive&&u.team===b.team&&u!==b);
+ const foes=enemiesOf(b).filter(e=>e.alive&&targetable(e)&&seenBy(b.team,e)&&edge(b,e)<E(1050)).sort((x,y)=>edge(b,x)-edge(b,y));
+ const target=foes[0]||((p&&p.alive&&p.team!==b.team&&isChamp(p))?p:null);
+ const injured=allies.filter(a=>a.hp/a.maxHp<.82&&edge(b,a)<E(350)).sort((x,y)=>x.hp/a.maxHp-y.hp/a.maxHp);
+ const veryLow=injured.find(a=>a.hp/a.maxHp<.58);
+ const active=!!(b.mosesActive&&time<(b.mosesActiveUntil||0));
+ if(active)return false;
+ // 보호의 연기와 별개로, 숨 스킬은 한 번에 하나씩만 유지한다.
+ if(ready('R')&&(b.mosesBreath||0)>=30&&target&&edge(b,target)<E(1100)){
+   if(castSkill(b,'R',aimAt(b,target,.2),Math.min(1,edge(b,target)/E(1100))))return true;
+ }
+ // 푸른숨은 잃은 체력이 큰 아군이 있을 때 우선 사용한다.
+ if(ready('W')&&injured.length&&injured.some(a=>a.hp/a.maxHp<.78)){
+   if(castSkill(b,'W',null))return true;
+ }
+ // 하얀숨으로 아군 교전 합류와 스킬 회전을 돕는다.
+ const nearbyAllies=allies.filter(a=>edge(b,a)<E(360)).length;
+ if(ready('Q')&&target&&edge(b,target)<E(760)&&(nearbyAllies>=1||foes.length>=2||hpP<.7)){
+   if(castSkill(b,'Q',null))return true;
+ }
+ // 붉은숨은 아군이 적과 교전할 때 공격력 강화에 사용한다.
+ const alliedFight=allies.some(a=>a.target&&a.target.alive&&a.target.team!==b.team&&edge(b,a)<E(360));
+ if(ready('E')&&target&&edge(b,target)<E(700)&&(alliedFight||foes.length>=2||edge(b,target)<E(380))){
+   if(castSkill(b,'E',null))return true;
+ }
+ // 교전 중 부상 아군이 있으면 숨이 다시 준비되는 즉시 회복을 보조한다.
+ if(ready('W')&&veryLow&&castSkill(b,'W',null))return true;
+ return false;
+}
 function aiAlyssa(b, p, d, hpP) {
   if (b.alR) return true;
   const ready = k => b.rank[k] > 0 && b.cd[k] <= 0;
@@ -13889,6 +13911,7 @@ function updateBot(b, dt) {
   const hpP = p && p.alive && p.maxHp > 0 ? p.hp / p.maxHp : 1;
   if(b.key==='araya'&&aiAraya(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
   if(b.key==='angela'&&aiAngela(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
+  if(b.key==='moses'&&aiMoses(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
   b.thinkT = (b.thinkT || 0) - dt; b.stanceT = (b.stanceT || 0) - dt;
   const react = () => AI.react[0] + Math.random() * (AI.react[1] - AI.react[0]);
   let dx = 0, dy = 0;
