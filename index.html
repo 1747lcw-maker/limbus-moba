@@ -4806,7 +4806,7 @@ function castMoses(c,key,ang,frac){
  const allies=heroes.filter(u=>u.alive&&u.team===c.team),enemies=heroes.filter(u=>u.alive&&u.team!==c.team&&!u.ward),radius=E(360),color={Q:'#fffdf2',W:'#58baff',E:'#e94b55'};
  if(['Q','W','E'].includes(key)){
   c.mosesActive=key;c.mosesActiveUntil=time+3;c.mosesBuffed={};fx.push({type:'mosesAura',x:c.x,y:c.y,r:radius,t:0,life:3.05,color:color[key],owner:c,kind:key});
-  if(key==='Q')for(const u of allies){if(dist(c,u)>radius+u.r)continue;u.anAsUntil=Math.max(u.anAsUntil||0,time+3);u.mosesAsMul=1.15+rk*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+3);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rk*.01);for(const sk of ['Q','W','E','R'])if(u.cd&&u.cd[sk]>0)u.cd[sk]=Math.max(0,u.cd[sk]-2);}
+  if(key==='Q')for(const u of allies){if(dist(c,u)>radius+u.r)continue;u.anAsUntil=Math.max(u.anAsUntil||0,time+3);u.mosesAsMul=1.15+rk*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+3);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rk*.01);}
   c.mosesBreath=Math.min(30,(c.mosesBreath||0)+2);c.cd[key]=c.cdMax[key]=cd[key][rk]*(typeof hasteMul==='function'?hasteMul(c):1);text(c.x,c.y-E(48),key==='Q'?'하얀숨':key==='W'?'푸른숨':'붉은숨',color[key],true,1);return true;
  }
  if(key==='R'){
@@ -4819,7 +4819,7 @@ function mosesTick(c,dt){
  if(c.mosesActive&&time>=(c.mosesActiveUntil||0)){c.mosesActive=null;c.mosesActiveUntil=0;}
  if(c.mosesActive){const key=c.mosesActive,r=E(360),rank=Math.max(0,(c.rank&&c.rank[key]||1)-1);
   for(const u of heroes){if(!u.alive||u.team!==c.team||dist(c,u)>r+u.r)continue;const id=u.id||u.key+':'+u.team;
-   if(key==='Q'){u.anAsUntil=Math.max(u.anAsUntil||0,time+.35);u.mosesAsMul=1.15+rank*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+.35);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rank*.01);}
+   if(key==='Q'){u.anAsUntil=Math.max(u.anAsUntil||0,time+.35);u.mosesAsMul=1.15+rank*.01;u.anMoveUntil=Math.max(u.anMoveUntil||0,time+.35);u.anMoveMul=Math.max(u.anMoveMul||1,1.10+rank*.01);if(!c.mosesBuffed[id]){for(const sk of ['Q','W','E','R'])if(u.cd&&u.cd[sk]>0)u.cd[sk]=Math.max(0,u.cd[sk]-2);c.mosesBuffed[id]=true;}}
    else if(key==='W'&&!c.mosesBuffed[id]){const heal=Math.max(0,u.maxHp-u.hp)*(.20+rank*.01);u.hp=Math.min(u.maxHp,u.hp+heal);c.mosesBuffed[id]=true;fx.push({type:'mosesAura',x:u.x,y:u.y,r:E(70),t:0,life:.8,color:'#58baff',owner:c,kind:'heal'});if(heal>0)text(u.x,u.y-E(34),'+'+Math.round(heal),'#72c9ff',true,.8);}
    else if(key==='E'){u.mosesAdUntil=time+.4;u.mosesAdMul=1.20+rank*.02;}
   }
