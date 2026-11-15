@@ -1100,7 +1100,7 @@ function drawFog(g) {
   g.save(); g.imageSmoothingEnabled = true; g.drawImage(fogCvs, 0, 0, W, H); g.restore();
 }
 function fxSeen(f) {
-  if (spectating) return true;                                              // 안개 속 적 이펙트는 숨김
+  if (spectating || f.type === 'anRGlobal') return true;                                              // 안개 속 적 이펙트는 숨김
   const o = f.owner;
   if (o && o.team) { if (o.team === player.team) return true; if (!(f.x !== undefined)) return seenBy(player.team, o); }
   if (f.x === undefined || f.y === undefined) return true;
