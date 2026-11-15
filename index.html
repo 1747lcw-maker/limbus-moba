@@ -3822,7 +3822,7 @@ function damage(src, tgt, amount, opts = {}) {
       fx.push({type:'pop', x:tgt.x, y:tgt.y, r:tgt.r * 1.3, color:'#e6c35c', t:0, life:.35});
     }
   }
-  if (isChamp(src) && src.team !== tgt.team && (isChamp(tgt) || (opts.damageOverTime && !isMonster(tgt)))) { src.dmgDealt = (src.dmgDealt || 0) + geburaActualHpLoss + shieldLoss; if (isChamp(tgt)) tgt.dmgTaken = (tgt.dmgTaken || 0) + geburaActualHpLoss; }   // 통계: 챔피언 피해 및 정글 몬스터를 제외한 화상·출혈 지속 피해 기록
+  if (isChamp(src) && src.team !== tgt.team && opts.type !== 'true' && (isChamp(tgt) || (opts.damageOverTime && !isMonster(tgt)))) { src.dmgDealt = (src.dmgDealt || 0) + geburaActualHpLoss + shieldLoss; if (isChamp(tgt)) tgt.dmgTaken = (tgt.dmgTaken || 0) + geburaActualHpLoss; }   // 통계: 고정 피해(type:'true')는 가한 피해량에서 제외하고, 일반 피해 및 비고정 지속 피해만 기록
   if (isChamp(src) && isChamp(tgt) && src.team !== tgt.team) { if (time - (tgt.lastChampHitT ?? -99) > 5) tgt.fightT0 = time; tgt.lastChampHitT = time; }
   if (isChamp(src) && src.gdGuard && tgt.team !== src.team) gdLifeline(src, amount);   // 귀도 집행 유예: 지키는 아군 딜의 15% 회복
   if (isChamp(src) && src.alive) {                    // 흡혈
