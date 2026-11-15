@@ -4746,8 +4746,20 @@ function philipTick(c,dt){
 function angelaLight(c,n=1){if(!c||c.key!=='angela')return;c.anLight=Math.min(5,(c.anLight||0)+n);if(n>0&&c===player)text(c.x,c.y-c.r-E(32),'빛 +'+n,'#9deeff',true,.55);}
 function angelaCombatEvent(src,tgt,amount,opts={}){
  if(!tgt||!isChamp(tgt))return;
- for(const a of heroes){if(a.key!=='angela'||!a.alive||tgt.team===a.team||dist(a,tgt)>E(1050))continue;a.anCoins=(a.anCoins||0)+(opts.kill?35:opts.basic||opts.skill?4:2);
-  while(a.anCoins>=100){a.anCoins-=100;a.anEmotionStage=(a.anEmotionStage||0)+1;fx.push({type:'anEmotion',x:a.x,y:a.y,r:E(130),t:0,life:1.05,owner:a});sfxPlay('chime',a.x,a.y,.9,1.1);angelaOpenEmotion(a);}
+ for(const a of heroes){
+  if(a.key!=='angela'||!a.alive||tgt.team===a.team||dist(a,tgt)>E(1050))continue;
+  // 손상된 상태값(Infinity/NaN)이나 비정상적으로 큰 누적치가 무한 루프를 만들지 않도록 정규화한다.
+  const stored=Number.isFinite(a.anCoins)?Math.max(0,a.anCoins):0;
+  a.anCoins=Math.min(199,stored+(opts.kill?35:opts.basic||opts.skill?4:2));
+  let emotionGuard=0;
+  while(a.anCoins>=100&&emotionGuard<2){
+   emotionGuard++;
+   a.anCoins-=100;
+   a.anEmotionStage=(Number.isFinite(a.anEmotionStage)?a.anEmotionStage:0)+1;
+   fx.push({type:'anEmotion',x:a.x,y:a.y,r:E(130),t:0,life:1.05,owner:a});
+   sfxPlay('chime',a.x,a.y,.9,1.1);
+   angelaOpenEmotion(a);
+  }
  }
 }
 function angelaOpenEmotion(c){
@@ -4896,7 +4908,12 @@ function drawMosesFx(g,f,k){
  g.restore();
 }
 function angelaTick(c,dt){
- if(c.key!=='angela')return;c.anLight=c.anLight||0;c.anLightClock=(c.anLightClock||0)+dt;while(c.anLightClock>=5){c.anLightClock-=5;angelaLight(c,1);}
+ if(c.key!=='angela')return;
+ c.anLight=Number.isFinite(c.anLight)?Math.max(0,c.anLight):0;
+ c.anLightClock=Number.isFinite(c.anLightClock)?Math.max(0,c.anLightClock):0;
+ c.anLightClock+=Number.isFinite(dt)?Math.max(0,Math.min(.1,dt)):0;
+ let lightGuard=0;
+ while(c.anLightClock>=5&&lightGuard<2){lightGuard++;c.anLightClock-=5;angelaLight(c,1);}
  if(c.anZone&&!c.anZone.done&&time>=c.anZone.at){const z=c.anZone;z.done=true;for(const u of units){if(!u.alive||u.ward||!isChamp(u))continue;const d=Math.hypot(u.x-z.x,u.y-z.y);if(d>z.r+u.r)continue;if(u.team!==c.team){angelaSkillHit(c,u,82+c.ap*.42,'#7bcfff');if(u.alive){u.slowT=Math.max(u.slowT||0,1.6);u.slowAmt=Math.max(u.slowAmt||0,.35);}}else if(isChamp(u)){u.shield=Math.max(u.shield||0,75+c.ap*.38);u.shieldT=Math.max(u.shieldT||0,3);u.anMoveUntil=time+2.2;u.anMoveMul=1.35;u.anAsUntil=time+2.2;fx.push({type:'anAura',x:u.x,y:u.y,r:u.r*2,t:0,life:1.1,owner:c});}}fx.push({type:'anWburst',x:z.x,y:z.y,r:z.r,t:0,life:.65,owner:c});c.anZone=null;}
 }
 function angelaOnKill(u,src){
