@@ -13770,6 +13770,10 @@ function updateBot(b, dt) {
     if (counterTarget) { p = counterTarget; b.target = counterTarget; b.stance = 'allin'; b.stanceT = 0; b.mode = 'lane'; cancelRecall(b); }
   }
   const hpB = b.hp / b.maxHp;
+  // 전용 챔피언 AI에 전달할 대상 거리와 대상 체력 비율을 먼저 계산한다.
+  // 대상이 없거나 이미 쓰러졌어도 AI 업데이트가 예외로 중단되지 않도록 안전한 기본값을 사용한다.
+  const d = p && p.alive ? edge(b,p) : Infinity;
+  const hpP = p && p.alive && p.maxHp > 0 ? p.hp / p.maxHp : 1;
   if(b.key==='araya'&&aiAraya(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
   if(b.key==='angela'&&aiAngela(b,p,d,hpP)){moveChamp(b,0,0,dt);return;}
   b.thinkT = (b.thinkT || 0) - dt; b.stanceT = (b.stanceT || 0) - dt;
