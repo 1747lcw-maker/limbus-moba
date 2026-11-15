@@ -3971,6 +3971,7 @@ function kill(u, src) {
   sdOnKill(u, src);                                                   // 소드: 처치 관여 → 작전의 전율                                                  // 메피는 배고파: 엔케팔린
   u.alive = false; u.hp = 0; u.mark = null; u.gwT = 0; u.spore = null;
   angelaOnKill(u,src); angelaCombatEvent(src,u,0,{kill:true});
+  if(src&&src.anGreedUntil>time){const heal=src.maxHp*.06;src.hp=Math.min(src.maxHp,src.hp+heal);text(src.x,src.y-E(42),'+'+Math.round(heal),'#8cffb0',true,.65);}
   if(u.kind==='gachiuJaro'){if(u.owner)u.owner.jaroRespawnAt=time+60;deathFx(u,src);if(u.owner&&(u.owner===player||u.owner.team===player.team))text(u.x,u.y-E(35),'자로 전투 불능 · 60초 후 부활','#c9b5df',true,1);return;}
   alOnDeath(u);                                                      // 알리사: 0.3초 뒤 자폭
   mtOnDeath(u);
@@ -4169,7 +4170,7 @@ function basicAttack(c, t) {
   if (c.key === 'charon' && !t.structure) dmg = chBasic(c, t, dmg);   // 민폐 승객 정리 표식   // 붉은시선: 열기 · 표식 추가 피해   // 정화: 망치로 내려침
   if (c.key === 'yuri') yuriBeam(c, t, dmg, crit);                  // 광선 평타
   else if(c.key==='vespa'){vespaThrow(c,t,dmg,'basic');}
-  else if (c.st.ranged) { if (c.key === 'dongbaek') dbTwinShot(c, t, dmg, crit); projectiles.push({x:c.x + Math.cos(c.face + .5) * c.r, y:c.y + Math.sin(c.face + .5) * c.r, tgt:t, src:c, amount:dmg, speed:E(c.key === 'outis' || c.key === 'saude' ? 2400 : 1500), color:'#ffc4dc', size:E(7), opts:{basic:true, crit, alW:alUseW(c)}, alyssa:c.key === 'alyssa', faust:c.key === 'faust', outis:c.key === 'outis', saude:c.key === 'saude', honglu:c.key === 'honglu', hoh:c.key === 'hohenheim', lastShot:c.key === 'outis' && c.ammo <= 0}); }   // 원거리: 투사체
+  else if (c.st.ranged) { if (c.key === 'dongbaek') dbTwinShot(c, t, dmg, crit); projectiles.push({x:c.x + Math.cos(c.face + .5) * c.r, y:c.y + Math.sin(c.face + .5) * c.r, tgt:t, src:c, amount:dmg, speed:E(c.key === 'outis' || c.key === 'saude' ? 2400 : 1500), color:c.key==='angela'?'#8feaff':'#ffc4dc', size:E(c.key==='angela'?9:7), opts:{basic:true, crit, type:c.key==='angela'?'magic':undefined, alW:alUseW(c)}, alyssa:c.key === 'alyssa', faust:c.key === 'faust', outis:c.key === 'outis', saude:c.key === 'saude', honglu:c.key === 'honglu', hoh:c.key === 'hohenheim', lastShot:c.key === 'outis' && c.ammo <= 0}); }   // 원거리: 투사체
   else damage(c, t, dmg, enhanced ? {color:'#d9a066', basic:true, skill:true, crit} : {basic:true, crit});
   if (c.key === 'meursault') mrPassive(c, t);                      // 이방인
   if (c.key === 'marten') mtMark(c, t);                              // 요정초롱: 요정 표식
@@ -4752,9 +4753,9 @@ function castAngela(c,key,ang,frac){
  if(key==='W'){if(ang==null)ang=c.face||0;const d=E(570)*Math.max(.15,Math.min(1,frac??.55)),x=c.x+Math.cos(ang)*d,y=c.y+Math.sin(ang)*d;c.anZone={x,y,at:time+.75,done:false,r:E(190)};c.cd.W=c.cdMax.W=14*hasteMul(c);fx.push({type:'anW',x,y,r:E(190),t:0,life:1.25,owner:c});sfxPlay('chime',x,y,.9,.9);return true;}
  if(key==='E'){const enemy=angelaTarget(c,ang,frac,c.team==='blue'?'red':'blue',620),ally=angelaTarget(c,ang,frac,c.team,620);const point=ang!=null?{x:c.x+Math.cos(ang)*E(620)*Math.max(.08,Math.min(1,frac??.55)),y:c.y+Math.sin(ang)*E(620)*Math.max(.08,Math.min(1,frac??.55))}:c;const chosen=enemy!==c&&(!ally||ally===c||dist(enemy,point)<dist(ally,point))?enemy:(ally||c);
   if(chosen.team===c.team){for(const k of ['Q','W','E'])chosen.cd[k]=Math.max(0,chosen.cd[k]-.35*(chosen.cdMax[k]||0));chosen.anMoveUntil=time+2;chosen.anMoveMul=1.48;chosen.anAsUntil=time+2;fx.push({type:'anClock',x:chosen.x,y:chosen.y,r:chosen.r*2.8,ally:true,t:0,life:1.1});text(chosen.x,chosen.y-E(50),'시간 가속','#9eeaff',true,.8);}
-  else{damage(c,chosen,75+c.ap*.55,{skill:true,type:'magic',color:'#8bdfff'});chosen.slowT=Math.max(chosen.slowT||0,1.5);chosen.slowAmt=Math.max(chosen.slowAmt||0,.62);chosen.anAtkSlowUntil=time+1.5;fx.push({type:'anClock',x:chosen.x,y:chosen.y,r:chosen.r*2.8,ally:false,t:0,life:1.1});text(chosen.x,chosen.y-E(50),'시간 정지','#ff7777',true,.8);}c.cd.E=c.cdMax.E=16*hasteMul(c);sfxPlay('chime',chosen.x,chosen.y,1,.75);return true;
+  else{angelaSkillHit(c,chosen,75+c.ap*.55,'#8bdfff');chosen.slowT=Math.max(chosen.slowT||0,1.5);chosen.slowAmt=Math.max(chosen.slowAmt||0,.62);chosen.anAtkSlowUntil=time+1.5;fx.push({type:'anClock',x:chosen.x,y:chosen.y,r:chosen.r*2.8,ally:false,t:0,life:1.1});text(chosen.x,chosen.y-E(50),'시간 정지','#ff7777',true,.8);}c.cd.E=c.cdMax.E=16*hasteMul(c);sfxPlay('chime',chosen.x,chosen.y,1,.75);return true;
  }
- if(key==='R'){c.cd.R=c.cdMax.R=150*hasteMul(c);fx.push({type:'anRGlobal',x:W/2,y:H/2,r:Math.max(W,H),t:0,life:1.5,owner:c});for(const u of heroes){if(!u.alive||u===c||!seenBy(c.team,u))continue;if(u.team===c.team){u.anAllyUntil=time+10;u.anAllyOwner=c;u.anAsUntil=time+10;u.anMoveUntil=time+10;u.anMoveMul=1.20;u.anHaste=30;u.anRHeal=true;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,owner:c});}else{u.anRUntil=time+10;u.anROwner=c;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,enemy:true,owner:c});}}angelaLight(c,2);text(c.x,c.y-E(60),'도서관의 무대','#ffe0a0',true,1.5);sfxPlay('boom',c.x,c.y,1.2,.7);return true;}
+ if(key==='R'){c.cd.R=c.cdMax.R=150*hasteMul(c);fx.push({type:'anRGlobal',x:W/2,y:H/2,r:Math.max(W,H),t:0,life:1.5,owner:c});for(const u of heroes){if(!u.alive||!seenBy(c.team,u))continue;if(u.team===c.team){u.anAllyUntil=time+10;u.anAllyOwner=c;u.anAsUntil=time+10;u.anMoveUntil=time+10;u.anMoveMul=1.20;u.anHaste=30;u.anRHeal=true;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,owner:c});}else{u.anRUntil=time+10;u.anROwner=c;fx.push({type:'anEnvelope',x:u.x,y:u.y,r:u.r*2,t:0,life:1.2,enemy:true,owner:c});}}angelaLight(c,2);text(c.x,c.y-E(60),'도서관의 무대','#ffe0a0',true,1.5);sfxPlay('boom',c.x,c.y,1.2,.7);return true;}
  return false;
 }
 function angelaTick(c,dt){
@@ -14719,7 +14720,7 @@ function drawAngelaBody(g,c){
   g.fillStyle='#53dfff';g.beginPath();g.arc(r*.18,0,r*.09+Math.sin(time*6)*E(1.5),0,Math.PI*2);g.fill();g.restore();
   g.save();g.font='bold '+E(8)+'px sans-serif';g.textAlign='center';g.fillStyle='#c5f4ff';g.shadowColor='#4acbff';g.shadowBlur=E(5);g.fillText('감정 '+Math.floor(c.anCoins||0)+'/100',0,-r*1.05);g.restore();
   for(let i=0;i<3;i++){const a=time*1.8+i*Math.PI*2/3;g.fillStyle='#a8f1ff';g.globalAlpha=.65+.3*Math.sin(time*5+i);g.beginPath();g.arc(r*.9+Math.cos(a)*r*.2,Math.sin(a)*r*.55,r*.055,0,Math.PI*2);g.fill();}
-  g.save();for(let i=0;i<5;i++){g.fillStyle=i<(c.anLight||0)?'#a5f0ff':'rgba(110,150,170,.35)';g.shadowColor='#6edfff';g.shadowBlur=i<(c.anLight||0)?E(8):0;g.beginPath();g.arc(c.x-c.r*.45+i*c.r*.22,c.y+c.r*1.02,E(3.2),0,Math.PI*2);g.fill();}g.restore();
+  g.save();for(let i=0;i<5;i++){g.fillStyle=i<(c.anLight||0)?'#a5f0ff':'rgba(110,150,170,.35)';g.shadowColor='#6edfff';g.shadowBlur=i<(c.anLight||0)?E(8):0;g.beginPath();g.arc(-r*.45+i*r*.22,r*1.02,E(3.2),0,Math.PI*2);g.fill();}g.restore();
   g.restore();
 }
 function drawChamp(g, c) {
