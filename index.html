@@ -4833,6 +4833,7 @@ function drawMosesBody(g,c){
  g.fillStyle='#e9d9ad';g.beginPath();g.arc(E(4),-E(4),E(3),0,Math.PI*2);g.fill();
  g.restore();
 }
+function drawMosesFx(g,f,k){g.save();g.translate(f.x||0,f.y||0);g.rotate(f.ang||0);g.globalAlpha=Math.max(0,1-k)*.72;g.shadowColor=f.color||'#e4c56d';g.shadowBlur=E(22);for(let i=0;i<7;i++){const x=f.len*(.12+i*.12),y=Math.sin(k*9+i*1.8)*E(20);g.fillStyle=i%2?'#fff9e8':(f.color||'#e4c56d');g.strokeStyle='#fff4c7';g.lineWidth=E(2);g.beginPath();g.ellipse(x,y,E(15)*(1+k),E(9)*(1+k),i*.35,0,Math.PI*2);g.fill();g.stroke();}g.restore();}
 function angelaTick(c,dt){
  if(c.key!=='angela')return;c.anLight=c.anLight||0;c.anLightClock=(c.anLightClock||0)+dt;while(c.anLightClock>=5){c.anLightClock-=5;angelaLight(c,1);}
  if(c.anZone&&!c.anZone.done&&time>=c.anZone.at){const z=c.anZone;z.done=true;for(const u of units){if(!u.alive||u.ward||!isChamp(u))continue;const d=Math.hypot(u.x-z.x,u.y-z.y);if(d>z.r+u.r)continue;if(u.team!==c.team){angelaSkillHit(c,u,82+c.ap*.42,'#7bcfff');if(u.alive){u.slowT=Math.max(u.slowT||0,1.6);u.slowAmt=Math.max(u.slowAmt||0,.35);}}else if(isChamp(u)){u.shield=Math.max(u.shield||0,75+c.ap*.38);u.shieldT=Math.max(u.shieldT||0,3);u.anMoveUntil=time+2.2;u.anMoveMul=1.35;u.anAsUntil=time+2.2;fx.push({type:'anAura',x:u.x,y:u.y,r:u.r*2,t:0,life:1.1,owner:c});}}fx.push({type:'anWburst',x:z.x,y:z.y,r:z.r,t:0,life:.65,owner:c});c.anZone=null;}
@@ -13340,7 +13341,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {araya:['jungle','mid','top'], gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support'], moses:['support']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 제한과 팀 내부 연계 픽 판단을 분리
   const used = new Set(taken), partnerUsed = new Set(partnerTaken), out = [];
@@ -13364,7 +13365,7 @@ function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 
   }
   return out;
 }
-const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip', 'angela', 'araya'];
+const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip', 'angela', 'araya', 'moses'];
 const AI_PICK_EXCLUDED = new Set(['callisto','purpleTear']); // 칼리스토와 보라눈물은 AI 밴픽 후보에서 제외 (직접 선택은 가능)
 const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // AI 선택 후보
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
@@ -20149,6 +20150,7 @@ function drawFx(g) {
     const k = Math.max(0, f.t / f.life);
     if (!fxSeen(f)) continue;
     if (f.type === 'wardSet' || f.type === 'wardDie') { drawWardFx(g, f, k); continue; }
+    if (f.type === 'mosesSmoke') { drawMosesFx(g,f,k); continue; }
     if(f.type.startsWith('ar')){drawArayaFx(g,f,k);continue;}
     if(f.type.startsWith('an')){drawAngelaFx(g,f,k);continue;}
     if(f.type.startsWith('ma')){drawMathiasFx(g,f,k);continue;}
@@ -22362,7 +22364,7 @@ $('shopBtn').addEventListener('click', () => openShop(!shopOpen));
 addEventListener('keydown', e => { if (spectating || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; if (e.key.toLowerCase() === 'p') openShop(!shopOpen); if (e.key === 'Escape' && shopOpen) openShop(false); });
 
 // ═════════════ 점수판 (탭) ═════════════
-const CHAMP_COL = {araya:'#1457b8',dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', mathias:'#f1eff8', angela:'#83dfff', bot:'#7a3438'};
+const CHAMP_COL = {araya:'#1457b8',dongrang:'#b07a28', ran:'#b8e641', effie:'#9aa8b8', saude:'#5aa0c8', xichun:'#c8202c', wei:'#26262c', bongdad:'#f39a2e', ricardo:'#7b3fa8', gubo:'#2c2a48', dongbaek:'#d6a93e', thoma:'#8a7b4c', guido:'#8f1d24', marten:'#4f6a34', alyssa:'#e04a24', hohenheim:'#2e55b8', gregor:'#5a3a20', rodion:'#c9a27a', yisang:'#15151a', ishmael:'#e8792b', ryoshu:'#c8232b', faust:'#f4f3f7', donq:'#f2c230', outis:'#2a7a47', honglu:'#3fc7a8', sinclair:'#8b9c15', heathcliff:'#6a3d9a', meursault:'#1d3461', yuri:'#c8405a', kromer:'#ece4d6', vergil:'#2b2c31', charon:'#26393a', roland:'#090a0d', liuEn:'#41464f', gachiu:'#d12b9a', vespa:'#d5aa16', gebura:'#8b0018', mathias:'#f1eff8', angela:'#83dfff', moses:'#d8b65a', bot:'#7a3438'};
 const TEAM_SIZE = 5;
 let boardOpen = false, boardT = 0;
 function openBoard(on) {
@@ -24057,7 +24059,7 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'],
+  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], moses:['마법사','서포터'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
@@ -24174,6 +24176,13 @@ function cxDetail(k, key = 'P', roleOverride = null) {
   cxShowSkill(key, true);
 }
 // 앤젤라 · 빛의 도서관 관장
+CODEX_SK.moses = {
+ P:{name:'연기의 조율',text:()=> '모제스의 기본 공격은 담뱃대에서 뿜어낸 연기를 날리는 원거리 마법 공격입니다. 아군을 보호하고 적의 움직임을 방해하는 연기 기술을 사용합니다.'},
+ Q:{name:'연무탄',cd:[7,6.5,6,5.5,5],text:()=> '담뱃대에서 응축한 황금빛 연기를 직선으로 내뿜어 경로상의 적에게 마법 피해를 입힙니다.'},
+ W:{name:'백색 장막',cd:[13,12,11,10,9],text:()=> '가장 체력이 낮은 주변 아군에게 흰 연기를 둘러 3.5초 동안 보호막을 부여합니다.'},
+ E:{name:'금빛 잔향',cd:[12,11,10,9,8],text:()=> '가장 가까운 적 주변에 황금빛 연기를 폭발시켜 광역 마법 피해와 둔화를 입힙니다.'},
+ R:{name:'안개 속의 진실',cd:[105,90,75],text:()=> '주변 넓은 범위에 황금빛 안개를 퍼뜨립니다. 적에게 마법 피해를 입히고 아군에게 보호막과 이동 속도 증가를 부여합니다.'}
+};
 CODEX_SK.araya = {
  P:{name:'시간 얽힘',text:()=> '전투 중 30초마다 <b>과거 · 현재 · 미래</b> 중 하나로 무작위 전환됩니다. 챔피언 위에 현재 폼과 다음 전환까지 남은 시간이 표시됩니다.<br><br><b>과거</b>: 모든 스킬과 기본 공격 피해량의 40%를 3초에 걸쳐 추가 물리 출혈 피해로 입힙니다.<br><b>현재</b>: 모든 스킬과 기본 공격 피해량의 50%를 4초에 걸쳐 추가 마법 화상 피해로 입힙니다.<br><b>미래</b>: 모든 스킬과 기본 공격이 85% 확률로 치명타로 적중합니다.'},
  Q:{name:'필연쇄 [必然殺]',cd:KARAYA.Q.cd,range:KARAYA.Q.dash,text:()=> '지정한 방향으로 최대 550 거리만큼 돌진하며 경로상의 적에게 물리 피해를 입힙니다. 지나온 경로와 끝 지점에 공간의 흉터를 남기고, <b>정확히 1초 후</b> 균열이 동시에 폭발해 추가 물리 피해를 입힙니다. 폭발에 맞은 적에게도 공간의 흉터가 새겨집니다.'},
