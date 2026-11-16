@@ -20435,7 +20435,7 @@ function drawCallistoFx(g,f,k){
  g.save();g.globalAlpha=Math.max(0,1-k);g.strokeStyle='#e52f48';g.fillStyle='rgba(205,28,54,.22)';g.shadowColor='#ff4058';g.shadowBlur=E(18);g.lineWidth=E(5);
  if(f.type==='callistoRect'||f.type==='callistoCircle'){
   if(f.type==='callistoRect'){g.translate(f.x,f.y);g.rotate(f.ang);g.setLineDash([E(13),E(8)]);g.lineWidth=E(3);g.strokeRect(E(25),-f.wid/2,f.len,f.wid);g.fillRect(E(25),-f.wid/2,f.len,f.wid);g.setLineDash([]);}
-  else{g.beginPath();g.arc(f.x,f.y,f.r*(.78+.22*(1-k)),0,Math.PI*2);g.fill();g.stroke();g.lineWidth=E(2);g.beginPath();g.arc(f.x,f.y,f.r*(.55+.18*Math.sin(time*8)),0,Math.PI*2);g.stroke();}
+  else{const cx=f.owner&&f.owner.alive?f.owner.x:f.x,cy=f.owner&&f.owner.alive?f.owner.y:f.y;g.beginPath();g.arc(cx,cy,f.r*(.78+.22*(1-k)),0,Math.PI*2);g.fill();g.stroke();g.lineWidth=E(2);g.beginPath();g.arc(cx,cy,f.r*(.55+.18*Math.sin(time*8)),0,Math.PI*2);g.stroke();}
  }else if(f.type==='callistoArc'){
   g.translate(f.x,f.y);g.rotate(f.ang);g.lineWidth=E(f.wide?13:9);g.beginPath();g.arc(E(12),0,f.len*.58,-.9,.9);g.stroke();g.lineWidth=E(3);g.beginPath();g.arc(E(12),0,f.len*.72,-.78,.78);g.stroke();
  }else if(f.type==='callistoBones'){
