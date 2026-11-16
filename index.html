@@ -5039,14 +5039,17 @@ function callistoCast(c,key,ang){
  const cd=cds[key][n]*hasteMul(c),color='#d83a4b';
  if(key==='Q'||key==='W'){
   const a=ang==null?autoAim(c,E(key==='Q'?380:470)):ang;c.face=a;
-  let hits=[];
+  let hits=[],third=false, wStackBefore=c.callistoWStacks||0;
   if(key==='Q'){
    const len=E(360),half=.72;
    hits=units.filter(u=>u.alive&&u.team!==c.team&&targetable(u)&&!u.structure&&!u.ward&&dist(c,u)<len+u.r&&Math.abs(Math.atan2(Math.sin(Math.atan2(u.y-c.y,u.x-c.x)-a),Math.cos(Math.atan2(u.y-c.y,u.x-c.x)-a)))<half);
   }else{
    c.callistoWStacks=c.callistoWStacks||0;
    if(c.callistoWAt&&time-c.callistoWAt>5)c.callistoWStacks=0;
-   const third=c.callistoWStacks>=2;if(third)c.callistoWStacks=0;c.callistoWAt=time;
+   wStackBefore=c.callistoWStacks;
+   third=wStackBefore>=2;
+   if(third)c.callistoWStacks=0;
+   c.callistoWAt=time;
    const len=E(third?390:470),wid=E(third?62:42);
    if(third){const sx=c.x,sy=c.y;c.x+=Math.cos(a)*E(115);c.y+=Math.sin(a)*E(115);c.callistoDash={sx,sy,ex:c.x,ey:c.y,until:time+.45};fx.push({type:'ieShot',x:sx,y:sy,ang:a,len:E(140),t:0,life:.45,wide:true});}
    hits=segHits(c,a,len,wid);
@@ -5055,11 +5058,11 @@ function callistoCast(c,key,ang){
   let total=0;
   for(const u of hits){
    if(isChamp(u))callForHelp(c,u);
-   const raw=(key==='Q'?65+n*28+c.ad*.78:55+n*27+c.ad*(c.callistoWStacks===0?.95:.78));
+   const raw=(key==='Q'?65+n*28+c.ad*.78:55+n*27+c.ad*(third||wStackBefore>0?.78:.95));
    const dealt=damage(c,u,raw,{skill:true,type:'physical',color});
    total+=Math.max(0,dealt||0);
    callistoBleed(c,u,Math.max(0,dealt||0)*.2,3);
-   if(key==='W'&&c.callistoWStacks===0&&dealt>0){const h=dealt*.2,b=c.hp;c.hp=Math.min(c.maxHp,c.hp+h);c.healDone=(c.healDone||0)+c.hp-b;}
+   if(key==='W'&&wStackBefore===0&&dealt>0){const h=dealt*.2,b=c.hp;c.hp=Math.min(c.maxHp,c.hp+h);c.healDone=(c.healDone||0)+c.hp-b;}
   }
   if(key==='Q'){
    const ally=heroes.filter(u=>u.alive&&u.team===c.team&&u!==c).sort((x,y)=>dist(c,x)-dist(c,y))[0];
