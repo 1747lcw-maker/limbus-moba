@@ -5025,9 +5025,9 @@ function callistoMarkTick(c){
 }
 function callistoStack(c){
  if(!c||c.key!=='callisto'||!c.alive||c.callistoArt)return;
- c.callistoInspiration=Math.min(5,(c.callistoInspiration||0)+1);
- text(c.x,c.y-c.r-E(48),'영감 '+c.callistoInspiration+'/5','#f5e7d8',true,.8);
- if(c.callistoInspiration>=5){
+ c.callistoInspiration=Math.min(2,(c.callistoInspiration||0)+1);
+ text(c.x,c.y-c.r-E(48),'영감 '+c.callistoInspiration+'/2','#f5e7d8',true,.8);
+ if(c.callistoInspiration>=2){
   c.callistoArt=true;c.callistoArtUntil=Infinity;
   fx.push({type:'burst',x:c.x,y:c.y,r:c.r*3,t:0,life:1,col:'#fff1d9'});
   text(c.x,c.y-c.r-E(62),'예술','#fff8e8',true,1.4);
