@@ -506,7 +506,7 @@
   .sel-card b{font-size:17px;letter-spacing:.04em;white-space:nowrap}
   .sel-card{position:relative}  .sel-card .rec{position:absolute;right:10px;top:10px;font-style:normal;font-size:10px;font-weight:800;color:#1a1405;background:#e6c35c;border-radius:999px;padding:1px 8px} .sel-card .rec.sub{background:#8a7a5a;color:#f0e1c9}
   .sel-card .go{align-self:stretch;margin-top:2px;text-align:center;padding:8px;border-radius:8px;background:#e6c35c;color:#1a1405;font-weight:800}
-  #rotate{z-index:50;position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  #rotate{z-index:50;position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;
     background:rgba(8,12,10,.92);text-align:center;padding-inline:24px;font-size:15px}
   #rotate small{color:var(--muted)}
   @media (orientation:landscape){#rotate{display:none}}
@@ -568,6 +568,19 @@
   .music-setting-foot{font-size:11px;color:#b9a58c}
   #musicMute{border:1px solid #806342;border-radius:7px;background:#2b2017;color:#f4d7a5;padding:5px 11px;font:700 11px system-ui,sans-serif;cursor:pointer}
   #musicMute[aria-pressed="true"]{background:#6b342b;border-color:#c77b65;color:#fff}
+  /* 모바일 세로 화면: 게임 캔버스를 계속 표시하고 HUD를 좁은 폭에 맞춤 */
+  @media (orientation:portrait) and (max-width:760px){
+    #stats{top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;max-width:calc(100vw - 116px);gap:5px;padding:4px 7px;font-size:9px;white-space:nowrap}
+    #stats .score{font-size:11px;gap:3px}
+    #stats .xp{width:25px}
+    .topbtn{font-size:10px;padding:6px 7px}
+    #fs{right:calc(env(safe-area-inset-right,0px) + 6px)}
+    #spr{right:calc(env(safe-area-inset-right,0px) + 70px)}
+    #snd{right:calc(env(safe-area-inset-right,0px) + 6px);top:calc(env(safe-area-inset-top,0px) + 42px)}
+    #board{padding:5px}
+    #board .bd{padding:7px;font-size:11px}
+  }
+
 </style>
 
 <canvas id="c"></canvas>
@@ -2394,7 +2407,7 @@ async function toggleFullscreen() {
     if (!document.fullscreenElement) {
       if (!document.documentElement.requestFullscreen) return;
       await document.documentElement.requestFullscreen();
-      try { await screen.orientation.lock('landscape'); } catch {}
+      // 화면 방향은 사용자가 선택한 세로/가로 상태를 유지합니다.
     } else if (document.exitFullscreen) await document.exitFullscreen();
   } catch {}
 }
@@ -2927,7 +2940,7 @@ function resize() {
   dpr = mobileRender ? 1 : (devicePixelRatio || 1); // 모바일만 저해상도 렌더링, PC는 기기의 기본 픽셀 밀도 사용
   vw = innerWidth; vh = innerHeight;
   cvs.width = vw * dpr; cvs.height = vh * dpr;
-  baseZoom = Math.max(vh / 720, vw / 1600) * S * VIEW_K; zoom = baseZoom * zoomMul;
+  const portraitMobile = vw < vh && (matchMedia('(pointer: coarse)').matches || vw <= 760);\n  baseZoom = (portraitMobile ? Math.max(vh / 2200, vw / 1600) : Math.max(vh / 720, vw / 1600)) * S * VIEW_K; zoom = baseZoom * zoomMul;
   ui = Math.max(0.72, Math.min(1, vh / 480));
   Object.assign(ATK_BTN, {r:46 * ui, maxDrag:95 * ui});
   Object.assign(SK_BTN, {r:30 * ui, maxDrag:80 * ui});
