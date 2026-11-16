@@ -21559,6 +21559,15 @@ Object.assign(SKILL_ICON_DRAW,{moses:{
  E:g=>{iconGlow(g,0,0,34,'rgba(225,55,65,.85)');g.strokeStyle='#ff7b83';g.lineWidth=4;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();g.strokeStyle='#ffd6d6';g.lineWidth=2;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.stroke();iconPoly(g,[[-4,-19],[4,-19],[3,-4],[13,3],[4,12],[-4,4],[-13,3],[-3,-4]],'#7d1824','#ffd6d6');for(let i=0;i<6;i++){const a=i*Math.PI/3;iconLine(g,Math.cos(a)*25,Math.sin(a)*25,Math.cos(a)*32,Math.sin(a)*32,'#ff9da3',2);}},
  R:g=>{iconGlow(g,0,0,37,'rgba(255,35,48,.98)');g.strokeStyle='#ff6873';g.lineWidth=3;g.beginPath();g.arc(0,0,26,0,Math.PI*2);g.stroke();g.setLineDash([4,3]);g.strokeStyle='#ffe6e6';g.lineWidth=1.5;g.beginPath();g.arc(0,0,18,0,Math.PI*2);g.stroke();g.setLineDash([]);iconCircle(g,0,0,7,'#26080d','#ffb8bd');iconLine(g,-30,0,30,0,'#ffb8bd',2);iconLine(g,0,-30,0,30,'#ffb8bd',2);iconPoly(g,[[-5,-5],[0,-13],[5,-5],[4,5],[0,10],[-4,5]],'#ff303e','#fff0f0');}
 }});
+
+SKILL_BG.callisto=['#f4f1e8','#431b25'];
+SKILL_ICON_DRAW.callisto={
+ P:g=>{iconGlow(g,0,0,31,'rgba(220,55,75,.65)');iconCircle(g,0,0,20,'#eee9dc','#fff');for(let i=0;i<5;i++){const a=i*Math.PI*2/5;iconLine(g,0,0,Math.cos(a)*25,Math.sin(a)*25,'#a92e43',2.5);}iconCircle(g,0,0,7,'#a92e43','#f8e9df');},
+ Q:g=>{iconGlow(g,0,0,30,'rgba(205,45,65,.65)');sSlash(g,-23,17,23,-17,'#5c2630',12);sSlash(g,-23,17,23,-17,'#f2eadb',5);for(let i=0;i<4;i++)iconCircle(g,-15+i*10,12-i*7,2.2,'#d34b5a');},
+ W:g=>{iconGlow(g,0,0,30,'rgba(205,45,65,.6)');for(let i=0;i<3;i++){const y=-16+i*16;sSlash(g,-23,y-5,22,y+5,'#6c2632',8);sSlash(g,-23,y-5,22,y+5,'#f5eee1',3);}iconLine(g,-25,-25,25,-25,'#d94d60',2);},
+ E:g=>{iconGlow(g,0,0,30,'rgba(225,220,205,.5)');g.strokeStyle='#f4eee2';g.lineWidth=3;g.beginPath();g.ellipse(0,0,25,15,-.3,0,7);g.stroke();for(let i=0;i<7;i++){const a=i*Math.PI*2/7;iconPoly(g,[[Math.cos(a)*13,Math.sin(a)*8],[Math.cos(a)*31,Math.sin(a)*19],[Math.cos(a+.18)*17,Math.sin(a+.18)*10]],'#c63c50');}},
+ R:g=>{iconGlow(g,0,0,34,'rgba(205,35,60,.85)');g.strokeStyle='#f6eee0';g.lineWidth=3;g.beginPath();g.arc(0,0,24,0,7);g.stroke();for(let i=0;i<8;i++){const a=i*Math.PI/4;sSlash(g,Math.cos(a)*9,Math.sin(a)*9,Math.cos(a)*31,Math.sin(a)*31,i%2?'#e9dfcd':'#b52b43',4);}iconCircle(g,0,0,9,'#762333','#f5e8d9');}
+};
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
@@ -21833,6 +21842,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   binah:{coat:'#09090d',pants:'#050508',hair:'#08080d',skin:'#17151b',eye:'#f2cf62',fx:'raven',smoke:true,line:'조율은 끝났습니다. 이제 침묵하시지요.'},
   angela:{coat:'#d9f5ff',pants:'#24364b',hair:'#dcefff',skin:'#f1e6df',eye:'#83dfff',fx:'angela',line:'초대장은 전달되었습니다. 이제 당신의 이야기를 책으로 남기겠어요.'},
   moses:{coat:'#e8e5d7',pants:'#202b38',hair:'#d5d0c3',skin:'#e7d8c8',eye:'#e7d8b5',fx:'shard',line:'연기는 걷혔어요. 이제 사건의 진실만 남았군요.'},
+  callisto:{coat:'#f2efe5',pants:'#28252a',hair:'#d8d1c4',skin:'#e4d1c4',eye:'#e84a5d',fx:'bone',line:'아름답게 완성되었네요. 이 작품의 제목은… 폐장이랍니다.'},
   araya:{coat:'#0b1d3b',pants:'#050d1c',hair:'#071326',skin:'#e6eaf2',eye:'#4d9cff',fx:'bolt',line:'푸른 칼끝이 지나간 자리에는, 침묵만이 남는다.'},
 };
 let mvp = null, mvpRun = false;
@@ -21871,7 +21881,7 @@ function mvpClose() {
   if (!wasDev) { $('over').hidden = false; showMatchStats(); }
 }
 function mvpSpawn() {                                                                       // 등장 연출 입자
-  const M = mvp, L = MVP_LOOK[M.key], P = M.parts, n = {roach:140, coin:70, feather:80, drop:90, ink:7, shard:70, spark:90, tracer:12, petal:90, flame:90, bolt:9, chain:40, apple:40, nail:70, eye:36, bus:1, raven:100}[L.fx] || 60;
+  const M = mvp, L = MVP_LOOK[M.key], P = M.parts, n = {bone:110, roach:140, coin:70, feather:80, drop:90, ink:7, shard:70, spark:90, tracer:12, petal:90, flame:90, bolt:9, chain:40, apple:40, nail:70, eye:36, bus:1, raven:100}[L.fx] || 60;
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2, side = Math.random() < .5 ? -1 : 1;
     P.push({i, a, side, r0:1.2 + Math.random() * .6, ra:.18 + Math.random() * .22, sp:.6 + Math.random() * .9, ph:Math.random() * 7, s:.6 + Math.random() * .7, delay:Math.random() * .35});
@@ -21963,6 +21973,7 @@ const MVP_ACT = {
   },
 
   araya:A=>{const a=A.a,k=mE(mClamp(a/.55,0,1)),slash=mClamp((a-.35)/.42,0,1);return{back:g=>{g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.65*k;for(let i=0;i<5;i++){const rr=A.Rb*(1.2+i*.38);g.strokeStyle=i%2?'rgba(50,130,255,.45)':'rgba(155,210,255,.7)';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(A.x,A.floor-A.Rb*.5,rr,rr*.28,-.25+i*.12,a*.8+i,a*.8+i+Math.PI*1.35);g.stroke();}g.restore();},front:g=>{if(slash<=0)return;g.save();g.globalCompositeOperation='lighter';g.globalAlpha=1-slash*.45;g.lineCap='round';g.shadowColor='#3988ff';g.shadowBlur=A.Rb*.3;g.strokeStyle='#1457b8';g.lineWidth=A.Rb*(.32*(1-slash*.5));g.beginPath();g.moveTo(A.x-A.Rb*3,A.floor-A.Rb*3.2);g.quadraticCurveTo(A.x+A.Rb*.3,A.floor-A.Rb*1.1,A.x+A.Rb*3.4,A.floor-A.Rb*.35);g.stroke();g.strokeStyle='#d9edff';g.lineWidth=A.Rb*.055;g.stroke();g.restore();}};},
+  callisto:A=>{const a=A.a,open=mE(mClamp(a/.5,0,1)),slash=mClamp((a-.55)/.55,0,1),pulse=.5+.5*Math.sin(a*7);return{back:g=>{g.save();g.globalCompositeOperation='lighter';g.translate(A.x,A.floor-A.Rb*1.2);for(let q=0;q<4;q++){g.globalAlpha=open*(.45-q*.07);g.strokeStyle=q%2?'#e8e0d2':'#d83b52';g.lineWidth=A.Rb*.035;g.beginPath();g.ellipse(0,0,A.Rb*(1.1+q*.42),A.Rb*(.3+q*.1),a*.2+q*.7,0,Math.PI*2);g.stroke();}for(let i=0;i<18;i++){const th=i*Math.PI/9+a*1.8,rr=A.Rb*(1.1+((i%3)*.35));g.fillStyle=i%2?'#f4eee2':'#d83b52';g.globalAlpha=open*.75;g.beginPath();g.ellipse(Math.cos(th)*rr,Math.sin(th)*rr*.42,A.Rb*.055,A.Rb*.16,th,0,7);g.fill();}g.restore();},front:g=>{if(slash<=0)return;g.save();g.globalCompositeOperation='lighter';g.globalAlpha=slash;g.translate(A.x+A.Rb*.65,A.floor-A.Rb*1.45);g.rotate(-.5+slash*.8);g.shadowColor='#ed4058';g.shadowBlur=A.Rb*.5;g.fillStyle='#eee8d9';g.strokeStyle='#9f293e';g.lineWidth=A.Rb*.06;g.beginPath();g.moveTo(-A.Rb*.2,A.Rb*.1);g.lineTo(A.Rb*1.9,-A.Rb*2.2);g.lineTo(A.Rb*1.45,-A.Rb*.65);g.lineTo(A.Rb*2.1,-A.Rb*.25);g.lineTo(A.Rb*.35,A.Rb*.35);g.closePath();g.fill();g.stroke();g.strokeStyle='#d83b52';g.lineWidth=A.Rb*.12;g.beginPath();g.moveTo(-A.Rb*.2,A.Rb*.1);g.lineTo(A.Rb*.65,-A.Rb*.8);g.stroke();for(let i=0;i<8;i++){const th=i*Math.PI/4+a*2;g.fillStyle=i%2?'#fff':'#d83b52';g.globalAlpha=.35+.5*pulse;g.beginPath();g.arc(Math.cos(th)*A.Rb*2.2,Math.sin(th)*A.Rb*1.7,A.Rb*.045,0,7);g.fill();}g.restore();}};},
   angela: A => { // 마도서를 펼쳐 푸른 페이지 마법진과 빛의 책장을 전개
     const a=A.a, open=mE(mClamp(a/.42,0,1)), pulse=.5+.5*Math.sin(a*5.2), burst=mClamp((a-.48)/.42,0,1);
     return {back:g=>{
@@ -22475,6 +22486,7 @@ function mvpIntro(g, W2, H2, cx, cy, S, M, L) {                                 
     const dir = a + p.side * Math.PI / 2, s = p.s * S * .028;
     g.globalAlpha = al; g.save(); g.translate(x, y);
     switch (L.fx) {
+      case 'bone': g.rotate(dir+life*.8); g.fillStyle=p.i%2?'#f4eee2':'#b83249'; g.strokeStyle='rgba(70,20,30,.8)'; g.lineWidth=1; g.beginPath(); g.moveTo(-s*1.8,-s*.45);g.lineTo(-s*.5,-s*.25);g.lineTo(0,-s*1.7);g.lineTo(s*.5,-s*.25);g.lineTo(s*1.8,-s*.45);g.lineTo(s*.8,s*.35);g.lineTo(0,s*1.8);g.lineTo(-s*.8,s*.35);g.closePath();g.fill();g.stroke();break;
       case 'roach': g.rotate(dir); g.fillStyle = '#2a1608'; g.beginPath(); g.ellipse(0, 0, s * 1.6, s * .9, 0, 0, 7); g.fill(); g.fillStyle = '#5a3a20'; g.beginPath(); g.ellipse(-s * .3, 0, s * 1.1, s * .6, 0, 0, 7); g.fill(); g.strokeStyle = '#1a0e04'; g.lineWidth = 1; for (const q of [-1, 1]) for (let l = -1; l <= 1; l++) { g.beginPath(); g.moveTo(l * s * .6, 0); g.lineTo(l * s * .6 + Math.sin(life * 30 + l) * s * .3, q * s * 1.4); g.stroke(); } g.beginPath(); g.moveTo(s * 1.5, 0); g.quadraticCurveTo(s * 2.6, -s, s * 3, -s * .4); g.moveTo(s * 1.5, 0); g.quadraticCurveTo(s * 2.6, s, s * 3, s * .4); g.stroke(); break;
       case 'coin': g.scale(Math.cos(life * 8 + p.ph), 1); g.fillStyle = '#e6b93c'; g.beginPath(); g.arc(0, 0, s * 1.3, 0, 7); g.fill(); g.strokeStyle = '#fff0b0'; g.lineWidth = 1.2; g.stroke(); break;
       case 'feather': g.rotate(dir + Math.sin(life * 4 + p.ph)); g.fillStyle = p.i % 2 ? '#f0f0f4' : '#1a1a20'; g.beginPath(); g.ellipse(0, 0, s * 2.2, s * .7, 0, 0, 7); g.fill(); g.strokeStyle = 'rgba(128,128,140,.8)'; g.lineWidth = .8; g.beginPath(); g.moveTo(-s * 2.2, 0); g.lineTo(s * 2.2, 0); g.stroke(); break;
@@ -24533,6 +24545,7 @@ const cbYiW = () => {                                                 // 이상:
   const m = ms[0]; if (m) castSkill(P, 'W', Math.atan2(m.y - P.y, m.x - P.x), Math.min(1, Math.hypot(m.x - P.x, m.y - P.y) / R));
 };
 const CX_COMBO = {
+  callisto:[{name:'재료의 완성',sum:'E로 적의 퇴로를 막고 기절시킨 뒤 Q와 W 연속 찌르기로 재료 표식을 가진 적에게 출혈을 누적합니다. 마지막 R로 주변을 휩쓸어 마무리하고, 예술 상태라면 흡혈로 전투를 이어갑니다.',steps:[['P','재료 표식이 붙은 적을 우선 공격합니다. 처치 관여로 영감을 모아 5중첩 예술 상태를 준비합니다.'],['E','티비아의 멜로디를 적의 이동 경로에 설치해 1.5초 뒤 기절시킵니다. 준비 중에는 움직이지 말고 안전한 위치를 확보합니다.'],['Q','기절한 적에게 부채꼴 참격을 적중시켜 피해의 20%를 3초 출혈로 남기고 자신과 가장 가까운 아군을 회복시킵니다.'],['W','반달리즘은 사절이랍니다를 1·2타 연속 적중시켜 출혈을 갱신하고 3타 돌진 찌르기까지 연결합니다.'],['R','폐장을 충전해 주변 적을 기절시키고 광역 피해와 강화 출혈로 교전을 마무리합니다.']],chain:(A,S)=>[S.k('E'),S.k('Q'),S.k('W'),S.k('W',{keep:true,after:.25,force:true}),S.k('W',{keep:true,after:.25,force:true}),S.k('R')]}],
   araya:[{name:'시간의 필연',sum:'Q로 일직선 공간에 흉터를 새기고, 폭발을 기다리는 동안 E로 표식 대상에게 순간이동합니다. 미래 폼에서는 치명타 폭딜, 과거·현재 폼에서는 지속 피해를 극대화하는 아라야의 핵심 연계예요.',steps:[['P','현재 시간 폼을 확인합니다. 미래라면 순간 폭딜, 과거·현재라면 지속 피해를 중심으로 교전합니다.'],['Q','적을 향해 돌진하며 공간의 흉터를 남깁니다. 1초 뒤 경로 전체가 폭발합니다.'],['E','흉터가 새겨진 적에게 순간이동해 추가 피해를 입힙니다.'],['W','근접한 적들을 부채꼴로 베고 둔화시키며 챔피언 적중 수만큼 보호막을 얻습니다.'],['R','핵심 적에게 극 공간참을 적중시켜 1.5초 동안 정지시키고, 이어지는 광역 폭발로 한타를 마무리합니다.']],chain:(A,S)=>[S.k('Q'),S.k('E'),S.k('W'),S.k('R')]}],
   binah:[{name:'검은 까마귀의 조율',sum:'조율자를 소환해 적을 추격하게 하고, Q·E로 적을 묶은 뒤 조율자의 연속 공격으로 피해와 회복, 출혈을 누적하는 비나의 소환수 연계예요.',steps:[['R','조율자 둘을 소환해 적 챔피언을 각각 추적하게 합니다. 조율자는 공격할 때마다 피해량만큼 비나를 회복시키고, 같은 피해량의 출혈을 3초에 걸쳐 남깁니다.'],['Q','단일 기둥을 쓰러뜨려 조율자가 공격할 적을 둔화·속박합니다.'],['E','넓은 황금 파도를 보내 여러 적에게 진동을 쌓고 조율자의 공격 기회를 만듭니다.'],['W','조율자의 공격 대상과 거리를 조절하며 안전한 위치에서 지원합니다.'],['R','조율자가 지정한 적을 황금 까마귀의 추가 타격으로 마무리합니다.']],chain:(A,S)=>[S.k('R'),S.k('Q'),S.k('E'),S.k('W'),S.k('R')]}],
   philip:[{name:'밀랍날개의 개화',sum:'체력이 위험해졌을 때 E.G.O를 발현해 밀랍날개 형태로 전환하고, 강화된 검격과 방어 능력으로 적을 압박한 뒤 타오르는 일격으로 전장을 가로질러 마무리하는 필립의 연계예요.',steps:[['R','체력이 30% 이하일 때 불안정 개화 E.G.O를 발동합니다. 3초 동안 무적 상태로 변신을 준비하고, 변신이 완료되면 체력을 전부 회복하며 20초 동안 밀랍날개 형태가 됩니다.'],['E','후회로 공격력을 60% 높이고 받는 피해를 20% 줄이며, 체력도 회복합니다.'],['평타','불꽃을 두른 롱소드로 적을 압박하고 화상을 누적합니다.'],['Q','낙인을 세 번 적중시켜 마지막 검격의 2초 기절과 3초 화상을 노립니다.'],['W','깃털 방패로 전방 공격을 막아내며 반격을 준비합니다.'],['R','타오르는 일격을 1.5초 준비한 뒤 긴 직선으로 돌진해 적을 기절시키고, 스킬 피해량의 70%에 적중한 적 수를 곱한 화상 피해를 5초에 걸쳐 남깁니다.']],chain:(A,S)=>[S.k('R'),S.k('E',{after:3.1}),S.atk(),S.k('Q'),S.k('Q'),S.k('Q'),S.k('W'),S.k('R')]}],
