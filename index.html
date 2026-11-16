@@ -5012,16 +5012,14 @@ function callistoBleed(src,u,total,duration=3){
 function callistoMarkTick(c){
  if(!c||c.key!=='callisto'||!c.alive)return;
  if(c.callistoArt&&c.callistoArtUntil<=time){c.callistoArt=false;c.callistoInspiration=0;}
- if(!c.callistoArt){
-  const foes=heroes.filter(u=>u.alive&&u.team!==c.team&&targetable(u));
-  foes.sort((a,b)=>dist(c,a)-dist(c,b));
-  const next=foes[0]||null;
-  if(next){
-   if(c.callistoMarked&&c.callistoMarked!==next&&c.callistoMarked.callistoMarkedBy===c)c.callistoMarked.callistoMarkedBy=null;
-   c.callistoMarked=next;next.callistoMarkedBy=c;next.callistoMarkUntil=time+2.5;
-   fx.push({type:'burst',x:next.x,y:next.y,r:next.r*1.5,t:0,life:.5,col:'#f4f0e8'});
-   text(next.x,next.y-next.r-E(35),'재료','#fff8e8',true,.8);
-  }
+ const foes=heroes.filter(u=>u.alive&&u.team!==c.team&&targetable(u));
+ foes.sort((a,b)=>dist(c,a)-dist(c,b));
+ const next=foes[0]||null;
+ if(next){
+  if(c.callistoMarked&&c.callistoMarked!==next&&c.callistoMarked.callistoMarkedBy===c)c.callistoMarked.callistoMarkedBy=null;
+  if(c.callistoMarked!==next)text(next.x,next.y-next.r-E(35),'재료','#fff8e8',true,.8);
+  c.callistoMarked=next;next.callistoMarkedBy=c;next.callistoMarkUntil=time+2.5;
+  if(c.callistoMarkFxAt<=time||!Number.isFinite(c.callistoMarkFxAt)){c.callistoMarkFxAt=time+.55;fx.push({type:'burst',x:next.x,y:next.y,r:next.r*1.5,t:0,life:.5,col:'#f4f0e8'});}
  }
 }
 function callistoStack(c){
