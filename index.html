@@ -3844,7 +3844,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (isChamp(src) && src.alive) {                    // 흡혈
     const heal = amount * ((src.omni || 0) + (opts.basic ? src.ls || 0 : 0) + (src.vampT > 0 ? KY.R.vamp : 0)
                           + (hasItem(src, 'mimicry') ? .12 * (1 - src.hp / src.maxHp) : 0) + (src.key==='callisto'&&src.callistoArt&&isChamp(tgt)?1:0))
-               + (src.key === 'callisto' && isMinion(tgt) ? amount * .80 : 0); // 칼리스토: 미니언 피해의 80% 흡혈
+               + (src.key === 'callisto' && isMinion(tgt) ? amount * .60 : 0); // 칼리스토: 미니언 피해의 60% 흡혈
     if (heal > 0) { const beforeHp = src.hp; src.hp = Math.min(src.maxHp, src.hp + heal * (src.spBrand && time < src.spBrand.until ? .6 : 1)); src.healDone = (src.healDone || 0) + Math.max(0, src.hp - beforeHp); }   // 불태우는 낙인: 회복 감소
   }
   // 게부라 Q·E 흡혈: 평상시 실제 적 체력 피해의 30%, 붉은안개 발현 준비·변신 중 45%
