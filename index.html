@@ -13007,6 +13007,31 @@ function aiCombo(b, p) {
     if (readyQ && d < E(360)) { castSkill(b,'Q',a); return true; }
     return false;
   }
+  if (b.key === 'callisto') {
+    const a = Math.atan2(p.y - b.y, p.x - b.x);
+    const foes = enemiesOf(b).filter(e => e.alive && targetable(e));
+    const close = foes.filter(e => dist(e, b) <= E(340));
+    const lineTarget = foes.find(e => {
+      const dx=e.x-b.x, dy=e.y-b.y, along=dx*Math.cos(a)+dy*Math.sin(a);
+      const side=Math.abs(-dx*Math.sin(a)+dy*Math.cos(a));
+      return along>0 && along<E(760)+e.r && side<E(95)+e.r;
+    });
+    // 칼리스토는 전용 스킬 판정이므로 범용 aimShape/skillEst에 맡기지 않고 직접 사용한다.
+    if (ready('R') && (close.length >= 2 || (close.length >= 1 && (hpP < .5 || hpB > .65)))) {
+      castSkill(b, 'R', a); return true;
+    }
+    if (ready('E') && lineTarget && d > E(180) && d < E(760)) {
+      castSkill(b, 'E', a); return true;
+    }
+    if (ready('Q') && d < E(360)) {
+      castSkill(b, 'Q', a); return true;
+    }
+    // W 3타는 중첩을 쌓아 강화하므로, 근접 사거리에서 연속 사용을 우선한다.
+    if (ready('W') && d < E(470)) {
+      castSkill(b, 'W', a); return true;
+    }
+    return false;
+  }
   if (b.key === 'binah') { const a=Math.atan2(p.y-b.y,p.x-b.x),readyK=k=>b.rank[k]>0&&b.cd[k]<=0; if(readyK('R')&&d<E(900)&&units.some(u=>u.alive&&isChamp(u)&&u.team!==b.team&&(u.bnFairy||0)>=40)){castSkill(b,'R',a);return true;} if(readyK('Q')&&d<E(430)){castSkill(b,'Q',a);return true;} if(readyK('W')&&d<E(500)){castSkill(b,'W',a);return true;} if(readyK('E')&&d<E(600)){castSkill(b,'E',a);return true;} return false; }
   if (b.key === 'gebura') {
     const a = Math.atan2(p.y-b.y,p.x-b.x), form = b.gbFormUntil > time;
