@@ -13445,7 +13445,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {araya:['jungle','mid','top'], gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','mid'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support'], moses:['support']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['support','top'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support'], moses:['support']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 제한과 팀 내부 연계 픽 판단을 분리
   const used = new Set(taken), partnerUsed = new Set(partnerTaken), out = [];
@@ -15153,7 +15153,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'binah' ? '#111018' : c.key === 'gebura' ? '#410812' : c.key === 'philip' ? '#8B8580' : c.key === 'angela' ? '#83dfff' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'binah' ? '#111018' : c.key === 'gebura' ? '#410812' : c.key === 'callisto' ? '#f2f0e9' : c.key === 'philip' ? '#8B8580' : c.key === 'angela' ? '#83dfff' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -15169,6 +15169,49 @@ function drawChamp(g, c) {
   if (c.key === 'binah') drawBinahBody(g,c);
   if (c.flashT > 0) { g.fillStyle = `rgba(255,255,255,${Math.min(1, c.flashT / .1) * .85})`; g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.fill(); }
   if (!window.__mvpDraw) { g.strokeStyle = c.flashT > 0 ? '#ffffff' : sideCol(c); g.lineWidth = E(5); g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.stroke(); }
+// 칼리스토: 구멍 난 흰 챙모자와 뼈·살점 대검
+function drawCallistoBody(g,c){
+  const r=c.r,a=c.face||0, swing=c.swingT>0?Math.sin(Math.min(1,c.swingT/.2)*Math.PI):0;
+  const ivory='#f4f2e9', edge='#b9b7ae', shadow='#77766f', bone='#e9e2d1', flesh='#9e3948', sinew='#d36b70';
+  g.save();g.translate(c.x,c.y);g.rotate(a);
+  // 등 뒤로 드러나는 불규칙한 뼈 칼날의 윤곽
+  g.save();g.translate(r*.66,r*.48);g.rotate(-.58+swing*.18);
+  g.fillStyle='#5c2932';g.strokeStyle='#321c23';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.12,-r*.12);g.lineTo(r*.08,-r*1.12);g.lineTo(r*.34,-r*1.38);g.lineTo(r*.28,-r*.78);g.lineTo(r*.58,-r*.48);g.lineTo(r*.42,-r*.2);g.lineTo(r*.18,r*.22);g.closePath();g.fill();g.stroke();
+  g.fillStyle=bone;g.strokeStyle='#a99d8a';g.lineWidth=E(1.7);
+  g.beginPath();g.moveTo(-r*.02,-r*.16);g.lineTo(r*.12,-r*1.18);g.lineTo(r*.35,-r*1.48);g.lineTo(r*.31,-r*.82);g.lineTo(r*.61,-r*.51);g.lineTo(r*.45,-r*.24);g.lineTo(r*.19,r*.24);g.closePath();g.fill();g.stroke();
+  g.strokeStyle=flesh;g.lineWidth=E(5);g.lineCap='round';
+  g.beginPath();g.moveTo(r*.1,-r*.34);g.bezierCurveTo(-r*.02,-r*.62,r*.42,-r*.78,r*.31,-r*1.1);g.moveTo(r*.22,-r*.02);g.quadraticCurveTo(r*.56,-r*.24,r*.46,-r*.5);g.stroke();
+  g.fillStyle=sinew;g.beginPath();g.arc(r*.27,-r*.72,E(3.2),0,7);g.fill();g.restore();
+  // 흰색 코트와 어깨의 천 주름
+  g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(-r*.04,r*.22,r*.8,r*.65,0,0,7);g.fill();
+  g.fillStyle=ivory;g.strokeStyle=edge;g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.58,-r*.38);g.lineTo(-r*.38,-r*.78);g.lineTo(r*.22,-r*.82);g.lineTo(r*.58,-r*.34);g.lineTo(r*.48,r*.72);g.lineTo(-r*.56,r*.72);g.closePath();g.fill();g.stroke();
+  g.strokeStyle='#d0cec5';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.22,-r*.62);g.lineTo(-r*.05,r*.62);g.moveTo(r*.22,-r*.6);g.lineTo(r*.08,r*.35);g.stroke();
+  // 얼굴과 목
+  g.fillStyle='#d9c9bb';g.beginPath();g.ellipse(r*.02,-r*.62,r*.34,r*.32,0,0,7);g.fill();
+  g.fillStyle='#343239';g.beginPath();g.arc(r*.16,-r*.68,E(2.2),0,7);g.fill();
+  // 챙이 넓고 낡은 흰 모자: 챙에 뚫린 여러 구멍을 어두운 내부색으로 표현
+  g.fillStyle='#e8e7df';g.strokeStyle='#aaa99f';g.lineWidth=E(2);
+  g.beginPath();g.ellipse(r*.02,-r*.91,r*1.02,r*.22,-.04,0,7);g.fill();g.stroke();
+  g.fillStyle='#faf9f3';g.beginPath();g.ellipse(r*.02,-r*1.04,r*.55,r*.26,-.08,Math.PI,Math.PI*2);g.lineTo(r*.57,-r*.91);g.quadraticCurveTo(r*.05,-r*.73,-r*.5,-r*.91);g.closePath();g.fill();g.stroke();
+  for(const h of [[-.72,-.91,.105],[-.43,-.99,.075],[-.12,-.84,.09],[.2,-.98,.11],[.51,-.88,.075],[.76,-.94,.09]]){
+    g.fillStyle='#77766f';g.beginPath();g.ellipse(r*h[0],r*h[1],r*h[2],r*h[2]*.62,-.2,0,7);g.fill();
+    g.strokeStyle='#c4c1b7';g.lineWidth=E(1);g.stroke();
+  }
+  // 손잡이와 뼈·살점으로 이루어진 대검
+  g.save();g.translate(r*.58,r*.2);g.rotate(-.22-swing*.42);
+  g.strokeStyle='#4b3432';g.lineWidth=E(5);g.lineCap='round';g.beginPath();g.moveTo(-r*.12,0);g.lineTo(r*.42,-r*.12);g.stroke();
+  g.strokeStyle='#c6b9a5';g.lineWidth=E(3);g.beginPath();g.moveTo(r*.02,-r*.16);g.lineTo(r*.12,r*.16);g.stroke();
+  g.fillStyle=bone;g.strokeStyle='#9c907e';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(r*.34,-r*.2);g.lineTo(r*1.12,-r*.92);g.lineTo(r*1.02,-r*.47);g.lineTo(r*1.52,-r*.62);g.lineTo(r*1.28,-r*.18);g.lineTo(r*1.58,r*.02);g.lineTo(r*.72,r*.2);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#7f2938';g.beginPath();g.moveTo(r*.42,-r*.12);g.quadraticCurveTo(r*.84,-r*.55,r*1.34,-r*.48);g.lineTo(r*1.15,-r*.19);g.quadraticCurveTo(r*.76,r*.12,r*.42,-r*.12);g.fill();
+  g.strokeStyle=sinew;g.lineWidth=E(3);g.beginPath();g.moveTo(r*.56,-r*.16);g.bezierCurveTo(r*.78,-r*.48,r*1.1,-r*.32,r*1.36,-r*.5);g.moveTo(r*.7,r*.02);g.quadraticCurveTo(r*.96,-r*.1,r*1.22,-r*.22);g.stroke();
+  g.fillStyle='#f7eee0';for(let j=0;j<3;j++){g.beginPath();g.arc(r*(.82+j*.17),-r*(.3+j*.04),E(2.5),0,7);g.fill();}
+  g.restore();
+  g.restore();
+}
+  if (c.key === 'callisto') drawCallistoBody(g,c);
   if (c.key === 'roland') drawRolandBody(g,c);
   if (c.key === 'blueReverb') drawBlueReverbBody(g,c);
   if (c.key === 'liuEn') drawLiuEnBody(g,c);
@@ -24204,7 +24247,7 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], moses:['서포터','마법사'],
+  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['서포터','전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], moses:['서포터','마법사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
