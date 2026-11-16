@@ -2940,7 +2940,8 @@ function resize() {
   dpr = mobileRender ? 1 : (devicePixelRatio || 1); // 모바일만 저해상도 렌더링, PC는 기기의 기본 픽셀 밀도 사용
   vw = innerWidth; vh = innerHeight;
   cvs.width = vw * dpr; cvs.height = vh * dpr;
-  const portraitMobile = vw < vh && (matchMedia('(pointer: coarse)').matches || vw <= 760);\n  baseZoom = (portraitMobile ? Math.max(vh / 2200, vw / 1600) : Math.max(vh / 720, vw / 1600)) * S * VIEW_K; zoom = baseZoom * zoomMul;
+  const portraitMobile = vw < vh && (matchMedia('(pointer: coarse)').matches || vw <= 760);
+  baseZoom = (portraitMobile ? Math.max(vh / 2200, vw / 1600) : Math.max(vh / 720, vw / 1600)) * S * VIEW_K; zoom = baseZoom * zoomMul;
   ui = Math.max(0.72, Math.min(1, vh / 480));
   Object.assign(ATK_BTN, {r:46 * ui, maxDrag:95 * ui});
   Object.assign(SK_BTN, {r:30 * ui, maxDrag:80 * ui});
