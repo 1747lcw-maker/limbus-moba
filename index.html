@@ -13009,27 +13009,54 @@ function aiCombo(b, p) {
     return false;
   }
   if (b.key === 'callisto') {
-    const a = Math.atan2(p.y - b.y, p.x - b.x);
-    const foes = enemiesOf(b).filter(e => e.alive && targetable(e));
-    const close = foes.filter(e => dist(e, b) <= E(340));
-    const lineTarget = foes.find(e => {
-      const dx=e.x-b.x, dy=e.y-b.y, along=dx*Math.cos(a)+dy*Math.sin(a);
-      const side=Math.abs(-dx*Math.sin(a)+dy*Math.cos(a));
-      return along>0 && along<E(760)+e.r && side<E(95)+e.r;
-    });
-    // 칼리스토는 전용 스킬 판정이므로 범용 aimShape/skillEst에 맡기지 않고 직접 사용한다.
-    if (ready('R') && (close.length >= 2 || (close.length >= 1 && (hpP < .5 || hpB > .65)))) {
-      castSkill(b, 'R', a); return true;
+    // p가 현재 공격 대상으로 잡힌 적과 다르거나 거리가 잘못 계산되는 상황을 피하고,
+    // 실제 교전 가능한 적 챔피언을 기준으로 각 스킬의 적중 가능성을 따로 계산한다.
+    const foes = heroes.filter(e => e.alive && e.team !== b.team && targetable(e))
+      .sort((x,y) => dist(b,x) - dist(b,y));
+    if (!foes.length) return false;
+    const nearest = foes[0];
+    const angleTo = e => aimAt(b, e, .16);
+    const countHits = (ang, len, width, cone = false) => foes.filter(e => {
+      const d0 = dist(b,e);
+      if (d0 > len + e.r) return false;
+      if (cone) {
+        const delta = Math.abs(Math.atan2(Math.sin(Math.atan2(e.y-b.y,e.x-b.x)-ang),
+          Math.cos(Math.atan2(e.y-b.y,e.x-b.x)-ang)));
+        return delta < .72;
+      }
+      return inLine(b, ang, len, width, e);
+    }).length;
+    const close = foes.filter(e => dist(b,e) <= E(340) + e.r);
+    const hpSelf = b.hp / b.maxHp;
+    const woundedEnemy = close.some(e => e.hp / e.maxHp <= .38);
+    const bestAngle = (len, width, cone = false) => {
+      let best = null, hits = 0;
+      for (const e of foes) {
+        const ang = angleTo(e), n = countHits(ang, len, width, cone);
+        if (n > hits) { hits = n; best = ang; }
+      }
+      return { angle: best, hits };
+    };
+    const qAim = bestAngle(E(360), E(360), true);
+    const wAim = bestAngle(E(470), E(84));
+    const eAim = bestAngle(E(760), E(150));
+
+    // 궁극기는 실제 원형 범위 안에 적이 있을 때만 사용한다.
+    if (ready('R') && close.length &&
+        (close.length >= 2 || woundedEnemy || (close.length === 1 && hpSelf > .55))) {
+      if (castSkill(b, 'R', angleTo(close[0]))) return true;
     }
-    if (ready('E') && lineTarget && d > E(180) && d < E(760)) {
-      castSkill(b, 'E', a); return true;
+    // E는 예고 범위에 적이 들어오는 방향을 골라 사용한다.
+    if (ready('E') && eAim.hits > 0 && dist(b, nearest) > E(150)) {
+      if (castSkill(b, 'E', eAim.angle)) return true;
     }
-    if (ready('Q') && d < E(360)) {
-      castSkill(b, 'Q', a); return true;
+    // Q는 부채꼴에 적이 실제로 들어오는 방향을 골라, 다수 적중과 회복을 노린다.
+    if (ready('Q') && qAim.hits > 0) {
+      if (castSkill(b, 'Q', qAim.angle)) return true;
     }
-    // W 3타는 중첩을 쌓아 강화하므로, 근접 사거리에서 연속 사용을 우선한다.
-    if (ready('W') && d < E(470)) {
-      castSkill(b, 'W', a); return true;
+    // W는 사거리 내 적을 향해 사용하고, 적중하면 다음 두 타격까지 이어서 강화한다.
+    if (ready('W') && wAim.hits > 0) {
+      if (castSkill(b, 'W', wAim.angle)) return true;
     }
     return false;
   }
