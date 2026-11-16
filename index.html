@@ -1211,7 +1211,7 @@ const STATS = {
            hp:[530, 102], regen:[1.4, 0.12], ad:[60, 3.2], armor:[24, 4.5], mr:[31, 2.7], as:[0.67, 0.028]},
   liuEn: {name:'뤼엔', r:31, range:110, speed:305, acquire:270, ap:[22, 8],
            hp:[650, 122], regen:[1.8, 0.16], ad:[62, 3.5], armor:[35, 5.0], mr:[33, 2.8], as:[0.67, 0.026]},
-  callisto: {name:'칼리스토', r:30, range:100, speed:300, acquire:265,
+  callisto: {name:'칼리스토', r:30, range:100, speed:300, acquire:265, roles:['fighter','support'],
            hp:[640, 120], regen:[1.7, 0.15], ad:[65, 3.8], armor:[34, 5.0], mr:[33, 2.8], as:[0.66, 0.025]},
   gebura: {name:'게부라', r:31, range:100, speed:320, acquire:285,
            hp:[610, 112], regen:[1.55, 0.14], ad:[70, 4.4], armor:[29, 4.6], mr:[29, 2.6], as:[0.70, 0.032]},
@@ -3843,7 +3843,7 @@ function damage(src, tgt, amount, opts = {}) {
   if (isChamp(src) && src.gdGuard && tgt.team !== src.team) gdLifeline(src, amount);   // 귀도 집행 유예: 지키는 아군 딜의 15% 회복
   if (isChamp(src) && src.alive) {                    // 흡혈
     const heal = amount * ((src.omni || 0) + (opts.basic ? src.ls || 0 : 0) + (src.vampT > 0 ? KY.R.vamp : 0)
-                          + (hasItem(src, 'mimicry') ? .12 * (1 - src.hp / src.maxHp) : 0) + (src.key==='callisto'&&src.callistoArt?1:0));       // 미미크리
+                          + (hasItem(src, 'mimicry') ? .12 * (1 - src.hp / src.maxHp) : 0) + (src.key==='callisto'&&src.callistoArt&&isChamp(tgt)?.9:0));       // 미미크리
     if (heal > 0) { const beforeHp = src.hp; src.hp = Math.min(src.maxHp, src.hp + heal * (src.spBrand && time < src.spBrand.until ? .6 : 1)); src.healDone = (src.healDone || 0) + Math.max(0, src.hp - beforeHp); }   // 불태우는 낙인: 회복 감소
   }
   // 게부라 Q·E 흡혈: 평상시 실제 적 체력 피해의 30%, 붉은안개 발현 준비·변신 중 45%
@@ -13583,7 +13583,7 @@ const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'�
 const ROLE_PREF = {araya:['jungle','mid','top'], gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
-  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['support','top'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support'], moses:['support']};
+  alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','support'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support'], moses:['support']};
 const ROLE_W = [1, .4, .2];                                             // 선호 순위별 등장 가중치 (부라인 챔피언도 가끔 나옴)
 function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 제한과 팀 내부 연계 픽 판단을 분리
   const used = new Set(taken), partnerUsed = new Set(partnerTaken), out = [];
