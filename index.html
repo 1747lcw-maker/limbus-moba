@@ -3950,7 +3950,7 @@ function damage(src, tgt, amount, opts = {}) {
 
 // ═════════════ 적중 피드백 (모든 챔피언 공통) ═════════════
 // 맞은 대상: 하얗게 번쩍 + 맞은 방향으로 살짝 밀림. 스킬이면 챔피언 색의 충격 고리, 챔피언을 맞히면 조준 표시(X)
-const HIT_COL = {moses:'#d8b65a',araya:'#3988ff',dongrang:'#f0d070', ran:'#d8ff4a', effie:'#b8c8ff', saude:'#bfe6ff', xichun:'#ff4050', wei:'#d8dce2', bongdad:'#ffb060', ricardo:'#c77dff', gubo:'#e0303e', dongbaek:'#ffd84a', thoma:'#e8d48a', guido:'#d8dce4', marten:'#ffd36a', alyssa:'#ffb04a', hohenheim:'#9fe0ff', gregor:'#ffb347', rodion:'#e8ecf4', yisang:'#ffffff', ryoshu:'#ff5a3a', faust:'#ffb8d2', donq:'#ffd23f', outis:'#8ff0b0', honglu:'#8ff5e0', sinclair:'#e8f070', heathcliff:'#d9a8ff', meursault:'#bcd6ff', yuri:'#ffd0d8', kromer:'#ffe7a3', vergil:'#ff6a5a', charon:'#bfe8de', bot:'#ff6b6b'};
+const HIT_COL = {callisto:'#f2f0e9',moses:'#d8b65a',araya:'#3988ff',dongrang:'#f0d070', ran:'#d8ff4a', effie:'#b8c8ff', saude:'#bfe6ff', xichun:'#ff4050', wei:'#d8dce2', bongdad:'#ffb060', ricardo:'#c77dff', gubo:'#e0303e', dongbaek:'#ffd84a', thoma:'#e8d48a', guido:'#d8dce4', marten:'#ffd36a', alyssa:'#ffb04a', hohenheim:'#9fe0ff', gregor:'#ffb347', rodion:'#e8ecf4', yisang:'#ffffff', ryoshu:'#ff5a3a', faust:'#ffb8d2', donq:'#ffd23f', outis:'#8ff0b0', honglu:'#8ff5e0', sinclair:'#e8f070', heathcliff:'#d9a8ff', meursault:'#bcd6ff', yuri:'#ffd0d8', kromer:'#ffe7a3', vergil:'#ff6a5a', charon:'#bfe8de', bot:'#ff6b6b'};
 function hitFeedback(src, tgt, opts) {
   const a = Math.atan2(tgt.y - src.y, tgt.x - src.x);
   tgt.flashT = opts.skill ? .16 : .1;
@@ -5048,11 +5048,12 @@ function callistoCast(c,key,ang){
   }else{
    c.callistoWStacks=c.callistoWStacks||0;
    if(c.callistoWAt&&time-c.callistoWAt>5)c.callistoWStacks=0;
-   const third=c.callistoWStacks>=2;c.callistoWStacks=third?0:c.callistoWStacks+1;c.callistoWAt=time;
+   const third=c.callistoWStacks>=2;if(third)c.callistoWStacks=0;c.callistoWAt=time;
    const len=E(third?390:470),wid=E(third?62:42);
    if(third){const sx=c.x,sy=c.y;c.x+=Math.cos(a)*E(115);c.y+=Math.sin(a)*E(115);c.callistoDash={sx,sy,ex:c.x,ey:c.y,until:time+.45};fx.push({type:'ieShot',x:sx,y:sy,ang:a,len:E(140),t:0,life:.45,wide:true});}
    hits=segHits(c,a,len,wid);
   }
+  if(key==='W'&&!third&&hits.length)c.callistoWStacks=Math.min(2,(c.callistoWStacks||0)+1);
   let total=0;
   for(const u of hits){
    if(isChamp(u))callForHelp(c,u);
