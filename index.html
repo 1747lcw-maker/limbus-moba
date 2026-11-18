@@ -5127,12 +5127,12 @@ function castPurpleTear(c,key,ang,frac,n){
  if(key==='Q'){
   const travel=Math.min(len,E(340));c.x+=Math.cos(a)*travel;c.y+=Math.sin(a)*travel;
   hits.forEach(u=>damage(c,u,75+lv*28+c.ad*.95,{skill:true,color}));
-  spikeFx(c,a,travel,E(76),.48,false);
+  fx.push({type:'ptSlash',owner:c,ang:a,len:travel,wid:E(76),t:0,life:.48,thin:false});
   fx.push({type:'burst',x:c.x,y:c.y,r:E(105),t:0,life:1.5,col:dark});
   fx.push({type:'burst',x:c.x,y:c.y,r:E(145),t:0,life:.7,col:color});sfxPlay('swing',c.x,c.y,1.3,.72);setStance(0);
  }else if(key==='W'){
   hits.forEach((u,i)=>{damage(c,u,90+lv*30+c.ad*1.05,{skill:true,color});if(u.alive&&!u.structure){if(i===0){u.x+=Math.cos(a)*E(45);u.y+=Math.sin(a)*E(45);}else{u.slowT=Math.max(u.slowT||0,1.5);u.slowAmt=Math.max(u.slowAmt||0,.32);}}});
-  spikeFx(c,a,len,E(82),.62,true);fx.push({type:'burst',x:c.x+Math.cos(a)*len*.72,y:c.y+Math.sin(a)*len*.72,r:E(90),t:0,life:.7,col:color});sfxPlay('zap',c.x,c.y,1.25,.8);setStance(1);
+  fx.push({type:'ptSlash',owner:c,ang:a,len,wid:E(82),t:0,life:.62,thin:true});fx.push({type:'burst',x:c.x+Math.cos(a)*len*.72,y:c.y+Math.sin(a)*len*.72,r:E(90),t:0,life:.7,col:color});sfxPlay('zap',c.x,c.y,1.25,.8);setStance(1);
  }else if(key==='E'){
   c.shield=Math.max(c.shield||0,c.maxHp*.22);c.shieldT=1.5;c.ptMirageUntil=time+1.5;c.ptCounterUsed=false;
   fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2.8,t:0,life:1.5,col:color});text(c.x,c.y-c.r-E(42),'신기루 방벽','#e4c8ff',true,1);sfxPlay('ult',c.x,c.y,.85,1.2);setStance(3);
@@ -16332,6 +16332,27 @@ function plate(g, x0, x1, w0, w1) {
 }
 
 // Q·W: 벌레 팔이 쭉 뻗었다가 다시 거둬들임. 마디(쐐기 판)가 겹쳐 이어지고 끝은 갈고리/바늘
+function drawPurpleTearSlash(g,f,k){
+  const c=f.owner;if(!c)return;
+  const t=f.t,life=f.life,fade=Math.max(0,1-k);
+  const out=.09,hold=life*.58;
+  const reach=t<out?easeOut(t/out):t<hold?1:1-easeOut((t-hold)/(life-hold));
+  const len=E(28)+(f.len-E(28))*reach,w=f.wid*(f.thin?.34:.48);
+  g.save();g.translate(c.x,c.y);g.rotate(f.ang);g.globalAlpha=fade;
+  g.shadowColor='#bd78ff';g.shadowBlur=E(18);
+  g.lineCap='round';g.lineJoin='round';
+  // 보라눈물 전용: 차원 균열을 닮은 자색 초승달형 검광
+  g.strokeStyle='rgba(93,42,145,.72)';g.lineWidth=w;
+  g.beginPath();g.moveTo(E(18),-w*.16);g.quadraticCurveTo(len*.48,-w*.95,len,w*.08);g.stroke();
+  g.strokeStyle='#a85cff';g.lineWidth=Math.max(E(2),w*.42);
+  g.beginPath();g.moveTo(E(20),-w*.12);g.quadraticCurveTo(len*.52,-w*.72,len,w*.06);g.stroke();
+  g.strokeStyle='#f0ddff';g.lineWidth=Math.max(E(1),w*.11);
+  g.beginPath();g.moveTo(E(24),-w*.08);g.quadraticCurveTo(len*.58,-w*.42,len-E(8),w*.03);g.stroke();
+  // 균열 조각
+  g.shadowBlur=0;g.strokeStyle='rgba(215,177,255,.85)';g.lineWidth=E(2);
+  for(let i=0;i<3;i++){const x=len*(.35+i*.18),y=-w*(.35-i*.08);g.beginPath();g.moveTo(x,y);g.lineTo(x+E(12),y-E(9));g.stroke();}
+  g.restore();
+}
 function drawSpike(g, f) {
   const c = f.owner, t = f.t;
   const outT = .08, backT = f.life * .6;
@@ -20601,7 +20622,7 @@ function drawFx(g) {
     if(f.type.startsWith('br')){drawBlueReverbFx(g,f,k);continue;}
     if(f.type.startsWith('bn')){drawBinahFx(g,f,k);continue;}
     if (f.type === 'bloodBurst') { drawBloodFx(g, f, k); continue; }
-    if (f.type === 'spike') drawSpike(g, f);
+    if (f.type === 'ptSlash') drawPurpleTearSlash(g,f,k);\n    else if (f.type === 'spike') drawSpike(g, f);
     else if (f.type === 'puff') {
       g.globalAlpha = (1 - k) * .7; g.strokeStyle = '#e9e2d4'; g.lineWidth = E(3) * (1 - k);
       g.beginPath(); g.ellipse(f.x, f.y, f.r * (1 + k * 1.2), f.r * .4 * (1 + k * 1.2), 0, 0, 7); g.stroke(); g.globalAlpha = 1;
