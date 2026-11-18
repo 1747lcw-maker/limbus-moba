@@ -15350,7 +15350,7 @@ function drawChamp(g, c) {
     }
     g.restore();
   }
-  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'binah' ? '#111018' : c.key === 'gebura' ? '#410812' : c.key === 'callisto' ? '#f2f0e9' : c.key === 'philip' ? '#8B8580' : c.key === 'angela' ? '#83dfff' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
+  const base = c.key === 'dongrang' ? DLC.coat : c.key === 'ran' ? RNC.coat : c.key === 'effie' ? EFC.coat : c.key === 'saude' ? SDC.coat : c.key === 'xichun' ? XCC.red : c.key === 'wei' ? XCC.wei : c.key === 'bongdad' ? BPC.apron : c.key === 'ricardo' ? RIC.coat : c.key === 'gubo' ? GBC.coat : c.key === 'dongbaek' ? DBC.coat : c.key === 'thoma' ? TMC.coat : c.key === 'guido' ? GDC.cape : c.key === 'marten' ? MTC.coat : c.key === 'alyssa' ? ALC.coat : c.key === 'hohenheim' ? HHC.coat : c.key === 'gregor' ? (rForm(c) ? '#2e1c0e' : CHITIN) : c.key === 'rodion' ? '#c9a27a' : c.key === 'yisang' ? '#15151a' : c.key === 'ishmael' ? '#e8792b' : c.key === 'ryoshu' ? '#c8232b' : c.key === 'faust' ? '#f4f3f7' : c.key === 'donq' ? '#f2c230' : c.key === 'sinclair' ? '#8b9c15' : c.key === 'heathcliff' ? '#6a3d9a' : c.key === 'meursault' ? '#1d3461' : c.key === 'yuri' ? '#c8405a' : c.key === 'kromer' ? '#ece4d6' : c.key === 'vergil' ? '#2b2c31' : c.key === 'charon' ? '#26393a' : c.key === 'roland' ? '#08090d' : c.key === 'blueReverb' ? '#173d68' : c.key === 'purpleTear' ? '#24113f' : c.key === 'liuEn' ? '#292a30' : c.key === 'gachiu' ? '#17151a' : c.key === 'naihwang' ? '#421018' : c.key === 'indigoElder' ? '#566b7d' : c.key === 'vespa' ? '#d5aa16' : c.key === 'binah' ? '#111018' : c.key === 'gebura' ? '#410812' : c.key === 'callisto' ? '#f2f0e9' : c.key === 'philip' ? '#8B8580' : c.key === 'angela' ? '#83dfff' : c.key === 'honglu' ? '#3fc7a8' : c.key === 'outis' ? '#1b5a33' : '#7a3438';
   if (c.key === 'alyssa') drawAlyssaBack(g, c);
   if (c.key === 'marten') drawMartenBack(g, c);
   if (c.key === 'guido') drawGuidoBack(g, c);
@@ -15364,8 +15364,35 @@ function drawChamp(g, c) {
     g.restore();
   }
   if (c.key === 'binah') drawBinahBody(g,c);
+  if (c.key === 'purpleTear') drawPurpleTearBody(g,c);
   if (c.flashT > 0) { g.fillStyle = `rgba(255,255,255,${Math.min(1, c.flashT / .1) * .85})`; g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.fill(); }
   if (!window.__mvpDraw) { g.strokeStyle = c.flashT > 0 ? '#ffffff' : sideCol(c); g.lineWidth = E(5); g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.stroke(); }
+// 보라눈물: 짙은 보라색 코트와 전용 일본도 '자색 단절'
+function drawPurpleTearBody(g,c){
+  const r=c.r, a=c.face||0, swing=c.swingT>0?Math.sin(Math.min(1,c.swingT/.2)*Math.PI):0;
+  g.save();g.translate(c.x,c.y);g.rotate(a);
+  // 등 뒤로 흐르는 보라색 외투
+  g.fillStyle='#170d29';g.strokeStyle='#7650a8';g.lineWidth=E(2);
+  g.beginPath();g.moveTo(-r*.42,-r*.35);g.lineTo(-r*1.12,-r*.72);g.lineTo(-r*1.02,r*1.22);g.lineTo(-r*.38,r*.88);g.lineTo(r*.08,r*1.12);g.lineTo(r*.42,r*.72);g.lineTo(r*.34,-r*.55);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#4b2675';g.beginPath();g.moveTo(-r*.42,-r*.2);g.lineTo(r*.18,-r*.5);g.lineTo(r*.55,r*.66);g.lineTo(-r*.34,r*.72);g.closePath();g.fill();
+  g.strokeStyle='#b78aff';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.18,-r*.25);g.lineTo(-r*.02,r*.62);g.stroke();
+  // 머리와 보라빛 머리카락 실루엣
+  g.fillStyle='#d9c5f5';g.beginPath();g.arc(-r*.12,-r*.72,r*.43,0,Math.PI*2);g.fill();
+  g.fillStyle='#241238';g.strokeStyle='#9b70d0';g.lineWidth=E(1.5);g.beginPath();g.moveTo(-r*.53,-r*.83);g.quadraticCurveTo(-r*.25,-r*1.52,r*.38,-r*1.08);g.lineTo(r*.22,-r*.48);g.lineTo(-r*.18,-r*.62);g.lineTo(-r*.48,-r*.34);g.closePath();g.fill();g.stroke();
+  // 손에 든 일본도: 흑자색 손잡이, 은보라색 날, 발광하는 칼날
+  g.save();g.translate(r*.12,r*.12);g.rotate(-.48+swing*.18);
+  g.shadowColor='#b879ff';g.shadowBlur=E(13);
+  g.strokeStyle='#d9b8ff';g.lineWidth=E(5);g.lineCap='round';g.beginPath();g.moveTo(r*.12,r*.05);g.lineTo(r*1.62,-r*1.18);g.stroke();
+  g.strokeStyle='#f1e5ff';g.lineWidth=E(1.7);g.beginPath();g.moveTo(r*.22,-r*.02);g.lineTo(r*1.58,-r*1.15);g.stroke();
+  g.shadowBlur=0;g.fillStyle='#241238';g.strokeStyle='#a879d8';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.1,r*.2);g.lineTo(r*.28,-r*.12);g.lineTo(r*.42,r*.02);g.lineTo(.04*r,r*.34);g.closePath();g.fill();g.stroke();
+  g.strokeStyle='#e0c4ff';g.lineWidth=E(3);g.beginPath();g.moveTo(r*.05,r*.18);g.lineTo(r*.3,-r*.04);g.stroke();
+  g.fillStyle='#c99aff';g.beginPath();g.arc(r*1.62,-r*1.18,E(2.4),0,Math.PI*2);g.fill();g.restore();
+  // 어깨 장식과 가슴의 자색 문양
+  g.fillStyle='#b98be8';g.beginPath();g.moveTo(-r*.48,-r*.35);g.lineTo(-r*.78,-r*.62);g.lineTo(-r*.3,-r*.58);g.closePath();g.fill();
+  g.strokeStyle='rgba(211,177,255,.9)';g.lineWidth=E(1.5);g.beginPath();g.moveTo(-r*.08,-r*.22);g.lineTo(r*.08,r*.18);g.lineTo(-r*.08,r*.48);g.stroke();
+  g.restore();
+}
+
 // 칼리스토: 구멍 난 흰 챙모자와 뼈·살점 대검
 function drawCallistoBody(g,c){
   const r=c.r,a=c.face||0, swing=c.swingT>0?Math.sin(Math.min(1,c.swingT/.2)*Math.PI):0;
