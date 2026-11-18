@@ -15367,7 +15367,7 @@ function drawChamp(g, c) {
   if (c.key === 'purpleTear') drawPurpleTearBody(g,c);
   if (c.flashT > 0) { g.fillStyle = `rgba(255,255,255,${Math.min(1, c.flashT / .1) * .85})`; g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.fill(); }
   if (!window.__mvpDraw) { g.strokeStyle = c.flashT > 0 ? '#ffffff' : sideCol(c); g.lineWidth = E(5); g.beginPath(); g.arc(c.x, c.y, c.r, 0, 7); g.stroke(); }
-// 보라눈물: 짙은 보라색 코트와 전용 일본도 '자색 단절'
+// 보라눈물: 짙은 보라색 코트와 세 자루의 전용 일본도
 function drawPurpleTearBody(g,c){
   const r=c.r, a=c.face||0, swing=c.swingT>0?Math.sin(Math.min(1,c.swingT/.2)*Math.PI):0;
   g.save();g.translate(c.x,c.y);g.rotate(a);
@@ -15376,10 +15376,34 @@ function drawPurpleTearBody(g,c){
   g.beginPath();g.moveTo(-r*.42,-r*.35);g.lineTo(-r*1.12,-r*.72);g.lineTo(-r*1.02,r*1.22);g.lineTo(-r*.38,r*.88);g.lineTo(r*.08,r*1.12);g.lineTo(r*.42,r*.72);g.lineTo(r*.34,-r*.55);g.closePath();g.fill();g.stroke();
   g.fillStyle='#4b2675';g.beginPath();g.moveTo(-r*.42,-r*.2);g.lineTo(r*.18,-r*.5);g.lineTo(r*.55,r*.66);g.lineTo(-r*.34,r*.72);g.closePath();g.fill();
   g.strokeStyle='#b78aff';g.lineWidth=E(2);g.beginPath();g.moveTo(-r*.18,-r*.25);g.lineTo(-r*.02,r*.62);g.stroke();
+
+  // 양옆을 호위하는 두 자루의 공중 부유 일본도
+  const float=(typeof time==='number'?Math.sin(time*3.2):0);
+  function floatingKatana(x,y,tilt,phase){
+    g.save();g.translate(x,y+float*r*.10*phase);g.rotate(tilt+(typeof time==='number'?Math.sin(time*2.4+phase)*.045:0));
+    g.shadowColor='#b879ff';g.shadowBlur=E(11);
+    g.strokeStyle='#29143f';g.lineWidth=E(7);g.lineCap='round';
+    g.beginPath();g.moveTo(0,r*.28);g.lineTo(r*.10,-r*1.12);g.stroke();
+    g.strokeStyle='#d9b8ff';g.lineWidth=E(4.2);
+    g.beginPath();g.moveTo(r*.02,r*.12);g.quadraticCurveTo(r*.12,-r*.52,r*.10,-r*1.42);g.stroke();
+    g.strokeStyle='#fff0ff';g.lineWidth=E(1.25);
+    g.beginPath();g.moveTo(r*.055,r*.08);g.lineTo(r*.13,-r*1.35);g.stroke();
+    g.shadowBlur=0;
+    g.strokeStyle='#171020';g.lineWidth=E(6);
+    g.beginPath();g.moveTo(-r*.04,r*.22);g.lineTo(r*.12,r*.62);g.stroke();
+    g.strokeStyle='#a879d8';g.lineWidth=E(2);
+    for(let i=0;i<4;i++){g.beginPath();g.moveTo(-r*.045,r*(.28+i*.075));g.lineTo(r*.105,r*(.34+i*.075));g.stroke();}
+    g.fillStyle='#d8b6ff';g.strokeStyle='#5b347c';g.lineWidth=E(1.5);
+    g.beginPath();g.ellipse(r*.04,r*.18,r*.19,r*.055,-.1,0,Math.PI*2);g.fill();g.stroke();
+    g.restore();
+  }
+  floatingKatana(-r*.38,-r*.30,-.16,-1);
+  floatingKatana(-r*.38,r*.42,.16,1);
+
   // 머리와 보라빛 머리카락 실루엣
   g.fillStyle='#d9c5f5';g.beginPath();g.arc(-r*.12,-r*.72,r*.43,0,Math.PI*2);g.fill();
   g.fillStyle='#241238';g.strokeStyle='#9b70d0';g.lineWidth=E(1.5);g.beginPath();g.moveTo(-r*.53,-r*.83);g.quadraticCurveTo(-r*.25,-r*1.52,r*.38,-r*1.08);g.lineTo(r*.22,-r*.48);g.lineTo(-r*.18,-r*.62);g.lineTo(-r*.48,-r*.34);g.closePath();g.fill();g.stroke();
-  // 손에 든 일본도: 흑자색 손잡이, 은보라색 날, 발광하는 칼날
+  // 보라눈물이 직접 휘두르는 주무기: 일본도 '자색 단절'
   g.save();g.translate(r*.12,r*.12);g.rotate(-.48+swing*.18);
   g.shadowColor='#b879ff';g.shadowBlur=E(13);
   g.strokeStyle='#d9b8ff';g.lineWidth=E(5);g.lineCap='round';g.beginPath();g.moveTo(r*.12,r*.05);g.lineTo(r*1.62,-r*1.18);g.stroke();
