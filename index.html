@@ -25097,7 +25097,7 @@ function demoInit() {
   document.body.classList.add('demo');
   chosenChamp = DEMO.champ; chosenRole = DEMO.champ==='indigoElder' ? (DEMO.role==='support'?'support':DEMO.role==='ranged'?'bottom':'top') : 'mid';
   resetGame();
-  if(player.key==='morris'&&DEMO.form==='bride'){player.morrisBride=true;player.range=440;player.acquire=500;if(player.st)player.st={...player.st,ranged:true,range:440};}
+  if(player.key==='morris'&&DEMO.form==='bride'){player.morrisInit=true;player.morrisBride=true;player.morrisRevives=0;player.morrisTransformUntil=0;player.morrisZones=[];player.morrisStructures=[];player.morrisNails=[];player.morrisEReady=false;player.morrisDuel=null;player.morrisDuelUntil=0;player.morrisBaseMaxHp=player.maxHp;player.morrisBaseAp=player.ap;player.range=440;player.acquire=500;if(player.st)player.st={...player.st,ranged:true,range:440};}
   started = true;
   $('menu').hidden = true; $('select').hidden = true;
   nextWave = 1e12;
