@@ -25416,7 +25416,7 @@ setInterval(musicRefresh,500);
     if(c.key!=='morris')return;
     if(c.morrisInit)return;
     c.morrisInit=true;c.morrisBride=false;c.morrisRevives=0;c.morrisTransformUntil=0;
-    c.morrisZones=[];c.morrisEReady=false;c.morrisDuel=null;c.morrisDuelUntil=0;
+    c.morrisZones=[];c.morrisStructures=[];c.morrisEReady=false;c.morrisDuel=null;c.morrisDuelUntil=0;
     c.morrisBaseMaxHp=c.maxHp;c.morrisBaseAp=c.ap;
     c.range=105;c.acquire=260;if(c.st)c.st={...c.st,ranged:false,range:105};
   }
@@ -25431,16 +25431,17 @@ setInterval(musicRefresh,500);
     c.morrisTransformUntil=time+2;c.morrisTransformKind=kind;c.morrisMoveLock=true;
     c.rootT=Math.max(c.rootT||0,time+2);c.cast=null;c.atkT=Math.max(c.atkT||0,2);
     morrisFx(c,kind==='bride'?M.gold:M.blue,E(100));
+    sfxPlay('phDarkBell',c.x,c.y,1.05);
     text(c.x,c.y-c.r-E(42),'기계음 · 변신 준비','#f2d34a',true,1);
   }
   function morrisCompleteTransform(c){
     const kind=c.morrisTransformKind;c.morrisTransformUntil=0;c.morrisMoveLock=false;
     if(kind==='bride'){
       c.morrisBride=true;c.range=440;c.acquire=500;if(c.st)c.st={...c.st,ranged:true,range:440};c.morrisRevives=0;
-      morrisFx(c,M.gold,E(145));text(c.x,c.y-c.r-E(48),'신부 강림','#f4d33d',true,1.1);
+      morrisFx(c,M.gold,E(145));sfxPlay('phTransformCrack',c.x,c.y,1.1);text(c.x,c.y-c.r-E(48),'신부 강림','#f4d33d',true,1.1);
     }else{
       c.morrisRevives++;c.hp=Math.min(c.maxHp,c.hp+c.maxHp*[.60,.30,.15][c.morrisRevives-1]);
-      morrisFx(c,M.gold,E(135));text(c.x,c.y-c.r-E(48),'검은 신 · 회복 '+c.morrisRevives+'/3','#f4d33d',true,1);
+      morrisFx(c,M.gold,E(135));sfxPlay('phTransformCrack',c.x,c.y,1);text(c.x,c.y-c.r-E(48),'검은 신 · 회복 '+c.morrisRevives+'/3','#f4d33d',true,1);
     }
   }
   function morrisCast(c,key,ang,frac){
@@ -25458,7 +25459,7 @@ setInterval(musicRefresh,500);
       const raw=75+c.level*12+c.ap*.55;
       damage(c,enemy,raw,{skill:true,type:'magic',color:bride?M.gold:M.blue,big:true});
       if(bride&&enemy.alive)enemy.silenceUntil=Math.max(enemy.silenceUntil||0,time+3);
-      morrisFx(enemy,bride?M.gold:M.blue,E(85));c.cd.Q=c.cdMax.Q=cd.Q*hasteMul(c);
+      morrisFx(enemy,bride?M.gold:M.blue,E(85));sfxPlay('heavy',enemy.x,enemy.y,bride?1.05:1);c.cd.Q=c.cdMax.Q=cd.Q*hasteMul(c);
     }else if(key==='W'){
       const x=c.x+Math.cos(ang||c.face)*E(360),y=c.y+Math.sin(ang||c.face)*E(360);
       if(bride){
@@ -25469,15 +25470,17 @@ setInterval(musicRefresh,500);
         }
       }else{
         c.morrisZones.push({x,y,until:time+3,next:time,src:c});
-        morrisFx({x,y},M.blue,E(125));
+        c.morrisStructures.push({x,y,until:time+3,next:time,src:c,phase:Math.random()*Math.PI*2});
+        morrisFx({x,y},M.blue,E(125));sfxPlay('flame',x,y,1.05);
       }
+      if(bride)sfxPlay('clang',c.x,c.y,1);else sfxPlay('zapBig',x,y,1.1);
       c.cd.W=c.cdMax.W=cd.W*hasteMul(c);
     }else if(key==='E'){
       if(!bride){
         const shield=Math.max(0,c.maxHp-c.hp)*.60;c.shield=(c.shield||0)+shield;c.shieldT=Math.max(c.shieldT||0,2);
-        morrisFx(c,M.blue,E(100));text(c.x,c.y-c.r-E(35),'보존','#4faaff',true,.8);
+        morrisFx(c,M.blue,E(100));sfxPlay('zap',c.x,c.y,1);text(c.x,c.y-c.r-E(35),'보존','#4faaff',true,.8);
       }else{
-        c.morrisEReady=true;morrisFx(c,M.gold,E(90));text(c.x,c.y-c.r-E(35),'회계 준비 완료','#f2d34a',true,.8);
+        c.morrisEReady=true;morrisFx(c,M.gold,E(90));sfxPlay('clang',c.x,c.y,1.1);text(c.x,c.y-c.r-E(35),'회계 준비 완료','#f2d34a',true,.8);
       }
       c.cd.E=c.cdMax.E=cd.E*hasteMul(c);
     }else if(key==='R'){
@@ -25486,7 +25489,7 @@ setInterval(musicRefresh,500);
       c.morrisOldMaxHp=c.maxHp;c.morrisOldAp=c.ap;c.maxHp*=1.3;c.ap*=1.3;c.hp=Math.min(c.maxHp,c.hp+c.morrisOldMaxHp*.3);
       const cx=(c.x+enemy.x)/2,cy=(c.y+enemy.y)/2,dx=c.x-enemy.x,dy=c.y-enemy.y;
       c.x=cx+dx*.5;c.y=cy+dy*.5;enemy.x=cx-dx*.5;enemy.y=cy-dy*.5;
-      morrisFx(c,M.gold,E(190));morrisFx(enemy,M.gold,E(190));
+      morrisFx(c,M.gold,E(190));morrisFx(enemy,M.gold,E(190));sfxPlay('ult',c.x,c.y,1.2);sfxPlay('boom',enemy.x,enemy.y,.9);
       text(c.x,c.y-c.r-E(50),'SHIFT + DELETE','#f4d33d',true,1.2);c.cd.R=c.cdMax.R=cd.R;
     }
     return true;
@@ -25521,10 +25524,10 @@ setInterval(musicRefresh,500);
     if(c.morrisBride){
       const big=!!c.morrisEReady;c.morrisEReady=false;
       projectiles.push({x:c.x,y:c.y,tgt:t,src:c,amount:(c.ad||54)+(c.ap||0)*.25+(big?70+c.ap*.45:0),speed:E(1350),color:big?'#ffe34a':'#f4d02d',size:E(big?15:9),opts:{basic:true,skill:big,type:'magic',color:M.gold}});
-      if(big){morrisFx(c,M.gold,E(80));}
+      if(big){morrisFx(c,M.gold,E(80));sfxPlay('zapBig',c.x,c.y,1.05);}else sfxPlay('swing',c.x,c.y,.65);
     }else{
       const dmg=(c.ad||54)+c.level*3;damage(c,t,dmg,{basic:true,color:'#258dff'});
-      fx.push({type:'pop',x:t.x,y:t.y,r:E(42),color:'#258dff',t:0,life:.28});
+      fx.push({type:'pop',x:t.x,y:t.y,r:E(42),color:'#258dff',t:0,life:.28});sfxPlay('heavy',t.x,t.y,.9);
     }
   };
   castSkillCore=function(c,key,ang,frac){
@@ -25554,6 +25557,7 @@ setInterval(musicRefresh,500);
           }
         }
         c.morrisZones=c.morrisZones.filter(z=>time<z.until);
+        c.morrisStructures=(c.morrisStructures||[]).filter(z=>time<z.until);
       }
       if(c!==player&&c.alive&&!c.morrisTransformUntil){
         const e=morrisEnemy(c,900);if(e){
@@ -25571,6 +25575,43 @@ setInterval(musicRefresh,500);
     __morrisDraw(g,c);
     if(!c||c.key!=='morris'||!c.alive)return;
     g.save();
+    // W: 전장에 남는 간수의 푸른 불꽃 횃불 구조물
+    for(const z of (c.morrisStructures||[])){
+      const left=Math.max(0,Math.min(1,(z.until-time)/.45)),pulse=.5+.5*Math.sin(time*7+(z.phase||0));
+      g.save();g.translate(z.x,z.y);g.globalAlpha=left;
+      g.fillStyle='rgba(18,93,190,.12)';g.strokeStyle='rgba(43,145,255,.55)';g.lineWidth=E(2);
+      g.beginPath();g.arc(0,0,E(125),0,Math.PI*2);g.fill();g.stroke();
+      g.setLineDash([E(7),E(6)]);g.lineDashOffset=-time*E(24);g.beginPath();g.arc(0,0,E(112),0,Math.PI*2);g.stroke();g.setLineDash([]);
+      g.shadowColor='#168cff';g.shadowBlur=E(22);g.fillStyle='#11151d';g.strokeStyle='#477cae';g.lineWidth=E(3);
+      g.beginPath();g.ellipse(0,E(5),E(19),E(9),0,0,Math.PI*2);g.fill();g.stroke();
+      g.fillRect(-E(5),-E(43),E(10),E(48));g.strokeRect(-E(5),-E(43),E(10),E(48));
+      g.fillStyle='#0c1828';g.beginPath();g.moveTo(-E(17),-E(42));g.lineTo(-E(12),-E(65));g.lineTo(0,-E(75));g.lineTo(E(12),-E(65));g.lineTo(E(17),-E(42));g.closePath();g.fill();g.stroke();
+      g.globalCompositeOperation='lighter';g.shadowColor='#258dff';g.shadowBlur=E(26);
+      for(let i=0;i<5;i++){const a=time*2.6+i*Math.PI*2/5,rr=E(8+i%2*5);g.fillStyle=i%2?'#a7dcff':'#258dff';g.beginPath();g.ellipse(Math.cos(a)*E(7),-E(67)-Math.abs(Math.sin(a))*E(12),rr*.55,rr*1.45,a*.25,0,Math.PI*2);g.fill();}
+      g.fillStyle='#e7f5ff';g.beginPath();g.arc(0,-E(70),E(4+3*pulse),0,Math.PI*2);g.fill();
+      g.globalCompositeOperation='source-over';g.restore();
+    }
+    // 두 폼의 실루엣·의상·머리 장식을 캐릭터 토큰 위에 별도 렌더링
+    const bride=!!c.morrisBride,sc=c.r/34;
+    g.save();g.translate(c.x,c.y);g.scale(sc,sc);
+    g.shadowColor=bride?'#f4d02d':'#258dff';g.shadowBlur=E(bride?13:9);
+    g.fillStyle='#070707';g.strokeStyle=bride?'#d8bd56':'#384b61';g.lineWidth=2.4;
+    g.beginPath();g.moveTo(-18,19);g.lineTo(-14,-8);g.lineTo(-8,-16);g.lineTo(8,-16);g.lineTo(15,-7);g.lineTo(19,19);g.closePath();g.fill();g.stroke();
+    if(bride){
+      g.fillStyle='#f0e9dc';g.beginPath();g.moveTo(-13,-8);g.lineTo(0,2);g.lineTo(13,-8);g.lineTo(17,19);g.lineTo(-17,19);g.closePath();g.fill();
+      g.fillStyle='#171313';g.beginPath();g.arc(0,-20,10,0,Math.PI*2);g.fill();
+      g.strokeStyle='#f1d24b';g.lineWidth=2;g.beginPath();g.arc(0,-20,13,Math.PI*1.05,Math.PI*1.95);g.stroke();
+      for(let i=0;i<3;i++){g.fillStyle='#f5d84c';g.fillRect(-8+i*8,-34,3,7);}
+      g.fillStyle='#e5d5c0';g.fillRect(-2,-12,4,22);
+    }else{
+      g.fillStyle='#171a20';g.beginPath();g.arc(0,-20,10,0,Math.PI*2);g.fill();
+      g.fillStyle='#08090b';g.fillRect(-11,-29,22,7);g.fillRect(-7,-35,14,8);
+      g.strokeStyle='#258dff';g.lineWidth=2;g.beginPath();g.moveTo(-12,-6);g.lineTo(0,4);g.lineTo(12,-6);g.stroke();
+      // 간수의 십자 해머
+      g.save();g.translate(19,-5);g.rotate(-.45);g.fillStyle='#11151b';g.strokeStyle='#258dff';g.lineWidth=2;g.fillRect(-2,-23,4,39);g.strokeRect(-2,-23,4,39);g.fillRect(-10,-24,20,8);g.strokeRect(-10,-24,20,8);g.restore();
+    }
+    g.fillStyle='#f1ce32';g.shadowColor='#f1ce32';g.shadowBlur=E(8);g.beginPath();g.arc(-4,-21,1.5,0,Math.PI*2);g.arc(4,-21,1.5,0,Math.PI*2);g.fill();
+    g.restore();
     if(c.morrisTransformUntil>time){g.globalAlpha=.75;g.strokeStyle='#f4d02d';g.lineWidth=E(7);g.shadowColor='#f4d02d';g.shadowBlur=E(25);g.beginPath();g.arc(c.x,c.y,c.r*2.2,0,Math.PI*2);g.stroke();}
     else if(c.morrisBride||c.morrisEReady){g.globalAlpha=.8;g.strokeStyle=c.morrisBride?'#f4d02d':'#258dff';g.lineWidth=E(3);g.shadowColor=g.strokeStyle;g.shadowBlur=E(16);g.beginPath();g.arc(c.x,c.y,c.r*1.55,0,Math.PI*2);g.stroke();}
     g.restore();
