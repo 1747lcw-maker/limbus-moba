@@ -20747,7 +20747,7 @@ function drawButtons(g) {
                  : rod ? (k === 'W' && player.pStacks >= KR.W.need) || (k === 'Q' && player.qStack >= KR.Q.need) || (k === 'R' && !!rodTargetR(player)) || (k === 'Q' && rodQMode(player) === 'circle')
                        : (k === 'R' && player.key === 'gebura' && player.gbFormUntil > time && player.gbRStage < 2) || (k === 'W' && !!(player.mtW || player.gdW)) || (k === 'R' && !!player.gdR) || (k === 'R' && !!player.dbR) || (k === 'R' && rForm(player)) || (k === 'E' && player.eStacks > 0) || (k === 'R' && !!player.snipe);
     const osn = k === 'R' && player.key === 'outis' && !!player.snipe;     // 오티스 저격 중: R = 발포 버튼
-    const learned = player.rank[k] > 0 && !(rod && k === 'R' && !rodTargetR(player) && cd <= 0);
+    const learned = player.rank[k] > 0 && !(player.key==='morris'&&!player.morrisBride&&k==='R') && !(rod && k === 'R' && !rodTargetR(player) && cd <= 0);
     g.globalAlpha = learned ? 1 : .45;
     g.fillStyle = active ? 'rgba(138,90,52,.8)' : 'rgba(20,26,30,.65)';
     g.beginPath(); g.arc(p.x, p.y, r, 0, 7); g.fill();
@@ -25451,7 +25451,7 @@ setInterval(musicRefresh,500);
     if(c.key!=='morris')return;
     if(c.morrisInit)return;
     c.morrisInit=true;c.morrisBride=false;c.morrisRevives=0;c.morrisTransformUntil=0;
-    c.morrisZones=[];c.morrisStructures=[];c.morrisEReady=false;c.morrisDuel=null;c.morrisDuelUntil=0;
+    c.morrisZones=[];c.morrisStructures=[];c.morrisNails=[];c.morrisEReady=false;c.morrisDuel=null;c.morrisDuelUntil=0;
     c.morrisBaseMaxHp=c.maxHp;c.morrisBaseAp=c.ap;
     c.range=105;c.acquire=260;if(c.st)c.st={...c.st,ranged:false,range:105};
   }
@@ -25500,6 +25500,7 @@ setInterval(musicRefresh,500);
       const x=c.x+Math.cos(ang||c.face)*E(360),y=c.y+Math.sin(ang||c.face)*E(360);
       if(bride){
         const a=ang||c.face,tx=c.x+Math.cos(a)*E(360),ty=c.y+Math.sin(a)*E(360),radius=E(128);
+        c.morrisNails.push({x:tx,y:ty,until:time+.7});
         fx.push({type:'pop',x:tx,y:ty,r:radius,color:M.gold,t:0,life:.7});
         for(const u of units){if(!u.alive||u.team===c.team||u.structure)continue;
           if(Math.hypot(u.x-tx,u.y-ty)<radius+u.r){damage(c,u,95+c.ap*.65,{skill:true,type:'magic',color:M.gold});u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.25);morrisFx(u,M.gold,E(48));}
@@ -25659,6 +25660,13 @@ setInterval(musicRefresh,500);
     if(!c||c.key!=='morris'||!c.alive)return;
     const bride=!!c.morrisBride,sc=c.r/34;
     g.save();g.translate(c.x,c.y);
+    for(const nail of (c.morrisNails||[])){
+      const t=Math.max(0,Math.min(1,(nail.until-time)/.7));
+      g.save();g.translate(nail.x-c.x,nail.y-c.y);g.globalAlpha=t;g.shadowColor='#f5d84c';g.shadowBlur=18;
+      g.strokeStyle='#fff0a0';g.lineWidth=3;g.beginPath();g.moveTo(0,-E(105)*t);g.lineTo(0,E(8));g.stroke();
+      g.fillStyle='#f5d84c';g.beginPath();g.moveTo(-E(7),-E(18));g.lineTo(0,-E(34));g.lineTo(E(7),-E(18));g.lineTo(E(3),E(4));g.lineTo(-E(3),E(4));g.closePath();g.fill();g.restore();
+    }
+    c.morrisNails=(c.morrisNails||[]).filter(n=>time<n.until);
     // 기존 챔피언 토큰/스프라이트를 덮고 폼별 실루엣을 독립적으로 렌더링
     g.fillStyle='#070707';g.beginPath();g.arc(0,0,c.r*1.18,0,Math.PI*2);g.fill();
     g.scale(sc,sc);g.lineJoin='round';g.lineCap='round';
