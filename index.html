@@ -24489,7 +24489,7 @@ const CX_CLASS = {                                              // 역할군: [�
   heathcliff:['전사'], meursault:['탱커', '서포터'], yuri:['원거리', '서포터'], kromer:['암살자', '전사'], vergil:['전사', '암살자'],
   charon:['전사', '탱커'], hohenheim:['마법사', '원거리'], alyssa:['마법사', '암살자'], marten:['서포터', '탱커'], guido:['탱커', '서포터'],
   thoma:['서포터', '전사'], dongbaek:['원거리'], gubo:['원거리', '암살자'], ricardo:['탱커', '전사'], bongdad:['전사', '탱커'], xichun:['암살자', '탱커'], wei:['암살자', '탱커'], saude:['원거리'], effie:['서포터', '탱커'], ran:['서포터', '마법사'], dongrang:['암살자', '마법사'],
-  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['서포터','전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], moses:['서포터','마법사'], morris:['탱커','전사'],
+  roland:['전사'], blueReverb:['마법사','전사','서포터'], purpleTear:['암살자','전사'], vespa:['원거리'], naihwang:['전사'], gachiu:['탱커'], indigoElder:['원거리','탱커','서포터'], liuEn:['전사'], callisto:['서포터','전사'], gebura:['암살자'], mathias:['탱커','전사'], angela:['마법사','서포터'], araya:['암살자','전사'], moses:['서포터','마법사'], morris:['탱커','전사'],
 };
 const CX_CLASS_COL = {'전사':'#d9824a', '암살자':'#c9455a', '마법사':'#8a7cf0', '탱커':'#5c9bd6', '서포터':'#4fbf8f', '원거리':'#e6c35c'};
 const cxClassHtml = (k, role=chosenRole) => { const classes = k === 'indigoElder' ? (role === 'support' ? ['서포터','원거리'] : role === 'bottom' ? ['원거리'] : ['탱커','원거리']) : (CX_CLASS[k] || []); return classes.map((c, i) => `<span class="cx-cls${i ? ' sub' : ''}" style="--c:${CX_CLASS_COL[c]}">${i ? '부' : '주'} · ${c}</span>`).join(''); };
@@ -24498,6 +24498,7 @@ const cxCol = k => {
   if (k === 'philip') return 'linear-gradient(151deg, transparent 0 8%, #9f3d20 8.2% 10.2%, #ffad62 10.4% 11.5%, transparent 11.8% 27%, #b64c25 27.2% 29.8%, #ffc078 30% 31.2%, transparent 31.5% 49%, #a83f20 49.2% 52%, #ffb36a 52.2% 53.3%, transparent 53.6% 70%, #bd5429 70.2% 72.8%, #ffbd75 73% 74.2%, transparent 74.5%), linear-gradient(35deg, transparent 0 18%, #b84b24 18.2% 20.8%, #ffc078 21% 22.2%, transparent 22.5% 43%, #a94120 43.2% 46%, #ffad62 46.2% 47.4%, transparent 47.7% 67%, #b64c25 67.2% 70%, #ffc078 70.2% 71.4%, transparent 71.7%), linear-gradient(135deg, #55545a 0%, #77736f 38%, #a49a91 68%, #625f60 100%)';
   if (k === 'araya') return 'linear-gradient(135deg,#050d1c 0%,#0b1d3b 45%,#124ca8 70%,#3988ff 100%)';
    if (k === 'roland') return '#090a0d';
+  if (k === 'purpleTear') return 'linear-gradient(135deg, #21113f 0%, #5b2b91 46%, #a77be8 50%, #39205f 100%)';
   if (k === 'blueReverb') return 'linear-gradient(135deg, #102b50 0%, #28639c 48%, #d4e0ee 50%, #7898bb 100%)';
   if (k === 'liuEn') return '#41464f';
   if (k === 'callisto') return '#f2f0e9';
@@ -24592,7 +24593,7 @@ function cxDetail(k, key = 'P', roleOverride = null) {
     <div class="cx-detail">
       <div class="cx-left">
         <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
-          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, k === 'indigoElder' ? (cxIndigoRole === 'support' ? 'support' : cxIndigoRole === 'ranged' ? 'bottom' : 'top') : chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+({tank:'탱커·원거리 형태',ranged:'원딜·원거리 형태',support:'서포터·원거리 형태'}[cxIndigoRole] || '탱커·원거리 형태') : ''}</small></div></div></div>
+          <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, k === 'indigoElder' ? (cxIndigoRole === 'support' ? 'support' : cxIndigoRole === 'ranged' ? 'bottom' : 'top') : chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+({tank:'탱커·원거리 형태',ranged:'원딜·원거리 형태',support:'서포터·원거리 형태'}[cxIndigoRole] || '탱커·원거리 형태') : ''}</small>${k === 'purpleTear' ? '<small>무기 · 일본도형 장검</small><small>디자인 · 보라색 계열 외형과 보라빛 검광</small>' : ''}</div></div></div>
         ${k === 'indigoElder' ? `<div class="cx-form-picks" role="tablist" aria-label="쪽빛노인 전투 형태"><button type="button" data-ie-form="tank" aria-pressed="${cxIndigoRole==='tank'}">탱커 형태 <small>탑·정글·미드</small></button><button type="button" data-ie-form="ranged" aria-pressed="${cxIndigoRole==='ranged'}">원딜 형태 <small>바텀</small></button><button type="button" data-ie-form="support" aria-pressed="${cxIndigoRole==='support'}">서포터 형태 <small>서포터</small></button></div>` : k === 'morris' ? `<div class="cx-form-picks" role="tablist" aria-label="모리스 폼 선택"><button type="button" data-morris-form="warden" aria-pressed="${cxMorrisForm==='warden'}">간수 폼 <small>근거리 탱커</small></button><button type="button" data-morris-form="bride" aria-pressed="${cxMorrisForm==='bride'}">신부 폼 <small>원거리 AP 딜탱</small></button></div>` : ''}
         <details class="cx-stats" open><summary>기초 스탯 개요${k === 'indigoElder' ? ' · ' + ({tank:'탱커 보정 적용',ranged:'원딜 보정 적용',support:'서포터 보정 적용'}[cxIndigoRole] || '탱커 보정 적용') : ''}</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
