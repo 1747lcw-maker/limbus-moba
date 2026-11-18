@@ -2153,7 +2153,7 @@ const CHAMP_UI = {
            cast:{Q:'머리 가르기', W:'올인', R:'던져지는 것'}},
   philip: {names:{Q:'낙인',W:'의뢰 처리',E:'후회',R:'불안정 개화 E.G.O::밀랍날개'},cast:{Q:'낙인',W:'의뢰 처리',E:'후회',R:'불안정 개화 E.G.O::밀랍날개'},desc:{P:'귀환 시간이 1초로 감소합니다. 재사용 대기시간 3분.',Q:'롱소드로 전방을 찌릅니다. 밀랍날개 상태에서는 세 번째 Q 적중 시 2초 기절 및 Q 피해량만큼 3초 화상을 부여합니다.',W:'대상에게 돌진해 검으로 공격합니다. 밀랍날개 상태에서는 왼쪽 날개로 5초 동안 전방 공격을 막고 받는 피해가 75% 감소하며 공격자를 화상에 빠뜨립니다.',E:'3초 동안 공격력 20% 증가 및 받는 피해 15% 감소. 밀랍날개 상태에서는 4.5초 동안 공격력 60% 증가, 이동 속도 5% 증가, 받는 피해 20% 감소 및 공격력만큼 회복합니다.',R:'체력 30% 이하에서 사용 가능. 3초간 무적 변신 후 체력을 전부 회복하며 20초 동안 밀랍날개 형태가 됩니다. 재사용 R은 1.5초 준비 후 전방으로 돌진해 적을 기절시키고, 스킬 피해량의 70%에 적중한 적 수를 곱한 화상 피해를 5초에 걸쳐 입힙니다.'}},
 };
-const skillNames = c => { const n=(CHAMP_UI[c.key] || CHAMP_UI.gregor).names; if(c.key!=='gebura')return n; return {...n,Q:c.gbQStage===1?'찌르기':c.gbQStage===2?'횡베기':'종베기',R:c.gbTransformUntil>time?'변신 중':c.gbFormUntil>time?(c.gbRStage===0?'대절단 세로':c.gbRStage===1?'대절단 가로':'붉은안개'):'E.G.O 발현::붉은안개'}; };
+const skillNames = c => { if(c.key==='morris'&&c.morrisBride)return {Q:'침묵의 형벌',W:'못 박기',E:'황금 못',R:'검은 예식'}; const n=(CHAMP_UI[c.key] || CHAMP_UI.gregor).names; if(c.key!=='gebura')return n; return {...n,Q:c.gbQStage===1?'찌르기':c.gbQStage===2?'횡베기':'종베기',R:c.gbTransformUntil>time?'변신 중':c.gbFormUntil>time?(c.gbRStage===0?'대절단 세로':c.gbRStage===1?'대절단 가로':'붉은안개'):'E.G.O 발현::붉은안개'}; };
 // 조준 모양: {len, wid} 직선 / {circle} 원형 / {ring} 사거리 / null = 즉시
 function aimShape(c, key) {
   if(c.key==='araya'&&key==='Q')return {point:E(560)};
@@ -20751,7 +20751,7 @@ function drawButtons(g) {
     g.globalAlpha = learned ? 1 : .45;
     g.fillStyle = active ? 'rgba(138,90,52,.8)' : 'rgba(20,26,30,.65)';
     g.beginPath(); g.arc(p.x, p.y, r, 0, 7); g.fill();
-    const sic = skillIconCanvas(k === 'R' && player.mrCopy && time < player.mrCopy.until ? player.mrCopy.key : player.key, k);   // 뫼르소: 복사한 궁극기 아이콘
+    const sic = skillIconCanvas(k === 'R' && player.mrCopy && time < player.mrCopy.until ? player.mrCopy.key : (player.key === 'morris' && player.morrisBride ? 'morrisBride' : player.key), k);   // 뫼르소: 복사한 궁극기 아이콘
     if (sic) { g.drawImage(sic, p.x - r, p.y - r, r * 2, r * 2); if (active) { g.fillStyle = 'rgba(255,200,120,.22)'; g.beginPath(); g.arc(p.x, p.y, r, 0, 7); g.fill(); } }
     g.beginPath(); g.arc(p.x, p.y, r, 0, 7);
     g.strokeStyle = rod ? (active ? '#bfe6ff' : '#9aa0ad') : (k === 'R' ? '#d9a066' : '#b89468'); g.lineWidth = rForm(player) || (rod && active) ? 3.5 : 2; g.stroke();
@@ -20862,7 +20862,7 @@ function drawButtons(g) {
   // PC: 스킬 버튼에 마우스를 올리면 해당 캐릭터의 스킬 설명 표시
   if (mouse.on && player.alive) {
     const hovered = ['Q','W','E','R'].find(k => { const p = skillPos(k); return Math.hypot(mouse.x-p.x, mouse.y-p.y) <= (k === 'R' ? SK_BTN.r + 8 : SK_BTN.r + 4); });
-    const info = hovered && CHAMP_UI[player.key] && CHAMP_UI[player.key].desc && CHAMP_UI[player.key].desc[hovered];
+    const info = hovered && player.key === 'morris' && player.morrisBride ? ({Q:'전방의 적에게 간수 폼과 같은 강타를 가하고 3초간 침묵시킵니다.',W:'지정 지점에 황금 못을 내리꽂아 범위 내 적에게 마법 피해를 주고 25% 둔화시킵니다.',E:'다음 원거리 기본 공격을 거대한 황금 못으로 강화합니다. 적중한 적을 5초간 기절시킵니다.',R:'대상 챔피언을 7초간 별도 결투 영역에 가두고 주문력과 최대 체력을 30% 증가시킵니다.'})[hovered] : (hovered && CHAMP_UI[player.key] && CHAMP_UI[player.key].desc && CHAMP_UI[player.key].desc[hovered]);
     if (info) {
       const p = skillPos(hovered), w = Math.min(250, vw - 24), h = 76;
       const x = Math.max(12, Math.min(vw - w - 12, p.x - w - 16)), y = Math.max(12, Math.min(vh - h - 12, p.y - h - 40));
@@ -20892,7 +20892,7 @@ function drawButtons(g) {
   const rodP = player.key === 'rodion', yiP = player.key === 'yisang', isP = player.key === 'ishmael';
   g.fillStyle = (rodP ? player.pStacks >= KR.P.max : player.hasteT > 0) ? 'rgba(255,179,71,.8)' : 'rgba(20,26,30,.6)';
   g.beginPath(); g.arc(pp.x, pp.y, 16, 0, 7); g.fill();
-  const pic = skillIconCanvas(player.key, 'P'); if (pic) { g.globalAlpha = .85; g.drawImage(pic, pp.x - 16, pp.y - 16, 32, 32); g.globalAlpha = 1; }
+  const pic = skillIconCanvas(player.key === 'morris' && player.morrisBride ? 'morrisBride' : player.key, 'P'); if (pic) { g.globalAlpha = .85; g.drawImage(pic, pp.x - 16, pp.y - 16, 32, 32); g.globalAlpha = 1; }
   g.beginPath(); g.arc(pp.x, pp.y, 16, 0, 7); g.strokeStyle = '#ffb347'; g.lineWidth = 1.5; g.stroke();
   if (rodP) {                                      // 뜬구름 잡기 중첩 게이지
     g.strokeStyle = '#ffcf6b'; g.lineWidth = 3;
@@ -21651,6 +21651,14 @@ SKILL_ICON_DRAW.callisto={
  E:g=>{iconGlow(g,0,0,30,'rgba(225,220,205,.5)');g.strokeStyle='#f4eee2';g.lineWidth=3;g.beginPath();g.ellipse(0,0,25,15,-.3,0,7);g.stroke();for(let i=0;i<7;i++){const a=i*Math.PI*2/7;iconPoly(g,[[Math.cos(a)*13,Math.sin(a)*8],[Math.cos(a)*31,Math.sin(a)*19],[Math.cos(a+.18)*17,Math.sin(a+.18)*10]],'#c63c50');}},
  R:g=>{iconGlow(g,0,0,34,'rgba(205,35,60,.85)');g.strokeStyle='#f6eee0';g.lineWidth=3;g.beginPath();g.arc(0,0,24,0,7);g.stroke();for(let i=0;i<8;i++){const a=i*Math.PI/4;sSlash(g,Math.cos(a)*9,Math.sin(a)*9,Math.cos(a)*31,Math.sin(a)*31,i%2?'#e9dfcd':'#b52b43',4);}iconCircle(g,0,0,9,'#762333','#f5e8d9');}
 };
+Object.assign(SKILL_ICON_DRAW,{morrisBride:{
+ P:g=>{iconGlow(g,0,0,28,'rgba(255,211,48,.75)');g.strokeStyle='#f7df70';g.lineWidth=3;g.beginPath();g.arc(0,0,22,0,Math.PI*2);g.stroke();iconPoly(g,[[-15,-7],[0,-17],[15,-7],[12,15],[-12,15]],'#17120b','#f7d84d');iconCircle(g,0,-5,5,'#f6d84c','#fff1a3');},
+ Q:g=>{iconGlow(g,0,0,30,'rgba(255,213,45,.85)');sSlash(g,-23,12,24,-12,'#17120b',10);sSlash(g,-20,8,27,-16,'#f5d33d',4);iconLine(g,-12,-19,13,-28,'#fff0a0',2);},
+ W:g=>{iconGlow(g,0,0,31,'rgba(255,211,45,.9)');g.save();g.rotate(-.5);for(let i=-1;i<=1;i++){iconLine(g,i*13,-25,i*13,20,'#f5d33d',4);iconPoly(g,[[i*13-5,-19],[i*13,-29],[i*13+5,-19]],'#fff0a0');}g.restore();g.strokeStyle='#f5d33d';g.lineWidth=3;g.beginPath();g.arc(0,4,24,0,Math.PI*2);g.stroke();},
+ E:g=>{iconGlow(g,0,0,30,'rgba(255,224,75,.9)');iconLine(g,0,-27,0,23,'#f8d83e',8);iconPoly(g,[[-9,-20],[0,-32],[9,-20],[6,-12],[-6,-12]],'#fff0a0','#f5d33d');g.strokeStyle='#fff0a0';g.lineWidth=2;g.beginPath();g.arc(0,0,27,0,Math.PI*2);g.stroke();},
+ R:g=>{iconGlow(g,0,0,34,'rgba(255,208,35,.95)');g.strokeStyle='#f7d84d';g.lineWidth=3;g.beginPath();g.arc(0,0,25,0,Math.PI*2);g.stroke();for(let i=0;i<8;i++){const a=i*Math.PI/4;iconLine(g,Math.cos(a)*16,Math.sin(a)*16,Math.cos(a)*34,Math.sin(a)*34,'#fff0a0',3);}iconCircle(g,0,0,10,'#17120b','#f5d33d');}
+}});
+SKILL_BG.morrisBride=['#f3d34b','#171008'];
 function skillIconCanvas(champ, key) {
   const id = champ + key; if (SKILL_ICON_CACHE[id]) return SKILL_ICON_CACHE[id];
   const f = (SKILL_ICON_DRAW[champ] || {})[key]; if (!f) return null;
@@ -25456,8 +25464,8 @@ setInterval(musicRefresh,500);
   }
   function morrisStartTransform(c,kind){
     c.morrisTransformUntil=time+2;c.morrisTransformKind=kind;c.morrisMoveLock=true;
-    c.rootT=Math.max(c.rootT||0,time+2);c.cast=null;c.atkT=Math.max(c.atkT||0,2);
-    morrisFx(c,kind==='bride'?M.gold:M.blue,E(100));
+    c.rootT=Math.max(c.rootT||0,time+2);c.cast=null;c.atkT=Math.max(c.atkT||0,2);c.slowT=Math.max(c.slowT||0,2);c.slowAmt=1;
+    morrisFx(c,(kind==='bride'||kind==='recover')?M.gold:M.blue,E(100));
     sfxPlay('phDarkBell',c.x,c.y,1.05);
     text(c.x,c.y-c.r-E(42),'기계음 · 변신 준비','#f2d34a',true,1);
   }
@@ -25467,6 +25475,7 @@ setInterval(musicRefresh,500);
       c.morrisBride=true;c.range=440;c.acquire=500;if(c.st)c.st={...c.st,ranged:true,range:440};c.morrisRevives=0;
       morrisFx(c,M.gold,E(145));sfxPlay('phTransformCrack',c.x,c.y,1.1);text(c.x,c.y-c.r-E(48),'신부 강림','#f4d33d',true,1.1);
     }else{
+      c.morrisBride=true;c.range=440;c.acquire=500;if(c.st)c.st={...c.st,ranged:true,range:440};
       c.morrisRevives++;c.hp=Math.min(c.maxHp,c.hp+c.maxHp*[.60,.30,.15][c.morrisRevives-1]);
       morrisFx(c,M.gold,E(135));sfxPlay('phTransformCrack',c.x,c.y,1);text(c.x,c.y-c.r-E(48),'검은 신 · 회복 '+c.morrisRevives+'/3','#f4d33d',true,1);
     }
@@ -25490,10 +25499,10 @@ setInterval(musicRefresh,500);
     }else if(key==='W'){
       const x=c.x+Math.cos(ang||c.face)*E(360),y=c.y+Math.sin(ang||c.face)*E(360);
       if(bride){
-        const len=E(420),wid=E(100),a=ang||c.face;
+        const a=ang||c.face,tx=c.x+Math.cos(a)*E(360),ty=c.y+Math.sin(a)*E(360),radius=E(128);
+        fx.push({type:'pop',x:tx,y:ty,r:radius,color:M.gold,t:0,life:.7});
         for(const u of units){if(!u.alive||u.team===c.team||u.structure)continue;
-          const vx=u.x-c.x,vy=u.y-c.y,along=vx*Math.cos(a)+vy*Math.sin(a),side=Math.abs(-vx*Math.sin(a)+vy*Math.cos(a));
-          if(along>0&&along<len&&side<wid+u.r){damage(c,u,95+c.ap*.65,{skill:true,type:'magic',color:M.gold});u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.25);morrisFx(u,M.gold,E(48));}
+          if(Math.hypot(u.x-tx,u.y-ty)<radius+u.r){damage(c,u,95+c.ap*.65,{skill:true,type:'magic',color:M.gold});u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.25);morrisFx(u,M.gold,E(48));}
         }
       }else{
         c.morrisZones.push({x,y,until:time+3,next:time,src:c});
@@ -25533,6 +25542,7 @@ setInterval(musicRefresh,500);
     }
     if(src&&src.key==='morris'&&src.morrisDuel&&tgt!==src.morrisDuel&&tgt!==src)return 0;
     const dealt=__morrisDamage(src,tgt,amount,opts);
+    if(src&&src.key==='morris'&&src.morrisBride&&opts.morrisEmpowered&&dealt>0&&tgt&&tgt.alive){tgt.stunT=Math.max(tgt.stunT||0,5);tgt.stunBy=src;}
     if(src&&src.key==='morris'&&src.morrisBride&&opts.skill&&dealt>0&&src.alive){
       const heal=Math.min(src.maxHp-src.hp,dealt*.05);src.hp+=heal;src.healDone=(src.healDone||0)+heal;
     }
@@ -25550,7 +25560,7 @@ setInterval(musicRefresh,500);
     cancelRecall(c);c.face=Math.atan2(t.y-c.y,t.x-c.x);c.atkT=1/Math.max(.3,c.as);c.swingT=.22;
     if(c.morrisBride){
       const big=!!c.morrisEReady;c.morrisEReady=false;
-      projectiles.push({x:c.x,y:c.y,tgt:t,src:c,amount:(c.ad||54)+(c.ap||0)*.25+(big?70+c.ap*.45:0),speed:E(1350),color:big?'#ffe34a':'#f4d02d',size:E(big?15:9),opts:{basic:true,skill:big,type:'magic',color:M.gold}});
+      projectiles.push({x:c.x,y:c.y,tgt:t,src:c,amount:(c.ad||54)+(c.ap||0)*.25+(big?70+c.ap*.45:0),speed:E(1350),color:big?'#ffe34a':'#f4d02d',size:E(big?15:9),opts:{basic:true,skill:big,type:'magic',color:M.gold,morrisEmpowered:big}});
       if(big){morrisFx(c,M.gold,E(80));sfxPlay('zapBig',c.x,c.y,1.05);}else sfxPlay('swing',c.x,c.y,.65);
     }else{
       const dmg=(c.ad||54)+c.level*3;damage(c,t,dmg,{basic:true,color:'#258dff'});
@@ -25641,6 +25651,44 @@ setInterval(musicRefresh,500);
     g.restore();
     if(c.morrisTransformUntil>time){g.globalAlpha=.75;g.strokeStyle='#f4d02d';g.lineWidth=E(7);g.shadowColor='#f4d02d';g.shadowBlur=E(25);g.beginPath();g.arc(c.x,c.y,c.r*2.2,0,Math.PI*2);g.stroke();}
     else if(c.morrisBride||c.morrisEReady){g.globalAlpha=.8;g.strokeStyle=c.morrisBride?'#f4d02d':'#258dff';g.lineWidth=E(3);g.shadowColor=g.strokeStyle;g.shadowBlur=E(16);g.beginPath();g.arc(c.x,c.y,c.r*1.55,0,Math.PI*2);g.stroke();}
+    g.restore();
+  };
+  const __morrisDrawFinal=drawChamp;
+  drawChamp=function(g,c){
+    __morrisDrawFinal(g,c);
+    if(!c||c.key!=='morris'||!c.alive)return;
+    const bride=!!c.morrisBride,sc=c.r/34;
+    g.save();g.translate(c.x,c.y);
+    // 기존 챔피언 토큰/스프라이트를 덮고 폼별 실루엣을 독립적으로 렌더링
+    g.fillStyle='#070707';g.beginPath();g.arc(0,0,c.r*1.18,0,Math.PI*2);g.fill();
+    g.scale(sc,sc);g.lineJoin='round';g.lineCap='round';
+    if(bride){
+      // 신부: 무기 없는 긴 웨딩드레스, 베일, 금빛 후광과 검은 원형 장판
+      g.save();g.shadowColor='#f3d02f';g.shadowBlur=18;
+      g.fillStyle='rgba(8,7,7,.92)';g.strokeStyle='#d8bd56';g.lineWidth=2.5;
+      g.beginPath();g.ellipse(0,8,33,29,0,0,Math.PI*2);g.fill();g.stroke();
+      g.fillStyle='#171313';g.beginPath();g.moveTo(-12,-13);g.lineTo(12,-13);g.lineTo(25,29);g.lineTo(-25,29);g.closePath();g.fill();g.stroke();
+      g.fillStyle='#eee6d4';g.beginPath();g.moveTo(-8,-10);g.lineTo(0,3);g.lineTo(8,-10);g.lineTo(15,27);g.lineTo(-15,27);g.closePath();g.fill();
+      g.fillStyle='#171313';g.beginPath();g.arc(0,-22,10,0,Math.PI*2);g.fill();
+      g.fillStyle='#090909';g.beginPath();g.moveTo(-10,-27);g.quadraticCurveTo(-25,-5,-20,23);g.lineTo(-12,18);g.lineTo(-13,-14);g.fill();
+      g.beginPath();g.moveTo(10,-27);g.quadraticCurveTo(25,-5,20,23);g.lineTo(12,18);g.lineTo(13,-14);g.fill();
+      g.strokeStyle='#f5d84c';g.lineWidth=3;g.beginPath();g.arc(0,-23,15,Math.PI*1.05,Math.PI*1.95);g.stroke();
+      for(let i=0;i<7;i++){const a=i*Math.PI*2/7+time*.3;g.fillStyle=i%2?'#fff0a0':'#f5d84c';g.beginPath();g.arc(Math.cos(a)*31,-22+Math.sin(a)*13,2.2,0,Math.PI*2);g.fill();}
+      g.restore();
+    }else{
+      // 간수: 두꺼운 검은 갑주, 십자 해머, 등에 푸른 불꽃 횃불
+      g.save();g.shadowColor='#258dff';g.shadowBlur=17;
+      g.fillStyle='#10151d';g.strokeStyle='#52657a';g.lineWidth=2.5;
+      g.beginPath();g.moveTo(-22,-12);g.lineTo(-14,-24);g.lineTo(14,-24);g.lineTo(23,-10);g.lineTo(19,25);g.lineTo(-19,25);g.closePath();g.fill();g.stroke();
+      g.fillStyle='#07090d';g.beginPath();g.moveTo(-25,-14);g.lineTo(-17,-25);g.lineTo(-8,-19);g.lineTo(-12,5);g.lineTo(-26,2);g.closePath();g.fill();g.stroke();
+      g.beginPath();g.moveTo(25,-14);g.lineTo(17,-25);g.lineTo(8,-19);g.lineTo(12,5);g.lineTo(26,2);g.closePath();g.fill();g.stroke();
+      g.fillStyle='#090b10';g.beginPath();g.arc(0,-27,11,0,Math.PI*2);g.fill();g.stroke();
+      g.fillRect(-12,-34,24,5);g.fillRect(-7,-40,14,7);
+      g.fillStyle='#258dff';g.shadowBlur=22;g.beginPath();g.moveTo(-19,-16);g.quadraticCurveTo(-34,-33,-20,-47);g.quadraticCurveTo(-19,-34,-10,-44);g.quadraticCurveTo(-4,-29,-13,-15);g.fill();
+      g.fillStyle='#bce7ff';g.beginPath();g.ellipse(-18,-33,3.5,8,-.25,0,Math.PI*2);g.fill();
+      g.save();g.translate(25,-5);g.rotate(-.38);g.fillStyle='#11151b';g.strokeStyle='#258dff';g.lineWidth=2.5;g.fillRect(-3,-26,6,48);g.strokeRect(-3,-26,6,48);g.fillRect(-13,-25,26,10);g.strokeRect(-13,-25,26,10);g.restore();
+      g.restore();
+    }
     g.restore();
   };
   for(const c of champs())if(c.key==='morris')morrisInit(c);
