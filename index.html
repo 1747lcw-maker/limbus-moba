@@ -25429,7 +25429,7 @@ setInterval(musicRefresh,500);
   }
   function morrisStartTransform(c,kind){
     c.morrisTransformUntil=time+2;c.morrisTransformKind=kind;c.morrisMoveLock=true;
-    c.stunT=Math.max(c.stunT||0,0);c.cast=null;c.atkT=Math.max(c.atkT||0,2);
+    c.rootT=Math.max(c.rootT||0,time+2);c.cast=null;c.atkT=Math.max(c.atkT||0,2);
     morrisFx(c,kind==='bride'?M.gold:M.blue,E(100));
     text(c.x,c.y-c.r-E(42),'기계음 · 변신 준비','#f2d34a',true,1);
   }
@@ -25439,7 +25439,7 @@ setInterval(musicRefresh,500);
       c.morrisBride=true;c.range=440;c.acquire=500;c.morrisRevives=0;
       morrisFx(c,M.gold,E(145));text(c.x,c.y-c.r-E(48),'신부 강림','#f4d33d',true,1.1);
     }else{
-      c.morrisRevives++;c.hp=Math.min(c.maxHp,c.maxHp*[.60,.30,.15][c.morrisRevives-1]||c.hp);
+      c.morrisRevives++;c.hp=Math.min(c.maxHp,c.hp+c.maxHp*[.60,.30,.15][c.morrisRevives-1]);
       morrisFx(c,M.gold,E(135));text(c.x,c.y-c.r-E(48),'검은 신 · 회복 '+c.morrisRevives+'/3','#f4d33d',true,1);
     }
   }
@@ -25496,7 +25496,7 @@ setInterval(musicRefresh,500);
       morrisInit(tgt);
       if(tgt.morrisTransformUntil>time)return 0;
       if(tgt.morrisDuel&&src!==tgt.morrisDuel&&src!==tgt)return 0;
-      if(tgt.hp<=tgt.maxHp*.10&&tgt.morrisRevives<3){
+      if(tgt.hp<=tgt.maxHp*.10+Math.max(0,amount||0)&&tgt.morrisRevives<3){
         if(!tgt.morrisTransformUntil)morrisStartTransform(tgt,'recover');
         return 0;
       }
