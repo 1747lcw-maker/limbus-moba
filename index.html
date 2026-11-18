@@ -25460,8 +25460,11 @@ setInterval(musicRefresh,500);
     c.range=105;c.acquire=260;if(c.st)c.st={...c.st,ranged:false,range:105};
   }
   function morrisFx(c,color,r){
-    fx.push({type:'pop',x:c.x,y:c.y,r:r||E(70),color,t:0,life:.65});
-    fx.push({type:'pop',x:c.x,y:c.y,r:(r||E(70))*.62,color:'#090909',t:0,life:.42});
+    const R=r||E(70);
+    fx.push({type:'pop',x:c.x,y:c.y,r:R,color,t:0,life:.8});
+    fx.push({type:'pop',x:c.x,y:c.y,r:R*.78,color:'#090909',t:0,life:.55});
+    fx.push({type:'pop',x:c.x,y:c.y,r:R*1.28,color:'#fff1a8',t:0,life:.34});
+    for(let i=0;i<12;i++){const a=i*Math.PI/6,rr=R*(.35+Math.random()*.35);fx.push({type:'pop',x:c.x+Math.cos(a)*rr,y:c.y+Math.sin(a)*rr,r:E(12+Math.random()*12),color:i%2?color:'#fff0a0',t:0,life:.48});}
   }
   function morrisEnemy(c,range){
     return champs().filter(e=>e.alive&&e.team!==c.team&&targetable(e)&&(!c.morrisDuel||e===c.morrisDuel)&&dist(c,e)<E(range||850)).sort((a,b)=>dist(c,a)-dist(c,b))[0]||null;
@@ -25529,9 +25532,13 @@ setInterval(musicRefresh,500);
       c.morrisDuel=enemy;enemy.morrisDuel=c;c.morrisDuelUntil=enemy.morrisDuelUntil=time+7;
       c.morrisOldMaxHp=c.maxHp;c.morrisOldAp=c.ap;c.maxHp*=1.3;c.ap*=1.3;c.hp=Math.min(c.maxHp,c.hp+c.morrisOldMaxHp*.3);
       const cx=(c.x+enemy.x)/2,cy=(c.y+enemy.y)/2,dx=c.x-enemy.x,dy=c.y-enemy.y;
+      c.morrisDuelCenter={x:cx,y:cy};enemy.morrisDuelCenter={x:cx,y:cy};
       c.x=cx+dx*.5;c.y=cy+dy*.5;enemy.x=cx-dx*.5;enemy.y=cy-dy*.5;
-      morrisFx(c,M.gold,E(190));morrisFx(enemy,M.gold,E(190));sfxPlay('ult',c.x,c.y,1.2);sfxPlay('boom',enemy.x,enemy.y,.9);
-      text(c.x,c.y-c.r-E(50),'SHIFT + DELETE','#f4d33d',true,1.2);c.cd.R=c.cdMax.R=cd.R;
+      c.morrisDuelStarted=enemy.morrisDuelStarted=time;c.morrisDuelRadius=enemy.morrisDuelRadius=E(390);
+      morrisFx(c,'#f4cf32',E(260));morrisFx(enemy,'#9b55ff',E(240));
+      for(let i=0;i<3;i++)fx.push({type:'pop',x:cx,y:cy,r:E(180+i*95),color:i===1?'#9b55ff':'#f4cf32',t:0,life:1.25});
+      sfxPlay('ult',c.x,c.y,1.5);sfxPlay('boom',enemy.x,enemy.y,1.2);sfxPlay('phDarkBell',cx,cy,1.25);
+      text(cx,cy-E(250),'SHIFT + DELETE','#f4d33d',true,1.5);c.cd.R=c.cdMax.R=cd.R;
     }
     return true;
   }
@@ -25546,6 +25553,8 @@ setInterval(musicRefresh,500);
       }
     }
     if(src&&src.key==='morris'&&src.morrisDuel&&tgt!==src.morrisDuel&&tgt!==src)return 0;
+    if(src&&src.morrisDuel&&src.morrisDuel.key==='morris'&&tgt!==src.morrisDuel&&tgt!==src)return 0;
+    if(tgt&&tgt.morrisDuel&&src!==tgt.morrisDuel&&src!==tgt)return 0;
     const dealt=__morrisDamage(src,tgt,amount,opts);
     if(src&&src.key==='morris'&&src.morrisBride&&opts.morrisEmpowered&&dealt>0&&tgt&&tgt.alive){tgt.stunT=Math.max(tgt.stunT||0,5);tgt.stunBy=src;}
     if(src&&src.key==='morris'&&src.morrisBride&&opts.skill&&dealt>0&&src.alive){
@@ -25615,8 +25624,19 @@ setInterval(musicRefresh,500);
     return result;
   };
   drawChamp=function(g,c){
+    const duelOwner=champs().find(x=>x.key==='morris'&&x.morrisDuel&&x.alive);
+    if(duelOwner&&c&&c!==duelOwner&&c!==duelOwner.morrisDuel)return;
     __morrisDraw(g,c);
     if(!c||c.key!=='morris'||!c.alive)return;
+    if(c.morrisDuel&&c.morrisDuel.alive){
+      const e=c.morrisDuel,cx=(c.x+e.x)/2,cy=(c.y+e.y)/2,R=c.morrisDuelRadius||E(390),pulse=.5+.5*Math.sin(time*5);
+      g.save();g.globalCompositeOperation='lighter';g.translate(cx,cy);
+      g.fillStyle='rgba(13,5,24,.20)';g.beginPath();g.arc(0,0,R,0,Math.PI*2);g.fill();
+      for(let i=0;i<4;i++){g.globalAlpha=.8-i*.13;g.strokeStyle=i%2?'#a45cff':'#f4cf32';g.shadowColor=g.strokeStyle;g.shadowBlur=E(22);g.lineWidth=E(i===0?7:3);g.setLineDash(i%2?[E(12),E(9)]:[]);g.lineDashOffset=-time*E(35)*(i%2?1:-1);g.beginPath();g.arc(0,0,R*(.78+i*.075)+pulse*E(5),0,Math.PI*2);g.stroke();}
+      g.setLineDash([]);g.globalAlpha=.8;g.strokeStyle='#ffe9a0';g.lineWidth=E(2);g.shadowBlur=E(18);
+      for(let i=0;i<12;i++){const a=i*Math.PI/6+time*.12;g.beginPath();g.moveTo(Math.cos(a)*R*.68,Math.sin(a)*R*.68);g.lineTo(Math.cos(a)*R*.94,Math.sin(a)*R*.94);g.stroke();}
+      g.restore();
+    }
     g.save();
     // W: 전장에 남는 간수의 푸른 불꽃 횃불 구조물
     for(const z of (c.morrisStructures||[])){
