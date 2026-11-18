@@ -24528,7 +24528,7 @@ const cxIcon = (k, key) => {
   const cv = skillIconCanvas(k, key);
   try { return cv ? cv.toDataURL() : ''; } catch { return ''; }
 };
-let cxChamp = null, cxKey = 'P', cxIndigoRole = 'tank';
+let cxChamp = null, cxKey = 'P', cxIndigoRole = 'tank', cxMorrisForm = 'warden';
 
 function openMenu(on) { $('menu').hidden = !on; }
 $('mVicDev').addEventListener('click', () => mvpOpen('gregor', true));
@@ -24592,7 +24592,7 @@ function cxDetail(k, key = 'P', roleOverride = null) {
       <div class="cx-left">
         <div class="cx-head"><span class="cx-token lg" style="background:${cxCol(k)};border-color:${cxCol(k)}"></span>
           <div><b>${esc(STATS[k].name)}</b><div class="cx-clss">${cxClassHtml(k, k === 'indigoElder' ? (cxIndigoRole === 'support' ? 'support' : cxIndigoRole === 'ranged' ? 'bottom' : 'top') : chosenRole)}<small>${STATS[k].ranged ? '원거리 공격' : '근접 공격'}${k === 'indigoElder' ? ' · '+({tank:'탱커·원거리 형태',ranged:'원딜·원거리 형태',support:'서포터·원거리 형태'}[cxIndigoRole] || '탱커·원거리 형태') : ''}</small></div></div></div>
-        ${k === 'indigoElder' ? `<div class="cx-form-picks" role="tablist" aria-label="쪽빛노인 전투 형태"><button type="button" data-ie-form="tank" aria-pressed="${cxIndigoRole==='tank'}">탱커 형태 <small>탑·정글·미드</small></button><button type="button" data-ie-form="ranged" aria-pressed="${cxIndigoRole==='ranged'}">원딜 형태 <small>바텀</small></button><button type="button" data-ie-form="support" aria-pressed="${cxIndigoRole==='support'}">서포터 형태 <small>서포터</small></button></div>` : ''}
+        ${k === 'indigoElder' ? `<div class="cx-form-picks" role="tablist" aria-label="쪽빛노인 전투 형태"><button type="button" data-ie-form="tank" aria-pressed="${cxIndigoRole==='tank'}">탱커 형태 <small>탑·정글·미드</small></button><button type="button" data-ie-form="ranged" aria-pressed="${cxIndigoRole==='ranged'}">원딜 형태 <small>바텀</small></button><button type="button" data-ie-form="support" aria-pressed="${cxIndigoRole==='support'}">서포터 형태 <small>서포터</small></button></div>` : k === 'morris' ? `<div class="cx-form-picks" role="tablist" aria-label="모리스 폼 선택"><button type="button" data-morris-form="warden" aria-pressed="${cxMorrisForm==='warden'}">간수 폼 <small>근거리 탱커</small></button><button type="button" data-morris-form="bride" aria-pressed="${cxMorrisForm==='bride'}">신부 폼 <small>원거리 AP 딜탱</small></button></div>` : ''}
         <details class="cx-stats" open><summary>기초 스탯 개요${k === 'indigoElder' ? ' · ' + ({tank:'탱커 보정 적용',ranged:'원딜 보정 적용',support:'서포터 보정 적용'}[cxIndigoRole] || '탱커 보정 적용') : ''}</summary>
           <table><thead><tr><th></th><th>1레벨</th><th>레벨당</th><th>${MAX_LEVEL}레벨</th></tr></thead><tbody>${cxStatRows(k)}</tbody></table>
         </details>
@@ -24981,6 +24981,7 @@ function cxShowSkill(key, fresh) {
   cxKey = key;
   const isW = cxChamp === 'xichun' && key[0] === 'w', bk = isW ? key.slice(1) : key;   // 가시춘과 웨이: w로 시작하면 웨이의 스킬
   let sk = ((isW ? CODEX_SK.wei : CODEX_SK[cxChamp]) || {})[bk] || ((EXTRA_CODEX[cxChamp] || {})[bk]) || {name:'', text:() => '설명 준비 중'};
+  if(cxChamp==='morris') { const F={warden:{P:'체력이 10% 이하가 되면 2초 동안 무적·행동 불가 상태로 변신을 준비한 뒤 신부 폼이 됩니다. 신부 폼에서는 스킬 피해의 5%를 흡혈하며, 체력이 10% 이하가 될 때마다 최대 체력의 60%·30%·15%를 순서대로 회복합니다. 세 번 모두 발동하면 사망 후 부활 전까지 재발동하지 않습니다.',Q:'가까운 적에게 접근해 검은 십자 해머로 강타하여 마법 피해를 줍니다.',W:'푸른 불꽃 횃불을 지정 위치에 설치합니다. 3초 동안 영역 안의 적에게 0.5초마다 주문력의 10%에 해당하는 마법 피해를 주고, 영역 안에 머무는 적은 효과가 끝날 때까지 공포에 빠져 도망칩니다.',E:'잃은 체력의 60%만큼 보호막을 얻습니다. 보호막은 2초 동안 유지됩니다.',R:'간수 폼에서는 사용할 수 없습니다.'},bride:{P:'간수 폼에서 체력이 10% 이하가 되면 2초 동안 무적·행동 불가 상태로 변신을 준비한 뒤 신부 폼이 됩니다. 신부 폼에서는 스킬 피해의 5%를 흡혈하며, 체력이 10% 이하가 될 때마다 최대 체력의 60%·30%·15%를 순서대로 회복합니다. 세 번 모두 발동하면 사망 후 부활 전까지 재발동하지 않습니다.',Q:'전방의 적에게 간수 폼과 같은 강타를 가해 마법 피해를 주고 3초 동안 침묵시킵니다.',W:'지정 위치에 황금 못을 떨어뜨려 범위 내 적에게 마법 피해를 주고 25% 둔화시킵니다. 적중한 적은 못의 낙하 효과가 끝날 때까지 공포에 빠져 도망칩니다.',E:'다음 기본 공격을 거대한 황금 못으로 강화합니다. 적중한 적을 5초 동안 기절시킵니다.',R:'대상 적 챔피언과 7초 동안 별도 결투 영역에 들어갑니다. 결투 중 모리스의 주문력과 최대 체력이 30% 증가합니다.'}}; const names={P:'검은 신',Q:'형벌',W:'감히… 죄인이 형벌을 거부하는가',E:'보존',R:'Shift + Delete'}; sk={...sk,name:names[bk]||sk.name,text:()=>F[cxMorrisForm][bk]||''}; }
   if(cxChamp==='indigoElder') { const F={tank:{P:'30초마다 가장 가까운 적 2명에게 대호수 표식을 부여합니다. 표식 규칙은 30초마다 무작위로 교체됩니다. Q 적중 시 이동 속도 30% 감소, W 적중 시 보유 골드 10% 약탈, E 영역에 들어오면 2.5초 속박이 적용됩니다.',Q:'강력한 작살을 직선으로 발사합니다. 적중한 적에게 준 피해량만큼 쪽빛노인의 체력을 회복합니다.',W:'날카로운 작살을 부채꼴로 발사합니다. 적중한 적에게 쪽빛노인의 최대 체력 10%에 해당하는 출혈 피해를 4초에 걸쳐 입힙니다.',E:'쪽빛노인을 중심으로 넓은 바다 영역을 펼칩니다. 영역 안 아군은 투명해지고 적은 시야를 차단당합니다.',R:'파이크처럼 지연 후 X자 영역을 타격합니다. 체력 30% 이하 적을 처형하며, 성공하면 아군에게 각각 300골드를 지급합니다.'},ranged:{P:'30초마다 가장 가까운 적 2명에게 대호수 표식을 부여합니다. 표식 규칙은 30초마다 무작위로 교체됩니다. Q 적중 시 이동 속도 30% 감소, W 적중 시 보유 골드 10% 약탈, E 영역에 들어오면 2.5초 속박이 적용됩니다.',Q:'강력한 작살을 직선으로 발사합니다. 적중한 적에게 준 피해량만큼의 출혈 피해를 4초에 걸쳐 입힙니다.',W:'날카로운 작살을 부채꼴로 발사합니다. 적중 시 쪽빛노인의 이동 속도와 피해량이 3초 동안 10% 증가합니다.',E:'쪽빛노인을 중심으로 넓은 바다 영역을 펼칩니다. 영역 안 아군은 투명해지고 적은 시야를 차단당합니다.',R:'파이크처럼 지연 후 X자 영역을 타격합니다. 체력 30% 이하 적을 처형하며, 성공하면 아군에게 각각 300골드를 지급합니다.'},support:{P:'30초마다 가장 가까운 적 2명에게 대호수 표식을 부여합니다. 표식 규칙은 30초마다 무작위로 교체됩니다. Q 적중 시 이동 속도 30% 감소, W 적중 시 보유 골드 10% 약탈, E 영역에 들어오면 2.5초 속박이 적용됩니다.',Q:'강력한 작살을 직선으로 발사합니다. 적중한 적의 이동 속도를 2초 동안 15% 감소시킵니다.',W:'날카로운 작살을 부채꼴로 발사합니다. 적중한 적에게 피해를 주고 1초 동안 속박합니다.',E:'쪽빛노인을 중심으로 넓은 바다 영역을 펼칩니다. 영역 안 아군은 투명해지고 적은 시야를 차단당합니다. 아군의 공격력이 10%, 물리·마법 방어력이 8% 증가합니다.',R:'파이크처럼 지연 후 X자 영역을 타격합니다. 체력 30% 이하 적을 처형하며, 성공하면 아군에게 각각 300골드를 지급합니다.'}}; const names={P:'대호수의 규칙',Q:'작살 쏘기',W:'갈고리 작살 쏘기',E:'여긴 대호수의 한가운데야',R:'고래 사냥 -포경-'}; sk={...sk,name:names[bk]||sk.name,text:()=>F[cxIndigoRole][bk]||''}; }
   for (const b of document.querySelectorAll('.cx-tabs [data-sk]')) b.setAttribute('aria-selected', b.dataset.sk === key);
   const meta = [];
@@ -24990,19 +24991,19 @@ function cxShowSkill(key, fresh) {
   $('cxSkill').innerHTML = `<h3><span class="cx-key">${bk === 'P' ? '패시브' : bk}</span>${esc(sk.name)}</h3>
     ${meta.length ? `<div class="cx-meta">${meta.join('')}</div>` : ''}<div class="cx-text">${body}</div>
     ${bk !== 'P' ? `<p class="cx-note">${bk === 'R' ? '궁극기 수치는 1 / 2 / 3랭크 순서입니다 (레벨 ' + R_LEVELS.join('·') + '에 배움).' : '수치는 1 / 2 / 3 / 4랭크 순서입니다.'}</p>` : ''}`;
-  $('cxCap').textContent = `${cxChamp === 'xichun' ? (isW ? '웨이' : '가시춘') : STATS[cxChamp].name} ${cxChamp==='indigoElder' ? ({tank:'탱커 형태',ranged:'원딜 형태',support:'서포터 형태'}[cxIndigoRole]+' · ') : ''}${bk === 'P' ? '패시브' : bk} 시연 영상 · 실제 게임 엔진으로 반복 재생 (13레벨, 아이템 없음 · 허수아비 적)`;
-  cxDemo(cxChamp, key, fresh, cxChamp==='indigoElder'?cxIndigoRole:null);
+  $('cxCap').textContent = `${cxChamp === 'xichun' ? (isW ? '웨이' : '가시춘') : STATS[cxChamp].name} ${cxChamp==='indigoElder' ? ({tank:'탱커 형태',ranged:'원딜 형태',support:'서포터 형태'}[cxIndigoRole]+' · ') : cxChamp==='morris' ? (cxMorrisForm==='bride'?'신부 폼 · ':'간수 폼 · ') : ''}${bk === 'P' ? '패시브' : bk} 시연 영상 · 실제 게임 엔진으로 반복 재생 (13레벨, 아이템 없음 · 허수아비 적)`;
+  cxDemo(cxChamp, key, fresh, cxChamp==='indigoElder'?cxIndigoRole:null, cxChamp==='morris'?cxMorrisForm:null);
 }
 // 시연: 같은 게임을 작은 iframe 안에서 '시연 모드'로 실행
-let cxDemoChamp = null, cxDemoRole = null;
-function cxDemo(k, key, fresh, role = null) {
+let cxDemoChamp = null, cxDemoRole = null, cxDemoForm = null;
+function cxDemo(k, key, fresh, role = null, form = null) {
   const fr = $('cxDemo'); if (!fr) return;
-  if (!fresh && cxDemoChamp === k && fr.contentWindow && (k !== 'indigoElder' || role === cxDemoRole)) { fr.contentWindow.postMessage({demoSkill:key}, '*'); return; }
-  cxDemoChamp = k; cxDemoRole = role;
-  const payload = JSON.stringify({champ:k, skill:key, role:role || undefined});
+  if (!fresh && cxDemoChamp === k && fr.contentWindow && (k !== 'indigoElder' || role === cxDemoRole) && (k !== 'morris' || form === cxDemoForm)) { fr.contentWindow.postMessage({demoSkill:key}, '*'); return; }
+  cxDemoChamp = k; cxDemoRole = role; cxDemoForm = form;
+  const payload = JSON.stringify({champ:k, skill:key, role:role || undefined, form:form || undefined});
   fr.srcdoc = PAGE_SRC.replace('<head>', '<head><script>window.DEMO=' + payload + '<\/script>');
 }
-function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; cxDemoRole = null; }
+function cxStopDemo() { const fr = $('cxDemo'); if (fr) fr.srcdoc = ''; cxDemoChamp = null; cxDemoRole = null; cxDemoForm = null; }
 
 $('mVsAi').addEventListener('click', () => { if(aiDraftTimer)clearTimeout(aiDraftTimer); aiDraftState=null; $('aiDraft').hidden=true; aiDraftBans = []; aiDraftLineup = null; openMenu(false); $('select').hidden = false; selStep('role'); });
 $('mCodex').addEventListener('click', () => { openMenu(false); openCodex(true); });
@@ -25084,6 +25085,7 @@ $('codex').addEventListener('click', e => {
   const cbI = e.target.closest('[data-cb]'); if (cbI) { const [ck, ci] = cbI.dataset.cb.split(':'); cxPlayCombo(ck, +ci); return; }
   const c = e.target.closest('[data-cx]'); if (c) { cxDetail(c.dataset.cx); $('cxBody').scrollTop = 0; return; }
   const form = e.target.closest('[data-ie-form]'); if(form && cxChamp==='indigoElder'){cxDetail('indigoElder',cxKey,form.dataset.ieForm);$('cxBody').scrollTop=0;return;}
+  const morrisForm = e.target.closest('[data-morris-form]'); if(morrisForm && cxChamp==='morris'){cxMorrisForm=morrisForm.dataset.morrisForm;cxDetail('morris',cxKey);$('cxBody').scrollTop=0;return;}
   const s = e.target.closest('[data-sk]'); if (s && cxChamp) cxShowSkill(s.dataset.sk, false);
 });
 $('selHome').addEventListener('click', () => { $('select').hidden = true; openMenu(true); });
@@ -25094,7 +25096,9 @@ const demo = {t:0, n:0, acts:[], len:3, i:0, dum:[], ally:null};
 function demoInit() {
   document.body.classList.add('demo');
   chosenChamp = DEMO.champ; chosenRole = DEMO.champ==='indigoElder' ? (DEMO.role==='support'?'support':DEMO.role==='ranged'?'bottom':'top') : 'mid';
-  resetGame(); started = true;
+  resetGame();
+  if(player.key==='morris'&&DEMO.form==='bride'){player.morrisBride=true;player.range=440;player.acquire=500;if(player.st)player.st={...player.st,ranged:true,range:440};}
+  started = true;
   $('menu').hidden = true; $('select').hidden = true;
   nextWave = 1e12;
   for (const cp of camps) cp.respawnAt = 1e12;
@@ -25503,7 +25507,7 @@ setInterval(musicRefresh,500);
         c.morrisNails.push({x:tx,y:ty,until:time+.7});
         fx.push({type:'pop',x:tx,y:ty,r:radius,color:M.gold,t:0,life:.7});
         for(const u of units){if(!u.alive||u.team===c.team||u.structure)continue;
-          if(Math.hypot(u.x-tx,u.y-ty)<radius+u.r){damage(c,u,95+c.ap*.65,{skill:true,type:'magic',color:M.gold});u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.25);morrisFx(u,M.gold,E(48));}
+          if(Math.hypot(u.x-tx,u.y-ty)<radius+u.r){damage(c,u,95+c.ap*.65,{skill:true,type:'magic',color:M.gold});if(u.alive){u.fearT=Math.max(u.fearT||0,time+.7);u.fearFrom={x:tx,y:ty};text(u.x,u.y-u.r-E(34),'공포','#c78bff',true,.7);}u.slowT=Math.max(u.slowT||0,2);u.slowAmt=Math.max(u.slowAmt||0,.25);morrisFx(u,M.gold,E(48));}
         }
       }else{
         c.morrisZones.push({x,y,until:time+3,next:time,src:c});
@@ -25590,6 +25594,7 @@ setInterval(musicRefresh,500);
           if(time>=z.next){z.next=time+.5;
             for(const u of units)if(u.alive&&u.team!==c.team&&!u.structure&&Math.hypot(u.x-z.x,u.y-z.y)<E(125)+u.r){
               damage(c,u,Math.max(1,c.ap*.10),{skill:true,type:'magic',noProc:true,color:M.blue,damageOverTime:true});
+              if(u.alive){u.fearT=Math.max(u.fearT||0,Math.min(z.until,time+.65));u.fearFrom={x:z.x,y:z.y};}
               fx.push({type:'pop',x:u.x,y:u.y,r:E(35),color:M.blue,t:0,life:.22});
             }
           }
