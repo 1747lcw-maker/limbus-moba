@@ -20622,7 +20622,8 @@ function drawFx(g) {
     if(f.type.startsWith('br')){drawBlueReverbFx(g,f,k);continue;}
     if(f.type.startsWith('bn')){drawBinahFx(g,f,k);continue;}
     if (f.type === 'bloodBurst') { drawBloodFx(g, f, k); continue; }
-    if (f.type === 'ptSlash') drawPurpleTearSlash(g,f,k);\n    else if (f.type === 'spike') drawSpike(g, f);
+    if (f.type === 'ptSlash') drawPurpleTearSlash(g,f,k);
+    else if (f.type === 'spike') drawSpike(g, f);
     else if (f.type === 'puff') {
       g.globalAlpha = (1 - k) * .7; g.strokeStyle = '#e9e2d4'; g.lineWidth = E(3) * (1 - k);
       g.beginPath(); g.ellipse(f.x, f.y, f.r * (1 + k * 1.2), f.r * .4 * (1 + k * 1.2), 0, 0, 7); g.stroke(); g.globalAlpha = 1;
