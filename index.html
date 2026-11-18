@@ -12988,6 +12988,32 @@ function inLine(c, ang, len, wid, t) {
 // 교전 중 스킬 사용 (챔피언별 콤보). 쓴 게 있으면 true
 function aiCombo(b, p) {
   const d = edge(b, p), ready = k => b.rank[k] > 0 && b.cd[k] <= 0, hpP = p.hp / p.maxHp, hpB = b.hp / b.maxHp;
+  if (b.key === 'morris') {
+    const a = aimAt(b, p, .16), bride = !!b.morrisBride;
+    // 신부 폼의 결투 궁극기는 적 챔피언과 가까워졌을 때 우선 사용
+    if (bride && ready('R') && d < E(650) && !b.morrisDuel && !p.morrisDuel) {
+      castSkill(b, 'R', a); return true;
+    }
+    // 간수 폼은 접근 후 형벌(Q)로 압박하고, 위험할 때 보존(E)으로 생존
+    if (!bride && ready('E') && (hpB < .72 || d < E(190))) {
+      castSkill(b, 'E', a); return true;
+    }
+    if (ready('Q') && d < E(bride ? 760 : 720)) {
+      castSkill(b, 'Q', a); return true;
+    }
+    // 간수의 횃불은 적이 설치 지점 주변에 들어오는 거리에서 사용
+    if (!bride && ready('W') && d > E(150) && d < E(500)) {
+      castSkill(b, 'W', a); return true;
+    }
+    // 신부 폼은 직선 못(W)과 강화 평타(E)를 교전 거리에서 순환
+    if (bride && ready('W') && d < E(560)) {
+      castSkill(b, 'W', a); return true;
+    }
+    if (bride && ready('E') && d < E(250)) {
+      castSkill(b, 'E', a); return true;
+    }
+    return false;
+  }
   if (b.key === 'mathias') {
     // Q 2타는 자체 재사용 창(2.2초) 안에 쿨다운이 남아 있어도 사용 가능
     const readyQ = b.rank.Q > 0 && (b.cd.Q <= 0 || (b.maQStage === 1 && time < (b.maQUntil || 0)));
