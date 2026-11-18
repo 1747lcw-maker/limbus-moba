@@ -25418,7 +25418,7 @@ setInterval(musicRefresh,500);
     c.morrisInit=true;c.morrisBride=false;c.morrisRevives=0;c.morrisTransformUntil=0;
     c.morrisZones=[];c.morrisEReady=false;c.morrisDuel=null;c.morrisDuelUntil=0;
     c.morrisBaseMaxHp=c.maxHp;c.morrisBaseAp=c.ap;
-    c.range=105;c.acquire=260;
+    c.range=105;c.acquire=260;if(c.st)c.st={...c.st,ranged:false,range:105};
   }
   function morrisFx(c,color,r){
     fx.push({type:'pop',x:c.x,y:c.y,r:r||E(70),color,t:0,life:.65});
@@ -25436,7 +25436,7 @@ setInterval(musicRefresh,500);
   function morrisCompleteTransform(c){
     const kind=c.morrisTransformKind;c.morrisTransformUntil=0;c.morrisMoveLock=false;
     if(kind==='bride'){
-      c.morrisBride=true;c.range=440;c.acquire=500;c.morrisRevives=0;
+      c.morrisBride=true;c.range=440;c.acquire=500;if(c.st)c.st={...c.st,ranged:true,range:440};c.morrisRevives=0;
       morrisFx(c,M.gold,E(145));text(c.x,c.y-c.r-E(48),'신부 강림','#f4d33d',true,1.1);
     }else{
       c.morrisRevives++;c.hp=Math.min(c.maxHp,c.hp+c.maxHp*[.60,.30,.15][c.morrisRevives-1]);
@@ -25510,7 +25510,7 @@ setInterval(musicRefresh,500);
     return dealt;
   };
   kill=function(u,src){
-    if(u&&u.key==='morris'){morrisInit(u);u.morrisBride=false;u.morrisRevives=0;u.morrisTransformUntil=0;u.morrisMoveLock=false;u.morrisDuel=null;u.maxHp=u.morrisBaseMaxHp||u.maxHp;u.ap=u.morrisBaseAp||u.ap;u.range=105;u.morrisEReady=false;u.morrisZones=[];}
+    if(u&&u.key==='morris'){morrisInit(u);u.morrisBride=false;u.morrisRevives=0;u.morrisTransformUntil=0;u.morrisMoveLock=false;u.morrisDuel=null;u.maxHp=u.morrisBaseMaxHp||u.maxHp;u.ap=u.morrisBaseAp||u.ap;u.range=105;if(u.st)u.st={...u.st,ranged:false,range:105};u.morrisEReady=false;u.morrisZones=[];}
     if(src&&src.key==='morris'&&src.morrisDuel===u){src.morrisDuel=null;src.morrisDuelUntil=0;src.maxHp=src.morrisOldMaxHp||src.maxHp;src.ap=src.morrisOldAp||src.ap;}
     return __morrisKill(u,src);
   };
