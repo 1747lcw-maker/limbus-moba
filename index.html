@@ -799,6 +799,7 @@
       <button type="button" class="sel-card" data-champ="angela"><span class="sel-token" style="background:#83dfff"></span><b>앤젤라</b><span class="go">선택</span></button>
        <button type="button" class="sel-card" data-champ="araya"><span class="sel-token" style="background:linear-gradient(135deg,#071326,#1457b8)"></span><b>아라야</b><span class="go">선택</span></button>
       <button type="button" class="sel-card" data-champ="moses"><span class="sel-token" style="background:linear-gradient(135deg,#fffdf2,#c99a32);border:1px solid #f5d77d"></span><b>모제스</b><span class="go">선택</span></button>
+      <button type="button" class="sel-card" data-champ="morris"><span class="sel-token" style="background:linear-gradient(135deg,#090909 0 58%,#f0c928 59%);border:1px solid #e8c52b;box-shadow:0 0 8px #e8c52b66"></span><b>모리스</b><span class="go">선택</span></button>
       <button type="button" class="sel-card" data-champ="dongrang">
         <span class="sel-token" style="background:#b07a28;box-shadow:0 0 0 2px #efe6d2"></span>
         <b>동랑</b>
@@ -1213,6 +1214,8 @@ const STATS = {
            hp:[650, 122], regen:[1.8, 0.16], ad:[62, 3.5], armor:[35, 5.0], mr:[33, 2.8], as:[0.67, 0.026]},
   callisto: {name:'칼리스토', r:30, range:100, speed:300, acquire:265, roles:['support','fighter'],
            hp:[640, 120], regen:[1.7, 0.15], ad:[65, 3.8], armor:[34, 5.0], mr:[33, 2.8], as:[0.66, 0.025]},
+  morris: {name:'모리스', r:34, range:105, speed:275, acquire:260, ap:[30, 8], roles:['tank','mage'],
+           hp:[820, 150], regen:[2.2, 0.20], ad:[54, 3.0], armor:[43, 6.0], mr:[40, 3.5], as:[0.62, 0.02]},
   gebura: {name:'게부라', r:31, range:100, speed:320, acquire:285,
            hp:[610, 112], regen:[1.55, 0.14], ad:[70, 4.4], armor:[29, 4.6], mr:[29, 2.6], as:[0.70, 0.032]},
   mathias: {name:'마티아스', r:34, range:105, speed:280, acquire:255,
@@ -2077,6 +2080,7 @@ const SK_BTN = {r:30, maxDrag:80, deadzone:14};
 // 공격 버튼을 중심으로 한 호 위에 Q → W → E → R 순서로 배치
 const SKILL_OFFSETS = {Q:[-124, 4], W:[-104, -70], E:[-46, -118], R:[30, -126]};
 const CHAMP_UI = {
+  morris:{names:{Q:'형벌',W:'감히… 죄인이 형벌을 거부하는가',E:'보존',R:'Shift + Delete'},cast:{},desc:{Q:'간수 폼: 지정한 적에게 접근해 검은 십자 해머로 내려찍습니다. 신부 폼: 접근 공격에 3초 침묵을 부여합니다.',W:'간수 폼: 파란 불꽃 횃불을 생성해 영역 안 적에게 3초간 화상 피해를 줍니다. 신부 폼: 지정 방향에 노란 못을 떨어뜨려 적을 둔화시킵니다.',E:'간수 폼: 잃은 체력의 60%만큼 2초 보호막을 얻습니다. 신부 폼: 다음 기본 공격을 강화해 적을 기절시킵니다.',R:'신부 폼 전용. 지정한 적 챔피언과 별도 결투 영역으로 이동해 모리스의 주문력과 최대 체력이 증가합니다.'},passive:'검은 신: 간수 폼에서 체력 10% 이하가 되면 2초간 무적 상태로 변신합니다. 신부 폼은 스킬 피해의 5%를 흡혈하며, 체력 10% 이하에서 최대 체력 60%·30%·15%를 순차 회복합니다. 세 번 모두 사용하면 리스폰 전까지 다시 발동하지 않습니다.'},
   moses:{names:{Q:'하얀숨',W:'푸른숨',E:'붉은숨',R:'붉은 점'},cast:{},desc:{Q:'3초 동안 주변 아군에게 공격 속도·이동 속도 증가와 재사용 대기시간 2초 감소를 부여합니다.',W:'3초 동안 범위 안 아군의 잃은 체력 일부를 회복합니다.',E:'3초 동안 범위 안 아군의 공격력을 증가시킵니다.',R:'호흡 30중첩에서만 사용 가능. 적 하나를 3초간 조준한 뒤 현재 체력×레벨의 고정 피해를 입힙니다.'}},
   araya:{names:{Q:'필연쇄 [必然殺]',W:'이연 - 잔 [二連 - 殘]',E:'지혜성도 [地慧星刀]',R:'극 공간참 - 절연 [空間斬 - 絶緣]'},cast:{},desc:{Q:'지정 방향으로 돌진해 경로와 끝 지점에 공간의 흉터를 남깁니다. 1초 뒤 균열이 동시에 폭발합니다.',W:'전방 부채꼴을 베어 물리 피해와 0.75초 둔화를 입히고, 적중한 적 챔피언 수에 비례해 보호막을 얻습니다.',E:'공간의 흉터가 새겨진 적에게 순간이동해 추가 물리 피해를 입힙니다.',R:'지정한 적에게 거대 공간참을 날리고 등 뒤로 순간이동합니다. 대상은 1.5초 동안 행동 불능이 되며, 이후 대상 위치에서 광역 폭발이 발생합니다.'}},
   roland:{names:{Q:'그건 그거고 이건 이거야',W:'함부로 끊어 낼 수는 없어',E:'안젤리카를 위한 춤',R:'내게는 고통밖에 없습니다. 그외에는...'},cast:{R2:'FURIOSO'},desc:{Q:'야스오의 강철 폭풍처럼 전방을 찌릅니다. 회오리 3타 없이 단일 찌르기만 사용합니다.',W:'이렐리아의 칼날 쇄도처럼 적에게 돌진합니다. 적 처치 시 재사용 대기시간이 초기화됩니다.',E:'사미라의 원형 검무처럼 주변을 베며 날아오는 투사체를 막아냅니다.',R:'뒤틀림 형태로 변신합니다. 변신 중 Q/W/E에 흡혈이 부여되고 궁극기를 재사용해 FURIOSO를 발동할 수 있습니다.'}},
@@ -12930,7 +12934,7 @@ const AI_BUILD = {
   yuri: ['s_blade', 'lament', 'pink', 'cobalt', 'justitia'],
   yisang: ['s_ring', 'galaxy', 'fragment', 'dacapo', 'star'],
 };
-const AI_SKILL_ORDER = {araya:['Q','E','W'], philip:['Q','E','W'],mathias:['Q','W','E'],dongrang:['Q', 'E', 'W'], ran:['Q', 'E', 'W'], effie:['Q', 'W', 'E'], saude:['Q', 'W', 'E'], xichun:['Q', 'E', 'W'], wei:['Q', 'E', 'W'], bongdad:['Q', 'W', 'E'], ricardo:['Q', 'E', 'W'], gubo:['Q', 'E', 'W'], dongbaek:['Q', 'W', 'E'], thoma:['Q', 'W', 'E'], guido:['Q', 'W', 'E'], marten:['Q', 'E', 'W'], alyssa:['Q', 'W', 'E'], hohenheim:['Q', 'W', 'E'], gregor:['Q', 'W', 'E'], rodion:['Q', 'E', 'W'], yisang:['W', 'Q', 'E'], ishmael:['Q', 'E', 'W'], ryoshu:['Q', 'E', 'W'], faust:['Q', 'E', 'W'], donq:['Q', 'W', 'E'], outis:['Q', 'W', 'E'], honglu:['Q', 'W', 'E'], sinclair:['Q', 'W', 'E'], heathcliff:['Q', 'E', 'W'], meursault:['Q', 'E', 'W'], yuri:['E', 'W', 'Q'], kromer:['Q', 'E', 'W'], vergil:['Q', 'W', 'E'], charon:['Q', 'E', 'W'], roland:['Q','W','E'], blueReverb:['Q','W','E'], purpleTear:['Q','E','W'], vespa:['Q','W','E'], naihwang:['Q','W','E'], gachiu:['W','Q','E'], indigoElder:['Q','W','E'], liuEn:['Q','W','E'], callisto:['Q','W','E']};
+const AI_SKILL_ORDER = {morris:['Q','W','E'], araya:['Q','E','W'], philip:['Q','E','W'],mathias:['Q','W','E'],dongrang:['Q', 'E', 'W'], ran:['Q', 'E', 'W'], effie:['Q', 'W', 'E'], saude:['Q', 'W', 'E'], xichun:['Q', 'E', 'W'], wei:['Q', 'E', 'W'], bongdad:['Q', 'W', 'E'], ricardo:['Q', 'E', 'W'], gubo:['Q', 'E', 'W'], dongbaek:['Q', 'W', 'E'], thoma:['Q', 'W', 'E'], guido:['Q', 'W', 'E'], marten:['Q', 'E', 'W'], alyssa:['Q', 'W', 'E'], hohenheim:['Q', 'W', 'E'], gregor:['Q', 'W', 'E'], rodion:['Q', 'E', 'W'], yisang:['W', 'Q', 'E'], ishmael:['Q', 'E', 'W'], ryoshu:['Q', 'E', 'W'], faust:['Q', 'E', 'W'], donq:['Q', 'W', 'E'], outis:['Q', 'W', 'E'], honglu:['Q', 'W', 'E'], sinclair:['Q', 'W', 'E'], heathcliff:['Q', 'E', 'W'], meursault:['Q', 'E', 'W'], yuri:['E', 'W', 'Q'], kromer:['Q', 'E', 'W'], vergil:['Q', 'W', 'E'], charon:['Q', 'E', 'W'], roland:['Q','W','E'], blueReverb:['Q','W','E'], purpleTear:['Q','E','W'], vespa:['Q','W','E'], naihwang:['Q','W','E'], gachiu:['W','Q','E'], indigoElder:['Q','W','E'], liuEn:['Q','W','E'], callisto:['Q','W','E']};
 const AI = {react:[.1, .2], dodgeReact:[.09, .16], dodgeChance:.84, engage:650, lastHit:1.15}; // 숙련 AI: 빠르게 판단하고 회피하되 모든 공격을 피하지는 않음
 
 // ── 포탑 철거: 맞아 줄 챔피언(탱커)을 앞세워 포탑 어그로를 받게 하고 나머지가 같이 침 ──
@@ -13608,7 +13612,7 @@ const killableMinion = (b, u) => u.hp <= b.ad * physMul(u, b) * 1.1 + csExecHp(u
 // ═════════════ 3대3 봇전: 팀·역할 ═════════════
 const ROLES = ['top', 'jungle', 'mid', 'bottom', 'support'], ROLE_NAME = {top:'탑', jungle:'정글', mid:'미드', bottom:'바텀', support:'서폿'};
 // 챔피언별 선호 라인 (앞쪽일수록 우선). 봇전 · 관전 · 멀티 빈자리 AI가 이 순서로 자리를 찾아감
-const ROLE_PREF = {araya:['jungle','mid','top'], gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
+const ROLE_PREF = {morris:['top','support','jungle'], araya:['jungle','mid','top'], gregor:['top', 'jungle'], rodion:['top', 'mid'], yisang:['mid', 'jungle'], ishmael:['top', 'support'], ryoshu:['top', 'mid'],
   faust:['support', 'mid'], donq:['support', 'top'], outis:['bottom', 'mid'], honglu:['mid', 'support'], sinclair:['jungle', 'top'], heathcliff:['top'],
   meursault:['support', 'top'], yuri:['bottom', 'support'], kromer:['jungle', 'mid'], vergil:['jungle', 'top'], charon:['jungle', 'top'], hohenheim:['mid', 'bottom'],
   alyssa:['mid', 'top'], marten:['support', 'jungle', 'top'], guido:['support', 'jungle'], thoma:['support', 'jungle'], dongbaek:['bottom'], gubo:['bottom', 'mid'], ricardo:['top', 'support'], bongdad:['jungle', 'top'], xichun:['mid', 'jungle'], saude:['bottom'], effie:['support'], ran:['support', 'mid'], dongrang:['jungle'], roland:['top','jungle'], blueReverb:['support','mid'], purpleTear:['jungle','top'], vespa:['bottom'], naihwang:['top','jungle'], gachiu:['support','top'], indigoElder:['bottom','top','jungle','mid','support'], liuEn:['top','jungle'], callisto:['top','support'], gebura:['jungle','mid'], mathias:['top','jungle'], philip:['top','jungle'], angela:['mid','support'], moses:['support']};
@@ -13635,7 +13639,7 @@ function pickForRoles(roles, taken = [], partnerTaken = taken) {      // 중복 
   }
   return out;
 }
-const CHAMP_POOL = ['binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip', 'angela', 'araya', 'moses'];
+const CHAMP_POOL = ['morris', 'binah', 'gregor', 'rodion', 'yisang', 'ishmael', 'ryoshu', 'faust', 'donq', 'outis', 'honglu', 'sinclair', 'heathcliff', 'meursault', 'yuri', 'kromer', 'vergil', 'charon', 'hohenheim', 'alyssa', 'marten', 'guido', 'thoma', 'dongbaek', 'gubo', 'ricardo', 'bongdad', 'xichun', 'saude', 'effie', 'ran', 'dongrang', 'roland', 'blueReverb', 'purpleTear', 'vespa', 'naihwang', 'gachiu', 'indigoElder', 'liuEn', 'callisto', 'gebura', 'mathias', 'philip', 'angela', 'araya', 'moses'];
 const AI_PICK_EXCLUDED = new Set(['purpleTear']); // 보라눈물만 AI 밴픽 후보에서 제외 (칼리스토는 AI 선택 가능)
 const AI_CHAMP_POOL = CHAMP_POOL.filter(k=>!AI_PICK_EXCLUDED.has(k)); // AI 선택 후보
 const JG_ROUTE = ['blood', 'thieves', 'rats', 'sweep', 'glutton', 'scribe'];            // 첫 정글 순서 (위 버프 → 쥐떼 → 아래 버프 → 청소부)
@@ -21895,6 +21899,7 @@ const MVP_LOOK = {   // 코트 · 바지 · 머리 · 피부 · 눈 · 무기
   binah:{coat:'#09090d',pants:'#050508',hair:'#08080d',skin:'#17151b',eye:'#f2cf62',fx:'raven',smoke:true,line:'조율은 끝났습니다. 이제 침묵하시지요.'},
   angela:{coat:'#d9f5ff',pants:'#24364b',hair:'#dcefff',skin:'#f1e6df',eye:'#83dfff',fx:'angela',line:'초대장은 전달되었습니다. 이제 당신의 이야기를 책으로 남기겠어요.'},
   moses:{coat:'#e8e5d7',pants:'#202b38',hair:'#d5d0c3',skin:'#e7d8c8',eye:'#e7d8b5',fx:'shard',line:'연기는 걷혔어요. 이제 사건의 진실만 남았군요.'},
+  morris:{coat:'#090909',pants:'#171717',hair:'#080808',skin:'#d8d0c8',eye:'#f1ce32',fx:'flame',smoke:true,line:'형벌은 끝나지 않는다. 다음 죄인을 데려와라.'},
   callisto:{coat:'#f2efe5',pants:'#28252a',hair:'#d8d1c4',skin:'#e4d1c4',eye:'#e84a5d',fx:'bone',line:'아름답게 완성되었네요. 이 작품의 제목은… 폐장이랍니다.'},
   araya:{coat:'#0b1d3b',pants:'#050d1c',hair:'#071326',skin:'#e6eaf2',eye:'#4d9cff',fx:'bolt',line:'푸른 칼끝이 지나간 자리에는, 침묵만이 남는다.'},
 };
