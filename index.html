@@ -3721,6 +3721,12 @@ function damage(src, tgt, amount, opts = {}) {
   if (nhTigerHit) amount *= .90;
   if (nhTigerHit && opts.skill && src.nhCombo && src.nhCombo.key === 'R') amount *= .7225;
   if(tgt&&tgt.key==='philip'&&(tgt.phInvulnUntil||0)>time)return 0;
+  if(src&&src.key==='purpleTear'&&(src.ptAllStancesUntil||0)<=time){
+    const stance=src.ptStance??0;
+    if(stance===0&&opts.basic)amount*=1.12;
+    if(stance===1&&opts.skill)amount*=1.12;
+  }
+  if(tgt&&tgt.key==='purpleTear'&&(tgt.ptAllStancesUntil||0)<=time&&(tgt.ptStance??0)===3)amount*=.88;
   if(src&&src.key==='moses'&&opts.basic){opts.type='magic';src.mosesBreath=Math.min(30,(src.mosesBreath||0)+2);}
   if(src&&src.mosesAdUntil>time)amount*=src.mosesAdMul||1.2;
   if(src&&src.anGreedUntil>time&&opts.skill)amount*=1+(src.anGreedAmp||.22);
@@ -4125,6 +4131,25 @@ function fire(src, tgt, amount, speed, color, size) {
   projectiles.push({x:src.x, y:src.y, tgt, src, amount, speed, color, size});
 }
 
+const PT_STANCE_NAMES=['참격','관통','타격','방어'];
+const PT_STANCE_COLORS=['#d8a4ff','#9cddff','#ffb0e8','#b8a4ff'];
+function purpleTearSetStance(c, stance, announce=true){
+  if(!c||c.key!=='purpleTear')return;
+  const next=((stance%4)+4)%4, changed=c.ptStance!==next;
+  c.ptStance=next;c.ptStanceUntil=Infinity;
+  if(!changed&&!announce)return;
+  const col=PT_STANCE_COLORS[next];
+  fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2.7,t:0,life:.62,col});
+  fx.push({type:'ptCoil',owner:c,t:0,life:.78,r:c.r*3.4});
+  fx.push({type:'ptSerpent',owner:c,ang:c.face||0,len:c.r*3.8,wid:c.r*1.3,t:0,life:.72});
+  text(c.x,c.y-c.r-E(40),PT_STANCE_NAMES[next]+' 태세',col,true,.95);
+  sfxPlay('zap',c.x,c.y,.62,1.15+next*.08);
+}
+function purpleTearBasicProgress(c){
+  if(!c||c.key!=='purpleTear'||(c.ptAllStancesUntil||0)>time)return;
+  c.ptBasicCount=(c.ptBasicCount||0)+1;
+  if(c.ptBasicCount>=3){c.ptBasicCount=0;purpleTearSetStance(((c.ptStance??0)+1)%4);}
+}
 // ═════════════ 기본 공격 ═════════════
 function basicAttack(c, t) {
   if (t.ward) { hitWard(c, t); return; }
@@ -4145,10 +4170,11 @@ function basicAttack(c, t) {
   }
   const lam = hasItem(c, 'lament') && time < c.lamentT ? .06 * c.lamentN : 0;
   const cob = hasItem(c, 'cobalt') && c.hp < c.maxHp * .5 ? .2 : 0;                         // 푸른 흉터
-  c.atkT = 1 / Math.min(2.5, c.as * (c.anAsUntil>time?(c.mosesAsMul||1.42):1) * (c.anAtkSlowUntil>time?.42:1) * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c) + (c.key==='naihwang'&&c.nhInstinctUntil>time ? .2 : 0)) * (c.key==='roland' ? 1.15 : 1) * (c.frostT > time ? .85 : 1));
+  c.atkT = 1 / Math.min(2.5, c.as * (c.anAsUntil>time?(c.mosesAsMul||1.42):1) * (c.anAtkSlowUntil>time?.42:1) * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c) + (c.key==='naihwang'&&c.nhInstinctUntil>time ? .2 : 0)) * (c.key==='roland' ? 1.15 : 1) * (c.key==='purpleTear' && (c.ptAllStancesUntil||0)<=time && (c.ptStance??0)===2 ? 1.20 : 1) * (c.frostT > time ? .85 : 1));
   if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(c.nhInstinctUntil>time?1.3:1.08, c.as * 1.38 * (c.nhInstinctUntil>time?1.2:1))); // 묵직한 한 방: 공격 속도 상한
   c.swingT = c.key === 'naihwang' ? .52 : c.key === 'gebura' ? .46 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
+  purpleTearBasicProgress(c);
   if(c.key==='angela')fx.push({type:'anQ',x:c.x,y:c.y,ang:c.face,len:dist(c,t),t:0,life:.26,owner:c});
   if(c.key==='philip'&&c.phEgoUntil>time){sfxPlay('phFireSwing',c.x,c.y,.95,1.05);philipFlameAction(c,'basic',c.face,.42,1.0);}
   if(c.key==='binah')fx.push({type:'bnBolt',x:c.x,y:c.y,ang:c.face,len:Math.max(E(70),dist(c,t)),t:0,life:.24});
@@ -5121,7 +5147,7 @@ function castPurpleTear(c,key,ang,frac,n){
  const color='#b56cff', dark='#32104f', stanceNames=['참격','관통','타격','방어'];
  const cd={Q:[8,7.5,7,6.5],W:[12,11,10,9],E:[16,15,14,13],R:[110,95,80]};
  const lv=rk(c,key), cooldown=cd[key][lv]*hasteMul(c), a=Number.isFinite(ang)?ang:autoAim(c,520);
- const setStance=s=>{c.ptStance=s;c.ptStanceUntil=time+5;fx.push({type:'burst',x:c.x,y:c.y,r:c.r*2.5,t:0,life:.55,col:color});text(c.x,c.y-c.r-E(38),stanceNames[s]+' 태세',color,true,.8);};
+ const setStance=s=>purpleTearSetStance(c,s);
  c.face=a;c.cd[key]=c.cdMax[key]=cooldown;
  const len=E(key==='Q'?390:key==='W'?560:620), hits=segHits(c,a,len,E(key==='W'?78:64));
  if(key==='Q'){
@@ -5151,7 +5177,7 @@ function castPurpleTear(c,key,ang,frac,n){
   fx.push({type:'burst',x:px,y:py,r:radius*1.8,t:0,life:1.35,col:'#e8caff'});
   fx.push({type:'burst',x:px,y:py,r:radius*2.15,t:0,life:1.65,col:'#8c35ce'});
   champs().filter(u=>u.alive&&u.team!==c.team&&Math.hypot(u.x-px,u.y-py)<radius+u.r).forEach(u=>{damage(c,u,170+lv*75+c.ad*1.35+c.ap*.5,{skill:true,color});if(u.alive){u.airT=Math.max(u.airT||0,1);u.airVy=-E(220);}});
-  c.ptAllStancesUntil=time+5;setStance(2);sfxPlay('ult',px,py,1.6,.65);
+  c.ptAllStancesUntil=time+5;setStance(2);text(c.x,c.y+c.r+E(52),'전 태세','#f0d5ff',true,1.2);sfxPlay('ult',px,py,1.6,.65);
  }
  return true;
 }
@@ -12787,6 +12813,7 @@ function champTimers(c, dt) {
   c.stunT = Math.max(0, c.stunT - dt); c.slowT -= dt; c.hasteT = Math.max(0, c.hasteT - dt);
   for (const k in c.cd) c.cd[k] = Math.max(0, c.cd[k] - dt);
   if (c.eStacks > 0 && time >= c.eUntil) c.eStacks = 0;
+  if(c.key==='purpleTear'&&(c.ptAllStancesUntil||0)>0&&time>=(c.ptAllStancesUntil||0)){c.ptAllStancesUntil=0;text(c.x,c.y-c.r-E(40),PT_STANCE_NAMES[c.ptStance??0]+' 태세 복귀',PT_STANCE_COLORS[c.ptStance??0],true,.75);}
   if (c.airT > 0) { c.airUp = (c.airUp || 0) + dt; if (c.airT - dt <= 0) fx.push({type:'puff', x:c.x, y:c.y + c.r * .6, r:c.r * .8, t:0, life:.25}); }
   c.airT = Math.max(0, c.airT - dt);
   if ((c.shieldT -= dt) <= 0) c.shield = 0;
@@ -15605,6 +15632,13 @@ function drawCallistoBody(g,c){
   else g.fillText(rForm(c) ? `바퀴 황제 ${c.rT.toFixed(1)}` : c.iceT > 0 ? `얼음 할버드 ${Math.ceil(c.iceT)}` : c.name, c.x, y - E(4));
   if (c.key === 'yisang' && c.featherN > 0)          // 자아심도: 강화 기본 공격 중첩
     for (let i = 0; i < c.featherN; i++) feather(g, c.x - E(24) + i * E(12), c.y + c.r + E(14), -Math.PI / 2 + .3, E(9));
+  if(c.key==='purpleTear'){
+    const all=(c.ptAllStancesUntil||0)>time, stance=c.ptStance??0, label=all?'전 태세':PT_STANCE_NAMES[stance];
+    const col=all?'#f0d5ff':PT_STANCE_COLORS[stance], yy=c.y+c.r+E(34), ww=E(all?94:76), hh=E(20);
+    g.save();g.globalAlpha=.96;g.fillStyle='rgba(20,8,34,.88)';g.fillRect(c.x-ww/2,yy-hh/2,ww,hh);
+    g.strokeStyle=col;g.lineWidth=E(1.8);g.strokeRect(c.x-ww/2,yy-hh/2,ww,hh);
+    g.fillStyle=col;g.font=`800 ${E(13)}px system-ui,sans-serif`;g.textAlign='center';g.textBaseline='middle';g.shadowColor=col;g.shadowBlur=E(9);g.fillText('✦ '+label+' 태세',c.x,yy);g.restore();
+  }
   if (c.key === 'rodion' && c.pStacks > 0) {        // 뜬구름 잡기 중첩
     g.fillStyle = '#ffcf6b'; g.font = `800 ${E(15)}px system-ui,sans-serif`; g.textBaseline = 'top';
     g.fillText(`치명 +${c.pStacks}%`, c.x, c.y + c.r + E(8));
