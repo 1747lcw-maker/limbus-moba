@@ -3721,12 +3721,15 @@ function damage(src, tgt, amount, opts = {}) {
   if (nhTigerHit) amount *= .90;
   if (nhTigerHit && opts.skill && src.nhCombo && src.nhCombo.key === 'R') amount *= .7225;
   if(tgt&&tgt.key==='philip'&&(tgt.phInvulnUntil||0)>time)return 0;
-  if(src&&src.key==='purpleTear'&&(src.ptAllStancesUntil||0)<=time){
-    const stance=src.ptStance??0;
-    if(stance===0&&opts.basic)amount*=1.12;
-    if(stance===1&&opts.skill)amount*=1.12;
+  if(src&&src.key==='purpleTear'){
+    const stance=src.ptStance??0, all=(src.ptAllStancesUntil||0)>time;
+    if((all||stance===0)&&opts.basic)amount*=1.12;       // 참격
+    if((all||stance===1)&&opts.skill)amount*=1.12;       // 관통
   }
-  if(tgt&&tgt.key==='purpleTear'&&(tgt.ptAllStancesUntil||0)<=time&&(tgt.ptStance??0)===3)amount*=.88;
+  if(tgt&&tgt.key==='purpleTear'){
+    const stance=tgt.ptStance??0, all=(tgt.ptAllStancesUntil||0)>time;
+    if(all||stance===3)amount*=.88;                      // 방어
+  }
   if(src&&src.key==='moses'&&opts.basic){opts.type='magic';src.mosesBreath=Math.min(30,(src.mosesBreath||0)+2);}
   if(src&&src.mosesAdUntil>time)amount*=src.mosesAdMul||1.2;
   if(src&&src.anGreedUntil>time&&opts.skill)amount*=1+(src.anGreedAmp||.22);
@@ -4170,7 +4173,7 @@ function basicAttack(c, t) {
   }
   const lam = hasItem(c, 'lament') && time < c.lamentT ? .06 * c.lamentN : 0;
   const cob = hasItem(c, 'cobalt') && c.hp < c.maxHp * .5 ? .2 : 0;                         // 푸른 흉터
-  c.atkT = 1 / Math.min(2.5, c.as * (c.anAsUntil>time?(c.mosesAsMul||1.42):1) * (c.anAtkSlowUntil>time?.42:1) * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c) + (c.key==='naihwang'&&c.nhInstinctUntil>time ? .2 : 0)) * (c.key==='roland' ? 1.15 : 1) * (c.key==='purpleTear' && (c.ptAllStancesUntil||0)<=time && (c.ptStance??0)===2 ? 1.20 : 1) * (c.frostT > time ? .85 : 1));
+  c.atkT = 1 / Math.min(2.5, c.as * (c.anAsUntil>time?(c.mosesAsMul||1.42):1) * (c.anAtkSlowUntil>time?.42:1) * (1 + (enhanced ? e.as : 0) + lam + cob + ryoAS(c) + (c.key==='naihwang'&&c.nhInstinctUntil>time ? .2 : 0)) * (c.key==='roland' ? 1.15 : 1) * (c.key==='purpleTear' && ((c.ptAllStancesUntil||0)>time || (c.ptStance??0)===2) ? 1.20 : 1) * (c.frostT > time ? .85 : 1));
   if (c.key === 'naihwang') c.atkT = Math.max(c.atkT, 1 / Math.min(c.nhInstinctUntil>time?1.3:1.08, c.as * 1.38 * (c.nhInstinctUntil>time?1.2:1))); // 묵직한 한 방: 공격 속도 상한
   c.swingT = c.key === 'naihwang' ? .52 : c.key === 'gebura' ? .46 : 0.18; c.swingE = enhanced;
   c.face = Math.atan2(t.y - c.y, t.x - c.x);
@@ -15637,7 +15640,7 @@ function drawCallistoBody(g,c){
     const col=all?'#f0d5ff':PT_STANCE_COLORS[stance], yy=c.y+c.r+E(34), ww=E(all?94:76), hh=E(20);
     g.save();g.globalAlpha=.96;g.fillStyle='rgba(20,8,34,.88)';g.fillRect(c.x-ww/2,yy-hh/2,ww,hh);
     g.strokeStyle=col;g.lineWidth=E(1.8);g.strokeRect(c.x-ww/2,yy-hh/2,ww,hh);
-    g.fillStyle=col;g.font=`800 ${E(13)}px system-ui,sans-serif`;g.textAlign='center';g.textBaseline='middle';g.shadowColor=col;g.shadowBlur=E(9);g.fillText('✦ '+label+' 태세',c.x,yy);g.restore();
+    g.fillStyle=col;g.font=`800 ${E(13)}px system-ui,sans-serif`;g.textAlign='center';g.textBaseline='middle';g.shadowColor=col;g.shadowBlur=E(9);g.fillText(all?'✦ 전 태세':'✦ '+label+' 태세',c.x,yy);g.restore();
   }
   if (c.key === 'rodion' && c.pStacks > 0) {        // 뜬구름 잡기 중첩
     g.fillStyle = '#ffcf6b'; g.font = `800 ${E(15)}px system-ui,sans-serif`; g.textBaseline = 'top';
