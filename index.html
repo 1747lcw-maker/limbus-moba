@@ -13198,8 +13198,9 @@ function aiCombo(b, p) {
     if (b.phTransformUntil>time) return false;
     if (ego) {
       // 변신 직후 강화 E로 공격·방어 버프를 확보하고, 사거리별로 강화 스킬을 순환한다.
+      // 재사용 R은 근거리에서도 발동 가능하므로 E보다 먼저 판단한다.
+      if (ready('R') && !b.phRCharge && d<E(1080)) { castSkill(b,'R',a); return true; }
       if (ready('E') && (b.phAtkUntil||0)<time+.8) { castSkill(b,'E',a); return true; }
-      if (ready('R') && !b.phRCharge && d>E(230) && d<E(1080)) { castSkill(b,'R',a); return true; }
       if (ready('Q') && d<E(430)) { castSkill(b,'Q',a); return true; }
       if (ready('W') && d<E(260) && (b.phWingGuardUntil||0)<time+.5) { castSkill(b,'W',a); return true; }
       if (ready('E') && (b.phDRUntil||0)<time+.5) { castSkill(b,'E',a); return true; }
@@ -25721,6 +25722,22 @@ setInterval(musicRefresh,500);
   function morrisEnemy(c,range){
     return champs().filter(e=>e.alive&&e.team!==c.team&&targetable(e)&&(!c.morrisDuel||e===c.morrisDuel)&&dist(c,e)<E(range||850)).sort((a,b)=>dist(c,a)-dist(c,b))[0]||null;
   }
+  function morrisEndDuel(c){
+    if(!c)return;
+    const other=c.morrisDuel;
+    c.morrisDuel=null;c.morrisDuelUntil=0;c.morrisDuelCenter=null;
+    if(c.key==='morris'){
+      c.maxHp=c.morrisOldMaxHp||c.morrisBaseMaxHp||c.maxHp;
+      c.ap=c.morrisOldAp||c.morrisBaseAp||c.ap;c.hp=Math.min(c.hp,c.maxHp);
+    }
+    if(other&&other.morrisDuel===c){
+      other.morrisDuel=null;other.morrisDuelUntil=0;other.morrisDuelCenter=null;
+      if(other.key==='morris'){
+        other.maxHp=other.morrisOldMaxHp||other.morrisBaseMaxHp||other.maxHp;
+        other.ap=other.morrisOldAp||other.morrisBaseAp||other.ap;other.hp=Math.min(other.hp,other.maxHp);
+      }
+    }
+  }
   function morrisStartTransform(c,kind){
     c.morrisTransformUntil=time+2;c.morrisTransformKind=kind;c.morrisMoveLock=true;
     c.rootT=Math.max(c.rootT||0,time+2);c.cast=null;c.atkT=Math.max(c.atkT||0,2);c.slowT=Math.max(c.slowT||0,2);c.slowAmt=1;
@@ -25804,9 +25821,9 @@ setInterval(musicRefresh,500);
         return 0;
       }
     }
-    if(src&&src.key==='morris'&&src.morrisDuel&&tgt!==src.morrisDuel&&tgt!==src)return 0;
-    if(src&&src.morrisDuel&&src.morrisDuel.key==='morris'&&tgt!==src.morrisDuel&&tgt!==src)return 0;
-    if(tgt&&tgt.morrisDuel&&src!==tgt.morrisDuel&&src!==tgt)return 0;
+    if(src&&src.key==='morris'&&src.morrisDuel&&src.morrisDuelUntil>time&&tgt!==src.morrisDuel&&tgt!==src)return 0;
+    if(src&&src.morrisDuel&&src.morrisDuel.key==='morris'&&src.morrisDuelUntil>time&&tgt!==src.morrisDuel&&tgt!==src)return 0;
+    if(tgt&&tgt.morrisDuel&&tgt.morrisDuelUntil>time&&src!==tgt.morrisDuel&&src!==tgt)return 0;
     const dealt=__morrisDamage(src,tgt,amount,opts);
     if(src&&src.key==='morris'&&src.morrisBride&&opts.morrisEmpowered&&dealt>0&&tgt&&tgt.alive){tgt.stunT=Math.max(tgt.stunT||0,5);tgt.stunBy=src;}
     if(src&&src.key==='morris'&&src.morrisBride&&opts.skill&&dealt>0&&src.alive){
@@ -25816,8 +25833,9 @@ setInterval(musicRefresh,500);
     return dealt;
   };
   kill=function(u,src){
+    if(u&&u.morrisDuel)morrisEndDuel(u);
+    if(src&&src.key==='morris'&&src.morrisDuel===u)morrisEndDuel(src);
     if(u&&u.key==='morris'){morrisInit(u);u.morrisBride=false;u.morrisRevives=0;u.morrisTransformUntil=0;u.morrisMoveLock=false;u.morrisDuel=null;u.maxHp=u.morrisBaseMaxHp||u.maxHp;u.ap=u.morrisBaseAp||u.ap;u.range=105;if(u.st)u.st={...u.st,ranged:false,range:105};u.morrisEReady=false;u.morrisZones=[];}
-    if(src&&src.key==='morris'&&src.morrisDuel===u){src.morrisDuel=null;src.morrisDuelUntil=0;src.maxHp=src.morrisOldMaxHp||src.maxHp;src.ap=src.morrisOldAp||src.ap;}
     return __morrisKill(u,src);
   };
   basicAttack=function(c,t){
@@ -25844,11 +25862,7 @@ setInterval(musicRefresh,500);
       if(!c.alive)continue;
       if(c.morrisTransformUntil>0&&time>=c.morrisTransformUntil)morrisCompleteTransform(c);
       if(c.morrisTransformUntil>time){c.vx=0;c.vy=0;c.atkT=Math.max(c.atkT||0,.1);}
-      if(c.morrisDuel&&time>=c.morrisDuelUntil){
-        const e=c.morrisDuel;if(e&&e.morrisDuel===c){e.morrisDuel=null;e.morrisDuelUntil=0;}
-        c.morrisDuel=null;c.maxHp=c.morrisOldMaxHp||c.maxHp;c.ap=c.morrisOldAp||c.ap;
-        c.hp=Math.min(c.hp,c.maxHp);morrisFx(c,M.gold,E(130));
-      }
+      if(c.morrisDuel&&time>=c.morrisDuelUntil){morrisEndDuel(c);morrisFx(c,M.gold,E(130));}
       if(c.morrisZones&&c.morrisZones.length){
         for(const z of c.morrisZones){
           if(time>=z.until)continue;
